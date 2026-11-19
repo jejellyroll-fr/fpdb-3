@@ -35,17 +35,19 @@ from pathlib import Path
 from stat import S_IMODE
 from typing import Any
 
-import defusedxml.minidom
 from defusedxml.common import DefusedXmlException
+
+from fpdb_3_legacy import config_xml
 
 # A configuration file is read from disk, so it can carry whatever an attacker
 # who reached the disk put there. defusedxml refuses the two constructs that
 # turn parsing into a weapon -- external entities, which read other files, and
 # nested entity definitions, which expand until memory runs out -- and it does
 # so by raising DefusedXmlException, which is a ValueError rather than the
-# ExpatError a malformed file raises. Both have to be caught wherever a
-# rejected file must not take fpdb down with it.
-XML_PARSE_ERRORS = (OSError, xml.parsers.expat.ExpatError, DefusedXmlException)
+# error a malformed file raises (ExpatError with minidom, ParseError with
+# ElementTree). All of them have to be caught wherever a rejected file must
+# not take fpdb down with it.
+XML_PARSE_ERRORS = (OSError, xml.parsers.expat.ExpatError, config_xml.ParseError, DefusedXmlException)
 
 if platform.system() == "Windows":
     import os
@@ -333,7 +335,7 @@ def _parse_example_config(path: str) -> Any | None:
         return cached[1]
 
     try:
-        doc = defusedxml.minidom.parse(path)
+        doc = config_xml.parse_file(path)
     except XML_PARSE_ERRORS as e:
         log.exception(f"Error parsing example configuration file {path}. Exception: {e}")
         return None
@@ -586,7 +588,7 @@ class Config(
             n = n + 1
             log.info(f"Reading configuration file {file}")
             try:
-                doc = defusedxml.minidom.parse(file)
+                doc = config_xml.parse_file(file)
                 self.doc = doc  # Root of XML tree
                 self.file_error = None
 
@@ -602,9 +604,9 @@ class Config(
         if doc is None:
             raise ValueError(f"Unable to load configuration file {file}")
 
-        if doc.getElementsByTagName("general") == []:
+        if not config_xml.find_all(doc, "general"):
             self.general.get_defaults()
-        for gen_node in doc.getElementsByTagName("general"):
+        for gen_node in config_xml.find_all(doc, "general"):
             self.general.add_elements(node=gen_node)  # add/overwrite elements in self.general
 
         if int(self.general["version"]) == CONFIG_VERSION:
@@ -612,15 +614,15 @@ class Config(
         else:
             self.wrongConfigVersion = True
 
-        if doc.getElementsByTagName("gui_cash_stats") == []:
+        if not config_xml.find_all(doc, "gui_cash_stats"):
             self.gui_cash_stats.get_defaults()
-        for gcs_node in doc.getElementsByTagName("gui_cash_stats"):
+        for gcs_node in config_xml.find_all(doc, "gui_cash_stats"):
             self.gui_cash_stats.add_elements(node=gcs_node)  # add/overwrite elements in self.gui_cash_stats
         self.gui_cash_stats.add_missing_defaults()
 
-        if doc.getElementsByTagName("gui_tour_stats") == []:
+        if not config_xml.find_all(doc, "gui_tour_stats"):
             self.gui_tour_stats.get_defaults()
-        for gcs_node in doc.getElementsByTagName("gui_tour_stats"):
+        for gcs_node in config_xml.find_all(doc, "gui_tour_stats"):
             self.gui_tour_stats.add_elements(node=gcs_node)  # add/overwrite elements in self.gui_cash_stats
 
         # One-time migration of stale user configs: bwin.fr and partypoker.fr
@@ -647,31 +649,31 @@ class Config(
             log.warning("Configuration %s: %s", self.file, error)
 
         #        s_sites = doc.getElementsByTagName("supported_sites")
-        for site_node in doc.getElementsByTagName("site"):
+        for site_node in config_xml.find_all(doc, "site"):
             site = Site(node=site_node)
             self.supported_sites[site.site_name] = site
 
         # Multiroom hero profiles (optional <hero_profiles> section).
-        for hp_node in doc.getElementsByTagName("hero_profile"):
+        for hp_node in config_xml.find_all(doc, "hero_profile"):
             hp = HeroProfile(node=hp_node)
             if hp.name:
                 self.hero_profiles[hp.name] = hp
 
         # Data source hero identities (optional <data_sources> section, #423).
-        for ds_node in doc.getElementsByTagName("data_source"):
+        for ds_node in config_xml.find_all(doc, "data_source"):
             source = DataSource(node=ds_node)
             if source.name:
                 self.data_sources[source.name] = source
 
         # Load site_ids from XML config
-        for site_id_node in doc.getElementsByTagName("site_id"):
-            site_name = site_id_node.getAttribute("site")
-            site_id = site_id_node.getAttribute("id")
+        for site_id_node in config_xml.find_all(doc, "site_id"):
+            site_name = config_xml.attr(site_id_node, "site")
+            site_id = config_xml.attr(site_id_node, "id")
             if site_name and site_id:
                 self.site_ids[site_name] = int(site_id)
 
         #        s_games = doc.getElementsByTagName("supported_games")
-        for supported_game_node in doc.getElementsByTagName("game"):
+        for supported_game_node in config_xml.find_all(doc, "game"):
             supported_game = Supported_games(supported_game_node)
             self.supported_games[supported_game.game_name] = supported_game
 
@@ -682,12 +684,10 @@ class Config(
         # A <supported_databases> section holds them, and older files put them
         # beside it at the top level instead. The section wins as soon as it
         # holds anything.
-        for supported_dbs_node in doc.getElementsByTagName("supported_databases"):
-            self._load_databases(supported_dbs_node.getElementsByTagName("database"))
+        for supported_dbs_node in config_xml.find_all(doc, "supported_databases"):
+            self._load_databases(config_xml.find_all(supported_dbs_node, "database"))
         if not self.supported_databases:
-            self._load_databases(
-                node for node in doc.documentElement.childNodes if getattr(node, "tagName", None) == "database"
-            )
+            self._load_databases(config_xml.children(doc, "database"))
         # ``None`` means that the CLI did not request an override.  An empty
         # string remains a valid explicit key because the XML format has always
         # allowed it as a database name.
@@ -699,15 +699,15 @@ class Config(
             raise ValueError(msg)
 
         #     s_dbs = doc.getElementsByTagName("mucked_windows")
-        for aw_node in doc.getElementsByTagName("aw"):
+        for aw_node in config_xml.find_all(doc, "aw"):
             aw = Aux_window(node=aw_node)
             self.aux_windows[aw.name] = aw
 
-        for ls_node in doc.getElementsByTagName("ls"):
+        for ls_node in config_xml.find_all(doc, "ls"):
             ls = Layout_set(node=ls_node)
             self.layout_sets[ls.name] = ls
 
-        for ss_node in doc.getElementsByTagName("ss"):
+        for ss_node in config_xml.find_all(doc, "ss"):
             ss = Stat_sets(node=ss_node)
             self.stat_sets[ss.name] = ss
 
@@ -715,7 +715,7 @@ class Config(
         self.hud_panel_rules, self.hud_panel_fallback, self.hud_panel_rules_enabled = parse_hud_panel_rules(doc)
 
         #     s_dbs = doc.getElementsByTagName("mucked_windows")
-        for hhc_node in doc.getElementsByTagName("hhc"):
+        for hhc_node in config_xml.find_all(doc, "hhc"):
             hhc = HHC(node=hhc_node)
             # Without a converter binding, IdentifySite never builds a parser
             # for the room, so bulk/auto import stops recognising its files.
@@ -724,7 +724,7 @@ class Config(
             self.hhcs[hhc.site] = hhc
 
         #        s_dbs = doc.getElementsByTagName("popup_windows")
-        for pu_node in doc.getElementsByTagName("pu"):
+        for pu_node in config_xml.find_all(doc, "pu"):
             pu = Popup(node=pu_node)
             self.popup_windows[pu.name] = pu
 
@@ -733,11 +733,11 @@ class Config(
         # user without a popup.
         self.install_popup_packs()
 
-        for imp_node in doc.getElementsByTagName("import"):
+        for imp_node in config_xml.find_all(doc, "import"):
             imp = Import(node=imp_node)
             self.imp = imp
 
-        for hui_node in doc.getElementsByTagName("hud_ui"):
+        for hui_node in config_xml.find_all(doc, "hud_ui"):
             hui = HudUI(node=hui_node)
             self.ui = hui
 
@@ -758,14 +758,14 @@ class Config(
                 )
                 self.save(file=os.path.join(CONFIG_PATH, "HUD_config.xml"))
 
-        if doc.getElementsByTagName("raw_hands") == []:
+        if not config_xml.find_all(doc, "raw_hands"):
             self.raw_hands = RawHands()
-        for raw_hands_node in doc.getElementsByTagName("raw_hands"):
+        for raw_hands_node in config_xml.find_all(doc, "raw_hands"):
             self.raw_hands = RawHands(raw_hands_node)
 
-        if doc.getElementsByTagName("raw_tourneys") == []:
+        if not config_xml.find_all(doc, "raw_tourneys"):
             self.raw_tourneys = RawTourneys()
-        for raw_tourneys_node in doc.getElementsByTagName("raw_tourneys"):
+        for raw_tourneys_node in config_xml.find_all(doc, "raw_tourneys"):
             self.raw_tourneys = RawTourneys(raw_tourneys_node)
 
         # What this object last read from (or wrote to) the file, so callers in
@@ -812,22 +812,22 @@ class Config(
         """
         changed = False
         has_ipoker_layout = any(
-            ls_node.getAttribute("name") == "ipoker_default" for ls_node in doc.getElementsByTagName("ls")
+            config_xml.attr(ls_node, "name") == "ipoker_default" for ls_node in config_xml.find_all(doc, "ls")
         )
-        for site_node in doc.getElementsByTagName("site"):
-            name = site_node.getAttribute("site_name")
+        for site_node in config_xml.find_all(doc, "site"):
+            name = config_xml.attr(site_node, "site_name")
             if name not in ENTAIN_FR_IPOKER_SITES:
                 continue
-            if site_node.getAttribute("network") == "PartyPoker":
-                site_node.setAttribute("network", "iPoker")
+            if config_xml.attr(site_node, "network") == "PartyPoker":
+                config_xml.set_attr(site_node, "network", "iPoker")
                 changed = True
                 detected = self._detect_entain_fr_data_dir(name)
                 if detected:
                     hh_path, ts_path, hero = detected
-                    site_node.setAttribute("HH_path", hh_path)
-                    site_node.setAttribute("TS_path", ts_path)
-                    if hero and site_node.getAttribute("screen_name") != hero:
-                        site_node.setAttribute("screen_name", hero)
+                    config_xml.set_attr(site_node, "HH_path", hh_path)
+                    config_xml.set_attr(site_node, "TS_path", ts_path)
+                    if hero and config_xml.attr(site_node, "screen_name") != hero:
+                        config_xml.set_attr(site_node, "screen_name", hero)
                     log.warning(
                         "Migrated site %r from the PartyPoker network to iPoker (hand histories: %s)",
                         name,
@@ -843,19 +843,19 @@ class Config(
             # configs too): a migrated skin must not keep the PartyPoker HUD
             # layout, or the stat windows are placed for the wrong table
             # geometry. Only rewrite when the target layout set exists.
-            if site_node.getAttribute("network") == "iPoker" and has_ipoker_layout:
-                for ls_node in site_node.getElementsByTagName("layout_set"):
-                    if ls_node.getAttribute("ls") == "party_default":
-                        ls_node.setAttribute("ls", "ipoker_default")
+            if config_xml.attr(site_node, "network") == "iPoker" and has_ipoker_layout:
+                for ls_node in config_xml.find_all(site_node, "layout_set"):
+                    if config_xml.attr(ls_node, "ls") == "party_default":
+                        config_xml.set_attr(ls_node, "ls", "ipoker_default")
                         changed = True
                         log.warning("Switched site %r HUD layout from party_default to ipoker_default", name)
-        for hhc_node in doc.getElementsByTagName("hhc"):
-            if hhc_node.getAttribute("site") not in ENTAIN_FR_IPOKER_SITES:
+        for hhc_node in config_xml.find_all(doc, "hhc"):
+            if config_xml.attr(hhc_node, "site") not in ENTAIN_FR_IPOKER_SITES:
                 continue
-            if hhc_node.getAttribute("converter") != "PartyPokerToFpdb":
+            if config_xml.attr(hhc_node, "converter") != "PartyPokerToFpdb":
                 continue
-            hhc_node.setAttribute("converter", "iPokerToFpdb")
-            hhc_node.setAttribute("summaryImporter", "iPokerSummary")
+            config_xml.set_attr(hhc_node, "converter", "iPokerToFpdb")
+            config_xml.set_attr(hhc_node, "summaryImporter", "iPokerSummary")
             changed = True
         return changed
 
@@ -885,27 +885,30 @@ class Config(
 
         source_profiles = [
             node
-            for node in source_doc.getElementsByTagName("ss")
-            if node.getAttribute("name") in {"aof_default", "aof_advanced"}
+            for node in config_xml.find_all(source_doc, "ss")
+            if config_xml.attr(node, "name") in {"aof_default", "aof_advanced"}
         ]
         source_popup = next(
-            (node for node in source_doc.getElementsByTagName("pu") if node.getAttribute("pu_name") == "aof_profile"),
+            (
+                node
+                for node in config_xml.find_all(source_doc, "pu")
+                if config_xml.attr(node, "pu_name") == "aof_profile"
+            ),
             None,
         )
         source_games = [
-            node for node in source_doc.getElementsByTagName("game") if node.getAttribute("game_name") in AOF_CATEGORIES
+            node
+            for node in config_xml.find_all(source_doc, "game")
+            if config_xml.attr(node, "game_name") in AOF_CATEGORIES
         ]
         if not source_profiles or not source_games:
             return False
 
-        package_doc = defusedxml.minidom.parseString("<fpdb_hud_package/>")
-        package_root = package_doc.documentElement
-        for source_profile in source_profiles:
-            package_root.appendChild(package_doc.importNode(source_profile, True))
-        if source_popup is not None:
-            package_root.appendChild(package_doc.importNode(source_popup, True))
-        for source_game in source_games:
-            package_root.appendChild(package_doc.importNode(source_game, True))
+        package_doc = config_xml.new_document("fpdb_hud_package", backend=config_xml.backend_of(source_doc))
+        package_root = config_xml.root(package_doc)
+        package_nodes = [*source_profiles, *([source_popup] if source_popup is not None else []), *source_games]
+        for source_node in package_nodes:
+            config_xml.append(package_doc, package_root, config_xml.import_node(package_doc, source_node))
         changed = install_missing_hud_package(doc, package_root)
         changed = (
             upgrade_legacy_popup_presentation(
@@ -942,23 +945,26 @@ class Config(
         # cell again. Match both its name and packaged location so a user's
         # unrelated/custom statistic is never replaced.
         advanced = next(
-            (node for node in doc.getElementsByTagName("ss") if node.getAttribute("name") == "aof_advanced"),
+            (node for node in config_xml.find_all(doc, "ss") if config_xml.attr(node, "name") == "aof_advanced"),
             None,
         )
         if advanced is not None:
-            for stat in advanced.getElementsByTagName("stat"):
-                if stat.getAttribute("_stat_name") == "aof_known_ev" and stat.getAttribute("_rowcol") == "(4,3)":
-                    stat.setAttribute("_stat_name", "aof_decision_ev")
+            for stat in config_xml.find_all(advanced, "stat"):
+                if (
+                    config_xml.attr(stat, "_stat_name") == "aof_known_ev"
+                    and config_xml.attr(stat, "_rowcol") == "(4,3)"
+                ):
+                    config_xml.set_attr(stat, "_stat_name", "aof_decision_ev")
                     changed = True
 
         # The named popup belongs to this feature and can be extended
         # idempotently while its class/theme and existing rows remain intact.
         popup = next(
-            (node for node in doc.getElementsByTagName("pu") if node.getAttribute("pu_name") == "aof_profile"),
+            (node for node in config_xml.find_all(doc, "pu") if config_xml.attr(node, "pu_name") == "aof_profile"),
             None,
         )
         if popup is not None and source_popup is not None:
-            existing = {node.getAttribute("pu_stat_name") for node in popup.getElementsByTagName("pu_stat")}
+            existing = {config_xml.attr(node, "pu_stat_name") for node in config_xml.find_all(popup, "pu_stat")}
             for name in (
                 "aof_known_equity",
                 "aof_known_ev",
@@ -973,13 +979,13 @@ class Config(
                 source_stat = next(
                     (
                         node
-                        for node in source_popup.getElementsByTagName("pu_stat")
-                        if node.getAttribute("pu_stat_name") == name
+                        for node in config_xml.find_all(source_popup, "pu_stat")
+                        if config_xml.attr(node, "pu_stat_name") == name
                     ),
                     None,
                 )
                 if source_stat is not None:
-                    popup.appendChild(doc.importNode(source_stat, True))
+                    config_xml.append(doc, popup, config_xml.import_node(doc, source_stat))
                     changed = True
         return changed
 
@@ -1007,16 +1013,6 @@ class Config(
                 return (str(history / "Tables"), str(history / "Tournaments"), account.name)
         return None
 
-    @staticmethod
-    def _preceding_comment(node):
-        """The comment written immediately above ``node``, if there is one."""
-        sibling = node.previousSibling
-        while sibling is not None and sibling.nodeType == sibling.TEXT_NODE and not sibling.data.strip():
-            sibling = sibling.previousSibling
-        if sibling is not None and sibling.nodeType == sibling.COMMENT_NODE:
-            return sibling
-        return None
-
     def add_missing_elements(self, doc, example_file):
         """Look through example config file and add any elements that are not in the config
         May need to add some 'enabled' attributes to turn things off - can't just delete a
@@ -1032,34 +1028,31 @@ class Config(
         if example_doc is None:
             return nodes_added
 
-        for cnode in doc.getElementsByTagName("FreePokerToolsConfig"):
-            for example_cnode in example_doc.childNodes:
-                if example_cnode.localName == "FreePokerToolsConfig":
-                    for example_node in example_cnode.childNodes:
-                        # print "nodetype", example_node.nodeType, "name", example_node.localName, "found", len(doc.getElementsByTagName(example_node.localName))
-                        if (
-                            example_node.nodeType == example_node.ELEMENT_NODE
-                            and doc.getElementsByTagName(example_node.localName) == []
-                        ):
-                            new = doc.importNode(example_node, True)  # True means do deep copy
-                            if example_node.localName == "general":
-                                # Adding defaults is not a schema migration.
-                                new.setAttribute("version", "0")
-                            t_node = self.doc.createTextNode("    ")
-                            cnode.appendChild(t_node)
-                            # A section the user has never seen arrives empty and
-                            # unexplained unless the comment documenting it comes
-                            # with it. Sections whose whole content is a shipped
-                            # default need no comment and have none.
-                            comment = self._preceding_comment(example_node)
-                            if comment is not None:
-                                cnode.appendChild(doc.importNode(comment, True))
-                                cnode.appendChild(self.doc.createTextNode("\n    "))
-                            cnode.appendChild(new)
-                            t_node = self.doc.createTextNode("\r\n\r\n")
-                            cnode.appendChild(t_node)
-                            log.debug(f"... adding missing config section: {example_node.localName}")
-                            nodes_added = nodes_added + 1
+        example_root = config_xml.root(example_doc)
+        if config_xml.tag_of(example_root) != "FreePokerToolsConfig":
+            return nodes_added
+        for cnode in config_xml.find_all(doc, "FreePokerToolsConfig"):
+            for example_node in config_xml.children(example_root):
+                tag = config_xml.tag_of(example_node)
+                if config_xml.find_all(doc, tag):
+                    continue
+                new = config_xml.import_node(doc, example_node)  # a deep copy
+                if tag == "general":
+                    # Adding defaults is not a schema migration.
+                    config_xml.set_attr(new, "version", "0")
+                config_xml.append_text(doc, cnode, "    ")
+                # A section the user has never seen arrives empty and
+                # unexplained unless the comment documenting it comes
+                # with it. Sections whose whole content is a shipped
+                # default need no comment and have none.
+                comment = config_xml.preceding_comment(example_doc, example_node)
+                if comment is not None:
+                    config_xml.append(doc, cnode, config_xml.import_node(doc, comment))
+                    config_xml.append_text(doc, cnode, "\n    ")
+                config_xml.append(doc, cnode, new)
+                config_xml.append_text(doc, cnode, "\r\n\r\n")
+                log.debug(f"... adding missing config section: {tag}")
+                nodes_added = nodes_added + 1
 
         if nodes_added > 0:
             log.debug(f"Added {nodes_added} missing config sections")
@@ -1101,7 +1094,7 @@ class Config(
 
         try:
             # Parse the XML file again
-            doc = defusedxml.minidom.parse(self.file)
+            doc = config_xml.parse_file(self.file)
 
             supported_sites = {}
             supported_games = {}
@@ -1117,53 +1110,53 @@ class Config(
             # which is what reloading onto the live object used to do.
             general = General()
             general.update(self.general)
-            if doc.getElementsByTagName("general") == []:
+            if not config_xml.find_all(doc, "general"):
                 general.get_defaults()
-            for gen_node in doc.getElementsByTagName("general"):
+            for gen_node in config_xml.find_all(doc, "general"):
                 general.add_elements(node=gen_node)
 
             # Sites
-            for site_node in doc.getElementsByTagName("site"):
+            for site_node in config_xml.find_all(doc, "site"):
                 site = Site(node=site_node)
                 supported_sites[site.site_name] = site
 
             # Games
-            for supported_game_node in doc.getElementsByTagName("game"):
+            for supported_game_node in config_xml.find_all(doc, "game"):
                 supported_game = Supported_games(supported_game_node)
                 supported_games[supported_game.game_name] = supported_game
 
             # Databases
             db_selected = self.db_selected
-            for db_node in doc.getElementsByTagName("database"):
+            for db_node in config_xml.find_all(doc, "database"):
                 db = Database(node=db_node)
                 if db_selected is None or db.db_selected:
                     db_selected = db.db_name
                 supported_databases[db.db_name] = db
 
             # Aux windows
-            for aw_node in doc.getElementsByTagName("aw"):
+            for aw_node in config_xml.find_all(doc, "aw"):
                 aw = Aux_window(node=aw_node)
                 aux_windows[aw.name] = aw
 
             # Layout sets
-            for ls_node in doc.getElementsByTagName("ls"):
+            for ls_node in config_xml.find_all(doc, "ls"):
                 ls = Layout_set(node=ls_node)
                 layout_sets[ls.name] = ls
 
             # Stat sets
-            for ss_node in doc.getElementsByTagName("ss"):
+            for ss_node in config_xml.find_all(doc, "ss"):
                 ss = Stat_sets(node=ss_node)
                 stat_sets[ss.name] = ss
 
             # Hero identities: multiroom profiles and data sources (#423). Read here
             # too, or a reload kept the identities the file no longer holds.
             hero_profiles = {}
-            for hp_node in doc.getElementsByTagName("hero_profile"):
+            for hp_node in config_xml.find_all(doc, "hero_profile"):
                 hp = HeroProfile(node=hp_node)
                 if hp.name:
                     hero_profiles[hp.name] = hp
             data_sources = {}
-            for ds_node in doc.getElementsByTagName("data_source"):
+            for ds_node in config_xml.find_all(doc, "data_source"):
                 source = DataSource(node=ds_node)
                 if source.name:
                     data_sources[source.name] = source
@@ -1176,14 +1169,14 @@ class Config(
 
             # HHCs (disabled rooms keep no converter binding -- see the
             # matching skip in the initial load)
-            for hhc_node in doc.getElementsByTagName("hhc"):
+            for hhc_node in config_xml.find_all(doc, "hhc"):
                 hhc = HHC(node=hhc_node)
                 if is_site_disabled(hhc.site):
                     continue
                 hhcs[hhc.site] = hhc
 
             # Popup windows
-            for pu_node in doc.getElementsByTagName("pu"):
+            for pu_node in config_xml.find_all(doc, "pu"):
                 pu = Popup(node=pu_node)
                 popup_windows[pu.name] = pu
 
@@ -1192,12 +1185,12 @@ class Config(
             # section -- so a file without one leaves whatever is in use alone
             # rather than replacing it with an empty stand-in.
             imp: Import | None = None
-            for imp_node in doc.getElementsByTagName("import"):
+            for imp_node in config_xml.find_all(doc, "import"):
                 imp = Import(node=imp_node)
 
             # HUD UI settings - this is the important part for HUD preferences
             ui: HudUI | None = None
-            for hui_node in doc.getElementsByTagName("hud_ui"):
+            for hui_node in config_xml.find_all(doc, "hud_ui"):
                 ui = HudUI(node=hui_node)
 
         except Exception as e:  # intentional broad catch: full XML config reload boundary, return False on any failure
@@ -1250,9 +1243,9 @@ class Config(
         places that apply a profile -- HUD creation, the table menu, a
         rebuild -- can record which content they put on the felt (#741).
         """
-        for ss_node in self.doc.getElementsByTagName("ss"):
-            if ss_node.getAttribute("name") == name:
-                return ss_node.toxml()
+        for ss_node in config_xml.find_all(self.doc, "ss"):
+            if config_xml.attr(ss_node, "name") == name:
+                return config_xml.to_xml(ss_node)
         return None
 
     def save(self, file=None) -> None:
@@ -1269,7 +1262,7 @@ class Config(
             except OSError as e:
                 log.exception(f"Failed to copy file {file} to backup. Exception: {e}")
 
-        _replace_with(file, self.wrap_long_lines(self.doc.toxml()).encode("utf-8"))
+        _replace_with(file, self.wrap_long_lines(config_xml.to_xml(self.doc)).encode("utf-8"))
         if file == self.file:
             self._loaded_file_fingerprint = _file_fingerprint(self.file)
 

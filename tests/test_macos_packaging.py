@@ -7,6 +7,7 @@ layout it demands is, because getting that wrong is what breaks the build.
 from __future__ import annotations
 
 import plistlib
+import re
 from pathlib import Path
 
 import pytest
@@ -232,8 +233,14 @@ def test_native_ci_installs_the_released_poker_eval_wheel() -> None:
     workflow = CI_WORKFLOW.read_text()
     native = _workflow_job(workflow, "native", "coverage")
 
+    # The wheel the CI tests against is the version the project pins.
+    pinned = re.search(r"poker-eval\.git@v(\d+\.\d+\.\d+)", (REPO_ROOT / "pyproject.toml").read_text())
+    assert pinned is not None
+    version = pinned.group(1)
+
     assert "Install released pypoker-eval wheel" in native
-    assert "releases/download/v1.2.0" in native
+    assert f"releases/download/v{version}/" in native
+    assert f"pypoker_eval-{version}-" in native
     assert "git clone --depth 1 https://github.com/jejellyroll-fr/poker-eval.git" not in native
     assert "manylinux_2_17_x86_64.manylinux2014_x86_64.whl" in native
     assert "macosx_11_0_arm64.whl" in native

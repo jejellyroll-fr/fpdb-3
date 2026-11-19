@@ -2,7 +2,7 @@
   "schema_version": 1,
   "pack": "plo-6max",
   "label": "Pot-Limit Omaha \u00b7 6-max",
-  "description": "Spot-first studies for six-max Pot-Limit Omaha, built on the dimensions a four-card game turns on: SPR, multiway state, board suit structure, pairing and connectivity, sizing and effective stack. No 13x13 range grid and no hand-state panels: neither has a correct four-card meaning here.",
+  "description": "Spot-first studies for six-max Pot-Limit Omaha, built on the dimensions that matter in four- and five-card games: SPR, multiway state, board suit structure, pairing and connectivity, sizing and effective stack. No 13x13 range grid and no hand-state panels: neither has a correct Omaha meaning here.",
   "studies": [
     {
       "id": "plo_preflop_rfi",
@@ -13,9 +13,10 @@
         "rfi"
       ],
       "game": "omahahi",
+      "supported_games": ["omahahi", "5_omahahi"],
       "table_size": 6,
       "base_filters": {
-        "game": "omahahi",
+        "game": ["omahahi", "5_omahahi"],
         "tournament": false,
         "max_seats": [
           6,
@@ -43,6 +44,10 @@
         "PLO",
         "Omaha",
         "pot-limit Omaha",
+        "PLO4",
+        "PLO5",
+        "4-card Omaha",
+        "5-card Omaha",
         "open raise",
         "raise first in"
       ],
@@ -142,9 +147,10 @@
         "facing-open"
       ],
       "game": "omahahi",
+      "supported_games": ["omahahi", "5_omahahi"],
       "table_size": 6,
       "base_filters": {
-        "game": "omahahi",
+        "game": ["omahahi", "5_omahahi"],
         "tournament": false,
         "max_seats": [
           6,
@@ -174,6 +180,10 @@
         "PLO",
         "Omaha",
         "pot-limit Omaha",
+        "PLO4",
+        "PLO5",
+        "4-card Omaha",
+        "5-card Omaha",
         "3bet",
         "3bet pot",
         "defend"
@@ -275,9 +285,10 @@
         "facing-3bet"
       ],
       "game": "omahahi",
+      "supported_games": ["omahahi", "5_omahahi"],
       "table_size": 6,
       "base_filters": {
-        "game": "omahahi",
+        "game": ["omahahi", "5_omahahi"],
         "tournament": false,
         "max_seats": [
           6,
@@ -306,6 +317,10 @@
         "PLO",
         "Omaha",
         "pot-limit Omaha",
+        "PLO4",
+        "PLO5",
+        "4-card Omaha",
+        "5-card Omaha",
         "3bet pot",
         "4bet"
       ],
@@ -406,9 +421,10 @@
         "squeeze"
       ],
       "game": "omahahi",
+      "supported_games": ["omahahi", "5_omahahi"],
       "table_size": 6,
       "base_filters": {
-        "game": "omahahi",
+        "game": ["omahahi", "5_omahahi"],
         "tournament": false,
         "max_seats": [
           6,
@@ -436,6 +452,10 @@
         "PLO",
         "Omaha",
         "pot-limit Omaha",
+        "PLO4",
+        "PLO5",
+        "4-card Omaha",
+        "5-card Omaha",
         "squeeze",
         "3bet"
       ],
@@ -536,9 +556,10 @@
         "blind-defence"
       ],
       "game": "omahahi",
+      "supported_games": ["omahahi", "5_omahahi"],
       "table_size": 6,
       "base_filters": {
-        "game": "omahahi",
+        "game": ["omahahi", "5_omahahi"],
         "tournament": false,
         "max_seats": [
           6,
@@ -567,6 +588,10 @@
         "PLO",
         "Omaha",
         "pot-limit Omaha",
+        "PLO4",
+        "PLO5",
+        "4-card Omaha",
+        "5-card Omaha",
         "BB defend",
         "blind defense"
       ],
@@ -668,9 +693,10 @@
         "flop"
       ],
       "game": "omahahi",
+      "supported_games": ["omahahi", "5_omahahi"],
       "table_size": 6,
       "base_filters": {
-        "game": "omahahi",
+        "game": ["omahahi", "5_omahahi"],
         "tournament": false,
         "max_seats": [
           6,
@@ -704,6 +730,10 @@
         "PLO",
         "Omaha",
         "pot-limit Omaha",
+        "PLO4",
+        "PLO5",
+        "4-card Omaha",
+        "5-card Omaha",
         "single raised pot",
         "cbet"
       ],
@@ -839,9 +869,10 @@
         "flop"
       ],
       "game": "omahahi",
+      "supported_games": ["omahahi", "5_omahahi"],
       "table_size": 6,
       "base_filters": {
-        "game": "omahahi",
+        "game": ["omahahi", "5_omahahi"],
         "tournament": false,
         "max_seats": [
           6,
@@ -875,6 +906,10 @@
         "PLO",
         "Omaha",
         "pot-limit Omaha",
+        "PLO4",
+        "PLO5",
+        "4-card Omaha",
+        "5-card Omaha",
         "single raised pot",
         "cbet"
       ],
@@ -1010,9 +1045,10 @@
         "flop"
       ],
       "game": "omahahi",
+      "supported_games": ["omahahi", "5_omahahi"],
       "table_size": 6,
       "base_filters": {
-        "game": "omahahi",
+        "game": ["omahahi", "5_omahahi"],
         "tournament": false,
         "max_seats": [
           6,
@@ -1045,6 +1081,10 @@
         "PLO",
         "Omaha",
         "pot-limit Omaha",
+        "PLO4",
+        "PLO5",
+        "4-card Omaha",
+        "5-card Omaha",
         "single raised pot",
         "cbet"
       ],
@@ -1180,9 +1220,10 @@
         "flop"
       ],
       "game": "omahahi",
+      "supported_games": ["omahahi", "5_omahahi"],
       "table_size": 6,
       "base_filters": {
-        "game": "omahahi",
+        "game": ["omahahi", "5_omahahi"],
         "tournament": false,
         "max_seats": [
           6,
@@ -1215,6 +1256,10 @@
         "PLO",
         "Omaha",
         "pot-limit Omaha",
+        "PLO4",
+        "PLO5",
+        "4-card Omaha",
+        "5-card Omaha",
         "single raised pot",
         "cbet"
       ],
@@ -1350,9 +1395,10 @@
         "turn"
       ],
       "game": "omahahi",
+      "supported_games": ["omahahi", "5_omahahi"],
       "table_size": 6,
       "base_filters": {
-        "game": "omahahi",
+        "game": ["omahahi", "5_omahahi"],
         "tournament": false,
         "max_seats": [
           6,
@@ -1384,6 +1430,10 @@
         "PLO",
         "Omaha",
         "pot-limit Omaha",
+        "PLO4",
+        "PLO5",
+        "4-card Omaha",
+        "5-card Omaha",
         "single raised pot",
         "cbet"
       ],
@@ -1519,9 +1569,10 @@
         "flop"
       ],
       "game": "omahahi",
+      "supported_games": ["omahahi", "5_omahahi"],
       "table_size": 6,
       "base_filters": {
-        "game": "omahahi",
+        "game": ["omahahi", "5_omahahi"],
         "tournament": false,
         "max_seats": [
           6,
@@ -1554,6 +1605,10 @@
         "PLO",
         "Omaha",
         "pot-limit Omaha",
+        "PLO4",
+        "PLO5",
+        "4-card Omaha",
+        "5-card Omaha",
         "3bet pot",
         "three bet pot"
       ],
@@ -1689,9 +1744,10 @@
         "flop"
       ],
       "game": "omahahi",
+      "supported_games": ["omahahi", "5_omahahi"],
       "table_size": 6,
       "base_filters": {
-        "game": "omahahi",
+        "game": ["omahahi", "5_omahahi"],
         "tournament": false,
         "max_seats": [
           6,
@@ -1724,6 +1780,10 @@
         "PLO",
         "Omaha",
         "pot-limit Omaha",
+        "PLO4",
+        "PLO5",
+        "4-card Omaha",
+        "5-card Omaha",
         "3bet pot",
         "three bet pot"
       ],
@@ -1859,9 +1919,10 @@
         "flop"
       ],
       "game": "omahahi",
+      "supported_games": ["omahahi", "5_omahahi"],
       "table_size": 6,
       "base_filters": {
-        "game": "omahahi",
+        "game": ["omahahi", "5_omahahi"],
         "tournament": false,
         "max_seats": [
           6,
@@ -1892,6 +1953,10 @@
         "PLO",
         "Omaha",
         "pot-limit Omaha",
+        "PLO4",
+        "PLO5",
+        "4-card Omaha",
+        "5-card Omaha",
         "3bet pot",
         "three bet pot"
       ],
@@ -2027,9 +2092,10 @@
         "turn"
       ],
       "game": "omahahi",
+      "supported_games": ["omahahi", "5_omahahi"],
       "table_size": 6,
       "base_filters": {
-        "game": "omahahi",
+        "game": ["omahahi", "5_omahahi"],
         "tournament": false,
         "max_seats": [
           6,
@@ -2060,6 +2126,10 @@
         "PLO",
         "Omaha",
         "pot-limit Omaha",
+        "PLO4",
+        "PLO5",
+        "4-card Omaha",
+        "5-card Omaha",
         "3bet pot",
         "three bet pot"
       ],

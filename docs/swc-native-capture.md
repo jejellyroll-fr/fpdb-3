@@ -142,7 +142,14 @@ where no matching game-server buffer was received.
 
 The native stream uses unsigned 32-bit little-endian message framing. Message
 class 34 supplies table name/id and tournament id; class 22 supplies state
-snapshots. Across the captured Hold'em, Omaha, OFC, and tournament sessions,
+snapshots. A tournament table the room seats the player at can arrive with no
+class-34 descriptor and only a class-31 one (#829): tournament id at offset 6,
+table id at 14, the tournament id again at 19, the name's length (u16) at 24 and
+the name from 26. Both descriptors end the name with the same block: three
+bytes, a two-letter game signature, `03`, the seat capacity, then `12` on a
+cash table or `00` on a tournament one. The signature's first letter is the
+limit (`F` fixed, `P` pot, `U` no-limit, as the lobby lists every table) and
+its second is `R` for a cash table or `T` for a tournament one. Across the captured Hold'em, Omaha, OFC, and tournament sessions,
 the snapshot decoder has confirmed hand id, table id, round number, and each
 length-prefixed player id/name. The full payload remains attached to every
 snapshot while the variable card/action suffix is decoded.
@@ -444,3 +451,17 @@ false block match. On `test4.raw` this recovers 52 up cards across the ten stud
 hands (studhi/studhilo/razz), each street's door and later up cards in order.
 Third-street hole cards and hidden seventh-street cards are not claimed, and no
 seat is resolved.
+
+Stud hands stay capture-only. On tournament stud tables the snapshot's
+name-to-funds pairing contradicts the Dealer chat in nearly every captured hand:
+the player whose funds rise is not the one the Dealer names as the winner, and
+one name is credited with folds made from several native indexes. Until that
+pairing is proven against the room's own hand histories, importing these hands
+would credit the wrong players with actions and pots (#829).
+
+The stakes a stud hand's envelope carries do not wait for that: the gametype's
+`ante` is the ante the capture read, and on a fixed-limit table `sb`/`bb` are
+half the small bet and the small bet derived from it, the convention
+`SealsWithClubsToFpdb` uses for the room's text histories (a `10-20` table is
+`sb` 5, `bb` 10). They used to read 0/0 with no ante even when the structure
+had been derived.

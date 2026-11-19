@@ -146,3 +146,36 @@ def test_the_table_size_comes_back_from_the_game_type(roundtrip) -> None:
     _, rebuilt = roundtrip
 
     assert rebuilt.maxseats == 10
+
+
+# --------------------------------------------------------------------------
+# Room money that has no action row
+# --------------------------------------------------------------------------
+
+
+def test_a_winamax_splash_comes_back_in_the_pot(importer, fresh_db, legacy_config, tmp_path, caplog) -> None:
+    """The Escape splash is room money: no one posts it, so HandsActions has no
+    row for it, only Hands.splashPot. Rebuilding the pot from the actions alone
+    left it 0.10 short of what the winner collected, logged "Collected amount
+    exceeds total pot" and showed the hand with no rake.
+    """
+    from fpdb_3_legacy.WinamaxToFpdb import Winamax
+
+    source = FIXTURES / "winamax" / "plo_escape_splash.txt"
+    parsed = Winamax(config=legacy_config, in_path=str(source), autostart=True).getProcessedHands()[0]
+
+    copy = tmp_path / source.name
+    shutil.copy(source, copy)
+    importer.addImportFile(str(copy), "Winamax")
+    assert importer.runImport()[0] == 1
+
+    cursor = fresh_db.get_cursor()
+    cursor.execute("SELECT id FROM Hands")
+    (hand_id,) = cursor.fetchone()
+    with caplog.at_level("WARNING"):
+        rebuilt = hand_factory(hand_id, legacy_config, fresh_db)
+
+    assert parsed.rake == Decimal("0.01")
+    assert rebuilt.totalpot == parsed.totalpot
+    assert rebuilt.rake == parsed.rake
+    assert "exceeds total pot" not in caplog.text

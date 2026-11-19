@@ -6,6 +6,7 @@ from types import SimpleNamespace
 import pytest
 
 import fpdb_3_legacy.equity as equity_module
+from fpdb_3_legacy import Card, derived_stats_allin
 from fpdb_3_legacy.DerivedStats import DerivedStats, _chip_increment
 from fpdb_3_legacy.equity import (
     EquityEngine,
@@ -61,6 +62,14 @@ class RecordingPokerEval:
         }
 
 
+class SeededRecordingPokerEval(RecordingPokerEval):
+    """A pypoker-eval 1.3.2+ backend: poker_eval takes seed= (#301)."""
+
+    @staticmethod
+    def base_seed() -> int:
+        return 0
+
+
 def test_split_pot_chip_increment_stays_decimal() -> None:
     """Odd split pots must not multiply Decimal by a float during auto-import."""
     assert _chip_increment(100) == Decimal("0.01")
@@ -97,6 +106,45 @@ def test_calculate_equity_reports_missing_optional_backend(monkeypatch) -> None:
 
     with pytest.raises(EquityUnavailableError, match="not installed"):
         calculate_equity("holdem", [["As", "Ah"], ["Ks", "Kh"]])
+
+
+def test_calculate_equity_passes_the_seed_to_a_backend_that_takes_one(monkeypatch) -> None:
+    # pypoker-eval 1.3.2 samples from its own PCG stream, out of srand()'s reach.
+    monkeypatch.setattr(equity_module, "_seed_native_rng", lambda seed: pytest.fail("srand() is not used"))
+    backend = SeededRecordingPokerEval()
+
+    calculate_equity("holdem", [["As", "Ah"], ["Kd", "Kc"]], iterations=500, backend=backend, seed=7)
+
+    assert backend.calls[0]["seed"] == 7
+
+
+def test_calculate_equity_seeds_srand_for_an_older_backend(monkeypatch) -> None:
+    seeded: list[int] = []
+    monkeypatch.setattr(equity_module, "_seed_native_rng", seeded.append)
+    backend = RecordingPokerEval()
+
+    calculate_equity("holdem", [["As", "Ah"], ["Kd", "Kc"]], iterations=500, backend=backend, seed=7)
+
+    assert "seed" not in backend.calls[0]
+    assert seeded == [7]
+
+
+@pytest.mark.skipif(equity_module.load_poker_eval() is None, reason="pypoker-eval is not installed")
+def test_native_seeded_sample_does_not_depend_on_earlier_samples() -> None:
+    backend = load_poker_eval()
+    pockets = [["6d", "3h"], ["7s", "3s"]]
+
+    def sample(seed: int | None) -> tuple:
+        return calculate_equity(
+            "fusion", pockets, iterations=equity_module.DEFAULT_EQUITY_ITERATIONS, backend=backend, seed=seed
+        ).players
+
+    first = sample(818)
+    sample(None)
+    calculate_equity("holdem", [["As", "Ah"], ["Kd", "Kc"]], iterations=777, backend=backend)
+
+    assert sample(818) == first
+    assert sample(819) != first
 
 
 def test_expected_pot_share_uses_net_pot() -> None:
@@ -417,7 +465,6 @@ def test_derived_stats_stores_expected_all_in_profit_x100(monkeypatch) -> None:
         "holdem",
         ["hero", "villain"],
         {"FLOP": {"allin": True, "board": [["2c", "3d", "4h"]]}},
-        {},
         {"hero": {"hole": ["As", "Ah"]}, "villain": {"hole": ["Ks", "Kh"]}},
     )
 
@@ -461,3 +508,107 @@ def test_boards_dict_detects_real_all_in_and_accumulates_board() -> None:
     assert boards["FLOP"] == {"board": [["2c", "3d", "4h"]], "allin": True}
     assert boards["TURN"] == {"board": [["2c", "3d", "4h", "5s"]], "allin": False}
     assert boards["RIVER"] == {"board": [["2c", "3d", "4h", "5s", "6c"]], "allin": False}
+
+
+@pytest.mark.skipif(equity_module.load_poker_eval() is None, reason="pypoker-eval is not installed")
+def test_every_eval_game_evaluates_its_own_complete_hands() -> None:
+    # Card.games' second field goes to poker-eval as is. A name it lists but
+    # does not enumerate failed only at import time: "fusion" before #818,
+    # "5draw" (pyenum error code 1) before poker-eval 1.3.3 (#831).
+    engine = equity_module.load_poker_eval()
+    failures = {}
+    for category, (base, evalgame, _hilo, _streets, _last, hrange) in Card.games.items():
+        if not evalgame:
+            continue
+        start, end = hrange[-1]
+        deck = iter(f"{rank}{suit}" for rank in "AKQJT98765432" for suit in "shdc")
+        pockets = [[next(deck) for _ in range(end - start)] for _ in range(2)]
+        board = [next(deck) for _ in range(5)] if base == "hold" else []
+        try:
+            engine.winners(game=evalgame, pockets=pockets, board=board)
+        except RuntimeError as error:
+            failures[category] = f"{evalgame}: {error}"
+    assert not failures, failures
+
+
+def _fusion_all_in_hand() -> SimpleNamespace:
+    return SimpleNamespace(
+        handid="fusion-all-in",
+        gametype={"base": "hold", "category": "fusion"},
+        holeStreets=["PREFLOP", "FLOP", "TURN"],
+        totalpot=Decimal("200"),
+        rake=Decimal(0),
+        pot=SimpleNamespace(
+            committed={"hero": Decimal("100"), "villain": Decimal("100")},
+            common={},
+        ),
+    )
+
+
+def _fusion_stats() -> DerivedStats:
+    stats = DerivedStats()
+    stats.handsplayers = {
+        "hero": {"sawShowdown": True, "wentAllIn": True, "allInEV": 0},
+        "villain": {"sawShowdown": True, "wentAllIn": True, "allInEV": 0},
+    }
+    return stats
+
+
+FUSION_HOLECARDS = {
+    "hero": {"hole": ["As", "Kd", "Qc", "Jh"]},
+    "villain": {"hole": ["Td", "Tc", "3h", "4h"]},
+}
+
+
+def test_fusion_all_in_on_the_flop_samples_the_turn_hole_card(monkeypatch) -> None:
+    # On the flop the fourth hole card is not dealt yet: the engine gets the
+    # three cards each player held and deals the rest itself (#818). Exact
+    # enumeration is far too slow multiway, so it is sampled.
+    backend = SeededRecordingPokerEval()
+    monkeypatch.setattr("fpdb_3_legacy.derived_stats_allin.pokereval", backend)
+    stats = _fusion_stats()
+
+    stats.getAllInEV(
+        _fusion_all_in_hand(),
+        Card.games["fusion"][1],
+        ["hero", "villain"],
+        {"FLOP": {"allin": True, "board": [["2s", "5s", "8s"]]}},
+        FUSION_HOLECARDS,
+    )
+
+    (call,) = backend.calls
+    assert call["game"] == "fusion"
+    assert call["pockets"] == [["As", "Kd", "Qc"], ["Td", "Tc", "3h"]]
+    assert call["board"] == ["2s", "5s", "8s", "__", "__"]
+    assert call["iterations"] == equity_module.DEFAULT_EQUITY_ITERATIONS
+    # Seeded, so a re-import stores the same EV whatever was sampled before.
+    assert call["seed"] == derived_stats_allin.ALL_IN_EV_SEED
+    assert stats.handsplayers["hero"]["allInEVCalculated"] is True
+
+
+def test_fusion_pockets_keep_the_cards_held_with_the_board() -> None:
+    pockets = [["As", "Kd", "Qc", "Jh"], ["Td", "Tc", "3h", "4h"]]
+
+    assert equity_module.fusion_pockets(pockets, []) == [["As", "Kd"], ["Td", "Tc"]]
+    assert equity_module.fusion_pockets(pockets, ["2s", "5s", "8s"]) == [["As", "Kd", "Qc"], ["Td", "Tc", "3h"]]
+    assert equity_module.fusion_pockets(pockets, ["2s", "5s", "8s", "9s", "2d"]) == pockets
+    with pytest.raises(ValueError, match="0, 3, 4 or 5"):
+        equity_module.fusion_pockets(pockets, ["2s"])
+
+
+@pytest.mark.skipif(equity_module.load_poker_eval() is None, reason="pypoker-eval is not installed")
+def test_fusion_all_in_on_the_turn_is_exact_under_omaha_rules() -> None:
+    # Four spades on board, one in the hero's hand: a flush under hold'em rules,
+    # nothing under Fusion's (exactly two hole cards), so the tens are ahead.
+    stats = _fusion_stats()
+
+    stats.getAllInEV(
+        _fusion_all_in_hand(),
+        Card.games["fusion"][1],
+        ["hero", "villain"],
+        {"TURN": {"allin": True, "board": [["2s", "5s", "8s", "9s"]]}},
+        FUSION_HOLECARDS,
+    )
+
+    assert stats.handsplayers["hero"]["allInEV"] == -4500
+    assert stats.handsplayers["villain"]["allInEV"] == 4500

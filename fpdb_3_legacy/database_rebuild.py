@@ -18,6 +18,33 @@ from fpdb_3_legacy.sql_queries_cache_rebuild import HAND_TIME_RANGE
 log = get_logger("database")
 
 
+# The one-time refresh of the hero-hands-only rooms' HUD cache rows (#719):
+# their ids are spelled out (constants), and a test keeps them equal to
+# hud_room_policy.WPN_SITE_IDS.
+HERO_HANDS_ONLY_REFRESHED = "hudcache_hero_hands_only_v1"
+DELETE_HERO_HANDS_ONLY_HUDCACHE = (
+    "DELETE FROM HudCache WHERE gametypeId IN (SELECT id FROM Gametypes WHERE siteId IN (24, 115, 116, 117, 118, 119))"
+)
+REFRESH_WHERE_RING = "WHERE g.type = 'ring' AND g.siteId IN (24, 115, 116, 117, 118, 119)<hero_where>"
+HERO_HANDS_ONLY_PLAYERS = "SELECT id FROM Players WHERE siteId IN (24, 115, 116, 117, 118, 119) AND name = %s"
+REFRESH_WHERE_TOUR = "WHERE g.type = 'tour' AND g.siteId IN (24, 115, 116, 117, 118, 119)<hero_where>"
+
+# The one-time removal of the auto-notes those rooms' other hands produced
+# (#719, section 4.1.8): notes about hands none of the user's players took
+# part in. <ids> becomes the user's player ids (integers); with none, every
+# note of those rooms goes, as no hand of theirs could have produced it.
+HERO_HANDS_ONLY_AUTONOTES_DROPPED = "autonotes_hero_hands_only_v1"
+DELETE_OTHERS_AUTONOTES = (
+    "DELETE FROM PlayerAutoNotes WHERE handId IN (SELECT h.id FROM Hands h"
+    " INNER JOIN Gametypes g ON (g.id = h.gametypeId) WHERE g.siteId IN (24, 115, 116, 117, 118, 119)"
+    " AND NOT EXISTS (SELECT 1 FROM HandsPlayers own WHERE own.handId = h.id AND own.playerId IN (<ids>)))"
+)
+DELETE_ALL_HERO_HANDS_ONLY_AUTONOTES = (
+    "DELETE FROM PlayerAutoNotes WHERE handId IN (SELECT h.id FROM Hands h"
+    " INNER JOIN Gametypes g ON (g.id = h.gametypeId) WHERE g.siteId IN (24, 115, 116, 117, 118, 119))"
+)
+
+
 class DatabaseRebuildMixin:
     """Rebuild the caches from the hands they summarise."""
 
@@ -288,11 +315,91 @@ class DatabaseRebuildMixin:
         return h_start, v_start
 
     def rebuild_sql(self, game_type: str, table: str, where: str) -> str:
-        """The INSERT ... SELECT that refills one half ("ring" or "tour") of a statistics cache."""
+        """The INSERT ... SELECT that refills one half ("ring" or "tour") of a statistics cache.
+
+        The HUD cache leaves out what the import leaves out of it: a hand of a
+        room allowing HUD statistics from the user's own hands only (ACR/WPN,
+        #719) that none of the user's configured screen names played.
+        """
+        from fpdb_3_legacy.hud_room_policy import hero_hands_only_sql
+
+        if table == "HudCache":
+            where += hero_hands_only_sql(self.hero_hands_only_user_ids())
         query = self.sql.query["rebuildCache"].replace("%s", self.sql.query["placeholder"])
         tourney_join = "INNER JOIN Tourneys t ON (t.id = h.tourneyId)" if game_type == "tour" else ""
         query = query.replace("<tourney_join_clause>", tourney_join).replace("<where_clause>", where)
         return self.replace_statscache(game_type, table, query)
+
+    def hero_hands_only_user_ids(self) -> list[int]:
+        """The players the user's configured names are in the hero-hands-only rooms (ACR/WPN).
+
+        Configured names and aliases only: ``Players.hero`` marks whoever a
+        history showed hole cards for, which for someone else's history is not
+        the user. Every WPN skin is searched, since a name configured for one
+        skin plays hands filed under another.
+        """
+        from fpdb_3_legacy.hud_room_policy import user_names
+
+        # Looked up on every call, not remembered: the players appear as their
+        # hands are imported, so an answer kept from earlier would go stale.
+        names = sorted(user_names(getattr(self, "config", None), "WinningPoker"))
+        if not names:
+            return []
+        query = HERO_HANDS_ONLY_PLAYERS.replace("%s", self.sql.query["placeholder"])
+        cursor = self.get_cursor()
+        ids: set[int] = set()
+        for name in names:
+            cursor.execute(query, (name,))
+            ids.update(int(row[0]) for row in cursor.fetchall())
+        return sorted(ids)
+
+    def refresh_hero_hands_only_hudcache(self) -> None:
+        """Rebuild, once, the HUD cache rows of the hero-hands-only rooms (#719).
+
+        A database imported before the rule holds statistics from hands the
+        user did not play. Only those rooms' rows are dropped and refilled, so
+        the rest of the cache is untouched; the AnalyticsMeta flag makes it a
+        one-time step.
+        """
+        from fpdb_3_legacy import analytics_lifecycle
+
+        analytics_lifecycle.ensure_analytics_meta(self)
+        if HERO_HANDS_ONLY_REFRESHED in analytics_lifecycle._read_meta(self):
+            return
+        self._rebuild_prepare_heroes(None, None)
+        cursor = self.get_cursor()
+        cursor.execute(DELETE_HERO_HANDS_ONLY_HUDCACHE)
+        cursor.execute(self.rebuild_sql("ring", "HudCache", REFRESH_WHERE_RING))
+        cursor.execute(self.rebuild_sql("tour", "HudCache", REFRESH_WHERE_TOUR))
+        analytics_lifecycle._write_meta(self, {HERO_HANDS_ONLY_REFRESHED: "1"})
+        self.commit()
+
+    def drop_hero_hands_only_autonotes(self) -> None:
+        """Remove, once, the auto-notes the hero-hands-only rooms' other hands produced (#719).
+
+        ACR/WPN allow automatic notes from the user's own hands only. The
+        import no longer writes the others (``hud_room_policy.kept_from_hud``),
+        but a database imported before the rule holds some: the notes drawn
+        from a hand none of the user's configured names played are deleted.
+        The hands themselves stay; the AnalyticsMeta flag makes it a one-time
+        step.
+        """
+        from fpdb_3_legacy import analytics_lifecycle
+
+        analytics_lifecycle.ensure_analytics_meta(self)
+        if HERO_HANDS_ONLY_AUTONOTES_DROPPED in analytics_lifecycle._read_meta(self):
+            return
+        ids = self.hero_hands_only_user_ids()
+        if ids:
+            statement = DELETE_OTHERS_AUTONOTES.replace("<ids>", ", ".join(str(int(i)) for i in ids))
+        else:
+            statement = DELETE_ALL_HERO_HANDS_ONLY_AUTONOTES
+        cursor = self.get_cursor()
+        cursor.execute(statement)  # nosemgrep - constants and integers only
+        if cursor.rowcount and cursor.rowcount > 0:
+            log.info("Removed %d ACR/WPN auto-notes drawn from hands the user did not play", cursor.rowcount)
+        analytics_lifecycle._write_meta(self, {HERO_HANDS_ONLY_AUTONOTES_DROPPED: "1"})
+        self.commit()
 
     def _rebuild_ring_cache(self, table: Any, h_start: Any, v_start: Any, wmid: Any, commit: bool = True) -> None:
         """Rebuild the cash half of a statistics cache."""

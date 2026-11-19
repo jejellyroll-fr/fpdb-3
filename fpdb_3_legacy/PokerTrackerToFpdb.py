@@ -132,6 +132,7 @@ class PokerTracker(HandHistoryConverter):
         "FL": "fl",
         "Limit": "fl",
         "LIMIT": "fl",
+        "L": "fl",  # iPoker as PT4 stores it: "Texas Hold'em L $0.10/$0.20"
     }
     games = {  # base, category
         "Hold'em": ("hold", "holdem"),
@@ -157,9 +158,9 @@ class PokerTracker(HandHistoryConverter):
     # Static regexes
     re_GameInfo1 = re.compile(
         """
-          (?P<SITE>GAME\\s\\#|MERGE_GAME\\s\\#|Merge\\sGame\\s\\#)(?P<HID>[0-9\\-]+)(\\sVersion:[\\d\\.]+\\s(?P<UNCALLED>Uncalled:Y))?(:?\\s+|\\s\\|\\s)
+          (?P<SITE>GAME\\s\\#|MERGE_GAME\\s\\#|Merge\\sGame\\s\\#)(?P<HID>[0-9\\-]+)(\\sVersion:[\\d\\.]+\\s(?P<UNCALLED>Uncalled:[YN]))?(:?\\s+|\\s\\|\\s)
           (?P<GAME>Holdem|Texas\\sHold\'em|Omaha|Omaha\\sHi|Omaha\\sHi/Lo)\\s\\s?
-          ((?P<LIMIT>PL|NL|FL|No\\sLimit|Limit|LIMIT|Pot\\sLimit)\\s\\s?)?
+          ((?P<LIMIT>PL|NL|FL|No\\sLimit|Limit|LIMIT|Pot\\sLimit|L)\\s\\s?)?
           (?P<TOUR>Tournament)?
           (\\(?                            # open paren of the stakes
           (?P<CURRENCY>{LS}|)?

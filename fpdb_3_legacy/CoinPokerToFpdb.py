@@ -76,7 +76,7 @@ def _money(text: str) -> Decimal:
     return Decimal(text.replace(",", ""))
 
 
-class CoinPoker(HandHistoryConverter):
+class CoinPoker(HandHistoryConverter):  # pylint: disable=too-many-public-methods  # the converter's interface
     """CoinPoker (site id 140): text hand-history import."""
 
     sitename = "CoinPoker"
@@ -510,7 +510,7 @@ class CoinPoker(HandHistoryConverter):
     # Table detection (kept for the window-title lookups; no HUD is offered)
     # ------------------------------------------------------------------
     @staticmethod
-    def getTableTitleRe(
+    def getTableTitleRe(  # pylint: disable=arguments-renamed  # "type" would shadow the builtin; callers pass it by position
         game_type: Any = None,
         table_name: Any = None,
         tournament: Any = None,

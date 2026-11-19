@@ -5,9 +5,7 @@ various game types including Hold'em, Omaha, and Stud variants.
 """
 
 import unittest
-from datetime import datetime, timezone
-
-UTC = timezone.utc  # datetime.UTC is 3.11+; the packaged builds embed 3.10
+from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
 from types import SimpleNamespace

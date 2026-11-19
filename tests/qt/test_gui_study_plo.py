@@ -37,6 +37,7 @@ def test_a_plo_dashboard_runs_on_omaha_and_never_offers_a_holdem_panel(qtbot, pl
     selection = explorer.open_study("plo_srp_pfr_ip_flop", remember=False)
     dashboard = GuiStudyDashboard(db=plo_db, selection=selection)
     qtbot.addWidget(dashboard)
+    assert "PLO 4c + 5c" in dashboard.context_label.text()
     # A fifteen-hand corpus is under any honest minimum, so ask for every row
     # rather than assert on an empty low-sample screen.
     dashboard.model.set_min_sample(0)

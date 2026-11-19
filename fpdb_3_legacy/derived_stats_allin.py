@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 from decimal import ROUND_DOWN, Decimal
+from itertools import chain
 from typing import Any
 
 from fpdb_3_legacy import Card
@@ -29,12 +30,41 @@ from fpdb_3_legacy.derived_stats_base import (
     DerivedStatsBase,
     _chip_increment,
 )
-from fpdb_3_legacy.equity import EquityUnavailableError, calculate_equity, expected_pot_share, load_poker_eval
+from fpdb_3_legacy.equity import (
+    DEFAULT_EQUITY_ITERATIONS,
+    FUSION_ALL_HOLE_CARDS_BOARD,
+    EquityResult,
+    EquityUnavailableError,
+    calculate_equity,
+    fusion_pockets,
+    load_poker_eval,
+)
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 pokereval = load_poker_eval()
 
+# A sampled all-in EV is seeded so the same hand stores the same EV on every
+# import, whatever was sampled before it in the process (poker-eval #301).
+ALL_IN_EV_SEED = 818
+
 log = get_logger("derived_stats")
+
+# An action tuple is (player, action, amount, ..., all-in flag).
+MIN_ALL_IN_ACTION_SIZE = 3
+
+
+def _is_all_in(action: Any) -> bool:
+    """Whether this action put its player all-in."""
+    return isinstance(action, (list, tuple)) and len(action) >= MIN_ALL_IN_ACTION_SIZE and action[-1] is True
+
+
+def _fusion_iterations(board: list) -> int | None:
+    """Fusion's all-in equity deals the hole cards still to come (#818).
+
+    Exhaustively that is 25 s for a three-way flop and out of reach preflop,
+    so before the turn it is sampled.
+    """
+    return DEFAULT_EQUITY_ITERATIONS if len(board) < FUSION_ALL_HOLE_CARDS_BOARD else None
 
 
 class DerivedStatsAllInMixin(DerivedStatsBase):
@@ -132,7 +162,9 @@ class DerivedStatsAllInMixin(DerivedStatsBase):
                 self.handsstove.append([hand.dbid_hands, hand.playerIds[player[1]], street_id, 0, hl, 1, 0, None, 0])
 
         if base == "hold" and evalgame:
-            self.getAllInEV(hand, evalgame, holeplayers, boards, streets, holecards)
+            self.getAllInEV(hand, evalgame, holeplayers, boards, holecards)
+        elif base == "draw" and evalgame:
+            self.getAllInEVDraw(hand, evalgame, holeplayers, boards, last, hrange)
 
     def assembleHandsPots(self, hand: Any) -> None:  # noqa: C901, PLR0912, PLR0915
         """Assemble hands pots data and calculate winnings."""
@@ -328,10 +360,7 @@ class DerivedStatsAllInMixin(DerivedStatsBase):
                     if street_name == "PREFLOP" or street_name in hand.board:
                         cumulative_board.extend(hand.board.get(street_name, []) or [])
                         street_actions = hand.actions.get(street_name, [])
-                        allin = any(
-                            isinstance(action, (list, tuple)) and len(action) > 2 and action[-1] is True
-                            for action in street_actions
-                        )
+                        allin = any(_is_all_in(action) for action in street_actions)
                         boards[street_name] = {"board": [list(cumulative_board)], "allin": allin}
                         log.debug("Added board for %s: %s", street_name, boards[street_name])
                     else:
@@ -393,186 +422,236 @@ class DerivedStatsAllInMixin(DerivedStatsBase):
             log.exception("Error in getBoardsList for hand %s", hand.handid)
             raise
 
-    def getAllInEV(self, hand: Any, game_type: Any, players: Any, boards: Any, streets: Any, holecards: Any) -> None:  # noqa: C901, PLR0913, PLR0912
-        """Calculate all-in equity for players.
+    def getAllInEV(  # pylint: disable=invalid-name  # called by this name, as getBoardsDict
+        self, hand: Any, game_type: Any, players: Any, boards: Any, holecards: Any
+    ) -> None:
+        """Store the all-in EV of a flop game's players (draw games: getAllInEVDraw).
 
-        Adapted to handle both Hold'em and Draw games:
-        - Hold'em: Uses community cards + hole cards
-        - Draw: Uses only player's cards (5 cards)
+        The pot is split into the main pot and side pots (#836): a short stack
+        all-in can only win what each opponent matched of its stake. Each pot is
+        evaluated among the players who can win it, with the board of the street
+        its money went in: the street its smallest stake went all-in, so a short
+        stack all-in on the flop keeps its flop equity for the main pot while the
+        side pot is decided by a later all-in. A pot whose smallest stake never
+        went all-in goes with the last all-in street.
         """
+        log.debug("Calculating all-in EV for hand %s, game type: %s", hand.handid, game_type)
+        if not pokereval:
+            return
         try:
-            log.debug("Calculating all-in EV for hand %s, game type: %s", hand.handid, game_type)
-
-            # Get game base type
-            base = hand.gametype.get("base", "")
-
-            # For non-hold'em games (like draw), we need different handling
-            if base != "hold" and game_type:
-                return self.getAllInEVDraw(hand, game_type, players, streets, holecards)
-
-            # Original Hold'em logic
-            # Check if we have valid players for EV calculation
-            valid_players = [
-                player
-                for player in players
-                if player in self.handsplayers
-                and (
-                    self.handsplayers[player].get("sawShowdown", False)
-                    or self.handsplayers[player].get("wentAllIn", False)
-                )
-            ]
-
-            if len(valid_players) < MIN_PLAYERS_FOR_GAME:
-                log.debug("Not enough valid players for EV calculation: %s", valid_players)
-                return None
-
-            # Initialize stove data if not exists
-            if not hasattr(self, "handsstove"):
-                self.handsstove = []
-
-            # Calculate equity for each all-in situation
-            for street_name, street_data in boards.items():
-                if street_data.get("allin", False):
-                    try:
-                        if pokereval:
-                            player_hands = []
-                            evaluated_players = []
-                            for player in valid_players:
-                                if player in holecards:
-                                    hole = holecards[player].get("hole", [])
-                                    # Skip fully-unknown hands regardless of card
-                                    # count: Omaha's unrevealed hand is
-                                    # ["0x","0x","0x","0x"], which the old
-                                    # two-card check let through, feeding
-                                    # duplicate "0x" cards to the equity engine.
-                                    if hole and not all(str(c) in ("0x", "0", "") for c in hole):
-                                        player_hands.append(hole)
-                                        evaluated_players.append(player)
-
-                            if len(player_hands) >= MIN_PLAYERS_FOR_GAME:
-                                board_cards = street_data["board"][0] if street_data["board"] else []
-
-                                result = calculate_equity(
-                                    game_type,
-                                    player_hands,
-                                    board_cards,
-                                    backend=pokereval,
-                                )
-                                pot = Decimal(hand.totalpot)
-                                rake = Decimal(hand.rake)
-                                for player, player_result in zip(evaluated_players, result.players, strict=True):
-                                    committed = Decimal(hand.pot.committed.get(player, 0)) + Decimal(
-                                        hand.pot.common.get(player, 0)
-                                    )
-                                    expected = expected_pot_share(player_result.equity, pot, rake)
-                                    self.handsplayers[player]["allInEV"] = int(100 * (expected - committed))
-                                    self.handsplayers[player]["allInEVCalculated"] = True
-                                    log.debug(
-                                        "Player %s all-in equity=%s expected-profit=%s",
-                                        player,
-                                        player_result.equity,
-                                        expected - committed,
-                                    )
-
-                    except (EquityUnavailableError, RuntimeError):
-                        log.exception("RuntimeError in pokereval calculation")
-                    except (AttributeError, KeyError, TypeError, ValueError):
-                        log.exception("Error calculating equity for %s", street_name)
-
-        except Exception:  # intentional broad catch: all-in EV is best-effort stats enrichment.
+            expected = self._layered_all_in_ev(hand, game_type, boards, self._all_in_pockets(players, holecards))
+        except (EquityUnavailableError, RuntimeError):
+            log.exception("RuntimeError in pokereval calculation for hand %s", hand.handid)
+            return
+        # All-in EV is best-effort stats enrichment: it never stops a hand's import.
+        except Exception:  # pylint: disable=broad-exception-caught
             log.exception("Error in getAllInEV for hand %s", hand.handid)
+            return
+        paid = self._paid_into_pot(hand)
+        for player, share in expected.items():
+            profit = share - paid.get(player, Decimal(0))
+            self.handsplayers[player]["allInEV"] = int(100 * profit)
+            self.handsplayers[player]["allInEVCalculated"] = True
+            log.debug("Player %s all-in expected-profit=%s", player, profit)
 
-    def getAllInEVDraw(self, hand: Any, _game_type: Any, _players: Any, _streets: Any, holecards: Any) -> None:  # noqa: C901
-        """Calculate all-in equity for Draw games.
+    def _layered_all_in_ev(
+        self, hand: Any, game_type: str, boards: dict, pockets: dict[str, list]
+    ) -> dict[str, Decimal]:
+        """What each player expects back from the main pot and the side pots they can win."""
+        allin_streets = [street for street, data in boards.items() if data.get("allin", False)]
+        if not allin_streets or len(pockets) < MIN_PLAYERS_FOR_GAME:
+            return {}
+        bets = self._bets(hand)
+        allin_street_of = self._all_in_street_of(hand, list(pockets), allin_streets)
+        fusion = hand.gametype.get("category") == "fusion"
+        expected = dict.fromkeys(pockets, Decimal(0))
+        for net, eligible in self._net_pot_layers(hand, list(pockets), bets):
+            if len(eligible) == 1:
+                expected[eligible[0]] += net
+                continue
+            street = self._layer_street(eligible, bets, allin_street_of, allin_streets)
+            result = self._all_in_equity(game_type, eligible, pockets, boards[street], fusion=fusion)
+            for player, player_result in zip(eligible, result.players, strict=True):
+                expected[player] += player_result.equity * net
+        return expected
 
-        Draw games have different characteristics:
-        - No community cards
-        - Players have 5 cards each
-        - All-in situations need to evaluate complete hands
+    def _all_in_pockets(self, players: Any, holecards: Any) -> dict[str, list]:
+        """The hole cards of each player at showdown or all-in whose hand is known."""
+        pockets: dict[str, list] = {}
+        for player in players:
+            stats = self.handsplayers.get(player) or {}
+            if not (stats.get("sawShowdown", False) or stats.get("wentAllIn", False)):
+                continue
+            hole = holecards.get(player, {}).get("hole", [])
+            # Skip fully-unknown hands regardless of card count: Omaha's
+            # unrevealed hand is ["0x","0x","0x","0x"], which a two-card check
+            # let through, feeding duplicate "0x" cards to the equity engine.
+            if hole and not all(str(c) in ("0x", "0", "") for c in hole):
+                pockets[player] = hole
+        return pockets
+
+    @staticmethod
+    def _all_in_street_of(hand: Any, players: list[str], allin_streets: list[str]) -> dict[str, str]:
+        """The street on which each of these players went all-in, if they did."""
+        actions = getattr(hand, "actions", None) or {}
+        street_of: dict[str, str] = {}
+        for street in allin_streets:
+            for action in actions.get(street) or []:
+                if _is_all_in(action) and action[0] in players:
+                    street_of.setdefault(action[0], street)
+        return street_of
+
+    @staticmethod
+    def _layer_street(
+        eligible: list[str], bets: dict[str, Decimal], allin_street_of: dict[str, str], allin_streets: list[str]
+    ) -> str:
+        """The street a pot's money went in: the one its smallest stake went all-in, else the last all-in."""
+        level = min(bets.get(player, Decimal(0)) for player in eligible)
+        capped = [
+            allin_street_of[player]
+            for player in eligible
+            if player in allin_street_of and bets.get(player, Decimal(0)) == level
+        ]
+        return max(capped, key=allin_streets.index) if capped else allin_streets[-1]
+
+    @staticmethod
+    def _all_in_equity(
+        game_type: str, eligible: list[str], pockets: dict[str, list], street_data: dict, *, fusion: bool
+    ) -> EquityResult:
+        """The equity of the eligible hands with the board of the street they went all-in.
+
+        The known cards of the players who cannot win this pot are dead: they
+        cannot come on the board.
         """
+        board_cards = street_data["board"][0] if street_data["board"] else []
+        hands = [pockets[player] for player in eligible]
+        dead = [pocket for player, pocket in pockets.items() if player not in eligible]
+        iterations = None
+        if fusion:
+            game_type, iterations = "fusion", _fusion_iterations(board_cards)
+            hands, dead = fusion_pockets(hands, board_cards), fusion_pockets(dead, board_cards)
+        return calculate_equity(
+            game_type,
+            hands,
+            board_cards,
+            dead=list(chain.from_iterable(dead)),
+            iterations=iterations,
+            backend=pokereval,
+            seed=None if iterations is None else ALL_IN_EV_SEED,
+        )
+
+    def getAllInEVDraw(  # noqa: PLR0913  # pylint: disable=invalid-name  # sibling of getAllInEV
+        self,
+        hand: Any,
+        evalgame: str,
+        players: list[str],
+        boards: dict,
+        last: str,
+        hrange: list[tuple[int, int]],
+    ) -> None:
+        """Store the all-in EV of a draw hand whose money went in after the last draw (#831).
+
+        Every hand is complete then, so the showdown result is the equity, as on
+        a hold'em river. An all-in before the last draw depends on the draws
+        still to come, which poker-eval does not play: no EV is stored, rather
+        than one computed from cards nobody held at the time.
+        """
+        allin_streets = {street for street, data in boards.items() if data.get("allin")}
+        if allin_streets != {last}:
+            return
+        pocket_of = self._showdown_draw_hands(hand, players, hrange[-1])
+        if pocket_of is None or len(pocket_of) < MIN_PLAYERS_FOR_GAME:
+            return
+        evaluated = list(pocket_of)
+        paid = self._paid_into_pot(hand)
+        expected = dict.fromkeys(evaluated, Decimal(0))
         try:
-            log.debug("Calculating Draw all-in EV for hand %s", hand.handid)
+            for net, eligible in self._net_pot_layers(hand, evaluated, self._bets(hand)):
+                if len(eligible) == 1:
+                    expected[eligible[0]] += net
+                    continue
+                result = calculate_equity(evalgame, [pocket_of[player] for player in eligible], backend=pokereval)
+                for player, player_result in zip(eligible, result.players, strict=True):
+                    expected[player] += player_result.equity * net
+        except (EquityUnavailableError, RuntimeError, ValueError):
+            log.exception("getAllInEVDraw: no equity for hand %s", hand.handid)
+            return
+        for player in evaluated:
+            self.handsplayers[player]["allInEV"] = int(100 * (expected[player] - paid.get(player, Decimal(0))))
+            self.handsplayers[player]["allInEVCalculated"] = True
 
-            # Find the street where all-in occurred
-            for pot_id, (pot, pot_players) in enumerate(hand.pot.pots):
-                if pot_id == 0:
-                    pot += sum(hand.pot.common.values()) + hand.pot.stp  # noqa: PLW2901
+    def _showdown_draw_hands(
+        self, hand: Any, players: list[str], final_range: tuple[int, int]
+    ) -> dict[str, list[str]] | None:
+        """The final hand of each player at showdown, or None when one of them is unknown.
 
-                # Get valid players who went all-in
-                valid_players = []
-                player_cards = []
+        One unknown hand at showdown leaves the pot's split unknown.
+        """
+        start, end = final_range
+        hands: dict[str, list[str]] = {}
+        for player in players:
+            if not self.handsplayers[player].get("sawShowdown"):
+                continue
+            cards = [str(card) for card in hand.join_holecards(player, asList=True)[start:end]]
+            if len(cards) != end - start or not all(Card.encodeCard(card) for card in cards):
+                return None
+            hands[player] = cards
+        return hands
 
-                for player in pot_players:
-                    if (
-                        player in self.handsplayers
-                        and (
-                            self.handsplayers[player].get("sawShowdown", False)
-                            or self.handsplayers[player].get("wentAllIn", False)
-                        )
-                        and player in holecards
-                        and "cards" in holecards[player]
-                        and holecards[player]["cards"]
-                        and len(holecards[player]["cards"]) > 0
-                    ):
-                        # Get player's cards for Draw games
-                        cards = holecards[player]["cards"]
-                        # For draw games, use the complete hand
-                        player_hand = cards[-1] if isinstance(cards, list) else cards
-                        # Filter out placeholder cards
-                        player_hand = [c for c in player_hand if c != "0x"]
+    @staticmethod
+    def _paid_into_pot(hand: Any) -> dict[str, Decimal]:
+        """What each player put in the pot, blinds and antes included."""
+        players = set(hand.pot.committed) | set(hand.pot.common)
+        return {
+            player: Decimal(hand.pot.committed.get(player, 0)) + Decimal(hand.pot.common.get(player, 0))
+            for player in players
+        }
 
-                        if len(player_hand) >= MIN_MAXCARDS_SIZE:  # Draw games need 5 cards
-                            valid_players.append(player)
-                            player_cards.append(player_hand[:MIN_MAXCARDS_SIZE])  # Use first 5 cards
+    @staticmethod
+    def _bets(hand: Any) -> dict[str, Decimal]:
+        """What each player bet, blinds included; antes and dead blinds are common money."""
+        return {player: Decimal(amount) for player, amount in hand.pot.committed.items()}
 
-                if len(valid_players) >= MIN_PLAYERS_FOR_GAME and len(player_cards) >= MIN_PLAYERS_FOR_GAME:
-                    try:
-                        # Calculate equity for draw games
-                        # Note: Draw games don't use board cards
-                        iterations = 1000
+    @staticmethod
+    def _common_money(hand: Any) -> Decimal:
+        """The money every contender can win: antes, dead blinds and the room's (splash)."""
+        common = sum((Decimal(amount) for amount in hand.pot.common.values()), Decimal(0))
+        return common + Decimal(getattr(hand.pot, "stp", 0) or 0)
 
-                        # Use poker_eval for draw games
-                        engine = pokereval
-                        if engine is None:
-                            return
-                        evs = engine.poker_eval(
-                            game="5draw",  # Default for draw games
-                            iterations=iterations,
-                            pockets=player_cards,
-                            board=[],  # No board in draw games
-                        )
+    @classmethod
+    def _pot_layers(cls, hand: Any, contenders: list[str], bets: dict[str, Decimal]) -> list[tuple[Decimal, list[str]]]:
+        """Split the pot into the main pot and side pots, each with the contenders who can win it.
 
-                        equities = [e["ev"] for e in evs["eval"]]
+        A short stack all-in can only win what each opponent matched of its
+        stake. The parsers that read the pots from the summary leave
+        hand.pot.pots empty, so the layers come from what each player bet:
+        one per distinct contender stake. The common money (antes, dead
+        blinds) and the room's money (splash) go to the main pot, as
+        assembleHandsPots and aof_equity.build_pot_layers put them. Bets no
+        contender reaches (rounding) stay in the top layer.
+        """
+        layers: list[tuple[Decimal, list[str]]] = []
+        previous = Decimal(0)
+        for level in sorted({bets.get(player, Decimal(0)) for player in contenders}):
+            amount = sum((min(stake, level) - min(stake, previous) for stake in bets.values()), Decimal(0))
+            layers.append((amount, [player for player in contenders if bets.get(player, Decimal(0)) >= level]))
+            previous = level
+        main_amount, main_eligible = layers[0]
+        layers[0] = (main_amount + cls._common_money(hand), main_eligible)
+        top_amount, top_eligible = layers[-1]
+        layers[-1] = (top_amount + Decimal(hand.totalpot) - sum(amount for amount, _ in layers), top_eligible)
+        return layers
 
-                        # Adjust equities to sum to 1000
-                        remainder = (1000 - sum(equities)) / Decimal(len(equities))
-                        for i in range(len(equities)):
-                            equities[i] += remainder
-
-                            player = valid_players[i]
-                            # Calculate committed amount
-                            committed = 100 * hand.pot.committed.get(player, 0) + 100 * hand.pot.common.get(player, 0)
-
-                            # Calculate EV
-                            rake = hand.rake * (Decimal(pot) / Decimal(hand.totalpot))
-                            ev = ((pot - rake) * equities[i]) / Decimal(10)
-
-                            # Set all-in EV
-                            self.handsplayers[player]["allInEV"] = int(ev - committed)
-                            self.handsplayers[player]["allInEVCalculated"] = True
-                            log.debug(
-                                "Draw game - Player %s all-in EV: %s",
-                                player,
-                                self.handsplayers[player]["allInEV"],
-                            )
-
-                    except RuntimeError:
-                        log.exception("getAllInEVDraw: error running poker_eval for hand %s", hand.handid)
-                    except (AttributeError, KeyError, TypeError, ValueError):
-                        log.exception("getAllInEVDraw: unexpected error for hand %s", hand.handid)
-
-        except Exception:  # intentional broad catch: draw all-in EV is best-effort stats enrichment.
-            log.exception("Error in getAllInEVDraw for hand %s", hand.handid)
+    @classmethod
+    def _net_pot_layers(
+        cls, hand: Any, contenders: list[str], bets: dict[str, Decimal]
+    ) -> list[tuple[Decimal, list[str]]]:
+        """The pot layers net of the rake, which comes off each in proportion to its size."""
+        pot, rake = Decimal(hand.totalpot), Decimal(hand.rake)
+        return [
+            (amount - rake * amount / pot if pot else amount, eligible)
+            for amount, eligible in cls._pot_layers(hand, contenders, bets)
+        ]
 
     def awardPots(self, hand: Any) -> None:  # noqa: C901, PLR0912
         """Award pots to winners."""

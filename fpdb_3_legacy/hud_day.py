@@ -17,7 +17,7 @@ uses.
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 STYLE_KEY_FORMAT = "d%y%m%d"
 SQL_TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -26,18 +26,18 @@ SQL_TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 def local_offset(utc: datetime) -> timedelta:
     """The machine's UTC offset at the naive UTC instant ``utc``."""
     try:
-        offset = utc.replace(tzinfo=timezone.utc).astimezone().utcoffset()
+        offset = utc.replace(tzinfo=UTC).astimezone().utcoffset()
     except (OverflowError, OSError, ValueError):
         # Outside the platform's time range (before 1970 on Windows): the
         # offset of today is the best there is.
-        offset = datetime.now(timezone.utc).astimezone().utcoffset()
+        offset = datetime.now(UTC).astimezone().utcoffset()
     return offset or timedelta(0)
 
 
 def as_utc(start_time: datetime) -> datetime:
     """A hand's start time as a naive UTC datetime, which the database stores."""
     if start_time.tzinfo is not None:
-        start_time = start_time.astimezone(timezone.utc).replace(tzinfo=None)
+        start_time = start_time.astimezone(UTC).replace(tzinfo=None)
     return start_time
 
 
@@ -83,7 +83,7 @@ def minutes_sql(first: datetime | None, last: datetime | None, day_start: float)
     hand, otherwise a CASE on the start time; parenthesized either way.
     """
     if first is None or last is None:
-        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        now = datetime.now(UTC).replace(tzinfo=None)
         first = last = now
     changes = offset_changes(first, last)
     minutes = [round((offset - timedelta(hours=day_start)).total_seconds() / 60) for _start, offset in changes]

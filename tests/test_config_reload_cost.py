@@ -42,13 +42,13 @@ class TestExampleConfigCache:
     def test_second_parse_reuses_the_first(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         example = write_example(tmp_path)
         parses = []
-        real_parse = config_module.defusedxml.minidom.parse
+        real_parse = config_module.config_xml.parse_file
 
         def counting_parse(path: str, *args: Any, **kwargs: Any) -> Any:
             parses.append(path)
             return real_parse(path, *args, **kwargs)
 
-        monkeypatch.setattr(config_module.defusedxml.minidom, "parse", counting_parse)
+        monkeypatch.setattr(config_module.config_xml, "parse_file", counting_parse)
 
         first = config_module._parse_example_config(example)
         second = config_module._parse_example_config(example)

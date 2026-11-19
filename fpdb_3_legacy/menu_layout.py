@@ -146,6 +146,11 @@ def menu_layout() -> tuple[Menu, ...]:
                     "dia_tracker_migration",
                     tip=N_("Bring your hands over from PokerTracker 4 or Holdem Manager 3"),
                 ),
+                MenuItem(
+                    N_("PokerTracker 4 Notes…"),
+                    "dia_tracker_notes",
+                    tip=N_("Add PokerTracker 4 player notes and tags to fpdb's notes, never overwriting one"),
+                ),
             ),
         ),
         Menu(
@@ -158,6 +163,11 @@ def menu_layout() -> tuple[Menu, ...]:
                 MenuItem(N_("Research Browser"), "tab_research_browser"),
                 MenuItem(N_("Hand Viewer"), "tab_hand_viewer"),
                 MenuItem(N_("Session Stats"), "tab_session_stats", "Ctrl+S"),
+                MenuItem(
+                    N_("Results Calendar"),
+                    "tab_results_viewer",
+                    tip=N_("Cash results per day, week and month, with their profit curves"),
+                ),
             ),
         ),
         Menu(

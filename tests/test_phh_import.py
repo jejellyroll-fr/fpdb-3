@@ -494,30 +494,6 @@ def test_a_stud_completion_is_stored_as_a_completion(importer, fresh_db, tmp_pat
     assert 14 in actions, "completes"
 
 
-def test_without_a_toml_reader_phh_files_are_refused_not_crashed(monkeypatch) -> None:
-    """Python 3.10 (the PyOxidizer builds) has no tomllib; without tomli PHH says so."""
-    from fpdb_3_legacy import phh_import
-
-    def missing() -> Any:
-        raise ModuleNotFoundError("No module named 'tomli'")
-
-    monkeypatch.setattr(phh_import, "toml_module", missing)
-
-    [item] = list(iter_documents(FIXTURES / "razz.phh"))
-
-    assert isinstance(item, PHHImportError)
-    assert item.kind == UNSUPPORTED
-    assert "tomli" in str(item)
-
-
-def test_the_compat_toml_reader_is_tomllib_on_this_python() -> None:
-    import tomllib
-
-    from fpdb.compat import toml_module
-
-    assert toml_module() is tomllib
-
-
 def test_an_uncalled_all_in_bet_is_returned_even_when_the_board_runs_out() -> None:
     """Ivey's 572,100 nobody could call is returned, not booked as winnings (finishing_stacks)."""
     hand = build_hand(next(iter_documents(FIXTURES / "nl_holdem_dwan_ivey.phh")))

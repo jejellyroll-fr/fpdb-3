@@ -77,6 +77,7 @@ def test_graphing_modules_are_lazy_so_auto_import_does_not_build_the_font_cache(
         "GuiRingPlayerStats",
         "GuiSessionViewer",
         "GuiTourneyGraphViewer",
+        "results_calendar",
     }
     eager = {
         alias.name

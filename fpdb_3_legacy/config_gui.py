@@ -21,6 +21,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from fpdb_3_legacy import config_xml as cx
 from fpdb_3_legacy.config_common import (
     ConfigBase,
     string_to_bool,
@@ -28,6 +29,9 @@ from fpdb_3_legacy.config_common import (
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("configuration")
+
+# The attributes of a stats-table <col>, in the order of a column's values.
+_COL_ATTRIBUTES = ("col_name", "col_title", "disp_all", "disp_posn", "field_format", "field_type", "xalignment")
 
 
 class General(dict):
@@ -38,7 +42,7 @@ class General(dict):
         # day_start    - number n where 0.0 <= n < 24.0 representing start of day for user
         #                e.g. user could set to 4.0 for day to start at 4am local time
         # [ HH_bulk_path was here - now moved to import section ]
-        for name, value in list(node.attributes.items()):
+        for name, value in cx.attributes(node).items():
             log.debug(f"config.general: adding {name} = {value}")
             self[name] = value
 
@@ -138,9 +142,45 @@ class GUICashStats(list):
 
     def add_elements(self, node) -> None:
         # is this needed?
-        for child in node.childNodes:
-            if child.nodeType == child.ELEMENT_NODE:
-                (
+        for child in cx.children(node):
+            (
+                col_name,
+                col_title,
+                disp_all,
+                disp_posn,
+                field_format,
+                field_type,
+                xalignment,
+            ) = (
+                None,
+                None,
+                True,
+                True,
+                "%s",
+                "str",
+                0.0,
+            )
+
+            if cx.has_attr(child, "col_name"):
+                col_name = cx.attr(child, "col_name")
+            if cx.has_attr(child, "col_title"):
+                col_title = cx.attr(child, "col_title")
+            if cx.has_attr(child, "disp_all"):
+                disp_all = string_to_bool(cx.attr(child, "disp_all"))
+            if cx.has_attr(child, "disp_posn"):
+                disp_posn = string_to_bool(cx.attr(child, "disp_posn"))
+            if cx.has_attr(child, "field_format"):
+                field_format = cx.attr(child, "field_format")
+            if cx.has_attr(child, "field_type"):
+                field_type = cx.attr(child, "field_type")
+            try:
+                if cx.has_attr(child, "xalignment"):
+                    xalignment = float(cx.attr(child, "xalignment"))
+            except ValueError:
+                log.exception("bad number in xalignment was ignored")
+
+            self.append(
+                [
                     col_name,
                     col_title,
                     disp_all,
@@ -148,45 +188,8 @@ class GUICashStats(list):
                     field_format,
                     field_type,
                     xalignment,
-                ) = (
-                    None,
-                    None,
-                    True,
-                    True,
-                    "%s",
-                    "str",
-                    0.0,
-                )
-
-                if child.hasAttribute("col_name"):
-                    col_name = child.getAttribute("col_name")
-                if child.hasAttribute("col_title"):
-                    col_title = child.getAttribute("col_title")
-                if child.hasAttribute("disp_all"):
-                    disp_all = string_to_bool(child.getAttribute("disp_all"))
-                if child.hasAttribute("disp_posn"):
-                    disp_posn = string_to_bool(child.getAttribute("disp_posn"))
-                if child.hasAttribute("field_format"):
-                    field_format = child.getAttribute("field_format")
-                if child.hasAttribute("field_type"):
-                    field_type = child.getAttribute("field_type")
-                try:
-                    if child.hasAttribute("xalignment"):
-                        xalignment = float(child.getAttribute("xalignment"))
-                except ValueError:
-                    log.exception("bad number in xalignment was ignored")
-
-                self.append(
-                    [
-                        col_name,
-                        col_title,
-                        disp_all,
-                        disp_posn,
-                        field_format,
-                        field_type,
-                        xalignment,
-                    ],
-                )
+                ],
+            )
 
     def get_defaults(self) -> None:
         """A list of defaults to be called, should there be no entry in config."""
@@ -219,9 +222,45 @@ class GUITourStats(list):
 
     def add_elements(self, node) -> None:
         # is this needed?
-        for child in node.childNodes:
-            if child.nodeType == child.ELEMENT_NODE:
-                (
+        for child in cx.children(node):
+            (
+                col_name,
+                col_title,
+                disp_all,
+                disp_posn,
+                field_format,
+                field_type,
+                xalignment,
+            ) = (
+                None,
+                None,
+                True,
+                True,
+                "%s",
+                "str",
+                0.0,
+            )
+
+            if cx.has_attr(child, "col_name"):
+                col_name = cx.attr(child, "col_name")
+            if cx.has_attr(child, "col_title"):
+                col_title = cx.attr(child, "col_title")
+            if cx.has_attr(child, "disp_all"):
+                disp_all = string_to_bool(cx.attr(child, "disp_all"))
+            if cx.has_attr(child, "disp_posn"):
+                disp_posn = string_to_bool(cx.attr(child, "disp_posn"))
+            if cx.has_attr(child, "field_format"):
+                field_format = cx.attr(child, "field_format")
+            if cx.has_attr(child, "field_type"):
+                field_type = cx.attr(child, "field_type")
+            try:
+                if cx.has_attr(child, "xalignment"):
+                    xalignment = float(cx.attr(child, "xalignment"))
+            except ValueError:
+                log.exception("bad number in xalignment was ignored")
+
+            self.append(
+                [
                     col_name,
                     col_title,
                     disp_all,
@@ -229,45 +268,8 @@ class GUITourStats(list):
                     field_format,
                     field_type,
                     xalignment,
-                ) = (
-                    None,
-                    None,
-                    True,
-                    True,
-                    "%s",
-                    "str",
-                    0.0,
-                )
-
-                if child.hasAttribute("col_name"):
-                    col_name = child.getAttribute("col_name")
-                if child.hasAttribute("col_title"):
-                    col_title = child.getAttribute("col_title")
-                if child.hasAttribute("disp_all"):
-                    disp_all = string_to_bool(child.getAttribute("disp_all"))
-                if child.hasAttribute("disp_posn"):
-                    disp_posn = string_to_bool(child.getAttribute("disp_posn"))
-                if child.hasAttribute("field_format"):
-                    field_format = child.getAttribute("field_format")
-                if child.hasAttribute("field_type"):
-                    field_type = child.getAttribute("field_type")
-                try:
-                    if child.hasAttribute("xalignment"):
-                        xalignment = float(child.getAttribute("xalignment"))
-                except ValueError:
-                    log.exception("bad number in xalignment was ignored")
-
-                self.append(
-                    [
-                        col_name,
-                        col_title,
-                        disp_all,
-                        disp_posn,
-                        field_format,
-                        field_type,
-                        xalignment,
-                    ],
-                )
+                ],
+            )
 
     def get_defaults(self) -> None:
         """A list of defaults to be called, should there be no entry in config."""
@@ -284,9 +286,9 @@ class ConfigGuiMixin(ConfigBase):
     """Read and edit the general settings and the stats-table columns."""
 
     def set_general(self, lang=None) -> None:
-        for general_node in self.doc.getElementsByTagName("general"):
+        for general_node in cx.find_all(self.doc, "general"):
             if lang:
-                general_node.setAttribute("ui_language", lang)
+                cx.set_attr(general_node, "ui_language", lang)
 
     def set_preflop_advisor_path(self, path: str | None) -> None:
         """Remember where PreflopAdvisor is, for the solver review (#413); empty forgets it.
@@ -299,11 +301,32 @@ class ConfigGuiMixin(ConfigBase):
             self.general["preflop_advisor"] = value
         else:
             self.general.pop("preflop_advisor", None)
-        for general_node in self.doc.getElementsByTagName("general"):
+        for general_node in cx.find_all(self.doc, "general"):
             if value:
-                general_node.setAttribute("preflop_advisor", value)
-            elif general_node.hasAttribute("preflop_advisor"):
-                general_node.removeAttribute("preflop_advisor")
+                cx.set_attr(general_node, "preflop_advisor", value)
+            else:
+                cx.del_attr(general_node, "preflop_advisor")
+        self.save()
+
+    def get_replayer_amounts_in_bb(self) -> bool:
+        """Whether the replayer shows amounts in big blinds (#824); off by default.
+
+        An optional ``replayer_amounts="bb"`` attribute on ``<general>``, absent from the
+        shipped templates, so the replayer keeps showing money or chips until asked.
+        """
+        return str(self.general.get("replayer_amounts", "")).strip().lower() == "bb"
+
+    def set_replayer_amounts_in_bb(self, enabled: bool) -> None:
+        """Remember whether the replayer shows amounts in big blinds, and save."""
+        if enabled:
+            self.general["replayer_amounts"] = "bb"
+        else:
+            self.general.pop("replayer_amounts", None)
+        for general_node in cx.find_all(self.doc, "general"):
+            if enabled:
+                cx.set_attr(general_node, "replayer_amounts", "bb")
+            else:
+                cx.del_attr(general_node, "replayer_amounts")
         self.save()
 
     def get_check_for_updates(self) -> bool | None:
@@ -325,14 +348,14 @@ class ConfigGuiMixin(ConfigBase):
         """Record the user's answer to the update question, and save."""
         value = "True" if enabled else "False"
         self.general["check_for_updates"] = value
-        for general_node in self.doc.getElementsByTagName("general"):
-            general_node.setAttribute("check_for_updates", value)
+        for general_node in cx.find_all(self.doc, "general"):
+            cx.set_attr(general_node, "check_for_updates", value)
         self.save()
 
     def get_session_guard_defaults(self) -> dict[str, str]:
         """The Session Guard limits saved as defaults (#395), as stored; empty when none."""
-        for node in self.doc.getElementsByTagName("session_guard"):
-            return dict(node.attributes.items())
+        for node in cx.find_all(self.doc, "session_guard"):
+            return cx.attributes(node)
         return {}
 
     def set_session_guard_defaults(self, limits: dict[str, Any] | None) -> None:
@@ -341,13 +364,11 @@ class ConfigGuiMixin(ConfigBase):
         An optional ``<session_guard>`` element of the root: the shipped templates do not
         carry it, so a configuration without one simply has no defaults.
         """
-        for node in list(self.doc.getElementsByTagName("session_guard")):
-            node.parentNode.removeChild(node)
+        for node in cx.find_all(self.doc, "session_guard"):
+            cx.remove(self.doc, node)
         if limits:
-            node = self.doc.createElement("session_guard")
-            for name, value in sorted(limits.items()):
-                node.setAttribute(name, str(value))
-            self.doc.documentElement.appendChild(node)
+            node = cx.create_element(self.doc, "session_guard", dict(sorted(limits.items())))
+            cx.append(self.doc, cx.root(self.doc), node)
         self.save()
 
     def get_general_params(self):
@@ -364,28 +385,19 @@ class ConfigGuiMixin(ConfigBase):
     def save_gui_cash_stats(self):
         """Saves current gui_cash_stats list to the DOM tree."""
         # Find the <gui_cash_stats> node
-        gcs_nodes = self.doc.getElementsByTagName("gui_cash_stats")
+        gcs_nodes = cx.find_all(self.doc, "gui_cash_stats")
         if not gcs_nodes:
             # Create if not exists
-            root = self.doc.getElementsByTagName("FreePokerToolsConfig")[0]
-            gcs_node = self.doc.createElement("gui_cash_stats")
-            root.appendChild(gcs_node)
+            root = cx.find_all(self.doc, "FreePokerToolsConfig")[0]
+            gcs_node = cx.append(self.doc, root, cx.create_element(self.doc, "gui_cash_stats"))
         else:
             gcs_node = gcs_nodes[0]
 
         # Remove all children
-        while gcs_node.firstChild:
-            gcs_node.removeChild(gcs_node.firstChild)
+        cx.clear(self.doc, gcs_node)
 
         # Add new children
         for col in self.gui_cash_stats:
             # col is [col_name, col_title, disp_all, disp_posn, field_format, field_type, xalignment]
-            node = self.doc.createElement("col")
-            node.setAttribute("col_name", str(col[0]))
-            node.setAttribute("col_title", str(col[1]))
-            node.setAttribute("disp_all", str(col[2]))
-            node.setAttribute("disp_posn", str(col[3]))
-            node.setAttribute("field_format", str(col[4]))
-            node.setAttribute("field_type", str(col[5]))
-            node.setAttribute("xalignment", str(col[6]))
-            gcs_node.appendChild(node)
+            node = cx.create_element(self.doc, "col", {name: col[i] for i, name in enumerate(_COL_ATTRIBUTES)})
+            cx.append(self.doc, gcs_node, node)

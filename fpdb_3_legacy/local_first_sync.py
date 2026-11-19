@@ -47,6 +47,45 @@ CREATE TABLE IF NOT EXISTS fpdb_sync_outbox (
 # Tables pushed per hand, in FK-safe order. (table, local select cols)
 PUSH_TABLES = ("Hands", "HandsPlayers", "HandsActions")
 
+# Reconciliation (#684): every local hand stored since the outbox began gets an
+# outbox row, however it was stored. It closes the window between an import's
+# commit and its mark, and covers the hands stored outside Importer (the HTTP
+# and SwC captures write to the same local database).
+#
+# Hands at or below a floor are never queued, so hands stored before local-first
+# was turned on are never pushed by surprise. The floor is recorded once, when
+# the worker first opens the local database, and kept in fpdb_sync_state: worked
+# out again after a restart, it would leave out a hand committed before the
+# process died and never marked. It is just below the oldest outbox row (an
+# outbox from before the floor was kept), else the newest hand.
+#
+# Each worker's first pass starts at the floor; later ones start that many ids
+# below the newest hand they saw, since an import transaction still open then
+# may commit a lower id afterwards.
+RECONCILE_MARGIN = 1000
+# Polls between two passes (about 30 s at the default poll_s).
+RECONCILE_EVERY = 15
+STATE_DDL = "CREATE TABLE IF NOT EXISTS fpdb_sync_state (name VARCHAR(64) PRIMARY KEY, value BIGINT NOT NULL)"
+STATE_FLOOR_NAME = "reconcile_floor"
+STATE_GET_SQLITE = "SELECT value FROM fpdb_sync_state WHERE name = ?"
+STATE_GET_MYSQL = "SELECT value FROM fpdb_sync_state WHERE name = %s"
+STATE_SET_SQLITE = "INSERT INTO fpdb_sync_state (name, value) VALUES (?, ?)"
+STATE_SET_MYSQL = "INSERT INTO fpdb_sync_state (name, value) VALUES (%s, %s)"
+RECONCILE_FLOOR = (
+    "SELECT COALESCE((SELECT MIN(local_hand_id) FROM fpdb_sync_outbox) - 1, (SELECT MAX(id) FROM Hands), 0)"
+)
+# The floor of a local database with no Hands table yet: no hand to leave out.
+RECONCILE_FLOOR_NO_HANDS = "SELECT COALESCE(MIN(local_hand_id) - 1, 0) FROM fpdb_sync_outbox"
+RECONCILE_NEWEST = "SELECT COALESCE(MAX(id), 0) FROM Hands"
+RECONCILE_SQLITE = (
+    "INSERT OR IGNORE INTO fpdb_sync_outbox (local_hand_id) SELECT h.id FROM Hands h"
+    " LEFT JOIN fpdb_sync_outbox o ON o.local_hand_id = h.id WHERE o.local_hand_id IS NULL AND h.id > ?"
+)
+RECONCILE_MYSQL = (
+    "INSERT IGNORE INTO fpdb_sync_outbox (local_hand_id) SELECT h.id FROM Hands h"
+    " LEFT JOIN fpdb_sync_outbox o ON o.local_hand_id = h.id WHERE o.local_hand_id IS NULL AND h.id > %s"
+)
+
 # One worker per local database, shared by every Importer of this process: two
 # would push the same outbox at once, and one of them would lose its whole batch
 # on the unique index, or, with the indexes dropped, insert every hand twice.
@@ -88,6 +127,15 @@ class LocalFirstSync:
         self._ensure_outbox()
         self._users = 0
         self._shared_key = ""
+        # Reconciliation bounds (#684). The floor is read, or recorded, before any
+        # import of this process can commit a hand.
+        self._reconcile_floor: int | None = None
+        self._reconciled_up_to = 0
+        try:
+            with self._outbox_transaction() as c:
+                self._reconcile_floor = self._persisted_floor(c)
+        except Exception:  # noqa: BLE001 - a busy file: the first pass retries.
+            log.debug("Outbox reconciliation floor not read yet", exc_info=True)
 
     @classmethod
     def shared(cls, local_db: Any, server_db_factory: Callable[[], Any], local_db_path: str) -> LocalFirstSync:
@@ -150,6 +198,52 @@ class LocalFirstSync:
                 else "INSERT IGNORE INTO fpdb_sync_outbox (local_hand_id) VALUES (%s)",
                 [(int(h),) for h in local_hand_ids],
             )
+
+    def _persisted_floor(self, c: Any) -> int:
+        """The reconciliation floor kept in the local database, recorded the first time."""
+        sqlite = self.local_db.backend == 4
+        c.execute(STATE_DDL)  # nosemgrep
+        c.execute(STATE_GET_SQLITE if sqlite else STATE_GET_MYSQL, (STATE_FLOOR_NAME,))
+        row = c.fetchone()
+        if row is not None:
+            return int(row[0])
+        try:
+            c.execute(RECONCILE_FLOOR)
+        except Exception:  # noqa: BLE001 - no Hands table yet
+            c.execute(RECONCILE_FLOOR_NO_HANDS)
+        floor = int(c.fetchone()[0] or 0)
+        c.execute(STATE_SET_SQLITE if sqlite else STATE_SET_MYSQL, (STATE_FLOOR_NAME, floor))
+        return floor
+
+    def reconcile(self) -> int:
+        """Give an outbox row to every local hand stored since the outbox began (#684).
+
+        Returns how many hands were added. A worker's first pass searches from
+        the floor kept in ``fpdb_sync_state``; later ones from
+        :data:`RECONCILE_MARGIN` ids below the newest hand the previous pass
+        saw, never below that floor. A local database with no Hands table yet
+        adds nothing.
+        """
+        insert = RECONCILE_SQLITE if self.local_db.backend == 4 else RECONCILE_MYSQL
+        try:
+            with self._outbox_transaction() as c:
+                if self._reconcile_floor is None:
+                    self._reconcile_floor = self._persisted_floor(c)
+                if self._reconciled_up_to == 0:
+                    lower = self._reconcile_floor
+                else:
+                    lower = max(self._reconciled_up_to - RECONCILE_MARGIN, self._reconcile_floor)
+                c.execute(insert, (lower,))
+                added = max(c.rowcount, 0)
+                c.execute(RECONCILE_NEWEST)
+                self._reconciled_up_to = int(c.fetchone()[0] or 0)
+        except Exception:  # noqa: BLE001 - a missing table or a busy file: the next pass retries.
+            log.debug("Outbox reconciliation skipped", exc_info=True)
+            return 0
+        if added:
+            log.info("Local-first outbox: %d hand(s) stored without a mark are queued for the server", added)
+        latency_profile.count("sync_outbox_reconciled", added)
+        return added
 
     def pending(self) -> list[int]:
         with self._outbox_lock:
@@ -513,7 +607,11 @@ class LocalFirstSync:
                 self._own_conn = None
 
     def _loop(self) -> None:
+        polls = 0
         while not self._stop.is_set():
+            if polls % RECONCILE_EVERY == 0:
+                self.reconcile()
+            polls += 1
             try:
                 self.push_once()
             except Exception:

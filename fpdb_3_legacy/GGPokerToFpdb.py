@@ -241,6 +241,8 @@ class GGPoker(HandHistoryConverter):
         "PLO": ("hold", "omahahi"),
         "PLO-5": ("hold", "5_omahahi"),
         "PLO-6": ("hold", "6_omahahi"),
+        "Omaha5": ("hold", "5_omahahi"),  # "PLO-5 Bounty $3.20 Omaha5 Pot Limit"
+        "Omaha6": ("hold", "6_omahahi"),
         "OM": ("hold", "omahahi"),  # Pot Limit Omaha
     }
 
@@ -263,7 +265,7 @@ class GGPoker(HandHistoryConverter):
           (?P<TOURNAME>.+?)\\s
           )?
           # close paren of tournament info
-          (?P<GAME>Holdem|Hold\'em|ShortDeck|Omaha|PLO|Omaha\\sHi/Lo|PLO\\-(5|6)|OM)\\s
+          (?P<GAME>Holdem|Hold\'em|ShortDeck|Omaha5|Omaha6|Omaha|PLO|Omaha\\sHi/Lo|PLO\\-(5|6)|OM)\\s
           (?P<LIMIT>No\\sLimit|Fixed\\sLimit|Limit|Pot\\sLimit|\\(NL\\spostflop\\))?,?\\s*
           (-\\s)?
           (?P<SHOOTOUT>Match.*,\\s)?
@@ -272,6 +274,7 @@ class GGPoker(HandHistoryConverter):
           (?P<CURRENCY>{LS}|)?
           (ante\\s\\d+,\\s)?
           ((?P<SB>[,.0-9]+)/({LS})?(?P<BB>[,.0-9]+)|(?P<BUB>[,.0-9]+))
+          (\\((?P<ANTE>[,.0-9]+)\\))?   # ante in newer headers: Level5(100/200(20))
           (?P<CAP>\\s-\\s[{LS}]?(?P<CAPAMT>[,.0-9]+)\\sCap\\s-\\s)?        # Optional Cap part
           \\s?(?P<ISO>{LEGAL_ISO})?
           \\)                        # close paren of the stakes

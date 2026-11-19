@@ -1,0 +1,32 @@
+Winamax Poker - ESCAPE "Bucarest" - HandId: #22754010-6939-1786139990 - Omaha pot limit (0.01€/0.02€) - 2026/08/07 21:59:50 UTC
+Table: 'Bucarest' 6-max (real money) Seat #5 is the button
+Seat 1: alice (0.46€)
+Seat 2: bob (1.61€)
+Seat 3: carol (2€)
+Seat 4: dave (5.14€)
+Seat 5: erin (3.25€)
+Escape to Pot: total 0.10€
+*** ANTE/BLINDS ***
+alice posts small blind 0.01€
+bob posts big blind 0.02€
+Dealt to carol [Kh Qh 4h 5s]
+*** PRE-FLOP ***
+carol calls 0.02€
+dave calls 0.02€
+erin calls 0.02€
+alice calls 0.01€
+bob checks
+*** FLOP *** [9h 9c 3d]
+alice bets 0.07€
+bob folds
+carol folds
+dave folds
+erin folds
+alice collected 0.26€ from pot
+*** SUMMARY ***
+Total pot 0.26€ | Rake 0.01€
+Board: [9h 9c 3d]
+Seat 1: alice (small blind) won 0.26€
+
+
+

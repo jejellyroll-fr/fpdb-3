@@ -2,25 +2,28 @@
 # See https://pyoxidizer.readthedocs.io/ for documentation.
 
 def make_dist():
-    # PyOxidizer 0.24 cannot read the latest python-build-standalone v8
-    # archives. These 2024 distributions are still v7-compatible and avoid
-    # depending on PyOxidizer's much older bundled 2022 Python.
-    # PyOxidizer 0.24 cannot link CPython 3.11+ (missing _Py_Deepfreeze_*
-    # symbols). Stay on 3.10.14 for embedding. The package installation below
-    # limits the Python-version exception to the still-compatible fpdb and
-    # pypoker-eval sources; normal dependencies keep their metadata checks.
+    # 20240909 is the only python-build-standalone release PyOxidizer 0.24 can
+    # embed CPython 3.11 from (#457):
+    # - it is the first to ship deepfreeze.o in the "full" archives
+    #   (astral-sh/python-build-standalone#311). Earlier 3.11 archives,
+    #   20240713 included, fail to link on undefined _Py_Deepfreeze_* symbols,
+    #   which is why the builds were held at 3.10;
+    # - it is the last whose PYTHON.json is format v7. From 20241016 on the
+    #   archives are v8, which PyOxidizer 0.24 refuses to read.
+    # 3.12 cannot come from it either: its archives still name Hacl_Hash_SHA2
+    # as a library to link (fixed upstream in #312, a v8 release only).
+    # PyOxidizer is unmaintained, so this pin is final for as long as we use it.
+    # No Windows target: that 3.11 archive's PYTHON.json names OpenSSL 1.1 DLLs
+    # it does not contain (astral-sh/python-build-standalone#473), and Windows
+    # ships PyInstaller, its supported build, alone.
     distributions = {
         "aarch64-apple-darwin": [
-            "https://github.com/astral-sh/python-build-standalone/releases/download/20240713/cpython-3.10.14%2B20240713-aarch64-apple-darwin-pgo%2Blto-full.tar.zst",
-            "4558c58bd03309d0c7131d4b5c2cbce9843d385fbcc7d75e575b4bf887bf5f68",
-        ],
-        "x86_64-pc-windows-msvc": [
-            "https://github.com/astral-sh/python-build-standalone/releases/download/20240713/cpython-3.10.14%2B20240713-x86_64-pc-windows-msvc-shared-pgo-full.tar.zst",
-            "1003c93f92fdcca57308076995b224b888a7ee556763759e69d36e198b5bef14",
+            "https://github.com/astral-sh/python-build-standalone/releases/download/20240909/cpython-3.11.10%2B20240909-aarch64-apple-darwin-pgo%2Blto-full.tar.zst",
+            "d06300d9037a1db98dfd1b4d29d1e465f2436fa988771635855d875878adcd01",
         ],
         "x86_64-unknown-linux-gnu": [
-            "https://github.com/astral-sh/python-build-standalone/releases/download/20240713/cpython-3.10.14%2B20240713-x86_64-unknown-linux-gnu-pgo-full.tar.zst",
-            "f15c2b569f3bf8ba01737c5f46cf71e8bc07129ecc7304de9ba47b220acee47e",
+            "https://github.com/astral-sh/python-build-standalone/releases/download/20240909/cpython-3.11.10%2B20240909-x86_64-unknown-linux-gnu-pgo-full.tar.zst",
+            "5243224914268384cadf99e745885a35f3eee5c1a3841777b9da91a6b808e4fd",
         ],
     }
     if BUILD_TARGET_TRIPLE not in distributions:
@@ -157,9 +160,6 @@ def make_exe(dist):
         packaging_policy=policy,
         config=config,
     )
-    if BUILD_TARGET_TRIPLE == "x86_64-pc-windows-msvc":
-        exe.windows_subsystem = "windows"
-        exe.windows_runtime_dlls_mode = "when-present"
     
     # Read resources from python packages and include them
     pip_resources = []
@@ -167,10 +167,9 @@ def make_exe(dist):
         [["-r", CWD + "/pyoxidizer-requirements.txt"], {}],
         [
             [
-                "--ignore-requires-python",
                 "--no-deps",
                 CWD,
-                "pypoker-eval @ git+https://github.com/jejellyroll-fr/poker-eval.git@v1.1.0",
+                "pypoker-eval @ git+https://github.com/jejellyroll-fr/poker-eval.git@v1.3.3",
             ],
             # A release artifact must not inherit the runner CPU. In
             # particular, newer GitHub hosts expose AVX10 features that make

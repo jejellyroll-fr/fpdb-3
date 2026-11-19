@@ -19,6 +19,7 @@
 ########################################################################
 from __future__ import annotations
 
+from fpdb_3_legacy import config_xml as cx
 from fpdb_3_legacy.config_common import (
     ConfigBase,
     normalizePath,
@@ -33,13 +34,14 @@ log = get_logger("configuration")
 
 class Email:
     def __init__(self, node) -> None:
+        # pylint: disable=invalid-name  # the attribute names are the HUD_config.xml ones, read by name elsewhere
         self.node = node
-        self.host = node.getAttribute("host")
-        self.username = node.getAttribute("username")
-        self.password = node.getAttribute("password")
-        self.useSsl = node.getAttribute("useSsl")
-        self.folder = node.getAttribute("folder")
-        self.fetchType = node.getAttribute("fetchType")
+        self.host = cx.attr(node, "host")
+        self.username = cx.attr(node, "username")
+        self.password = cx.attr(node, "password")
+        self.useSsl = cx.attr(node, "useSsl")
+        self.folder = cx.attr(node, "folder")
+        self.fetchType = cx.attr(node, "fetchType")
 
     def __str__(self) -> str:
         return f"    email\n        fetchType = {self.fetchType}  host = {self.host}\n        username = {self.username} password = {self.password}\n        useSsl = {self.useSsl} folder = {self.folder}"
@@ -47,33 +49,34 @@ class Email:
 
 class Site:
     def __init__(self, node) -> None:
-        self.site_name = node.getAttribute("site_name")
-        self.screen_name = node.getAttribute("screen_name")
-        self.site_path = normalizePath(node.getAttribute("site_path"))
-        self.HH_path = normalizePath(node.getAttribute("HH_path"))
-        self.TS_path = normalizePath(node.getAttribute("TS_path"))
-        self.enabled = string_to_bool(node.getAttribute("enabled"), default=True)
+        # pylint: disable=invalid-name  # the attribute names are the HUD_config.xml ones, read by name elsewhere
+        self.site_name = cx.attr(node, "site_name")
+        self.screen_name = cx.attr(node, "screen_name")
+        self.site_path = normalizePath(cx.attr(node, "site_path"))
+        self.HH_path = normalizePath(cx.attr(node, "HH_path"))
+        self.TS_path = normalizePath(cx.attr(node, "TS_path"))
+        self.enabled = string_to_bool(cx.attr(node, "enabled"), default=True)
         # A room whose support is switched off stays off whatever the config
         # file says: an older HUD_config.xml (or the preferences editor) may
         # still carry enabled="True" for it. See fpdb_3_legacy.disabled_sites.
         if is_site_disabled(self.site_name):
             self.enabled = False
-        self.aux_enabled = string_to_bool(node.getAttribute("aux_enabled"), default=True)
+        self.aux_enabled = string_to_bool(cx.attr(node, "aux_enabled"), default=True)
         # An import-only room's files are imported after the session; no HUD
         # runs at its tables, whatever the config file says.
         if is_site_import_only(self.site_name):
             self.aux_enabled = False
-        self.hud_menu_xshift = node.getAttribute("hud_menu_xshift")
-        self.hud_menu_xshift = 1 if self.hud_menu_xshift == "" else int(self.hud_menu_xshift)
-        self.hud_menu_yshift = node.getAttribute("hud_menu_yshift")
-        self.hud_menu_yshift = 1 if self.hud_menu_yshift == "" else int(self.hud_menu_yshift)
-        if node.hasAttribute("TS_path"):
-            self.TS_path = normalizePath(node.getAttribute("TS_path"))
+        xshift = cx.attr(node, "hud_menu_xshift")
+        self.hud_menu_xshift = 1 if xshift == "" else int(xshift)
+        yshift = cx.attr(node, "hud_menu_yshift")
+        self.hud_menu_yshift = 1 if yshift == "" else int(yshift)
+        if cx.has_attr(node, "TS_path"):
+            self.TS_path = normalizePath(cx.attr(node, "TS_path"))
         else:
             self.TS_path = ""
 
         # Support for the network attribute (configuration by skins)
-        self.network = node.getAttribute("network") if node.hasAttribute("network") else "Unknown"
+        self.network = cx.attr(node, "network", "Unknown")
 
         # Hero aliases: a room can recognise several screen names as the hero
         # (nickname changes, multiple accounts). The primary ``screen_name`` is
@@ -81,25 +84,25 @@ class Site:
         # elements. Backward compatible: no <hero_alias> => [screen_name].
         self.hero_aliases = []
         _seen_aliases = set()
-        for _alias in [self.screen_name] + [n.getAttribute("name") for n in node.getElementsByTagName("hero_alias")]:
+        for _alias in [self.screen_name] + [cx.attr(n, "name") for n in cx.find_all(node, "hero_alias")]:
             if _alias and _alias not in _seen_aliases:
                 _seen_aliases.add(_alias)
                 self.hero_aliases.append(_alias)
 
         self.fav_seat = {}
-        for fav_node in node.getElementsByTagName("fav"):
-            max = int(fav_node.getAttribute("max"))
-            fav = int(fav_node.getAttribute("fav_seat"))
-            self.fav_seat[max] = fav
+        for fav_node in cx.find_all(node, "fav"):
+            max_seats = int(cx.attr(fav_node, "max"))
+            fav = int(cx.attr(fav_node, "fav_seat"))
+            self.fav_seat[max_seats] = fav
 
         self.layout_set = {}
-        for site_layout_node in node.getElementsByTagName("layout_set"):
-            gt = site_layout_node.getAttribute("game_type")
-            ls = site_layout_node.getAttribute("ls")
+        for site_layout_node in cx.find_all(node, "layout_set"):
+            gt = cx.attr(site_layout_node, "game_type")
+            ls = cx.attr(site_layout_node, "ls")
             self.layout_set[gt] = ls
 
         self.emails = {}
-        for email_node in node.getElementsByTagName("email"):
+        for email_node in cx.find_all(node, "email"):
             email = Email(email_node)
             self.emails[email.fetchType] = email
 
@@ -145,13 +148,13 @@ class HeroProfile:
     """
 
     def __init__(self, node) -> None:
-        self.name = node.getAttribute("name")
-        self.default = string_to_bool(node.getAttribute("default"), default=False)
+        self.name = cx.attr(node, "name")
+        self.default = string_to_bool(cx.attr(node, "default"), default=False)
         self.links: list[tuple[str, str]] = []
         seen = set()
-        for link in node.getElementsByTagName("link"):
-            site = link.getAttribute("site_name")
-            alias = link.getAttribute("alias")
+        for link in cx.find_all(node, "link"):
+            site = cx.attr(link, "site_name")
+            alias = cx.attr(link, "alias")
             if site and alias and (site, alias) not in seen:
                 seen.add((site, alias))
                 self.links.append((site, alias))
@@ -196,10 +199,10 @@ class DataSource:
     """
 
     def __init__(self, node) -> None:
-        self.name = node.getAttribute("name")
+        self.name = cx.attr(node, "name")
         self.hero_aliases: list[str] = []
-        for alias_node in node.getElementsByTagName("hero_alias"):
-            alias = alias_node.getAttribute("name")
+        for alias_node in cx.find_all(node, "hero_alias"):
+            alias = cx.attr(alias_node, "name")
             if alias and alias not in self.hero_aliases:
                 self.hero_aliases.append(alias)
 
@@ -210,11 +213,11 @@ class DataSource:
 class Supported_games:
     def __init__(self, node) -> None:
         self.game_name = ""
-        for name, value in list(node.attributes.items()):
+        for name, value in cx.attributes(node).items():
             setattr(self, name, value)
 
         self.game_stat_set = {}
-        for game_stat_set_node in node.getElementsByTagName("game_stat_set"):
+        for game_stat_set_node in cx.find_all(node, "game_stat_set"):
             gss = Game_stat_set(game_stat_set_node)
             self.game_stat_set[gss.game_type] = gss
 
@@ -239,8 +242,8 @@ class Supported_games:
 
 class Game_stat_set:
     def __init__(self, node) -> None:
-        self.game_type = node.getAttribute("game_type")
-        self.stat_set = node.getAttribute("stat_set")
+        self.game_type = cx.attr(node, "game_type")
+        self.stat_set = cx.attr(node, "stat_set")
 
     def __str__(self) -> str:
         return f"      Game Type: '{self.game_type}' Stat Set: '{self.stat_set}'\n"
@@ -250,16 +253,16 @@ class ConfigSitesMixin(ConfigBase):
     """Read and edit the sites, heroes and supported games."""
 
     def get_site_node(self, site):
-        for site_node in self.doc.getElementsByTagName("site"):
-            if site_node.getAttribute("site_name") == site:
+        for site_node in cx.find_all(self.doc, "site"):
+            if cx.attr(site_node, "site_name") == site:
                 return site_node
         return None
 
     def getEmailNode(self, siteName, fetchType):
-        siteNode = self.get_site_node(siteName)
-        for emailNode in siteNode.getElementsByTagName("email"):
-            if emailNode.getAttribute("fetchType") == fetchType:
-                return emailNode
+        site_node = self.get_site_node(siteName)
+        for email_node in cx.find_all(site_node, "email"):
+            if cx.attr(email_node, "fetchType") == fetchType:
+                return email_node
                 break
         return None
 
@@ -267,31 +270,30 @@ class ConfigSitesMixin(ConfigBase):
 
     def getGameNode(self, gameName):
         """Returns DOM game node for a given game."""
-        for gameNode in self.doc.getElementsByTagName("game"):
-            # print "getGameNode gameNode:",gameNode
-            if gameNode.getAttribute("game_name") == gameName:
-                return gameNode
+        for game_node in cx.find_all(self.doc, "game"):
+            if cx.attr(game_node, "game_name") == gameName:
+                return game_node
         return None
 
     # end def getGameNode
 
     def editEmail(self, siteName, fetchType, newEmail) -> None:
         emailNode = self.getEmailNode(siteName, fetchType)
-        emailNode.setAttribute("host", newEmail.host)
-        emailNode.setAttribute("username", newEmail.username)
-        emailNode.setAttribute("password", newEmail.password)
-        emailNode.setAttribute("folder", newEmail.folder)
-        emailNode.setAttribute("useSsl", newEmail.useSsl)
+        cx.set_attr(emailNode, "host", newEmail.host)
+        cx.set_attr(emailNode, "username", newEmail.username)
+        cx.set_attr(emailNode, "password", newEmail.password)
+        cx.set_attr(emailNode, "folder", newEmail.folder)
+        cx.set_attr(emailNode, "useSsl", newEmail.useSsl)
 
     # end def editEmail
 
     def edit_site(self, site_name, enabled, screen_name, history_path, summary_path) -> None:
         site_node = self.get_site_node(site_name)
-        site_node.setAttribute("enabled", enabled)
-        site_node.setAttribute("screen_name", screen_name)
-        site_node.setAttribute("HH_path", history_path)
+        cx.set_attr(site_node, "enabled", enabled)
+        cx.set_attr(site_node, "screen_name", screen_name)
+        cx.set_attr(site_node, "HH_path", history_path)
         if summary_path:
-            site_node.setAttribute("TS_path", summary_path)
+            cx.set_attr(site_node, "TS_path", summary_path)
 
     def get_hero_aliases(self, site_name):
         """Return all hero screen names recognised for a site.
@@ -333,13 +335,13 @@ class ConfigSitesMixin(ConfigBase):
 
     def _get_data_sources_node(self, create=False):
         """Return the ``<data_sources>`` DOM node, optionally creating it."""
-        nodes = self.doc.getElementsByTagName("data_sources")
+        nodes = cx.find_all(self.doc, "data_sources")
         if nodes:
             return nodes[0]
         if not create:
             return None
-        node = self.doc.createElement("data_sources")
-        self.doc.documentElement.appendChild(node)
+        node = cx.create_element(self.doc, "data_sources")
+        cx.append(self.doc, cx.root(self.doc), node)
         return node
 
     def set_data_source_hero_aliases(self, name, aliases) -> None:
@@ -357,20 +359,20 @@ class ConfigSitesMixin(ConfigBase):
 
         sources_node = self._get_data_sources_node(create=bool(ordered))
         if sources_node is not None:
-            for old in list(sources_node.getElementsByTagName("data_source")):
-                if old.getAttribute("name") == name:
-                    sources_node.removeChild(old)
+            for old in list(cx.find_all(sources_node, "data_source")):
+                if cx.attr(old, "name") == name:
+                    cx.remove(self.doc, old)
         if not ordered:
             self.data_sources.pop(name, None)
             return
 
-        source_node = self.doc.createElement("data_source")
-        source_node.setAttribute("name", name)
+        source_node = cx.create_element(self.doc, "data_source")
+        cx.set_attr(source_node, "name", name)
         for alias in ordered:
-            alias_node = self.doc.createElement("hero_alias")
-            alias_node.setAttribute("name", alias)
-            source_node.appendChild(alias_node)
-        sources_node.appendChild(source_node)
+            alias_node = cx.create_element(self.doc, "hero_alias")
+            cx.set_attr(alias_node, "name", alias)
+            cx.append(self.doc, source_node, alias_node)
+        cx.append(self.doc, sources_node, source_node)
         self.data_sources[name] = DataSource(node=source_node)
 
     def set_hero_aliases(self, site_name, aliases) -> None:
@@ -390,16 +392,16 @@ class ConfigSitesMixin(ConfigBase):
 
         site_node = self.get_site_node(site_name)
         primary = ordered[0] if ordered else ""
-        site_node.setAttribute("screen_name", primary)
+        cx.set_attr(site_node, "screen_name", primary)
 
         # Remove existing <hero_alias> children before re-adding.
-        for old in list(site_node.getElementsByTagName("hero_alias")):
-            site_node.removeChild(old)
+        for old in list(cx.find_all(site_node, "hero_alias")):
+            cx.remove(self.doc, old)
 
         for alias in ordered[1:]:
-            alias_node = self.doc.createElement("hero_alias")
-            alias_node.setAttribute("name", alias)
-            site_node.appendChild(alias_node)
+            alias_node = cx.create_element(self.doc, "hero_alias")
+            cx.set_attr(alias_node, "name", alias)
+            cx.append(self.doc, site_node, alias_node)
 
         if site_name in self.supported_sites:
             self.supported_sites[site_name].screen_name = primary
@@ -425,14 +427,14 @@ class ConfigSitesMixin(ConfigBase):
 
     def _get_hero_profiles_node(self, create=False):
         """Return the ``<hero_profiles>`` DOM node, optionally creating it."""
-        nodes = self.doc.getElementsByTagName("hero_profiles")
+        nodes = cx.find_all(self.doc, "hero_profiles")
         if nodes:
             return nodes[0]
         if not create:
             return None
-        root = self.doc.getElementsByTagName("FreePokerToolsConfig")[0]
-        node = self.doc.createElement("hero_profiles")
-        root.appendChild(node)
+        root = cx.find_all(self.doc, "FreePokerToolsConfig")[0]
+        node = cx.create_element(self.doc, "hero_profiles")
+        cx.append(self.doc, root, node)
         return node
 
     def save_hero_profile(self, name, links, default=False) -> None:
@@ -452,19 +454,19 @@ class ConfigSitesMixin(ConfigBase):
         profiles_node = self._get_hero_profiles_node(create=True)
 
         # Remove an existing profile with the same name before re-adding.
-        for old in list(profiles_node.getElementsByTagName("hero_profile")):
-            if old.getAttribute("name") == name:
-                profiles_node.removeChild(old)
+        for old in list(cx.find_all(profiles_node, "hero_profile")):
+            if cx.attr(old, "name") == name:
+                cx.remove(self.doc, old)
 
-        hp_node = self.doc.createElement("hero_profile")
-        hp_node.setAttribute("name", name)
-        hp_node.setAttribute("default", str(bool(default)))
+        hp_node = cx.create_element(self.doc, "hero_profile")
+        cx.set_attr(hp_node, "name", name)
+        cx.set_attr(hp_node, "default", str(bool(default)))
         for site, alias in ordered_links:
-            link_node = self.doc.createElement("link")
-            link_node.setAttribute("site_name", site)
-            link_node.setAttribute("alias", alias)
-            hp_node.appendChild(link_node)
-        profiles_node.appendChild(hp_node)
+            link_node = cx.create_element(self.doc, "link")
+            cx.set_attr(link_node, "site_name", site)
+            cx.set_attr(link_node, "alias", alias)
+            cx.append(self.doc, hp_node, link_node)
+        cx.append(self.doc, profiles_node, hp_node)
 
         self.hero_profiles[name] = HeroProfile(node=hp_node)
 
@@ -472,9 +474,9 @@ class ConfigSitesMixin(ConfigBase):
         """Remove a multiroom hero profile from the config DOM and memory."""
         profiles_node = self._get_hero_profiles_node(create=False)
         if profiles_node is not None:
-            for old in list(profiles_node.getElementsByTagName("hero_profile")):
-                if old.getAttribute("name") == name:
-                    profiles_node.removeChild(old)
+            for old in list(cx.find_all(profiles_node, "hero_profile")):
+                if cx.attr(old, "name") == name:
+                    cx.remove(self.doc, old)
         self.hero_profiles.pop(name, None)
 
     def getDefaultSite(self):

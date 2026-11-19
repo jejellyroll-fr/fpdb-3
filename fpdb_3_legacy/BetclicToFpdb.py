@@ -53,6 +53,15 @@ part)``, which fits a signed BIGINT and stayed collision-free over the whole
 carries the buy-in, the prize pool and the multiplier, and the summary carries
 each player's finishing place and winnings. ``Game Mode: Cash Game`` hands
 (ring games, e.g. PLO Omaha) carry euro amounts instead of chip counts.
+
+``Game Mode: Tournament`` hands (multi-table tournaments) add a ``Tournament
+Type`` line (``SKO`` for a progressive knockout) and an ``Ante`` line, post
+antes as ``Posts Ante 120``, and on a knockout tournament carry each player's
+bounty on the seat line and one summary line per knockout (#804)::
+
+    Seat 1: <name> (79307, €0.60 bounty) [BB]
+    ...
+    <winner> wins €0.10 for eliminating <victim> (x0.4), <winner> own bounty increases from €0.50 to €0.60
 """
 
 from __future__ import annotations
@@ -133,6 +142,10 @@ class Betclic(HandHistoryConverter):
 
     currencies = {"€": "EUR", "$": "USD", "£": "GBP"}
 
+    # "Tournament Type" values whose bounty grows with each knockout ("X own
+    # bounty increases from €0.50 to €0.60"). SKO is the one seen in an export.
+    PROGRESSIVE_KO_TYPES = frozenset({"SKO", "PKO"})
+
     # One marker per hand chunk; the export's "------------" separator is
     # missing between a few hands, so hands split at each header line.
     # \r? because IdentifySite matches the raw file: a Windows checkout rewrites
@@ -141,8 +154,11 @@ class Betclic(HandHistoryConverter):
     re_SplitHands = re.compile(r"^(?=\*\*\* HEADER \*\*\*$)", re.MULTILINE)
 
     re_HeaderSection = re.compile(r"\*\*\* HEADER \*\*\*\n(?P<FIELDS>.*?)\n\*\*\* PLAYERS \*\*\*", re.DOTALL)
+    # A knockout tournament seat carries the player's bounty after the stack:
+    # "Seat 1: name (79307, €0.60 bounty) [BB]".
     re_PlayerInfo = re.compile(
-        r"^Seat (?P<SEAT>[0-9]+): (?P<PNAME>.+) \((?P<STACK>[^)]+)\)(?: \[(?P<TAGS>[^\]]+)\])?$",
+        r"^Seat (?P<SEAT>[0-9]+): (?P<PNAME>.+) \((?P<STACK>[^,)]+)(?:, (?P<BOUNTY>[^)]+?) bounty)?\)"
+        r"(?: \[(?P<TAGS>[^\]]+)\])?$",
         re.MULTILINE,
     )
     re_HoleCards = re.compile(r"^(?P<PNAME>.+): \[(?P<CARDS>[^\]]+)\]$", re.MULTILINE)
@@ -153,6 +169,17 @@ class Betclic(HandHistoryConverter):
     )
     re_PostSB = re.compile(r"^Posts SB (?P<AMT>[^ ]+)( and is all-in)?$", re.MULTILINE)
     re_PostBB = re.compile(r"^Posts BB (?P<AMT>[^ ]+)( and is all-in)?$", re.MULTILINE)
+    re_PostAnte = re.compile(r"^Posts Ante (?P<AMT>[^ ]+)( and is all-in)?$", re.MULTILINE)
+    # One summary line per knockout, e.g.
+    #   "X wins €0.10 for eliminating Y (x0.4), X own bounty increases from €0.50 to €0.60"
+    # (x0.4 is the share of the victim's bounty this knockout paid out). Each
+    # line is one knockout: two identical lines are two knockouts, never merged.
+    re_Knockout = re.compile(
+        r"^(?P<PNAME>.+?) wins (?P<AMT>\S+) for eliminating (?P<VICTIM>.+?)"
+        r"(?: \(x(?P<MULT>[0-9.]+)\))?"
+        r"(?:, (?P=PNAME) own bounty increases from (?P<FROM>\S+) to (?P<TO>\S+))?$",
+        re.MULTILINE,
+    )
     re_ShowdownAction = re.compile(
         r"^(?P<PNAME>.+) shows \[(?P<CARDS>[^\]]+)\](?: \((?P<STRING>[^)]+)\))?(?: \[(?P<BEST>[^\]]+)\])?$",
         re.MULTILINE,
@@ -294,7 +321,13 @@ class Betclic(HandHistoryConverter):
             hand.buyinCurrency = self._currency_of(fields.get("Buy In", ""), fields.get("Prize pool", ""))
             hand.buyin = int(round(100 * Decimal(self._amount(fields.get("Buy In", "0")))))
             hand.fee = 0  # the export states a single entry amount
-            hand.isKO = False
+            # isKO / isProgressive key the TourneyTypes row, so they come from
+            # the header and the seat lines, which every hand of the tournament
+            # carries -- never from whether this particular hand paid a bounty.
+            tourney_type = fields.get("Tournament Type", "").upper()
+            seats_carry_bounty = any(m.group("BOUNTY") for m in self.re_PlayerInfo.finditer(hand.handText))
+            hand.isKO = "KO" in tourney_type or seats_carry_bounty
+            hand.isProgressive = tourney_type in self.PROGRESSIVE_KO_TYPES
             if hand.maxseats is None and fields.get("Game Mode") == "Spin":
                 hand.maxseats = 3
                 hand.gametype["maxSeats"] = 3
@@ -315,7 +348,8 @@ class Betclic(HandHistoryConverter):
             seat = int(m.group("SEAT"))
             name = m.group("PNAME").strip()
             tags = (m.group("TAGS") or "").split()
-            hand.addPlayer(seat, name, self._amount(m.group("STACK")))
+            bounty = self._amount(m.group("BOUNTY")) if m.group("BOUNTY") else None
+            hand.addPlayer(seat, name, self._amount(m.group("STACK")), bounty=bounty)
             if "Hero" in tags:
                 hand.hero = name
         if not hand.hero:
@@ -454,6 +488,23 @@ class Betclic(HandHistoryConverter):
                 hand.tourneyWinnings[player] = 0
             hand.tourneyWinningsCurrency[player] = m.group("CUR") or hand.buyinCurrency or hand.gametype.get("currency")
             log.info(f"readTourneyResults: '{player}' rank {m.group('RANK')} winnings {m.group('AMT')}")
+        self._readKnockouts(hand)
+
+    def _readKnockouts(self, hand) -> None:
+        """One knockout per "wins ... for eliminating" line.
+
+        koCounts is a count (TourneysPlayers.koCount); the cash paid goes to
+        koWinnings, in hundredths, which the profit queries read first. On a
+        progressive type the winner's grown bounty becomes its endBounty.
+        """
+        for m in self.re_Knockout.finditer(hand.handText):
+            player = m.group("PNAME").strip()
+            won = int(round(100 * Decimal(self._amount(m.group("AMT")))))
+            hand.koCounts[player] = hand.koCounts.get(player, 0) + 1
+            hand.koWinnings[player] = hand.koWinnings.get(player, 0) + won
+            if m.group("TO"):
+                hand.endBounty[player] = 100 * Decimal(self._amount(m.group("TO")))
+            log.info(f"readKnockouts: '{player}' eliminates '{m.group('VICTIM')}' for {won} (x{m.group('MULT')})")
 
     def readOther(self, hand) -> None:
         # The header states the pot and the rake outright; trust both so the
@@ -476,7 +527,10 @@ class Betclic(HandHistoryConverter):
         pass
 
     def readAntes(self, hand) -> None:
-        pass
+        for line in self.re_ActionLine.finditer(hand.handText):
+            m = self.re_PostAnte.match(line.group("ACTION"))
+            if m:
+                hand.addAnte(line.group("PNAME"), self._amount(m.group("AMT")))
 
     def readBringIn(self, hand) -> None:
         pass

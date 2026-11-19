@@ -26,7 +26,7 @@ CUSTOM_THEMES_DIR = Path.home() / ".fpdb" / "themes"
 DEFAULT_QT_THEME = "dark_purple.xml"
 
 
-class ThemeManager:
+class ThemeManager:  # pylint: disable=too-many-public-methods  # the themes' whole public API
     """Centralized theme manager for fpdb.
 
     Manages synchronization between:

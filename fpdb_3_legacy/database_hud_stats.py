@@ -47,6 +47,29 @@ _DEFAULT_HUD_PARAMS = {
 }
 
 
+def _add_session_row(stat_dict: dict, playerid: Any, colnames: list[str], row: Any) -> None:
+    """Add one hand's row of the session query to the player's running totals."""
+    for name, val in zip(colnames, row, strict=False):
+        if playerid not in stat_dict:
+            stat_dict[playerid] = {}
+            stat_dict[playerid][name.lower()] = val
+        elif name.lower() not in stat_dict[playerid]:
+            stat_dict[playerid][name.lower()] = val
+        elif name.lower() == "currency":
+            # Text, not a count: keep it while every hand agrees,
+            # and drop the symbol once two currencies mix.
+            if stat_dict[playerid]["currency"] != val:
+                stat_dict[playerid]["currency"] = ""
+        elif name.lower() not in (
+            "hand_id",
+            "player_id",
+            "seat",
+            "screen_name",
+            "seats",
+        ):
+            stat_dict[playerid][name.lower()] += val
+
+
 class DatabaseHudStatsMixin:
     """Reads the aggregates the HUD displays.
 
@@ -89,6 +112,7 @@ class DatabaseHudStatsMixin:
         def _rollback_after_failed_read(self) -> None: ...
 
         _in_tuple: Callable[[list], tuple[str, list]]
+        hero_hands_only_user_ids: Callable[[], list[int]]
 
         def recover_connection(self) -> bool: ...
 
@@ -845,6 +869,12 @@ class DatabaseHudStatsMixin:
         """
         query = self.sql.query["get_stats_from_hand_session"]
         query = query.replace("<signed>", "signed ") if self.db_server == "mysql" else query.replace("<signed>", "")
+        # ACR/WPN (#719): the other hands of the session count only if the user
+        # played them, like the HUD cache the aggregated path reads.
+        from fpdb_3_legacy.hud_room_policy import hero_hands_only_sql
+
+        if "<hero_hands_only>" in query:
+            query = query.replace("<hero_hands_only>", hero_hands_only_sql(self.hero_hands_only_user_ids(), "h2", "gt"))
 
         subs = (
             self.hand_1day_ago,
@@ -886,25 +916,7 @@ class DatabaseHudStatsMixin:
                     except (ValueError, TypeError):
                         is_hero = str(playerid) == str(hero_id)
                 if (is_hero and h_stat_range == "S") or (not is_hero and stat_range == "S"):
-                    for name, val in zip(colnames, row, strict=False):
-                        if playerid not in stat_dict:
-                            stat_dict[playerid] = {}
-                            stat_dict[playerid][name.lower()] = val
-                        elif name.lower() not in stat_dict[playerid]:
-                            stat_dict[playerid][name.lower()] = val
-                        elif name.lower() == "currency":
-                            # Text, not a count: keep it while every hand agrees,
-                            # and drop the symbol once two currencies mix.
-                            if stat_dict[playerid]["currency"] != val:
-                                stat_dict[playerid]["currency"] = ""
-                        elif name.lower() not in (
-                            "hand_id",
-                            "player_id",
-                            "seat",
-                            "screen_name",
-                            "seats",
-                        ):
-                            stat_dict[playerid][name.lower()] += val
+                    _add_session_row(stat_dict, playerid, colnames, row)
             latency_profile.record("hud_python_aggregate", time() - atime)
         else:
             log.error(f"query {query} result does not have player_id as first column")

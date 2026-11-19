@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-14 11:31+0100\n"
+"POT-Creation-Date: 2026-11-15 20:49+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -417,7 +417,7 @@ msgstr "Regroupement:"
 msgid "Hero:"
 msgstr "Héros:"
 
-#: fpdb_3_legacy/Filters.py
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/research_study_explorer.py
 msgid "Hold'em"
 msgstr "Hold'em"
 
@@ -469,7 +469,7 @@ msgstr "Dépareillées"
 msgid "Omaha"
 msgstr "Omaha"
 
-#: fpdb_3_legacy/Filters.py
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/research_study_explorer.py
 msgid "Omaha Hi/Lo"
 msgstr "Omaha Hi/Lo"
 
@@ -1355,7 +1355,8 @@ msgstr ""
 "C'est la seule base de données configurée, elle ne peut pas être supprimée — "
 "fpdb en a besoin d'au moins une. Ajoutez d'abord une autre base."
 
-#: fpdb_3_legacy/GuiDatabase.py
+#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiTrackerMigration.py
+#: fpdb_3_legacy/tracker_notes_dialog.py
 msgid "User"
 msgstr "Utilisateur"
 
@@ -1418,7 +1419,8 @@ msgid "FPDB 3 info"
 msgstr "Infos FPDB 3"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResearchBrowser.py
-#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/session_guard_dialog.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/GuiTrackerMigration.py
+#: fpdb_3_legacy/session_guard_dialog.py
 msgid "Hands"
 msgstr "Mains"
 
@@ -1426,11 +1428,11 @@ msgstr "Mains"
 msgid "Net profit excluding splash"
 msgstr "Profit net hors splash"
 
-#: fpdb_3_legacy/GuiGraphViewer.py
+#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/results_calendar.py
 msgid "Non-showdown"
 msgstr "Sans-showdown"
 
-#: fpdb_3_legacy/GuiGraphViewer.py
+#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/results_calendar.py
 msgid "Profit"
 msgstr "Profit"
 
@@ -1439,7 +1441,7 @@ msgid "Refresh Graph"
 msgstr "Rafraîchir Graphique"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiHandViewer.py
-#: fpdb_3_legacy/capture/swc_poker_console.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/capture/swc_poker_console.py
 msgid "Showdown"
 msgstr "Showdown"
 
@@ -1761,7 +1763,7 @@ msgid "Log Viewer"
 msgstr "Visionneuse de journaux"
 
 #: fpdb_3_legacy/GuiLogView.py fpdb_3_legacy/GuiOpponentsReport.py
-#: fpdb_3_legacy/pack_gallery_dialog.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/pack_gallery_dialog.py
 msgid "Refresh"
 msgstr "Rafraîchir"
 
@@ -1810,6 +1812,7 @@ msgid "Hand History Converters"
 msgstr "Convertisseurs d'historique des mains"
 
 #: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/menu_layout.py
+#: fpdb_3_legacy/tracker_notes_dialog.py
 msgid "Import"
 msgstr "Importation"
 
@@ -1972,6 +1975,10 @@ msgid "Share..."
 msgstr "Partager..."
 
 #: fpdb_3_legacy/GuiReplayer.py
+msgid "Show stacks, bets and pots in big blinds"
+msgstr "Afficher les tapis, mises et pots en grosses blindes"
+
+#: fpdb_3_legacy/GuiReplayer.py
 msgid "Solver review..."
 msgstr "Revue solver..."
 
@@ -1980,9 +1987,69 @@ msgid "Start"
 msgstr "Début"
 
 #: fpdb_3_legacy/GuiReplayer.py
+msgid "This hand has no big blind to count amounts in"
+msgstr "Cette main n'a pas de grosse blinde pour compter les montants"
+
+#: fpdb_3_legacy/GuiReplayer.py
 #, python-format
 msgid "bounty-adjusted chip EV %(chips)s"
 msgstr "chip EV ajustée des primes %(chips)s"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(name)s %(action)s %(size)s%% of the pot"
+msgstr "%(name)s %(action)s %(size)s%% du pot"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(name)s SPR %(spr)s"
+msgstr "SPR de %(name)s : %(spr)s"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(name)s to act"
+msgstr "À %(name)s de jouer"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(name)s to call %(amount)s"
+msgstr "%(name)s doit payer %(amount)s"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "MDF %(mdf)s%% · fold equity needed %(fe)s%% (heads-up)"
+msgstr "MDF %(mdf)s%% · fold equity nécessaire %(fe)s%% (heads-up)"
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "MDF / fold equity: heads-up only"
+msgstr "MDF / fold equity : heads-up uniquement"
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "Odds for all players"
+msgstr "Cotes de tous les joueurs"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "SPR %(spr)s"
+msgstr "SPR %(spr)s"
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid ""
+"Show SPR, bet sizing, pot odds, MDF and fold equity for every player, not "
+"only the hero"
+msgstr ""
+"Afficher le SPR, la taille des mises, les cotes du pot, le MDF et la fold "
+"equity de chaque joueur, pas seulement du héros"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "facing %(size)s%% of the pot"
+msgstr "face à une mise de %(size)s%% du pot"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "pot odds %(odds)s%%"
+msgstr "cotes du pot %(odds)s%%"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "-- built-in presets --"
@@ -2408,6 +2475,118 @@ msgid "{n} decisions are counted apart: their cards were never known."
 msgstr ""
 "{n} décisions sont comptées à part : leurs cartes n'ont jamais été connues."
 
+#: fpdb_3_legacy/results_calendar.py
+msgid "All hands of the filtered dates"
+msgstr "Toutes les mains des dates filtrées"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "All-in EV"
+msgstr "EV all-in"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "All-in EV (BB)"
+msgstr "EV all-in (BB)"
+
+#: fpdb_3_legacy/results_calendar.py
+#, python-brace-format
+msgid "All-in EV: {ev}"
+msgstr "EV all-in : {ev}"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "BB/100"
+msgstr "BB/100"
+
+#: fpdb_3_legacy/results_calendar.py
+#, python-brace-format
+msgid "BB/100: {bb100}"
+msgstr "BB/100 : {bb100}"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Click to select the whole month"
+msgstr "Cliquer pour sélectionner tout le mois"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Days"
+msgstr "Jours"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "EV BB/100"
+msgstr "EV BB/100"
+
+#: fpdb_3_legacy/results_calendar.py
+#, python-brace-format
+msgid ""
+"Hands: {hands} · Profit: {profit} · All-in EV: {ev} · BB/100: {bb100} · EV "
+"BB/100: {ev100} · Days played: {days} ({winning} winning)"
+msgstr "Mains : {hands} · Profit : {profit} · EV all-in : {ev} · BB/100 : {bb100} · EV BB/100 : {ev100} · Jours joués : {days} (dont {winning} gagnants)"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Loading…"
+msgstr "Chargement…"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Months"
+msgstr "Mois"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Next month"
+msgstr "Mois suivant"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Non-showdown (BB)"
+msgstr "Sans-showdown (BB)"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Open the hands of the selected period in the Hand Viewer"
+msgstr "Ouvrir les mains de la période sélectionnée dans la visionneuse de mains"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Period:"
+msgstr "Période :"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Previous month"
+msgstr "Mois précédent"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Profit (BB)"
+msgstr "Profit (BB)"
+
+#: fpdb_3_legacy/results_calendar.py
+#, python-brace-format
+msgid "Profit: {profit}"
+msgstr "Profit : {profit}"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Review hands"
+msgstr "Revoir les mains"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Showdown (BB)"
+msgstr "Showdown (BB)"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Unit:"
+msgstr "Unité :"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Week"
+msgstr "Semaine"
+
+#: fpdb_3_legacy/results_calendar.py
+#, python-brace-format
+msgid "Week of {date}"
+msgstr "Semaine du {date}"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Weeks"
+msgstr "Semaines"
+
+#: fpdb_3_legacy/results_calendar.py
+#, python-brace-format
+msgid "{hands} hands"
+msgstr "{hands} mains"
+
 #: fpdb_3_legacy/GuiSessionViewer.py
 msgid "Cumulative result (BB)"
 msgstr "Résultat cumulé (BB)"
@@ -2484,6 +2663,15 @@ msgstr "%(files)d fichiers de %(rooms)d rooms seront importés."
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
 #, python-format
+msgid ""
+"%(hands)d hands and %(summaries)d tournament summaries read from the "
+"database."
+msgstr ""
+"%(hands)d mains et %(summaries)d résumés de tournoi lus dans la base de "
+"données."
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+#, python-format
 msgid "%(hands)d hands imported from %(rooms)d rooms."
 msgstr "%(hands)d mains importées depuis %(rooms)d rooms."
 
@@ -2500,6 +2688,15 @@ msgid "%d files were left out: fpdb cannot read them."
 msgstr "%d fichiers ont été ignorés : fpdb ne sait pas les lire."
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
+#, python-format
+msgid ""
+"%d of them were stored with the wrong character set (a euro sign read as Ä); "
+"fpdb restores the room's own text."
+msgstr ""
+"%d d'entre eux étaient enregistrés avec le mauvais jeu de caractères (un "
+"signe euro lu comme Ä) ; fpdb rétablit le texte d'origine de la room."
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Another import is running. Try again once it has finished."
 msgstr "Un autre import est en cours. Réessayez quand il sera terminé."
 
@@ -2510,6 +2707,15 @@ msgstr "Choisir une room…"
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Choose the folder holding the hand histories"
 msgstr "Choisir le dossier contenant les historiques de mains"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Connecting to the PokerTracker 4 database…"
+msgstr "Connexion à la base de données de PokerTracker 4…"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/GuiVersionInfo.py
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Database"
+msgstr "Base de données"
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Duplicates"
@@ -2530,6 +2736,14 @@ msgstr "Trouver les historiques de mains"
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Folder holding the hand histories"
 msgstr "Dossier contenant les historiques de mains"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "From a folder: the tracker's archive or an export"
+msgstr "Depuis un dossier : l'archive du tracker ou un export"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "From the PokerTracker 4 database"
+msgstr "Depuis la base de données de PokerTracker 4"
 
 #: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/research_labels.py
 msgid "Hero"
@@ -2567,12 +2781,39 @@ msgid "No hand history fpdb can read was found in this folder."
 msgstr "Aucun historique de mains lisible par fpdb dans ce dossier."
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "No hand was added to the database since the last import."
+msgstr "Aucune main n'a été ajoutée à la base depuis le dernier import."
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "None of them is a hand history fpdb can read."
+msgstr "Aucun n'est un historique de mains que fpdb sait lire."
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Nothing is imported yet."
 msgstr "Rien n'est encore importé."
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Only the hands added since the last import from this database"
+msgstr "Seulement les mains ajoutées depuis le dernier import de cette base"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Partial"
 msgstr "Partielles"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Password"
+msgstr "Mot de passe"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Port"
+msgstr "Port"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+#, python-format
+msgid "Reading the PokerTracker 4 database: %(done)d of %(total)d hands…"
+msgstr ""
+"Lecture de la base de données de PokerTracker 4 : %(done)d mains sur "
+"%(total)d…"
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Reading the folder…"
@@ -2581,6 +2822,10 @@ msgstr "Lecture du dossier…"
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Room"
 msgstr "Room"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Server"
+msgstr "Serveur"
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
 #, python-format
@@ -2599,6 +2844,15 @@ msgid ""
 msgstr ""
 "Les stats, le HUD et les notes ne font pas partie de cet import ; voir le "
 "guide de migration dans la documentation."
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+#, python-format
+msgid ""
+"The PokerTracker 4 database could not be read:\n"
+"%s"
+msgstr ""
+"La base de données de PokerTracker 4 n'a pas pu être lue :\n"
+"%s"
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid ""
@@ -2620,7 +2874,7 @@ msgstr ""
 "Le dossier n'a pas pu être lu :\n"
 "%s"
 
-#: fpdb_3_legacy/GuiTrackerMigration.py
+#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/tracker_notes_dialog.py
 #, python-format
 msgid ""
 "The import stopped on an error:\n"
@@ -2632,6 +2886,10 @@ msgstr ""
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "What came over"
 msgstr "Ce qui a été importé"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "What the database holds"
+msgstr "Contenu de la base de données"
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "What the folder holds"
@@ -2647,6 +2905,18 @@ msgid ""
 msgstr ""
 "fpdb importe les mains que le tracker a conservées. Stats, HUD et notes se "
 "migrent à part."
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid ""
+"fpdb reads the hands PokerTracker 4 keeps in its PostgreSQL database. The "
+"connection is read-only: fpdb never writes to it. PokerTracker 4 shows these "
+"settings in Database > Database Management. The password is used for this "
+"import only and is not saved."
+msgstr ""
+"fpdb lit les mains que PokerTracker 4 conserve dans sa base PostgreSQL. La "
+"connexion est en lecture seule : fpdb n'y écrit jamais. PokerTracker 4 "
+"affiche ces paramètres dans Database > Database Management. Le mot de passe "
+"ne sert qu'à cet import et n'est pas enregistré."
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "not set"
@@ -2672,10 +2942,6 @@ msgstr "Copier le rapport"
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "Copy these details to the clipboard for a bug report"
 msgstr "Copier ces informations dans le presse-papiers pour un rapport de bug"
-
-#: fpdb_3_legacy/GuiVersionInfo.py fpdb_3_legacy/menu_layout.py
-msgid "Database"
-msgstr "Base de données"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "Documentation"
@@ -3471,7 +3737,7 @@ msgstr "Cette main ne peut pas être envoyée à PreflopAdvisor."
 msgid "Amounts"
 msgstr "Montants"
 
-#: fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/hand_share_dialog.py
 msgid "Big blinds"
 msgstr "Grosses blindes"
 
@@ -3633,7 +3899,7 @@ msgstr "n derniers jours"
 msgid "Opponents"
 msgstr "Adversaires"
 
-#: fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/hud_options_panel.py
 msgid "Period"
 msgstr "Période"
 
@@ -3757,6 +4023,14 @@ msgstr "À propos"
 #: fpdb_3_legacy/menu_layout.py
 msgid "About the program"
 msgstr "À propos du programme"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid ""
+"Add PokerTracker 4 player notes and tags to fpdb's notes, never overwriting "
+"one"
+msgstr ""
+"Ajouter les notes et étiquettes de joueurs de PokerTracker 4 aux notes de "
+"fpdb, sans jamais en écraser une"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Add, edit, test and select the database (SQLite / PostgreSQL / MySQL)"
@@ -3930,6 +4204,10 @@ msgid "Opponents Report"
 msgstr "Rapport sur les adversaires"
 
 #: fpdb_3_legacy/menu_layout.py
+msgid "PokerTracker 4 Notes…"
+msgstr "Notes PokerTracker 4…"
+
+#: fpdb_3_legacy/menu_layout.py
 msgid "Preferences"
 msgstr "Préférences"
 
@@ -4074,6 +4352,14 @@ msgid "Write a HUD profile or a stat pack ready to submit to the pack gallery"
 msgstr ""
 "Écrire un profil de HUD ou un pack de stats prêt à proposer à la galerie de "
 "packs"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Cash results per day, week and month, with their profit curves"
+msgstr "Résultats cash par jour, semaine et mois, avec leurs courbes de profit"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Results Calendar"
+msgstr "Calendrier des résultats"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "(label)"
@@ -6993,6 +7279,22 @@ msgstr "sièges"
 msgid "street"
 msgstr "street"
 
+#: fpdb_3_legacy/research_study_explorer.py
+msgid "6-card PLO"
+msgstr "PLO 6 cartes"
+
+#: fpdb_3_legacy/research_study_explorer.py
+msgid "PLO 4c + 5c"
+msgstr "PLO 4 + 5 cartes"
+
+#: fpdb_3_legacy/research_study_explorer.py
+msgid "Pot-Limit Omaha 4c"
+msgstr "Pot-Limit Omaha 4 cartes"
+
+#: fpdb_3_legacy/research_study_explorer.py
+msgid "Pot-Limit Omaha 5c"
+msgstr "Pot-Limit Omaha 5 cartes"
+
 #: fpdb_3_legacy/ring_stats/__init__.py
 msgid "Column Configuration"
 msgstr "Configuration des colonnes"
@@ -7287,6 +7589,7 @@ msgstr "Agression (AF)"
 msgid "Hands played"
 msgstr "Mains jouées"
 
+#: fpdb_3_legacy/results_calendar.py
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 msgid "Net profit"
@@ -7789,6 +8092,106 @@ msgstr ""
 "Sans archive, exportez les mains depuis Holdem Manager 3 vers un dossier. "
 "Vérifiez ensuite dans le bilan les fichiers que fpdb n'a pas su lire."
 
+#: fpdb_3_legacy/tracker_notes.py
+#, python-format
+msgid ""
+"%(added)d notes added, %(appended)d appended, %(updated)d updated, "
+"%(already)d already in fpdb, %(skipped)d skipped, %(unmatched)d not matched."
+msgstr ""
+"%(added)d notes ajoutées, %(appended)d complétées, %(updated)d mises à jour, "
+"%(already)d déjà dans fpdb, %(skipped)d ignorées, %(unmatched)d sans "
+"correspondance."
+
+#: fpdb_3_legacy/tracker_notes.py
+#, python-format
+msgid ""
+"Preview, nothing written: %(added)d notes to add, %(appended)d to append, "
+"%(updated)d to update, %(already)d already in fpdb, %(skipped)d to skip, "
+"%(unmatched)d not matched."
+msgstr ""
+"Aperçu, rien n'est écrit : %(added)d notes à ajouter, %(appended)d à "
+"compléter, %(updated)d à mettre à jour, %(already)d déjà dans fpdb, "
+"%(skipped)d à ignorer, %(unmatched)d sans correspondance."
+
+#: fpdb_3_legacy/tracker_notes.py
+msgid "added"
+msgstr "ajoutée"
+
+#: fpdb_3_legacy/tracker_notes.py
+msgid "already in fpdb"
+msgstr "déjà dans fpdb"
+
+#: fpdb_3_legacy/tracker_notes.py
+msgid "appended to the fpdb note"
+msgstr "ajoutée à la suite de la note fpdb"
+
+#: fpdb_3_legacy/tracker_notes.py
+msgid "auto-notes updated"
+msgstr "notes automatiques mises à jour"
+
+#: fpdb_3_legacy/tracker_notes.py
+msgid "not in fpdb: import the player's hands first"
+msgstr "absent de fpdb : importez d'abord les mains du joueur"
+
+#: fpdb_3_legacy/tracker_notes.py
+msgid "room unknown to fpdb"
+msgstr "salle inconnue de fpdb"
+
+#: fpdb_3_legacy/tracker_notes.py
+msgid "skipped: fpdb already has a note"
+msgstr "ignorée : fpdb a déjà une note"
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Also import PT4's automatic notes"
+msgstr "Importer aussi les notes automatiques de PT4"
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+#, python-format
+msgid ""
+"Could not read PokerTracker 4's database:\n"
+"%s"
+msgstr ""
+"Impossible de lire la base de données de PokerTracker 4 :\n"
+"%s"
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Host"
+msgstr "Hôte"
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Import PokerTracker 4 notes"
+msgstr "Importer les notes de PokerTracker 4"
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Leave players who already have an fpdb note alone"
+msgstr "Ne pas toucher aux joueurs qui ont déjà une note dans fpdb"
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid ""
+"PT4 rewrites its automatic notes as it imports hands, so fpdb keeps them in "
+"a section of their own and replaces that section on each import. Your own "
+"text stays as it is."
+msgstr ""
+"PT4 réécrit ses notes automatiques à mesure qu'il importe des mains : fpdb "
+"les range donc dans une section à part qu'il remplace à chaque import. Votre "
+"propre texte reste tel quel."
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Preview"
+msgstr "Aperçu"
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid ""
+"fpdb reads the notes and player tags from PokerTracker 4's database, read-"
+"only. An fpdb note is never overwritten: the PT4 note is added after it. "
+"Notes on players fpdb has no hands of are listed, not imported: import the "
+"hands first."
+msgstr ""
+"fpdb lit les notes et les étiquettes de joueurs dans la base de données de "
+"PokerTracker 4, en lecture seule. Une note fpdb n'est jamais écrasée : la "
+"note PT4 est ajoutée à sa suite. Les notes sur des joueurs dont fpdb n'a "
+"aucune main sont listées, pas importées : importez d'abord les mains."
+
 #: fpdb_3_legacy/update_notice.py
 #, python-format
 msgid "Download %s"
@@ -7843,6 +8246,22 @@ msgstr ""
 "des mises à jour.\n"
 "\n"
 "Rechercher les mises à jour automatiquement ?"
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "History..."
+msgstr "Historique..."
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "List the hand's actions and jump to one of them (A)"
+msgstr "Lister les actions de la main et aller à l'une d'elles (A)"
+
+#: fpdb_3_legacy/replay_history_dialog.py
+msgid "Action history"
+msgstr "Historique des actions"
+
+#: fpdb_3_legacy/replay_history_dialog.py
+msgid "Click an action, or select it and press Enter, to jump to it."
+msgstr "Cliquez sur une action, ou sélectionnez-la et appuyez sur Entrée, pour y aller."
 
 #~ msgid ""
 #~ "\n"
@@ -8903,9 +9322,6 @@ msgstr ""
 #~ msgid "HoldemOmaha hand initialised for %s"
 #~ msgstr "Logger par defaut initialisé pour %s"
 
-#~ msgid "Host"
-#~ msgstr "Hôte"
-
 #~ msgid "Host Computer"
 #~ msgstr "Ordinateur hôte"
 
@@ -9059,9 +9475,6 @@ msgstr ""
 
 #~ msgid "Mail Folder"
 #~ msgstr "Répertoire de Mail"
-
-#~ msgid "Mail Server"
-#~ msgstr "Serveur de mailing"
 
 #~ msgid "Main"
 #~ msgstr "Général"
@@ -9316,9 +9729,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "PartyPokerToFpdb: Unimplemented %s: '%s' '%s'"
 #~ msgstr "Non implémenté %s: '%s' '%s'"
-
-#~ msgid "Password"
-#~ msgstr "Mot de passe"
 
 #~ msgid "Player finishing stats unreadable : %s"
 #~ msgstr "Statistiques finales du joueur illisibles : %s"

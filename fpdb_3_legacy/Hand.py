@@ -35,6 +35,17 @@ log = get_logger("hand")
 
 HAND_DECIMAL_ERRORS = (InvalidOperation, TypeError, ValueError)
 
+# Rooms whose parser puts room money into the pot with addSTP and records the
+# amount in a Hands column (in cents). HandsActions has no row for that money,
+# so Hand.select has to put it back before totalling the pot, or the rebuilt
+# pot comes out short of what the winners collected.
+# Other rooms are left out on purpose: CoinPoker credits its splash beside the
+# pot, and CoinPoker/SWC bomb pots are antes already stored as actions.
+STP_COLUMNS_BY_SITE: dict[str, tuple[str, ...]] = {
+    "Winamax": ("bombPot", "splashPot"),  # heads-up turbo pot, Escape splash
+    "BetRivers": ("splashPot",),
+}
+
 
 def canonical_datetime_utc(value):
     if not value:
@@ -621,16 +632,40 @@ class Hand:
         db.updateTourneyPlayerBounties(self)
 
     def updateHudCache(self, db, doinsert=False) -> None:
-        """Function to update the HudCache."""
-        if self.callHud:
-            db.storeHudCache(
-                self.dbid_gt,
-                self.gametype,
-                self.playerIds,
-                self.startTime,
-                self.handsplayers,
-                doinsert,
-            )
+        """Function to update the HudCache.
+
+        At a room that allows HUD statistics only from the user's own hands
+        (ACR/WPN, #719), a hand none of the user's configured screen names
+        played -- an imported archive, someone else's history, which names its
+        own hero -- is kept in the database but does not feed the HUD.
+
+        Such a hand adds no statistics, but when it is the last of its batch
+        (``doinsert``) it still flushes what the earlier hands buffered:
+        ``storeHudCache`` writes its bulk buffer only on ``doinsert``, and the
+        next ``resetBulkCache`` would otherwise drop it.
+        """
+        if not self.callHud:
+            return
+        handsplayers = self.handsplayers
+        if self._hero_absent_where_required():
+            log.debug("Hand %s: no hero at a %s table, kept out of the HUD cache", self.handid, self.sitename)
+            if not doinsert:
+                return
+            handsplayers = {}
+        db.storeHudCache(
+            self.dbid_gt,
+            self.gametype,
+            self.playerIds,
+            self.startTime,
+            handsplayers,
+            doinsert,
+        )
+
+    def _hero_absent_where_required(self) -> bool:
+        """The room wants the HUD fed by the user's hands only, and none of the user's names played this one."""
+        from fpdb_3_legacy.hud_room_policy import kept_from_hud
+
+        return kept_from_hud(self, getattr(self, "config", None))
 
     def updateSessionsCache(self, db, tz, doinsert=False) -> None:
         """Function to update the Sessions."""
@@ -833,6 +868,11 @@ class Hand:
         # created before these columns simply return nothing, keeping the 0 default.
         self.bombPot = hand_info.get("bombpot", 0) or 0
         self.splashPot = hand_info.get("splashpot", 0) or 0
+        for column in STP_COLUMNS_BY_SITE.get(self.sitename, ()):
+            cents = getattr(self, column)
+            if cents:
+                self.addSTP(str(Decimal(cents) / 100))
+                break
         # self.startTime currently unused in the replayer and commented out.
         # However a startTime is needed for a valid output by writeHand:
         if isinstance(hand_info["starttime"], datetime.datetime):

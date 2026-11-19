@@ -63,22 +63,17 @@ def _windows_pyinstaller_commands() -> list[str]:
 
 
 # ---------------------------------------------------------------------------
-# pyoxidizer.bzl -- available on Windows again
+# pyoxidizer.bzl -- Windows ships PyInstaller alone (#457)
 # ---------------------------------------------------------------------------
 
 
-def test_the_windows_target_is_buildable() -> None:
-    assert "x86_64-pc-windows-msvc" in BZL
-    assert "PyOxidizer is deprecated on Windows" not in BZL
+def test_pyoxidizer_has_no_windows_target() -> None:
+    """Its CPython 3.11 archive names OpenSSL DLLs it does not contain there."""
+    assert "x86_64-pc-windows-msvc" not in BZL
 
 
-def test_the_windows_executable_is_a_gui_binary() -> None:
-    """Without this the launcher opens a console window behind the GUI."""
-    assert 'exe.windows_subsystem = "windows"' in BZL
-
-
-def test_the_workflow_builds_the_windows_bundle() -> None:
-    assert "fpdb-pyoxidizer-windows-x64" in CI
+def test_the_workflow_builds_no_windows_pyoxidizer_bundle() -> None:
+    assert "fpdb-pyoxidizer-windows-x64" not in CI
 
 
 def test_the_bundled_wheel_libraries_are_collected() -> None:
@@ -107,11 +102,6 @@ def test_the_packaged_libraries_precede_the_legacy_scripts() -> None:
 def test_the_bundle_is_verified_to_import_numpy() -> None:
     """A bundle that cannot import numpy cannot open a window; the build must say so."""
     assert "--run-module numpy.__config__" in CI
-
-
-def test_build_experiment_does_not_refuse_windows() -> None:
-    experiment = (ROOT / "build_experiment.sh").read_text(encoding="utf-8")
-    assert "PyOxidizer builds on Windows are deprecated" not in experiment
 
 
 # ---------------------------------------------------------------------------

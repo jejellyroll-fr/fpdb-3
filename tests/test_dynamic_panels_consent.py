@@ -70,7 +70,7 @@ def test_pokerstars_never_gets_them_on_any_regional_site(answers, site) -> None:
         ("Unibet", "Unibet"),
         ("GGPoker", "GGPoker"),
         ("CoinPoker", "CoinPoker"),
-        ("Americas Cardroom", "Americas Cardroom"),
+        ("Americas Cardroom", "ACR/WPN"),  # reviewed in #719: section 4.1.3
     ],
 )
 def test_a_yes_does_not_turn_them_on_where_the_room_has_not_allowed_them(answers, site, named) -> None:

@@ -1,0 +1,1677 @@
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70EDG4CEV369BFTDTV51CHT
+Date & Time: 2026-11-09 15:21:50 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 120
+Blinds: 600/1200
+Total Pot: 116600
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (79307, €0.60 bounty) [BB]
+Seat 2: Villain2 (49766, €0.50 bounty)
+Seat 3: Villain3 (56695, €0.50 bounty)
+Seat 4: Villain4 (36773, €0.50 bounty)
+Seat 5: Hero (52300, €0.50 bounty) [BTN Hero]
+Seat 6: Villain5 (88481, €0.60 bounty) [SB]
+*** HOLE CARDS ***
+Villain3: [6c 7c]
+Hero: [Jc Js]
+*** PRE-FLOP ***
+15:21:50 - Villain1: Posts Ante 120
+15:21:50 - Villain2: Posts Ante 120
+15:21:50 - Villain3: Posts Ante 120
+15:21:50 - Villain4: Posts Ante 120
+15:21:50 - Hero: Posts Ante 120
+15:21:50 - Villain5: Posts Ante 120
+15:21:50 - Villain5: Posts SB 600
+15:21:50 - Villain1: Posts BB 1200
+15:21:54 - Villain2: Calls 1200
+15:22:03 - Villain3: Calls 1200
+15:22:05 - Villain4: Calls 1200
+15:22:08 - Hero: Raises to 8520
+15:22:10 - Villain5: Folds
+15:22:13 - Villain1: Folds
+15:22:16 - Villain2: Calls 7320
+15:22:17 - Villain3: Calls 7320
+15:22:20 - Villain4: Folds
+*** FLOP *** [3c 3s 6d]
+15:22:24 - Villain2: Checks
+15:22:27 - Villain3: Checks
+15:22:29 - Hero: Bets 43660 and is all-in
+15:22:38 - Villain2: Folds
+15:22:41 - Villain3: Calls 43660
+*** TURN *** [3c 3s 6d 6s]
+*** RIVER *** [3c 3s 6d 6s Kd]
+*** SHOWDOWN ***
+Villain3 shows [6c 7c] (Full House) [6s 6d 6c 3s 3c]
+Hero shows [Jc Js] (Two Pair) [Js Jc 6s 6d Kd]
+*** SUMMARY ***
+Villain3 wins main pot of 116600
+Hero finished 445th
+Villain3 wins €0.10 for eliminating Hero (x0.4), Villain3 own bounty increases from €0.50 to €0.60
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70EB52KPJW3WC8BAYY30EQK
+Date & Time: 2026-11-09 15:20:33 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 100
+Blinds: 500/1000
+Total Pot: 56695
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (79407, €0.60 bounty)
+Seat 2: Villain2 (49866, €0.50 bounty)
+Seat 3: Villain3 (53195, €0.50 bounty)
+Seat 4: Villain4 (36873, €0.50 bounty) [BTN]
+Seat 5: Hero (54400, €0.50 bounty) [SB Hero]
+Seat 6: Villain5 (89581, €0.60 bounty) [BB]
+*** HOLE CARDS ***
+Hero: [9c Qs]
+*** PRE-FLOP ***
+15:20:33 - Villain1: Posts Ante 100
+15:20:33 - Villain2: Posts Ante 100
+15:20:33 - Villain3: Posts Ante 100
+15:20:33 - Villain4: Posts Ante 100
+15:20:33 - Hero: Posts Ante 100
+15:20:33 - Villain5: Posts Ante 100
+15:20:33 - Hero: Posts SB 500
+15:20:33 - Villain5: Posts BB 1000
+15:20:37 - Villain1: Folds
+15:20:48 - Villain2: Folds
+15:21:03 - Villain3: Calls 1000
+15:21:23 - Villain4: Sits out
+15:21:23 - Villain4: Folds
+15:21:23 - Hero: Disconnected
+15:21:23 - Hero: Calls 500
+15:21:23 - Hero: Sits out
+15:21:33 - Villain5: Checks
+*** FLOP *** [Ad Tc Qc]
+15:21:35 - Hero: Disconnected
+15:21:35 - Hero: Reconnected
+15:21:35 - Hero: Sits in
+15:21:36 - Villain4: Sits in
+15:21:39 - Hero: Bets 1000
+15:21:42 - Villain5: Folds
+15:21:45 - Villain3: Raises to 52095 and is all-in
+15:21:47 - Hero: Folds
+*** SUMMARY ***
+Villain3 wins main pot of 56695
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70E9YREXFQ01N4MBB0KPJWM
+Date & Time: 2026-11-09 15:19:54 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 100
+Blinds: 500/1000
+Total Pot: 3600
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (79507, €0.60 bounty)
+Seat 2: Villain2 (49966, €0.50 bounty)
+Seat 3: Villain3 (53295, €0.50 bounty) [BTN]
+Seat 4: Villain4 (35373, €0.50 bounty) [SB]
+Seat 5: Hero (55500, €0.50 bounty) [BB Hero]
+Seat 6: Villain5 (89681, €0.60 bounty)
+*** HOLE CARDS ***
+Hero: [4h 9c]
+*** PRE-FLOP ***
+15:19:54 - Villain1: Posts Ante 100
+15:19:54 - Villain2: Posts Ante 100
+15:19:54 - Villain3: Posts Ante 100
+15:19:54 - Villain4: Posts Ante 100
+15:19:54 - Hero: Posts Ante 100
+15:19:54 - Villain5: Posts Ante 100
+15:19:54 - Villain4: Posts SB 500
+15:19:54 - Hero: Posts BB 1000
+15:19:57 - Villain5: Folds
+15:20:00 - Villain1: Folds
+15:20:01 - Villain2: Folds
+15:20:21 - Villain3: Sits out
+15:20:21 - Villain3: Folds
+15:20:25 - Villain4: Raises to 2000
+15:20:26 - Villain3: Sits in
+15:20:30 - Hero: Folds
+*** SUMMARY ***
+Villain4 wins main pot of 3600
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70E69BZR16AR1G1N2HX0XZS
+Date & Time: 2026-11-09 15:17:54 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 100
+Blinds: 500/1000
+Total Pot: 53295
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (79607, €0.60 bounty)
+Seat 2: Villain2 (50066, €0.50 bounty) [BTN]
+Seat 3: Villain3 (43060, €0.50 bounty) [SB]
+Seat 4: Villain4 (44208, €0.50 bounty) [BB]
+Seat 5: Hero (55600, €0.50 bounty) [Hero]
+Seat 6: Villain5 (90781, €0.60 bounty)
+*** HOLE CARDS ***
+Hero: [4h Kd]
+*** PRE-FLOP ***
+15:17:54 - Villain1: Posts Ante 100
+15:17:54 - Villain2: Posts Ante 100
+15:17:54 - Villain3: Posts Ante 100
+15:17:54 - Villain4: Posts Ante 100
+15:17:54 - Hero: Posts Ante 100
+15:17:54 - Villain5: Posts Ante 100
+15:17:54 - Villain3: Posts SB 500
+15:17:54 - Villain4: Posts BB 1000
+15:17:55 - Hero: Disconnected
+15:17:55 - Hero: Sits out
+15:17:55 - Hero: Folds
+15:18:05 - Villain5: Calls 1000
+15:18:06 - Villain1: Folds
+15:18:10 - Hero: Reconnected
+15:18:10 - Hero: Sits in
+15:18:26 - Villain2: Folds
+15:18:35 - Villain3: Calls 500
+15:18:39 - Villain4: Raises to 2500
+15:18:42 - Villain5: Folds
+15:18:45 - Villain3: Calls 1500
+*** FLOP *** [8c 8s Jh]
+15:18:50 - Villain3: Checks
+15:18:57 - Hero: Reconnected
+15:19:02 - Villain4: Bets 2309
+15:19:13 - Villain3: Calls 2309
+*** TURN *** [8c 8s Jh 5s]
+15:19:24 - Villain3: Checks
+15:19:31 - Villain4: Bets 3926
+15:19:39 - Villain3: Calls 3926
+*** RIVER *** [8c 8s Jh 5s Jc]
+15:19:48 - Villain3: Bets 34225 and is all-in
+15:19:51 - Villain4: Folds
+*** SUMMARY ***
+Villain3 wins main pot of 53295
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70E37K3Z2W55698Z7CZ94RW
+Date & Time: 2026-11-09 15:16:14 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 100
+Blinds: 500/1000
+Total Pot: 3600
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (79707, €0.60 bounty) [BTN]
+Seat 2: Villain2 (51166, €0.50 bounty) [SB]
+Seat 3: Villain3 (44160, €0.50 bounty) [BB]
+Seat 4: Villain4 (44308, €0.50 bounty)
+Seat 5: Hero (55700, €0.50 bounty) [Hero]
+Seat 6: Villain5 (88281, €0.60 bounty)
+*** HOLE CARDS ***
+Villain2: [7h Th]
+Villain3: [2d 9s]
+Hero: [Jc Td]
+Villain5: [Ac 7s]
+*** PRE-FLOP ***
+15:16:14 - Villain1: Posts Ante 100
+15:16:14 - Villain2: Posts Ante 100
+15:16:14 - Villain3: Posts Ante 100
+15:16:14 - Villain4: Posts Ante 100
+15:16:14 - Hero: Posts Ante 100
+15:16:14 - Villain5: Posts Ante 100
+15:16:14 - Villain2: Posts SB 500
+15:16:14 - Villain3: Posts BB 1000
+15:16:16 - Villain4: Folds
+15:16:18 - Hero: Folds
+15:16:20 - Villain5: Calls 1000
+15:16:32 - Villain1: Folds
+15:16:35 - Villain2: Calls 500
+15:16:55 - Villain3: Sits out
+15:16:55 - Villain3: Checks
+*** FLOP *** [4d Kc 6d]
+15:16:55 - Villain4: Sits in
+15:16:58 - Villain2: Checks
+15:17:00 - Villain3: Checks
+15:17:01 - Villain3: Sits in
+15:17:01 - Villain5: Checks
+*** TURN *** [4d Kc 6d 8s]
+15:17:05 - Villain2: Checks
+15:17:22 - Villain3: Checks
+15:17:24 - Villain5: Checks
+*** RIVER *** [4d Kc 6d 8s 6c]
+15:17:27 - Villain2: Checks
+15:17:45 - Villain3: Checks
+15:17:48 - Villain5: Checks
+*** SHOWDOWN ***
+Villain2 shows [7h Th] (Pair) [6d 6c Kc Th 8s]
+Villain3 shows [2d 9s] (Pair) [6d 6c Kc 9s 8s]
+Villain5 shows [Ac 7s] (Pair) [6d 6c Ac Kc 8s]
+*** SUMMARY ***
+Villain5 wins main pot of 3600
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70E15597YEXEJTVGMJKAJF6
+Date & Time: 2026-11-09 15:15:06 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 80
+Blinds: 400/800
+Total Pot: 10692
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (80187, €0.60 bounty) [SB]
+Seat 2: Villain2 (52046, €0.50 bounty) [BB]
+Seat 3: Villain3 (46640, €0.50 bounty)
+Seat 4: Villain4 (44388, €0.50 bounty)
+Seat 5: Hero (51700, €0.50 bounty) [Hero]
+Seat 6: Villain5 (88361, €0.60 bounty) [BTN]
+*** HOLE CARDS ***
+Hero: [Ad Kh]
+*** PRE-FLOP ***
+15:15:06 - Villain1: Posts Ante 80
+15:15:06 - Villain2: Posts Ante 80
+15:15:06 - Villain3: Posts Ante 80
+15:15:06 - Villain4: Posts Ante 80
+15:15:06 - Hero: Posts Ante 80
+15:15:06 - Villain5: Posts Ante 80
+15:15:06 - Villain1: Posts SB 400
+15:15:06 - Villain2: Posts BB 800
+15:15:17 - Villain3: Calls 800
+15:15:18 - Villain4: Folds
+15:15:28 - Hero: Raises to 2400
+15:15:30 - Villain5: Folds
+15:15:34 - Villain1: Folds
+15:15:38 - Villain2: Folds
+15:15:38 - Villain3: Calls 1600
+*** FLOP *** [4s Ah Ac]
+15:15:48 - Villain3: Checks
+15:15:50 - Hero: Bets 4212
+15:16:10 - Villain3: Sits out
+15:16:10 - Villain3: Folds
+*** SUMMARY ***
+Hero wins main pot of 10692
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70DYYBGJAYREN54DPMP49DB
+Date & Time: 2026-11-09 15:13:53 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 80
+Blinds: 400/800
+Total Pot: 6080
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (81067, €0.60 bounty) [BB]
+Seat 2: Villain2 (52126, €0.50 bounty)
+Seat 3: Villain3 (49120, €0.50 bounty)
+Seat 4: Villain4 (44468, €0.50 bounty)
+Seat 5: Hero (51780, €0.50 bounty) [BTN Hero]
+Seat 6: Villain5 (84761, €0.60 bounty) [SB]
+*** HOLE CARDS ***
+Villain3: [Js 3c]
+Hero: [Td 4d]
+Villain5: [4h 7c]
+*** PRE-FLOP ***
+15:13:53 - Villain1: Posts Ante 80
+15:13:53 - Villain2: Posts Ante 80
+15:13:53 - Villain3: Posts Ante 80
+15:13:53 - Villain4: Posts Ante 80
+15:13:53 - Hero: Posts Ante 80
+15:13:53 - Villain5: Posts Ante 80
+15:13:53 - Villain5: Posts SB 400
+15:13:53 - Villain1: Posts BB 800
+15:13:57 - Hero: Reconnected
+15:13:59 - Villain2: Folds
+15:14:04 - Villain3: Calls 800
+15:14:06 - Villain4: Folds
+15:14:06 - Hero: Folds
+15:14:07 - Villain5: Calls 400
+15:14:15 - Villain1: Checks
+*** FLOP *** [Qd 7s 5d]
+15:14:18 - Villain5: Checks
+15:14:21 - Villain1: Checks
+15:14:30 - Villain3: Checks
+*** TURN *** [Qd 7s 5d 5h]
+15:14:33 - Villain5: Bets 800
+15:14:37 - Hero: Reconnected
+15:14:43 - Villain1: Folds
+15:14:52 - Villain3: Calls 800
+*** RIVER *** [Qd 7s 5d 5h Ac]
+15:14:54 - Villain5: Bets 800
+15:15:00 - Villain3: Calls 800
+*** SHOWDOWN ***
+Villain5 shows [4h 7c] (Two Pair) [7s 7c 5h 5d Ac]
+Villain3 shows [Js 3c] (Pair) [5h 5d Ac Qd Js]
+*** SUMMARY ***
+Villain5 wins main pot of 6080
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70DXKGHPGCGXXFF096GV6EX
+Date & Time: 2026-11-09 15:13:09 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 80
+Blinds: 400/800
+Total Pot: 4092
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (81147, €0.60 bounty)
+Seat 2: Villain2 (52206, €0.50 bounty)
+Seat 3: Villain3 (50000, €0.50 bounty)
+Seat 4: Villain4 (44548, €0.50 bounty) [BTN]
+Seat 5: Hero (52260, €0.50 bounty) [SB Hero]
+Seat 6: Villain5 (83161, €0.60 bounty) [BB]
+*** HOLE CARDS ***
+Hero: [9c 6s]
+*** PRE-FLOP ***
+15:13:09 - Villain1: Posts Ante 80
+15:13:09 - Villain2: Posts Ante 80
+15:13:09 - Villain3: Posts Ante 80
+15:13:09 - Villain4: Posts Ante 80
+15:13:09 - Hero: Posts Ante 80
+15:13:09 - Villain5: Posts Ante 80
+15:13:09 - Hero: Posts SB 400
+15:13:09 - Villain5: Posts BB 800
+15:13:12 - Villain1: Folds
+15:13:14 - Villain2: Folds
+15:13:19 - Villain3: Calls 800
+15:13:20 - Villain4: Folds
+15:13:20 - Hero: Folds
+15:13:22 - Villain5: Checks
+*** FLOP *** [Qs Qd 8h]
+15:13:25 - Villain5: Checks
+15:13:44 - Hero: Reconnected
+15:13:45 - Villain3: Sits out
+15:13:45 - Villain3: Checks
+*** TURN *** [Qs Qd 8h As]
+15:13:48 - Villain5: Bets 1612
+15:13:50 - Villain3: Folds
+*** SUMMARY ***
+Villain5 wins main pot of 4092
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70DVT781QMSRCCGS20NDK2S
+Date & Time: 2026-11-09 15:12:10 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 80
+Blinds: 400/800
+Total Pot: 3200
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (81227, €0.60 bounty)
+Seat 2: Villain2 (49886, €0.50 bounty) [BTN]
+Seat 4: Villain4 (45028, €0.50 bounty) [SB]
+Seat 5: Hero (53140, €0.50 bounty) [BB Hero]
+Seat 6: Villain5 (84041, €0.60 bounty)
+*** HOLE CARDS ***
+Villain2: [9c Ad]
+Hero: [8c Ah]
+Villain5: [Qh Kc]
+*** PRE-FLOP ***
+15:12:10 - Villain1: Posts Ante 80
+15:12:10 - Villain2: Posts Ante 80
+15:12:10 - Villain4: Posts Ante 80
+15:12:10 - Hero: Posts Ante 80
+15:12:10 - Villain5: Posts Ante 80
+15:12:10 - Villain4: Posts SB 400
+15:12:10 - Hero: Posts BB 800
+15:12:14 - Villain5: Calls 800
+15:12:16 - Villain1: Folds
+15:12:18 - Villain2: Calls 800
+15:12:20 - Villain4: Folds
+15:12:23 - Hero: Checks
+*** FLOP *** [6h 3c 6s]
+15:12:41 - Hero: Checks
+15:12:43 - Villain5: Checks
+15:12:44 - Villain2: Checks
+*** TURN *** [6h 3c 6s 7c]
+15:12:53 - Hero: Disconnected
+15:12:53 - Hero: Sits out
+15:12:53 - Hero: Checks
+15:12:55 - Villain5: Checks
+15:12:57 - Villain2: Checks
+*** RIVER *** [6h 3c 6s 7c Td]
+15:12:58 - Hero: Disconnected
+15:13:00 - Hero: Checks
+15:13:01 - Villain5: Checks
+15:13:02 - Hero: Reconnected
+15:13:02 - Hero: Sits in
+15:13:03 - Villain2: Checks
+*** SHOWDOWN ***
+Hero shows [8c Ah] (Pair) [6s 6h Ah Td 8c]
+Villain5 shows [Qh Kc] (Pair) [6s 6h Kc Qh Td]
+Villain2 shows [9c Ad] (Pair) [6s 6h Ad Td 9c]
+*** SUMMARY ***
+Villain2 wins main pot of 3200
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70DSP4WTX80THBCCX31JPA9
+Date & Time: 2026-11-09 15:11:01 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 80
+Blinds: 400/800
+Total Pot: 42320
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (85787, €0.60 bounty) [BTN]
+Seat 2: Villain2 (50766, €0.50 bounty) [SB]
+Seat 3: Villain6 (18360, €0.50 bounty) [BB]
+Seat 4: Villain4 (45108, €0.50 bounty)
+Seat 5: Hero (53220, €0.50 bounty) [Hero]
+Seat 6: Villain5 (60081, €0.50 bounty)
+*** HOLE CARDS ***
+Villain6: [7d Ah]
+Hero: [6s Jd]
+Villain5: [4c Ac]
+*** PRE-FLOP ***
+15:11:01 - Villain1: Posts Ante 80
+15:11:01 - Villain2: Posts Ante 80
+15:11:01 - Villain6: Posts Ante 80
+15:11:01 - Villain4: Posts Ante 80
+15:11:01 - Hero: Posts Ante 80
+15:11:01 - Villain5: Posts Ante 80
+15:11:01 - Villain2: Posts SB 400
+15:11:01 - Villain6: Posts BB 800
+15:11:03 - Villain4: Folds
+15:11:03 - Hero: Folds
+15:11:05 - Villain5: Calls 800
+15:11:08 - Villain1: Calls 800
+15:11:11 - Villain2: Calls 400
+15:11:14 - Villain6: Raises to 4480
+15:11:16 - Villain5: Calls 3680
+15:11:20 - Villain1: Calls 3680
+15:11:21 - Villain2: Folds
+*** FLOP *** [9d 4d Kc]
+15:11:26 - Villain6: Checks
+15:11:28 - Villain5: Checks
+15:11:32 - Villain1: Checks
+*** TURN *** [9d 4d Kc As]
+15:11:38 - Villain6: Bets 5151
+15:11:41 - Villain5: Raises to 19612
+15:11:49 - Villain1: Folds
+15:11:52 - Villain6: Calls 8649 and is all-in
+*** RIVER *** [9d 4d Kc As Ts]
+*** SHOWDOWN ***
+Villain6 shows [7d Ah] (Pair) [As Ah Kc Ts 9d]
+Villain5 shows [4c Ac] (Two Pair) [As Ac 4d 4c Kc]
+*** SUMMARY ***
+Villain5 wins main pot of 42320
+Villain6 finished 509th
+Villain5 wins €0.10 for eliminating Villain6 (x0.4), Villain5 own bounty increases from €0.50 to €0.60
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70DQW1A5VMBYX37PDTQE3H0
+Date & Time: 2026-11-09 15:10:01 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 70
+Blinds: 350/700
+Total Pot: 10864
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (79865, €0.60 bounty) [SB]
+Seat 2: Villain2 (51536, €0.50 bounty) [BB]
+Seat 3: Villain6 (23302, €0.50 bounty)
+Seat 4: Villain4 (45178, €0.50 bounty)
+Seat 5: Hero (53290, €0.50 bounty) [Hero]
+Seat 6: Villain5 (60151, €0.50 bounty) [BTN]
+*** HOLE CARDS ***
+Villain1: [Ah 4d]
+Villain6: [Jd 7d]
+Hero: [8c Td]
+*** PRE-FLOP ***
+15:10:01 - Villain1: Posts Ante 70
+15:10:01 - Villain2: Posts Ante 70
+15:10:01 - Villain6: Posts Ante 70
+15:10:01 - Villain4: Posts Ante 70
+15:10:01 - Hero: Posts Ante 70
+15:10:01 - Villain5: Posts Ante 70
+15:10:01 - Villain1: Posts SB 350
+15:10:01 - Villain2: Posts BB 700
+15:10:08 - Villain6: Raises to 1400
+15:10:09 - Villain4: Folds
+15:10:09 - Hero: Folds
+15:10:11 - Villain5: Folds
+15:10:17 - Villain1: Calls 1050
+15:10:20 - Villain2: Folds
+*** FLOP *** [Qc 7c As]
+15:10:24 - Villain1: Checks
+15:10:26 - Villain6: Bets 1372
+15:10:29 - Villain1: Calls 1372
+*** TURN *** [Qc 7c As Tc]
+15:10:35 - Villain1: Bets 700
+15:10:37 - Villain6: Calls 700
+*** RIVER *** [Qc 7c As Tc 3c]
+15:10:42 - Villain1: Bets 1400
+15:10:55 - Villain6: Calls 1400
+*** SHOWDOWN ***
+Villain1 shows [Ah 4d] (Pair) [As Ah Qc Tc 7c]
+Villain6 shows [Jd 7d] (Pair) [7d 7c As Qc Jd]
+*** SUMMARY ***
+Villain1 wins main pot of 10864
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70DP2MHD35SWX8MWTMW6F0J
+Date & Time: 2026-11-09 15:09:02 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 70
+Blinds: 350/700
+Total Pot: 13608
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (86529, €0.60 bounty) [BB]
+Seat 2: Villain2 (51606, €0.50 bounty)
+Seat 3: Villain6 (23372, €0.50 bounty)
+Seat 4: Villain4 (45248, €0.50 bounty)
+Seat 5: Hero (53360, €0.50 bounty) [BTN Hero]
+Seat 6: Villain5 (53207, €0.50 bounty) [SB]
+*** HOLE CARDS ***
+Villain1: [Qc Kc]
+Hero: [Jd 2d]
+Villain5: [Ah 6c]
+*** PRE-FLOP ***
+15:09:02 - Villain1: Posts Ante 70
+15:09:02 - Villain2: Posts Ante 70
+15:09:02 - Villain6: Posts Ante 70
+15:09:02 - Villain4: Posts Ante 70
+15:09:02 - Hero: Posts Ante 70
+15:09:02 - Villain5: Posts Ante 70
+15:09:02 - Villain5: Posts SB 350
+15:09:02 - Villain1: Posts BB 700
+15:09:05 - Villain2: Folds
+15:09:05 - Villain6: Folds
+15:09:25 - Villain4: Sits out
+15:09:25 - Villain4: Folds
+15:09:25 - Hero: Folds
+15:09:27 - Villain5: Calls 350
+15:09:33 - Villain1: Raises to 1750
+15:09:34 - Villain5: Calls 1050
+*** FLOP *** [Ac 3s 5s]
+15:09:38 - Villain5: Bets 1372
+15:09:40 - Villain1: Raises to 2744
+15:09:44 - Villain5: Calls 1372
+*** TURN *** [Ac 3s 5s 8d]
+15:09:46 - Villain5: Checks
+15:09:49 - Villain1: Bets 1400
+15:09:50 - Villain5: Calls 1400
+*** RIVER *** [Ac 3s 5s 8d 9s]
+15:09:53 - Hero: Reconnected
+15:09:53 - Villain5: Bets 700
+15:09:55 - Villain1: Calls 700
+*** SHOWDOWN ***
+Villain5 shows [Ah 6c] (Pair) [Ah Ac 9s 8d 6c]
+Villain1 shows [Qc Kc] (High Card) [Ac Kc Qc 9s 8d]
+*** SUMMARY ***
+Villain5 wins main pot of 13608
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70DMDEBBXTCB2JXASNNAPJ9
+Date & Time: 2026-11-09 15:08:08 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 70
+Blinds: 350/700
+Total Pot: 23372
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (90869, €0.60 bounty)
+Seat 2: Villain2 (52376, €0.50 bounty)
+Seat 3: Villain6 (8886, €0.50 bounty)
+Seat 4: Villain4 (45318, €0.50 bounty) [BTN]
+Seat 5: Hero (53780, €0.50 bounty) [SB Hero]
+Seat 6: Villain5 (62093, €0.50 bounty) [BB]
+*** HOLE CARDS ***
+Villain6: [Th Ts]
+Hero: [6d 7h]
+Villain5: [2s 8s]
+*** PRE-FLOP ***
+15:08:08 - Villain1: Posts Ante 70
+15:08:08 - Villain2: Posts Ante 70
+15:08:08 - Villain6: Posts Ante 70
+15:08:08 - Villain4: Posts Ante 70
+15:08:08 - Hero: Posts Ante 70
+15:08:08 - Villain5: Posts Ante 70
+15:08:08 - Hero: Posts SB 350
+15:08:08 - Villain5: Posts BB 700
+15:08:14 - Villain1: Calls 700
+15:08:16 - Villain2: Calls 700
+15:08:18 - Villain6: Raises to 4270
+15:08:18 - Villain4: Folds
+15:08:18 - Hero: Disconnected
+15:08:18 - Hero: Sits out
+15:08:18 - Hero: Folds
+15:08:20 - Villain5: Calls 3570
+15:08:25 - Hero: Reconnected
+15:08:25 - Hero: Sits in
+15:08:38 - Villain1: Calls 3570
+15:08:39 - Villain2: Folds
+*** FLOP *** [8d 9s Qh]
+15:08:42 - Villain5: Checks
+15:08:47 - Villain1: Checks
+15:08:49 - Villain6: Bets 4546 and is all-in
+15:08:50 - Villain5: Calls 4546
+15:08:53 - Villain1: Folds
+*** TURN *** [8d 9s Qh Kd]
+*** RIVER *** [8d 9s Qh Kd Tc]
+*** SHOWDOWN ***
+Villain5 shows [2s 8s] (Pair) [8s 8d Kd Qh Tc]
+Villain6 shows [Th Ts] (Three of a Kind) [Ts Th Tc Kd Qh]
+*** SUMMARY ***
+Villain6 wins main pot of 23372
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70DJGMH35EV6N78E1TX81EB
+Date & Time: 2026-11-09 15:07:06 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 70
+Blinds: 350/700
+Total Pot: 45318
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (90939, €0.60 bounty)
+Seat 2: Villain2 (52446, €0.50 bounty)
+Seat 3: Villain6 (30705, €0.50 bounty) [BTN]
+Seat 4: Villain4 (21819, €0.50 bounty) [SB]
+Seat 5: Hero (54550, €0.50 bounty) [BB Hero]
+Seat 6: Villain5 (62863, €0.50 bounty)
+*** HOLE CARDS ***
+Villain6: [Qd 5d]
+Villain4: [2c 5c]
+Hero: [Jc Kh]
+*** PRE-FLOP ***
+15:07:06 - Villain1: Posts Ante 70
+15:07:06 - Villain2: Posts Ante 70
+15:07:06 - Villain6: Posts Ante 70
+15:07:06 - Villain4: Posts Ante 70
+15:07:06 - Hero: Posts Ante 70
+15:07:06 - Villain5: Posts Ante 70
+15:07:06 - Villain4: Posts SB 350
+15:07:06 - Hero: Posts BB 700
+15:07:08 - Villain5: Calls 700
+15:07:13 - Hero: Reconnected
+15:07:26 - Villain1: Folds
+15:07:28 - Villain2: Folds
+15:07:37 - Villain6: Raises to 2100
+15:07:40 - Hero: Reconnected
+15:07:42 - Villain4: Calls 1750
+15:07:46 - Hero: Disconnected
+15:07:46 - Hero: Sits out
+15:07:46 - Hero: Folds
+15:07:46 - Villain5: Folds
+*** FLOP *** [2d Qc Kc]
+15:07:50 - Villain4: Bets 19649 and is all-in
+15:07:55 - Hero: Reconnected
+15:07:55 - Hero: Sits in
+15:07:58 - Villain6: Calls 19649
+*** TURN *** [2d Qc Kc Tc]
+*** RIVER *** [2d Qc Kc Tc Kd]
+*** SHOWDOWN ***
+Villain4 shows [2c 5c] (Flush) [Kc Qc Tc 5c 2c]
+Villain6 shows [Qd 5d] (Two Pair) [Kd Kc Qd Qc Tc]
+*** SUMMARY ***
+Villain4 wins main pot of 45318
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70DGJYWSQTKVZZ7C77Q4CYQ
+Date & Time: 2026-11-09 15:06:03 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 70
+Blinds: 350/700
+Total Pot: 38090
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (91009, €0.60 bounty)
+Seat 2: Villain2 (52516, €0.50 bounty) [BTN]
+Seat 3: Villain6 (31475, €0.50 bounty) [SB]
+Seat 4: Villain4 (40374, €0.50 bounty) [BB]
+Seat 5: Hero (54620, €0.50 bounty) [Hero]
+Seat 6: Villain5 (43328, €0.50 bounty)
+*** HOLE CARDS ***
+Villain4: [Kc Ks]
+Hero: [Qd 8s]
+Villain5: [6s Js]
+*** PRE-FLOP ***
+15:06:03 - Villain1: Posts Ante 70
+15:06:03 - Villain2: Posts Ante 70
+15:06:03 - Villain6: Posts Ante 70
+15:06:03 - Villain4: Posts Ante 70
+15:06:03 - Hero: Posts Ante 70
+15:06:03 - Villain5: Posts Ante 70
+15:06:03 - Villain6: Posts SB 350
+15:06:03 - Villain4: Posts BB 700
+15:06:05 - Hero: Disconnected
+15:06:05 - Hero: Sits out
+15:06:05 - Hero: Folds
+15:06:07 - Villain5: Calls 700
+15:06:09 - Hero: Reconnected
+15:06:09 - Hero: Sits in
+15:06:10 - Villain1: Folds
+15:06:12 - Villain2: Folds
+15:06:28 - Villain6: Calls 350
+15:06:29 - Hero: Reconnected
+15:06:39 - Villain4: Raises to 2100
+15:06:42 - Villain5: Calls 1400
+15:06:44 - Villain6: Folds
+*** FLOP *** [Jh As 8c]
+15:06:48 - Villain4: Bets 1862
+15:06:50 - Villain5: Calls 1862
+*** TURN *** [Jh As 8c 3s]
+15:06:53 - Villain4: Bets 3165
+15:06:54 - Hero: Reconnected
+15:06:54 - Villain5: Calls 3165
+*** RIVER *** [Jh As 8c 3s Jd]
+15:06:57 - Villain4: Bets 700
+15:06:58 - Villain5: Raises to 11358
+15:07:00 - Villain4: Calls 10658
+*** SHOWDOWN ***
+Villain4 shows [Kc Ks] (Two Pair) [Ks Kc Jh Jd As]
+Villain5 shows [6s Js] (Three of a Kind) [Js Jh Jd As 8c]
+*** SUMMARY ***
+Villain5 wins main pot of 38090
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70DEF8BVD67TXY7RC8EWEZJ
+Date & Time: 2026-11-09 15:04:53 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 60
+Blinds: 300/600
+Total Pot: 16944
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (81817, €0.60 bounty) [BTN]
+Seat 2: Villain2 (53176, €0.50 bounty) [SB]
+Seat 3: Villain6 (39227, €0.50 bounty) [BB]
+Seat 4: Villain4 (40434, €0.50 bounty)
+Seat 5: Hero (54680, €0.50 bounty) [Hero]
+Seat 6: Villain5 (43988, €0.50 bounty)
+*** HOLE CARDS ***
+Villain1: [6s 6c]
+Villain6: [9s Ad]
+Hero: [Ks 3d]
+*** PRE-FLOP ***
+15:04:53 - Villain1: Posts Ante 60
+15:04:53 - Villain2: Posts Ante 60
+15:04:53 - Villain6: Posts Ante 60
+15:04:53 - Villain4: Posts Ante 60
+15:04:53 - Hero: Posts Ante 60
+15:04:53 - Villain5: Posts Ante 60
+15:04:53 - Villain2: Posts SB 300
+15:04:53 - Villain6: Posts BB 600
+15:04:55 - Villain4: Folds
+15:05:01 - Hero: Folds
+15:05:04 - Villain5: Calls 600
+15:05:06 - Villain1: Calls 600
+15:05:10 - Villain2: Calls 300
+15:05:15 - Villain6: Checks
+*** FLOP *** [6h Js 9c]
+15:05:18 - Hero: Reconnected
+15:05:19 - Villain2: Checks
+15:05:23 - Villain6: Bets 1794
+15:05:26 - Villain5: Folds
+15:05:32 - Villain1: Raises to 5292
+15:05:33 - Hero: Reconnected
+15:05:34 - Villain2: Folds
+15:05:35 - Villain6: Calls 3498
+*** TURN *** [6h Js 9c Td]
+15:05:38 - Villain6: Checks
+15:05:42 - Villain1: Bets 1800
+15:05:44 - Villain6: Calls 1800
+*** RIVER *** [6h Js 9c Td Qs]
+15:05:51 - Hero: Reconnected
+15:05:54 - Villain6: Checks
+15:05:57 - Villain1: Checks
+*** SHOWDOWN ***
+Villain6 shows [9s Ad] (Pair) [9s 9c Ad Qs Js]
+Villain1 shows [6s 6c] (Three of a Kind) [6s 6h 6c Qs Js]
+*** SUMMARY ***
+Villain1 wins main pot of 16944
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70DD50W47TDKX8B8NKEYC2G
+Date & Time: 2026-11-09 15:04:10 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 60
+Blinds: 300/600
+Total Pot: 53176
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (82177, €0.60 bounty) [SB]
+Seat 2: Villain2 (49285, €0.50 bounty) [BB]
+Seat 3: Villain6 (42578, €0.50 bounty)
+Seat 4: Villain4 (40494, €0.50 bounty)
+Seat 5: Hero (54740, €0.50 bounty) [Hero]
+Seat 6: Villain5 (44048, €0.50 bounty) [BTN]
+*** HOLE CARDS ***
+Hero: [7d 8c]
+*** PRE-FLOP ***
+15:04:10 - Villain1: Posts Ante 60
+15:04:10 - Villain2: Posts Ante 60
+15:04:10 - Villain6: Posts Ante 60
+15:04:10 - Villain4: Posts Ante 60
+15:04:10 - Hero: Posts Ante 60
+15:04:10 - Villain5: Posts Ante 60
+15:04:10 - Villain1: Posts SB 300
+15:04:10 - Villain2: Posts BB 600
+15:04:14 - Villain6: Raises to 1800
+15:04:16 - Villain4: Folds
+15:04:16 - Hero: Disconnected
+15:04:16 - Hero: Sits out
+15:04:16 - Hero: Folds
+15:04:24 - Villain5: Folds
+15:04:27 - Villain4: Sits in
+15:04:28 - Villain1: Folds
+15:04:30 - Villain2: Calls 1200
+*** FLOP *** [Tc 4c 7c]
+15:04:35 - Villain2: Checks
+15:04:39 - Villain6: Bets 1491
+15:04:41 - Villain2: Calls 1491
+*** TURN *** [Tc 4c 7c 2c]
+15:04:44 - Hero: Reconnected
+15:04:44 - Hero: Sits in
+15:04:46 - Villain2: Bets 45934 and is all-in
+15:04:50 - Villain6: Folds
+*** SUMMARY ***
+Villain2 wins main pot of 53176
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70DARKJB78W0QQ7H6Q8Y4HW
+Date & Time: 2026-11-09 15:02:52 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 60
+Blinds: 300/600
+Total Pot: 8019
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (84037, €0.60 bounty) [BB]
+Seat 2: Villain2 (49945, €0.50 bounty)
+Seat 3: Villain6 (39578, €0.50 bounty)
+Seat 4: Villain4 (40554, €0.50 bounty)
+Seat 5: Hero (54800, €0.50 bounty) [BTN Hero]
+Seat 6: Villain5 (44408, €0.50 bounty) [SB]
+*** HOLE CARDS ***
+Hero: [9s Jd]
+*** PRE-FLOP ***
+15:02:52 - Villain1: Posts Ante 60
+15:02:52 - Villain2: Posts Ante 60
+15:02:52 - Villain6: Posts Ante 60
+15:02:52 - Villain4: Posts Ante 60
+15:02:52 - Hero: Posts Ante 60
+15:02:52 - Villain5: Posts Ante 60
+15:02:52 - Villain5: Posts SB 300
+15:02:52 - Villain1: Posts BB 600
+15:02:55 - Villain2: Calls 600
+15:02:58 - Hero: Reconnected
+15:02:58 - Hero: Sits in
+15:02:58 - Villain6: Raises to 1800
+15:03:18 - Villain4: Sits out
+15:03:18 - Villain4: Folds
+15:03:18 - Hero: Disconnected
+15:03:18 - Hero: Sits out
+15:03:18 - Hero: Folds
+15:03:19 - Hero: Reconnected
+15:03:19 - Hero: Sits in
+15:03:22 - Villain5: Folds
+15:03:27 - Villain1: Calls 1200
+15:03:29 - Villain2: Folds
+*** FLOP *** [6d 5c Ts]
+15:03:33 - Villain1: Checks
+15:03:40 - Villain6: Checks
+*** TURN *** [6d 5c Ts 3c]
+15:03:58 - Villain1: Checks
+15:04:01 - Villain6: Bets 3159
+15:04:07 - Villain1: Folds
+*** SUMMARY ***
+Villain6 wins main pot of 8019
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70D7B09QMJ1QHQ0CQP7TZZ5
+Date & Time: 2026-11-09 15:01:00 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 50
+Blinds: 250/500
+Total Pot: 1550
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (84087, €0.60 bounty)
+Seat 2: Villain2 (49995, €0.50 bounty)
+Seat 3: Villain6 (40128, €0.50 bounty)
+Seat 4: Villain4 (40604, €0.50 bounty) [BTN]
+Seat 5: Hero (55100, €0.50 bounty) [SB Hero]
+Seat 6: Villain5 (43408, €0.50 bounty) [BB]
+*** HOLE CARDS ***
+Villain6: [6s Qh]
+Hero: [9d 5h]
+Villain5: [8s Qs]
+*** PRE-FLOP ***
+15:01:00 - Villain1: Posts Ante 50
+15:01:00 - Villain2: Posts Ante 50
+15:01:00 - Villain6: Posts Ante 50
+15:01:00 - Villain4: Posts Ante 50
+15:01:00 - Hero: Posts Ante 50
+15:01:00 - Villain5: Posts Ante 50
+15:01:00 - Hero: Posts SB 250
+15:01:00 - Villain5: Posts BB 500
+15:01:00 - Hero: Reconnected
+15:01:08 - Villain1: Folds
+15:01:28 - Villain2: Sits out
+15:01:28 - Villain2: Folds
+15:01:28 - Villain6: Calls 500
+15:01:28 - Villain4: Folds
+15:01:28 - Hero: Disconnected
+15:01:37 - Hero: Reconnected
+15:01:43 - Hero: Disconnected
+15:02:05 - Villain2: Sits in
+15:02:14 - Hero: Sits out
+15:02:14 - Hero: Folds
+15:02:19 - Villain5: Checks
+*** FLOP *** [Jd Jh 7s]
+15:02:23 - Villain5: Checks
+15:02:26 - Villain6: Checks
+*** TURN *** [Jd Jh 7s 4h]
+15:02:32 - Villain5: Checks
+15:02:34 - Villain6: Checks
+*** RIVER *** [Jd Jh 7s 4h 5c]
+15:02:39 - Villain5: Checks
+15:02:46 - Villain6: Checks
+*** SHOWDOWN ***
+Villain5 shows [8s Qs] (Pair) [Jh Jd Qs 8s 7s]
+Villain6 shows [6s Qh] (Pair) [Jh Jd Qh 7s 6s]
+*** SUMMARY ***
+Villain5 wins main pot of 1550
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70CW912ZJX5EN05Y22ZN888
+Date & Time: 2026-11-09 14:54:57 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 50
+Blinds: 250/500
+Total Pot: 40604
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (84137, €0.60 bounty)
+Seat 2: Villain2 (50545, €0.50 bounty)
+Seat 3: Villain6 (59830, €0.50 bounty) [BTN]
+Seat 4: Villain4 (19702, €0.50 bounty) [SB]
+Seat 5: Hero (55650, €0.50 bounty) [BB Hero]
+Seat 6: Villain5 (43458, €0.50 bounty)
+*** HOLE CARDS ***
+Villain6: [Tc As]
+Villain4: [8h Jc]
+Hero: [6h Th]
+*** PRE-FLOP ***
+14:54:57 - Villain1: Posts Ante 50
+14:54:57 - Villain2: Posts Ante 50
+14:54:57 - Villain6: Posts Ante 50
+14:54:57 - Villain4: Posts Ante 50
+14:54:57 - Hero: Posts Ante 50
+14:54:57 - Villain5: Posts Ante 50
+14:54:57 - Villain4: Posts SB 250
+14:54:57 - Hero: Posts BB 500
+14:55:05 - Villain5: Folds
+14:55:10 - Villain1: Folds
+14:55:12 - Villain2: Calls 500
+14:55:17 - Villain6: Raises to 2550
+14:55:22 - Villain4: Calls 2300
+14:55:31 - Hero: Folds
+14:55:33 - Villain2: Folds
+*** FLOP *** [2d 8s Jh]
+14:55:38 - Villain4: Bets 4160
+14:55:41 - Villain6: Calls 4160
+*** TURN *** [2d 8s Jh 3c]
+14:55:45 - Villain4: Bets 500
+14:55:49 - Villain6: Raises to 5677
+14:55:52 - Villain4: Raises to 12942 and is all-in
+14:55:54 - Villain6: Calls 7265
+*** RIVER *** [2d 8s Jh 3c 3d]
+*** SHOWDOWN ***
+Villain4 shows [8h Jc] (Two Pair) [Jh Jc 8s 8h 3c]
+Villain6 shows [Tc As] (Pair) [3d 3c As Jh Tc]
+*** SUMMARY ***
+Villain4 wins main pot of 40604
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70CTDHRW2RMQ1FHT5AYSRBA
+Date & Time: 2026-11-09 14:53:56 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 50
+Blinds: 250/500
+Total Pot: 7600
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (84187, €0.60 bounty)
+Seat 2: Villain2 (51595, €0.50 bounty) [BTN]
+Seat 3: Villain6 (57080, €0.50 bounty) [SB]
+Seat 4: Villain4 (20252, €0.50 bounty) [BB]
+Seat 5: Hero (55700, €0.50 bounty) [Hero]
+Seat 6: Villain5 (44508, €0.50 bounty)
+*** HOLE CARDS ***
+Hero: [7h 8c]
+*** PRE-FLOP ***
+14:53:56 - Villain1: Posts Ante 50
+14:53:56 - Villain2: Posts Ante 50
+14:53:56 - Villain6: Posts Ante 50
+14:53:56 - Villain4: Posts Ante 50
+14:53:56 - Hero: Posts Ante 50
+14:53:56 - Villain5: Posts Ante 50
+14:53:56 - Villain6: Posts SB 250
+14:53:56 - Villain4: Posts BB 500
+14:54:00 - Hero: Folds
+14:54:02 - Villain5: Calls 500
+14:54:08 - Villain1: Folds
+14:54:10 - Villain2: Raises to 1000
+14:54:13 - Villain6: Calls 750
+14:54:13 - Villain4: Folds
+14:54:19 - Villain5: Calls 500
+*** FLOP *** [9s 6d Td]
+14:54:26 - Villain6: Checks
+14:54:28 - Villain5: Checks
+14:54:30 - Villain2: Checks
+*** TURN *** [9s 6d Td Ks]
+14:54:33 - Villain6: Checks
+14:54:37 - Villain5: Checks
+14:54:38 - Villain2: Checks
+*** RIVER *** [9s 6d Td Ks 8s]
+14:54:49 - Villain6: Bets 3800
+14:54:52 - Villain5: Folds
+14:54:54 - Villain2: Folds
+*** SUMMARY ***
+Villain6 wins main pot of 7600
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70CRKR59M76RXGREJVSM05W
+Date & Time: 2026-11-09 14:52:57 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 50
+Blinds: 250/500
+Total Pot: 6817
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (84237, €0.60 bounty) [BTN]
+Seat 2: Villain2 (51895, €0.50 bounty) [SB]
+Seat 3: Villain6 (57630, €0.50 bounty) [BB]
+Seat 4: Villain4 (22302, €0.50 bounty)
+Seat 5: Hero (52700, €0.50 bounty) [Hero]
+Seat 6: Villain5 (44558, €0.50 bounty)
+*** HOLE CARDS ***
+Hero: [Ac Th]
+*** PRE-FLOP ***
+14:52:57 - Villain1: Posts Ante 50
+14:52:57 - Villain2: Posts Ante 50
+14:52:57 - Villain6: Posts Ante 50
+14:52:57 - Villain4: Posts Ante 50
+14:52:57 - Hero: Posts Ante 50
+14:52:57 - Villain5: Posts Ante 50
+14:52:57 - Villain2: Posts SB 250
+14:52:57 - Villain6: Posts BB 500
+14:53:00 - Villain4: Raises to 1500
+14:53:04 - Hero: Calls 1500
+14:53:06 - Villain5: Folds
+14:53:19 - Villain1: Folds
+14:53:22 - Villain2: Folds
+14:53:33 - Villain6: Folds
+*** FLOP *** [4s 4c 3h]
+14:53:37 - Villain4: Bets 500
+14:53:38 - Hero: Calls 500
+*** TURN *** [4s 4c 3h Td]
+14:53:47 - Villain4: Checks
+14:53:50 - Hero: Bets 1767
+14:53:53 - Villain4: Folds
+*** SUMMARY ***
+Hero wins main pot of 6817
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70CPX8VQ4CEMRF33GEXPNXD
+Date & Time: 2026-11-09 14:52:01 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 50
+Blinds: 250/500
+Total Pot: 8745
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (85787, €0.60 bounty) [SB]
+Seat 2: Villain2 (52445, €0.50 bounty) [BB]
+Seat 3: Villain6 (59180, €0.50 bounty)
+Seat 4: Villain4 (22352, €0.50 bounty)
+Seat 5: Hero (48950, €0.50 bounty) [Hero]
+Seat 6: Villain5 (44608, €0.50 bounty) [BTN]
+*** HOLE CARDS ***
+Hero: [Ah Jd]
+*** PRE-FLOP ***
+14:52:01 - Villain1: Posts Ante 50
+14:52:01 - Villain2: Posts Ante 50
+14:52:01 - Villain6: Posts Ante 50
+14:52:01 - Villain4: Posts Ante 50
+14:52:01 - Hero: Posts Ante 50
+14:52:01 - Villain5: Posts Ante 50
+14:52:01 - Villain1: Posts SB 250
+14:52:01 - Villain2: Posts BB 500
+14:52:05 - Villain6: Calls 500
+14:52:08 - Villain4: Folds
+14:52:12 - Hero: Raises to 1500
+14:52:15 - Villain5: Folds
+14:52:20 - Villain1: Calls 1250
+14:52:22 - Villain2: Folds
+14:52:33 - Villain6: Calls 1000
+*** FLOP *** [Qs 8h 2s]
+14:52:38 - Villain1: Checks
+14:52:39 - Villain6: Checks
+14:52:44 - Hero: Checks
+*** TURN *** [Qs 8h 2s As]
+14:52:47 - Villain1: Checks
+14:52:48 - Villain6: Checks
+14:52:50 - Hero: Bets 3445
+14:52:53 - Villain1: Folds
+14:52:54 - Villain6: Folds
+*** SUMMARY ***
+Hero wins main pot of 8745
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70CNDKH8M2STZXDQFADP624
+Date & Time: 2026-11-09 14:51:12 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 50
+Blinds: 250/500
+Total Pot: 3795
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (86337, €0.60 bounty) [BB]
+Seat 2: Villain2 (52995, €0.50 bounty)
+Seat 3: Villain6 (57430, €0.50 bounty)
+Seat 4: Villain4 (22402, €0.50 bounty)
+Seat 5: Hero (49000, €0.50 bounty) [BTN Hero]
+Seat 6: Villain5 (45158, €0.50 bounty) [SB]
+*** HOLE CARDS ***
+Hero: [Kc 6h]
+*** PRE-FLOP ***
+14:51:12 - Villain1: Posts Ante 50
+14:51:12 - Villain2: Posts Ante 50
+14:51:12 - Villain6: Posts Ante 50
+14:51:12 - Villain4: Posts Ante 50
+14:51:12 - Hero: Posts Ante 50
+14:51:12 - Villain5: Posts Ante 50
+14:51:12 - Villain5: Posts SB 250
+14:51:12 - Villain1: Posts BB 500
+14:51:15 - Villain2: Calls 500
+14:51:19 - Villain6: Calls 500
+14:51:23 - Villain4: Folds
+14:51:25 - Hero: Folds
+14:51:25 - Hero: Sits in
+14:51:29 - Villain5: Calls 250
+14:51:33 - Villain1: Checks
+*** FLOP *** [9s 2d 5s]
+14:51:38 - Villain5: Checks
+14:51:40 - Villain1: Checks
+14:51:41 - Villain2: Checks
+14:51:44 - Villain6: Bets 1495
+14:51:47 - Villain5: Folds
+14:51:55 - Villain1: Folds
+14:51:58 - Villain2: Folds
+*** SUMMARY ***
+Villain6 wins main pot of 3795
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70CM9GHCC4M7B1S87XMED4S
+Date & Time: 2026-11-09 14:50:35 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 50
+Blinds: 250/500
+Total Pot: 57430
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (86387, €0.60 bounty)
+Seat 2: Villain2 (53045, €0.50 bounty)
+Seat 3: Villain6 (28240, €0.50 bounty)
+Seat 4: Villain4 (50642, €0.50 bounty) [BTN]
+Seat 5: Hero (49300, €0.50 bounty) [SB Hero]
+Seat 6: Villain5 (45708, €0.50 bounty) [BB]
+*** HOLE CARDS ***
+Villain6: [9c Jc]
+Villain4: [6h 5s]
+Hero: [8d Ah]
+*** PRE-FLOP ***
+14:50:35 - Villain1: Posts Ante 50
+14:50:35 - Villain2: Posts Ante 50
+14:50:35 - Villain6: Posts Ante 50
+14:50:35 - Villain4: Posts Ante 50
+14:50:35 - Hero: Posts Ante 50
+14:50:35 - Villain5: Posts Ante 50
+14:50:35 - Hero: Posts SB 250
+14:50:35 - Villain5: Posts BB 500
+14:50:39 - Villain1: Folds
+14:50:42 - Villain2: Folds
+14:50:44 - Villain6: Raises to 2050
+14:50:45 - Villain4: Calls 2050
+14:50:47 - Hero: Folds
+14:50:48 - Villain5: Folds
+*** FLOP *** [7c 9s Td]
+14:50:52 - Villain6: Bets 3347
+14:50:57 - Villain4: Calls 3347
+*** TURN *** [7c 9s Td 8s]
+14:51:01 - Villain6: Bets 7698
+14:51:03 - Villain4: Raises to 45195 and is all-in
+14:51:04 - Villain6: Calls 15095 and is all-in
+*** RIVER *** [7c 9s Td 8s Kh]
+*** SHOWDOWN ***
+Villain6 shows [9c Jc] (Straight) [Jc Td 9c 8s 7c]
+Villain4 shows [6h 5s] (Straight) [Td 9s 8s 7c 6h]
+*** SUMMARY ***
+Villain6 wins main pot of 57430
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70CJXAG6W3NNJ7E5R2ECQ57
+Date & Time: 2026-11-09 14:49:50 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 50
+Blinds: 250/500
+Total Pot: 28240
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (86937, €0.60 bounty)
+Seat 2: Villain2 (55595, €0.50 bounty)
+Seat 3: Villain6 (18910, €0.50 bounty) [BTN]
+Seat 4: Villain4 (56272, €0.50 bounty) [SB]
+Seat 5: Hero (49850, €0.50 bounty) [BB Hero]
+Seat 6: Villain5 (45758, €0.50 bounty)
+*** HOLE CARDS ***
+Hero: [2s Qh]
+*** PRE-FLOP ***
+14:49:50 - Villain1: Posts Ante 50
+14:49:50 - Villain2: Posts Ante 50
+14:49:50 - Villain6: Posts Ante 50
+14:49:50 - Villain4: Posts Ante 50
+14:49:50 - Hero: Posts Ante 50
+14:49:50 - Villain5: Posts Ante 50
+14:49:50 - Villain4: Posts SB 250
+14:49:50 - Hero: Posts BB 500
+14:49:55 - Villain5: Folds
+14:49:57 - Villain1: Calls 500
+14:49:58 - Villain2: Calls 500
+14:50:02 - Villain6: Raises to 1500
+14:50:03 - Villain4: Raises to 2500
+14:50:05 - Hero: Folds
+14:50:10 - Villain1: Folds
+14:50:13 - Villain2: Calls 2000
+14:50:13 - Villain6: Calls 1000
+*** FLOP *** [6d 2c Td]
+14:50:18 - Villain4: Bets 3080
+14:50:21 - Villain2: Folds
+14:50:23 - Villain6: Calls 3080
+*** TURN *** [6d 2c Td Js]
+14:50:26 - Villain4: Checks
+14:50:30 - Villain6: Bets 13280 and is all-in
+14:50:32 - Villain4: Folds
+*** SUMMARY ***
+Villain6 wins main pot of 28240
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70CJ564RT2VNHKHAF40JG0M
+Date & Time: 2026-11-09 14:49:25 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 50
+Blinds: 250/500
+Total Pot: 56272
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (86987, €0.60 bounty)
+Seat 2: Villain2 (56145, €0.50 bounty) [BTN]
+Seat 3: Villain6 (19460, €0.50 bounty) [SB]
+Seat 4: Villain4 (54522, €0.50 bounty) [BB]
+Seat 5: Hero (49900, €0.50 bounty) [Hero]
+Seat 6: Villain5 (46308, €0.50 bounty)
+*** HOLE CARDS ***
+Hero: [3h 7s]
+*** PRE-FLOP ***
+14:49:25 - Villain1: Posts Ante 50
+14:49:25 - Villain2: Posts Ante 50
+14:49:25 - Villain6: Posts Ante 50
+14:49:25 - Villain4: Posts Ante 50
+14:49:25 - Hero: Posts Ante 50
+14:49:25 - Villain5: Posts Ante 50
+14:49:25 - Villain6: Posts SB 250
+14:49:25 - Villain4: Posts BB 500
+14:49:28 - Hero: Folds
+14:49:31 - Villain5: Calls 500
+14:49:37 - Villain1: Folds
+14:49:38 - Villain2: Calls 500
+14:49:40 - Villain6: Calls 250
+14:49:42 - Villain4: Raises to 54472 and is all-in
+14:49:44 - Villain5: Folds
+14:49:46 - Villain2: Folds
+14:49:47 - Villain6: Folds
+*** SUMMARY ***
+Villain4 wins main pot of 56272
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70CGX71B2H6D4P1B55NTCK6
+Date & Time: 2026-11-09 14:48:45 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 50
+Blinds: 250/500
+Total Pot: 13470
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (87037, €0.60 bounty) [BTN]
+Seat 2: Villain2 (56445, €0.50 bounty) [SB]
+Seat 3: Villain6 (15153, €0.50 bounty) [BB]
+Seat 4: Villain4 (58379, €0.50 bounty)
+Seat 5: Hero (49950, €0.50 bounty) [Hero]
+Seat 6: Villain5 (46358, €0.50 bounty)
+*** HOLE CARDS ***
+Hero: [Ac 8h]
+*** PRE-FLOP ***
+14:48:45 - Villain1: Posts Ante 50
+14:48:45 - Villain2: Posts Ante 50
+14:48:45 - Villain6: Posts Ante 50
+14:48:45 - Villain4: Posts Ante 50
+14:48:45 - Hero: Posts Ante 50
+14:48:45 - Villain5: Posts Ante 50
+14:48:45 - Villain2: Posts SB 250
+14:48:45 - Villain6: Posts BB 500
+14:48:49 - Villain4: Raises to 1500
+14:49:09 - Hero: Sits out
+14:49:09 - Hero: Folds
+14:49:09 - Villain5: Folds
+14:49:11 - Villain1: Folds
+14:49:12 - Villain2: Folds
+14:49:12 - Villain6: Calls 1000
+*** FLOP *** [8d 9h 5s]
+14:49:16 - Villain6: Bets 2307
+14:49:18 - Villain4: Calls 2307
+*** TURN *** [8d 9h 5s 4c]
+14:49:21 - Villain6: Bets 5306
+14:49:22 - Villain4: Folds
+*** SUMMARY ***
+Villain6 wins main pot of 13470
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: ONE BY ONE
+Game ID: 01M6YSNJ00AYCSS4J39GKF5TT0
+Buy In: 1.00€
+Hand ID: 01M70CG0BM3R9Y7YE0DHZ6C3HM
+Date & Time: 2026-11-09 14:48:15 (UTC)
+Table ID: 01M70BBQBNKARAQZ7CD1RV9A5Y
+Ante: 50
+Blinds: 250/500
+Total Pot: 46358
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (87337, €0.60 bounty) [SB]
+Seat 2: Villain2 (56995, €0.50 bounty) [BB]
+Seat 3: Villain6 (37857, €0.50 bounty)
+Seat 4: Villain4 (58429, €0.50 bounty)
+Seat 5: Hero (50000, €0.50 bounty) [Hero]
+Seat 6: Villain5 (22704, €0.50 bounty) [BTN]
+*** HOLE CARDS ***
+Villain6: [4d Ah]
+Hero: [3c 8d]
+Villain5: [As 9h]
+*** PRE-FLOP ***
+14:48:15 - Villain1: Posts Ante 50
+14:48:15 - Villain2: Posts Ante 50
+14:48:15 - Villain6: Posts Ante 50
+14:48:15 - Villain4: Posts Ante 50
+14:48:15 - Hero: Posts Ante 50
+14:48:15 - Villain5: Posts Ante 50
+14:48:15 - Villain1: Posts SB 250
+14:48:15 - Villain2: Posts BB 500
+14:48:20 - Villain6: Raises to 2050
+14:48:21 - Villain4: Folds
+14:48:21 - Hero: Folds
+14:48:23 - Villain5: Raises to 22654 and is all-in
+14:48:30 - Villain1: Folds
+14:48:32 - Villain2: Folds
+14:48:33 - Villain6: Calls 20604
+*** FLOP *** [Kd Js 2c]
+*** TURN *** [Kd Js 2c 5c]
+*** RIVER *** [Kd Js 2c 5c 7s]
+*** SHOWDOWN ***
+Villain6 shows [4d Ah] (High Card) [Ah Kd Js 7s 5c]
+Villain5 shows [As 9h] (High Card) [As Kd Js 9h 7s]
+*** SUMMARY ***
+Villain5 wins main pot of 46358

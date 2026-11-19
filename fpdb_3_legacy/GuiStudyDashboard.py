@@ -48,7 +48,7 @@ from fpdb_3_legacy.research_study_dashboard import (
     DashboardComparison,
     StudyDashboardModel,
 )
-from fpdb_3_legacy.research_study_explorer import StudySelection
+from fpdb_3_legacy.research_study_explorer import StudySelection, game_label
 from fpdb_3_legacy.research_worker_db import worker_database
 from fpdb_3_legacy.responsive_layout import (
     CollapsibleSection,
@@ -487,7 +487,10 @@ class GuiStudyDashboard(QWidget):
 
     def _context_text(self) -> str:
         filters = self.model.base_filters
-        context = ", ".join(f"{name}={value}" for name, value in sorted(filters.items()))
+        context = ", ".join(
+            f"{name}={game_label(value) if name == 'game' else value}"
+            for name, value in sorted(filters.items())
+        )
         variables = ", ".join(
             f"{name}={value}" for name, value in sorted(self.model.state.variable_values.items())
         )

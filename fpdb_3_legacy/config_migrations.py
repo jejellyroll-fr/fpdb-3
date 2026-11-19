@@ -7,37 +7,46 @@ import shutil
 import tempfile
 from pathlib import Path
 
-import defusedxml.minidom
+from fpdb_3_legacy import config_xml as cx
+
+# The attributes that name what an element is: a binding is reported under the
+# nearest element (itself or an ancestor) carrying one of them.
+_OWNER_KEYS = ("game_name", "site_name", "name")
+
+
+def _owner_label(doc, node, default: str) -> str:
+    """The name of the game, site or definition that holds ``node``."""
+    owner = node
+    while not any(cx.has_attr(owner, key) for key in _OWNER_KEYS):
+        parent = cx.parent_of(doc, owner)
+        if parent is None:
+            break
+        owner = parent
+    return next((cx.attr(owner, key) for key in _OWNER_KEYS if cx.has_attr(owner, key)), default)
 
 
 def reference_errors(doc) -> list[str]:
     """Report every unresolved HUD binding, including its owning game/site."""
     definitions = {
-        kind: {n.getAttribute("name") for n in doc.getElementsByTagName(tag)}
+        kind: {cx.attr(n, "name") for n in cx.find_all(doc, tag)}
         for kind, tag in (("aux", "aw"), ("stat_set", "ss"), ("layout_set", "ls"))
     }
     errors = []
-    for node in doc.getElementsByTagName("*"):
+    for node in cx.find_all(doc, "*"):
+        tag = cx.tag_of(node)
         bindings = [(attr, attr) for attr in ("aux", "stat_set", "layout_set")]
-        if node.tagName == "layout_set":
+        if tag == "layout_set":
             bindings.append(("ls", "layout_set"))
-        if node.tagName == "hud_profile_rule":
+        if tag == "hud_profile_rule":
             bindings.append(("profile", "stat_set"))
         for attr, kind in bindings:
-            if not node.hasAttribute(attr):
+            if not cx.has_attr(node, attr):
                 continue
-            names = node.getAttribute(attr).split(",") if attr == "aux" else [node.getAttribute(attr)]
+            names = cx.attr(node, attr).split(",") if attr == "aux" else [cx.attr(node, attr)]
             for name in names:
                 name = name.strip()
                 if name and name not in definitions[kind]:
-                    owner = node
-                    keys = ("game_name", "site_name", "name")
-                    while not any(owner.hasAttribute(a) for a in keys):
-                        if owner.parentNode.nodeType != owner.ELEMENT_NODE:
-                            break
-                        owner = owner.parentNode
-                    label = next((owner.getAttribute(a) for a in keys if owner.hasAttribute(a)), node.tagName)
-                    errors.append(f"{label}: {kind} references undefined {name!r}")
+                    errors.append(f"{_owner_label(doc, node, tag)}: {kind} references undefined {name!r}")
     return errors
 
 
@@ -52,18 +61,18 @@ def _merge_83_to_84(doc, template) -> None:
         ("supported_sites", "site", "site_name"),
         ("hhcs", "hhc", "site"),
     ):
-        sources = template.getElementsByTagName(section)
+        sources = cx.find_all(template, section)
         if not sources:
             continue
-        targets = doc.getElementsByTagName(section)
+        targets = cx.find_all(doc, section)
         if not targets:
-            doc.documentElement.appendChild(doc.importNode(sources[0], True))
+            cx.append(doc, doc, cx.import_node(doc, sources[0]))
             continue
         target = targets[0]
-        existing = {n.getAttribute(key) for n in target.getElementsByTagName(tag)}
-        for node in sources[0].getElementsByTagName(tag):
-            if node.getAttribute(key) not in existing:
-                target.appendChild(doc.importNode(node, True))
+        existing = {cx.attr(n, key) for n in cx.find_all(target, tag)}
+        for node in cx.find_all(sources[0], tag):
+            if cx.attr(node, key) not in existing:
+                cx.append(doc, target, cx.import_node(doc, node))
     _repair_renamed_references(doc)
 
 
@@ -111,7 +120,7 @@ SITES_ADDED_IN_96 = ("PokerStars on Betfair",)  # #733: a PokerStars skin with i
 
 
 def _child_section(doc, section: str):
-    found = doc.getElementsByTagName(section)
+    found = cx.find_all(doc, section)
     return found[0] if found else None
 
 
@@ -132,16 +141,16 @@ def _add_sites(doc, template, names, *, before_same_converter: bool = False) -> 
         source = _child_section(template, section)
         if target is None or source is None:
             continue
-        existing = {node.getAttribute(key) for node in target.getElementsByTagName(tag)}
-        for node in source.getElementsByTagName(tag):
-            if node.getAttribute(key) in names and node.getAttribute(key) not in existing:
-                imported = doc.importNode(node, True)
+        existing = {cx.attr(node, key) for node in cx.find_all(target, tag)}
+        for node in cx.find_all(source, tag):
+            if cx.attr(node, key) in names and cx.attr(node, key) not in existing:
+                imported = cx.import_node(doc, node)
                 anchor = (
                     next(
                         (
                             other
-                            for other in target.getElementsByTagName(tag)
-                            if other.getAttribute("converter") == node.getAttribute("converter")
+                            for other in cx.find_all(target, tag)
+                            if cx.attr(other, "converter") == cx.attr(node, "converter")
                         ),
                         None,
                     )
@@ -149,10 +158,10 @@ def _add_sites(doc, template, names, *, before_same_converter: bool = False) -> 
                     else None
                 )
                 if anchor is not None:
-                    target.insertBefore(imported, anchor)
+                    cx.insert_before(doc, target, imported, anchor)
                 else:
-                    target.appendChild(imported)
-                existing.add(node.getAttribute(key))
+                    cx.append(doc, target, imported)
+                existing.add(cx.attr(node, key))
                 _add_missing_layout_sets(doc, template, node)
 
 
@@ -161,11 +170,11 @@ def _add_missing_layout_sets(doc, template, site) -> None:
     source = _child_section(template, "layout_sets")
     if target is None or source is None:
         return
-    defined = {node.getAttribute("name") for node in target.getElementsByTagName("ls")}
-    wanted = {node.getAttribute("ls") for node in site.getElementsByTagName("layout_set")} - defined
-    for node in source.getElementsByTagName("ls"):
-        if node.getAttribute("name") in wanted:
-            target.appendChild(doc.importNode(node, True))
+    defined = {cx.attr(node, "name") for node in cx.find_all(target, "ls")}
+    wanted = {cx.attr(node, "ls") for node in cx.find_all(site, "layout_set")} - defined
+    for node in cx.find_all(source, "ls"):
+        if cx.attr(node, "name") in wanted:
+            cx.append(doc, target, cx.import_node(doc, node))
 
 
 def _add_sites_87_to_88(doc, template) -> None:
@@ -190,14 +199,14 @@ def _add_summary_importers_88_to_89(doc, template) -> None:
     if target is None or source is None:
         return
     declared = {
-        (node.getAttribute("site"), node.getAttribute("converter")): node.getAttribute("summaryImporter")
-        for node in source.getElementsByTagName("hhc")
-        if node.getAttribute("summaryImporter")
+        (cx.attr(node, "site"), cx.attr(node, "converter")): cx.attr(node, "summaryImporter")
+        for node in cx.find_all(source, "hhc")
+        if cx.attr(node, "summaryImporter")
     }
-    for node in target.getElementsByTagName("hhc"):
-        importer = declared.get((node.getAttribute("site"), node.getAttribute("converter")))
-        if importer and not node.getAttribute("summaryImporter"):
-            node.setAttribute("summaryImporter", importer)
+    for node in cx.find_all(target, "hhc"):
+        importer = declared.get((cx.attr(node, "site"), cx.attr(node, "converter")))
+        if importer and not cx.attr(node, "summaryImporter"):
+            cx.set_attr(node, "summaryImporter", importer)
 
 
 def _add_sites_89_to_90(doc, template) -> None:
@@ -239,10 +248,10 @@ def _zero_padding_92_to_93(doc, template) -> None:
     sets them to 0, the spacing those HUDs have always had.
     """
     del template
-    for node in doc.getElementsByTagName("ss"):
+    for node in cx.find_all(doc, "ss"):
         for attr in ("xpad", "ypad"):
-            if node.hasAttribute(attr):
-                node.setAttribute(attr, "0")
+            if cx.has_attr(node, attr):
+                cx.set_attr(node, attr, "0")
 
 
 def _add_sites_93_to_94(doc, template) -> None:
@@ -279,17 +288,17 @@ def _add_sites_95_to_96(doc, template) -> None:
 
 
 def _repair_renamed_references(doc) -> None:
-    aux_names = {n.getAttribute("name") for n in doc.getElementsByTagName("aw")}
+    aux_names = {cx.attr(n, "name") for n in cx.find_all(doc, "aw")}
     if "Classic_HUD" not in aux_names and "ClassicHud" in aux_names:
-        for node in doc.getElementsByTagName("game"):
-            names = [name.strip() for name in node.getAttribute("aux").split(",")]
+        for node in cx.find_all(doc, "game"):
+            names = [name.strip() for name in cx.attr(node, "aux").split(",")]
             if "Classic_HUD" in names:
-                node.setAttribute("aux", ", ".join("ClassicHud" if name == "Classic_HUD" else name for name in names))
-    layout_names = {n.getAttribute("name") for n in doc.getElementsByTagName("ls")}
+                cx.set_attr(node, "aux", ", ".join("ClassicHud" if name == "Classic_HUD" else name for name in names))
+    layout_names = {cx.attr(n, "name") for n in cx.find_all(doc, "ls")}
     if "bodova_default" not in layout_names and "bovada_default" in layout_names:
-        for node in doc.getElementsByTagName("layout_set"):
-            if node.getAttribute("ls") == "bodova_default":
-                node.setAttribute("ls", "bovada_default")
+        for node in cx.find_all(doc, "layout_set"):
+            if cx.attr(node, "ls") == "bodova_default":
+                cx.set_attr(node, "ls", "bovada_default")
 
 
 MIGRATIONS = (
@@ -311,18 +320,18 @@ MIGRATIONS = (
 
 def upgrade_document(doc, template, target_version: int):
     """Prepare on a copy; never stamp an unknown schema as current."""
-    candidate = doc.cloneNode(True)
-    general = candidate.getElementsByTagName("general")
+    candidate = cx.clone_document(doc)
+    general = cx.find_all(candidate, "general")
     if not general:
         raise ValueError("Configuration has no version; manual review is required.")
-    version = int(general[0].getAttribute("version"))
-    template_general = template.getElementsByTagName("general")
-    if not template_general or int(template_general[0].getAttribute("version")) != target_version:
+    version = int(cx.attr(general[0], "version"))
+    template_general = cx.find_all(template, "general")
+    if not template_general or int(cx.attr(template_general[0], "version")) != target_version:
         raise ValueError("The shipped configuration template has an incompatible version.")
     for old, new, migrate in MIGRATIONS:
         if version == old and new <= target_version:
             migrate(candidate, template)
-            general[0].setAttribute("version", str(new))
+            cx.set_attr(general[0], "version", str(new))
             version = new
     if version != target_version:
         raise ValueError(f"No configuration upgrade path from version {version} to {target_version}.")
@@ -345,10 +354,10 @@ def write_upgrade(path: str, doc) -> str:
     temp_fd, temporary = tempfile.mkstemp(prefix=target.name + ".", suffix=".tmp", dir=target.parent)
     try:
         with os.fdopen(temp_fd, "w", encoding="utf-8") as stream:
-            stream.write(doc.toxml())
+            stream.write(cx.to_xml(doc))
             stream.flush()
             os.fsync(stream.fileno())
-        defusedxml.minidom.parse(temporary)
+        cx.parse_file(temporary, backend=cx.backend_of(doc))
         os.replace(temporary, target)
     finally:
         Path(temporary).unlink(missing_ok=True)

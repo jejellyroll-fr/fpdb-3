@@ -236,11 +236,11 @@ jobs:
           python_tag="cp${{ matrix.python-version }}"
           python_tag="${python_tag//./}"
           if [[ "$RUNNER_OS" == "macOS" ]]; then
-            wheel="pypoker_eval-1.2.0-${python_tag}-${python_tag}-macosx_11_0_arm64.whl"
+            wheel="pypoker_eval-1.3.3-${python_tag}-${python_tag}-macosx_11_0_arm64.whl"
           else
-            wheel="pypoker_eval-1.2.0-${python_tag}-${python_tag}-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+            wheel="pypoker_eval-1.3.3-${python_tag}-${python_tag}-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
           fi
-          url="https://github.com/jejellyroll-fr/poker-eval/releases/download/v1.2.0/${wheel}"
+          url="https://github.com/jejellyroll-fr/poker-eval/releases/download/v1.3.3/${wheel}"
           # GitHub's release CDN answers 503 often enough to redden a build on
           # its own, and uv's own retries span about ten seconds -- shorter
           # than such a blip tends to last. Spacing a few attempts turns it
@@ -551,17 +551,9 @@ jobs:
             target: aarch64-apple-darwin
             executable: fpdb
             artifact: fpdb-pyoxidizer-macos-arm64
-          # Windows is built again (it was dropped for Issue #225) so the
-          # single-interpreter bundle can be compared against the PyInstaller
-          # one. PyInstaller stays the supported Windows distribution.
-          - label: Windows x64
-            os: windows-latest
-            pyoxidizer_host: x86_64-pc-windows-msvc
-            pyoxidizer_archive: zip
-            pyoxidizer_sha256: c1b757bc7c64921b38bf5fd70d2a2e2f591d36fe1cae3b5722822c08f651ba7b
-            target: x86_64-pc-windows-msvc
-            executable: fpdb.exe
-            artifact: fpdb-pyoxidizer-windows-x64
+          # No Windows bundle (#457): Windows ships PyInstaller alone, and the
+          # CPython 3.11 archive PyOxidizer embeds names OpenSSL DLLs it does
+          # not contain there (astral-sh/python-build-standalone#473).
     steps:
       - uses: actions/checkout@v4
       - name: Validate macOS release credentials
@@ -659,12 +651,8 @@ jobs:
           fi
           python -c "import hashlib, pathlib, sys; actual = hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest(); assert actual == sys.argv[2], actual" \
             "$pyoxidizer_archive" "${{ matrix.pyoxidizer_sha256 }}"
-          if [[ "$pyoxidizer_archive" == *.zip ]]; then
-            python -m zipfile -e "$pyoxidizer_archive" "$RUNNER_TEMP"
-          else
-            mkdir -p "$pyoxidizer_dir"
-            tar -xzf "$pyoxidizer_archive" --strip-components=1 -C "$pyoxidizer_dir"
-          fi
+          mkdir -p "$pyoxidizer_dir"
+          tar -xzf "$pyoxidizer_archive" --strip-components=1 -C "$pyoxidizer_dir"
           echo "$pyoxidizer_dir" >> "$GITHUB_PATH"
       - name: Compile translation catalogs
         run: python tools/compile_translations.py

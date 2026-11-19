@@ -69,8 +69,8 @@ def test_hero_odds_summary_formatted_string(monkeypatch) -> None:
     replayer.currency_code = "USD"
     replayer.replay_model = cast(Any, SimpleNamespace(hand=SimpleNamespace(gametype={"category": "holdem"})))
     replayer.states = [
-        SimpleNamespace(players={}),
-        SimpleNamespace(players={1: SimpleNamespace(name="Hero", justacted=True, action="calls")}),
+        SimpleNamespace(street="FLOP", players={}),
+        SimpleNamespace(street="FLOP", players={1: SimpleNamespace(name="Hero", justacted=True, action="calls")}),
     ]
 
     frame = cast(Any, SimpleNamespace(
@@ -124,3 +124,108 @@ def test_hero_decision_metrics_supports_stud_and_draw() -> None:
     assert metrics["call_amount"] == Decimal(20)
     assert metrics["pot_odds_pct"] == Decimal(25)  # 20 / (60 + 20) = 25%
     assert metrics["pot_odds_ratio"] == Decimal(3)  # 60 / 20 = 3:1
+
+
+def _fusion_replayer(monkeypatch) -> tuple[Any, list[tuple[str, list[list[str]], list[str]]]]:
+    replayer = cast(Any, GuiReplayer).__new__(GuiReplayer)  # pylint: disable=no-value-for-parameter
+    replayer.Heroes = "Hero"
+    replayer.currency_code = "USD"
+    hand = SimpleNamespace(gametype={"category": "fusion", "base": "hold"}, holeStreets=["PREFLOP", "FLOP", "TURN"])
+    replayer.replay_model = cast(Any, SimpleNamespace(hand=hand))
+    calls: list[tuple[str, list[list[str]], list[str]]] = []
+
+    def engine(game, pockets, board, **_kwargs):
+        calls.append((game, pockets, board))
+        return SimpleNamespace(players=[SimpleNamespace(equity=Decimal("0.30")), SimpleNamespace(equity=Decimal("0.70"))])
+
+    monkeypatch.setattr("fpdb_3_legacy.GuiReplayer.calculate_equity", engine)
+    return replayer, calls
+
+
+def _fusion_frame(*streets: str) -> Any:
+    board = {"FLOP": ["2s", "5s", "8s"], "TURN": ["9s"], "RIVER": []}
+    return cast(Any, SimpleNamespace(
+        players=[
+            # Final pockets: the replay players hold all four from the start.
+            ReplayPlayer("Hero", 1, Decimal(0), Decimal(10), "calls", False, ["As", "Kd", "Qc", "Jh"]),
+            ReplayPlayer("Villain", 2, Decimal(0), Decimal(15), "bets", False, ["Td", "Tc", "3h", "4h"]),
+        ],
+        pot=Decimal(15),
+        board={street: board[street] for street in streets},
+        render_board=set(streets),
+    ))
+
+
+def test_fusion_flop_equity_holds_only_the_cards_dealt_so_far(monkeypatch) -> None:
+    # On the flop the turn's hole card is not dealt yet: the engine gets the
+    # three cards each player holds and deals the fourth itself (#818).
+    replayer, calls = _fusion_replayer(monkeypatch)
+
+    metrics = replayer._hero_decision_metrics(_fusion_frame("FLOP"), 0)
+
+    assert calls == [("fusion", [["As", "Kd", "Qc"], ["Td", "Tc", "3h"]], ["2s", "5s", "8s"])]
+    assert metrics["pot_odds_pct"] == Decimal(25)
+    assert metrics["call_equity_pct"] == Decimal(30)
+
+
+def test_fusion_equity_from_the_turn_holds_all_four_hole_cards(monkeypatch) -> None:
+    replayer, calls = _fusion_replayer(monkeypatch)
+
+    metrics = replayer._hero_decision_metrics(_fusion_frame("FLOP", "TURN"), 0)
+
+    assert calls == [("fusion", [["As", "Kd", "Qc", "Jh"], ["Td", "Tc", "3h", "4h"]], ["2s", "5s", "8s", "9s"])]
+    assert metrics["call_equity_pct"] == Decimal(30)
+
+
+def _draw_replayer(monkeypatch) -> tuple[Any, list[tuple[str, list[list[str]], list[str]]]]:
+    replayer = cast(Any, GuiReplayer).__new__(GuiReplayer)  # pylint: disable=no-value-for-parameter
+    replayer.Heroes = "Hero"
+    replayer.currency_code = "USD"
+    replayer.replay_model = cast(
+        Any, SimpleNamespace(hand=SimpleNamespace(gametype={"category": "27_3draw", "base": "draw"}))
+    )
+    calls: list[tuple[str, list[list[str]], list[str]]] = []
+
+    def engine(game, pockets, board, **_kwargs):
+        calls.append((game, pockets, board))
+        return SimpleNamespace(players=[SimpleNamespace(equity=Decimal(1)), SimpleNamespace(equity=Decimal(0))])
+
+    monkeypatch.setattr("fpdb_3_legacy.GuiReplayer.calculate_equity", engine)
+    return replayer, calls
+
+
+def _draw_frame(street: str) -> Any:
+    return cast(
+        Any,
+        SimpleNamespace(
+            players=[
+                ReplayPlayer("Hero", 1, Decimal(0), Decimal(10), "calls", False, ["7c", "5d", "4h", "3s", "2c"]),
+                ReplayPlayer("Villain", 2, Decimal(0), Decimal(15), "bets", False, ["8c", "6d", "5h", "4s", "2d"]),
+            ],
+            pot=Decimal(15),
+            board={},
+            render_board=set(),
+            street=street,
+        ),
+    )
+
+
+def test_draw_equity_waits_for_the_last_draw(monkeypatch) -> None:
+    # Before the third draw the hands shown are not the ones that will play:
+    # their showdown is not the equity (#831).
+    replayer, calls = _draw_replayer(monkeypatch)
+
+    metrics = replayer._hero_decision_metrics(_draw_frame("DRAWTWO"), 0)
+
+    assert not calls
+    assert metrics["call_equity_pct"] is None
+    assert metrics["pot_odds_pct"] == Decimal(25)
+
+
+def test_draw_equity_after_the_last_draw_is_the_showdown(monkeypatch) -> None:
+    replayer, calls = _draw_replayer(monkeypatch)
+
+    metrics = replayer._hero_decision_metrics(_draw_frame("DRAWTHREE"), 0)
+
+    assert calls == [("lowball27", [["7c", "5d", "4h", "3s", "2c"], ["8c", "6d", "5h", "4s", "2d"]], [])]
+    assert metrics["call_equity_pct"] == Decimal(100)
