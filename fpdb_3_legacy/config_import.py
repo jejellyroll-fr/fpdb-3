@@ -31,6 +31,7 @@ log = get_logger("configuration")
 
 class HHC:
     def __init__(self, node) -> None:
+        # pylint: disable=invalid-name  # the attribute names are the HUD_config.xml ones, read by name elsewhere
         self.site = cx.attr(node, "site")
         self.converter = cx.attr(node, "converter")
         self.summaryImporter = cx.attr(node, "summaryImporter")
@@ -41,6 +42,7 @@ class HHC:
 
 class Import:
     def __init__(self, node) -> None:
+        # pylint: disable=invalid-name  # the attribute names are the HUD_config.xml ones, read by name elsewhere
         self.node = node
         self.interval = cx.attr(node, "interval")
         self.sessionTimeout = string_to_bool(cx.attr(node, "sessionTimeout"), default=30)
