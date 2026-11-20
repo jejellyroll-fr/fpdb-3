@@ -85,7 +85,7 @@ TOURNEY_RESULTS_QUERY = """
 
 
 @dataclass(frozen=True)
-class TourneyResult:
+class TourneyResult:  # pylint: disable=too-many-instance-attributes  # one column per field
     """One player's result in one tournament, in display units."""
 
     tourney_id: int
@@ -232,7 +232,7 @@ def result_from_row(row: dict[str, Any]) -> TourneyResult:
 
 
 @dataclass
-class Summary:
+class Summary:  # pylint: disable=too-many-instance-attributes  # one running total per figure
     """Totals of a set of results, all in one currency.
 
     ``count`` is every tournament; the money figures, ITM and ROI cover the

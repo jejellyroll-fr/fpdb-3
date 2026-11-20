@@ -23,7 +23,10 @@ from fpdb_3_legacy.tourney_results import (
     running_curves,
     summarize,
 )
-from tests.test_knockout_filter import two_sngs  # noqa: F401 - fixture
+from tests import test_knockout_filter
+
+# The two imported sit-and-gos of the knockout tests, shared as a fixture.
+two_sngs = test_knockout_filter.two_sngs
 
 
 def result(tourney_id: int, *, prize: float | None = 0.0, bounties: float = 0.0, **fields) -> TourneyResult:
@@ -171,7 +174,7 @@ def test_the_description_reads_like_a_tournament_list() -> None:
     assert describe(result(1, sng=False, entries=180, max_seats=9, knockout=True)) == "MTT (9-max) Hyper NL Hold'em KO"
 
 
-def test_the_results_query_matches_the_detailed_stats(two_sngs) -> None:  # noqa: F811 - fixture
+def test_the_results_query_matches_the_detailed_stats(two_sngs) -> None:
     """Both queries take the same filters: the overview must add up to the old grid."""
     hero_ids = [row[0] for row in two_sngs.get_cursor().execute("SELECT id FROM Players WHERE name = 'Hero'")]
     site_ids = [row[0] for row in two_sngs.get_cursor().execute("SELECT DISTINCT siteId FROM TourneyTypes")]

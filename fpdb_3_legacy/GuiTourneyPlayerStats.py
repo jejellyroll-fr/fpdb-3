@@ -291,12 +291,12 @@ class _KpiStrip(QWidget):
         for column in range(self._grid.columnCount()):
             self._grid.setColumnStretch(column, 1 if column < columns else 0)
 
-    def resizeEvent(self, event) -> None:  # noqa: N802 - Qt override
+    def resizeEvent(self, event) -> None:  # noqa: N802  # pylint: disable=invalid-name  # Qt override
         super().resizeEvent(event)
         self._reflow()
 
 
-class _ResultsChart(QFrame):
+class _ResultsChart(QFrame):  # pylint: disable=too-many-instance-attributes  # widgets + drawn state
     """Running net won, ROI% and ITM% after each tournament.
 
     PyQtGraph is imported on first use: this tab is created at startup.
@@ -535,8 +535,9 @@ class GuiTourneyPlayerStats(QSplitter):
         frame_layout.setSpacing(8)
 
         self._pages = QStackedWidget()
+        table_panel = self._build_table_panel()
         self._pages.addWidget(self._build_placeholder())
-        self._pages.addWidget(self._build_results_page())
+        self._pages.addWidget(self._build_results_page(table_panel))
         frame_layout.addWidget(self._pages)
 
         self.addWidget(scroll)
@@ -575,7 +576,7 @@ class GuiTourneyPlayerStats(QSplitter):
         layout.addStretch(2)
         return page
 
-    def _build_results_page(self) -> QWidget:
+    def _build_results_page(self, table_panel: QWidget) -> QWidget:
         page = QWidget()
         layout = QVBoxLayout(page)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -624,7 +625,7 @@ class GuiTourneyPlayerStats(QSplitter):
         self.content_splitter.setChildrenCollapsible(False)
         self.chart = _ResultsChart()
         self.content_splitter.addWidget(self.chart)
-        self.content_splitter.addWidget(self._build_table_panel())
+        self.content_splitter.addWidget(table_panel)
         self.content_splitter.setStretchFactor(0, 2)
         self.content_splitter.setStretchFactor(1, 3)
         # The table gets the larger share from the start, not only of extra space.
@@ -1343,10 +1344,8 @@ class GuiTourneyPlayerStats(QSplitter):
         self._render(select_key=left.key)
 
     def _on_breadcrumb_link(self, link: str) -> None:
-        try:
+        if link.isdigit():
             self.clear_scope(int(link))
-        except ValueError:
-            return
 
     def _on_escape(self) -> None:
         if self.search_edit.hasFocus() and self.search_edit.text():
@@ -1410,7 +1409,7 @@ class GuiTourneyPlayerStats(QSplitter):
         if shown:
             self.table.resizeColumnToContents(index)
 
-    def changeEvent(self, event) -> None:  # noqa: N802 - Qt override
+    def changeEvent(self, event) -> None:  # noqa: N802  # pylint: disable=invalid-name  # Qt override
         super().changeEvent(event)
         # A theme switch restyles the cards by itself; the curves and tones need redrawing.
         if event.type() in (QEvent.Type.PaletteChange, QEvent.Type.StyleChange) and self.results:

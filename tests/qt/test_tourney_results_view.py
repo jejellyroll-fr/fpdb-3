@@ -15,10 +15,10 @@ pytestmark = pytest.mark.qt
 
 
 class _Filters(QWidget):
-    def registerButton2Name(self, *_args) -> None:  # noqa: N802 - Filters API
+    def registerButton2Name(self, *_args) -> None:  # noqa: N802  # pylint: disable=invalid-name  # Filters API
         pass
 
-    def registerButton2Callback(self, *_args) -> None:  # noqa: N802 - Filters API
+    def registerButton2Callback(self, *_args) -> None:  # noqa: N802  # pylint: disable=invalid-name  # Filters API
         pass
 
 
