@@ -81,6 +81,7 @@ ACTION_METHOD_BY_TYPE = {
     "calls": "addCall",
     "bets": "addBet",
     "raises": "addRaiseTo",
+    "completes": "addComplete",
     "folds": "addFold",
     "checks": "addCheck",
     "collects": "addCollectPot",
@@ -230,7 +231,7 @@ def build_hand_operations(hand_data: dict[str, Any]) -> list[dict[str, Any]]:
                     "source": "actions",
                 }
             )
-        elif method == "addRaiseTo":
+        elif method in {"addRaiseTo", "addComplete"}:
             operations.append(
                 {
                     "method": method,
@@ -492,7 +493,7 @@ def validate_hand_operations(operations: list[dict[str, Any]]) -> list[str]:
                 errors.append(f"operation {index}: seat {args[0]} is already held by '{seat_holders[args[0]]}'")
             else:
                 seat_holders[args[0]] = args[1]
-        elif method in {"addCall", "addBet", "addRaiseTo", "addFold", "addCheck"}:
+        elif method in {"addCall", "addBet", "addRaiseTo", "addComplete", "addFold", "addCheck"}:
             if len(args) < 2 or args[0] in (None, "", "UNKNOWN") or args[1] in (None, ""):
                 errors.append(f"operation {index}: {method} requires street and player")
         elif method in {"addBlind", "addAnte", "addCollectPot"}:

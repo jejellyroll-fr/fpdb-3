@@ -20,6 +20,7 @@ from fpdb_3_legacy.swc_native_capture import (
     _build_native_action_evidence,
     _collect_native_game_changes,
     _native_board_output,
+    _native_hand_seat_map,
     _native_street_profile,
     _native_table_family,
     _resolve_native_hand_game,
@@ -31,6 +32,7 @@ from fpdb_3_legacy.swc_native_capture import (
     build_native_ofc_summary,
     card_id_to_str,
     classify_native_ofc_deal_pattern,
+    decode_native_amount,
     derive_native_stud_betting_structure,
     derive_native_used_hole_cards,
     diff_game_states,
@@ -52,13 +54,12 @@ from fpdb_3_legacy.swc_native_capture import (
     infer_native_seat_evidence,
     iter_capture_records,
     iter_protocol_messages,
-    match_native_departed_active_action,
     match_native_foldout_winner_seat_evidence,
-    match_native_local_player_action,
     match_native_outbound_seat_evidence,
-    match_native_previous_active_action,
     match_native_return_seat_evidence,
     native_action_street,
+    native_seat_cards,
+    native_stud_hole_cards,
     normalize_native_hands,
     parse_native_card_mnemonic,
     parse_native_dealer_draw,
@@ -74,6 +75,14 @@ from fpdb_3_legacy.swc_native_capture import (
     parse_native_outbound_action,
     parse_native_outbound_seat_request,
     summarize_native_hands,
+)
+from tests.helpers.swc_native_payloads import (
+    encode_native_amount,
+    native_action_event,
+    native_event_list,
+    native_player_record,
+    native_seat_block,
+    native_state_payload,
 )
 
 HEADER = struct.Struct("=IHBBHHIQ")
@@ -475,31 +484,56 @@ def test_extract_game_state_preserves_confirmed_ids_players_and_raw_payload():
     assert snapshot.peer_port == 20013
 
 
-def test_extract_game_state_reads_observed_three_byte_stack_units():
+def test_extract_game_state_reads_each_seat_state_from_the_block_before_its_record():
     table_id = 28248
     hand_id = 298328340
-    name = b"Mahyar"
-    player = (
-        (255385813).to_bytes(4, "little")
-        + len(name).to_bytes(2, "little")
-        + name
-        + b"\0\0prefix"
-        + b"\xf0\xbf"
-        + b"\0\x16\x80"
-        + b"\0\x40"
-        + (b"\0" * 4)
-        + (580).to_bytes(3, "little")
-        + b"suffix"
-    )
-    payload = (
-        b"\x16\0" + player + hand_id.to_bytes(4, "little") + table_id.to_bytes(4, "little") + (b"\0" * 5) + b"\x01"
+    payload = native_state_payload(
+        table_id,
+        hand_id,
+        [
+            None,
+            (native_seat_block(funds=580, active=True), native_player_record(255385813, "alice")),
+            None,
+            (native_seat_block(funds=1500), native_player_record(7, "bob")),
+        ],
     )
 
     snapshot = extract_game_state(NativeProtocolMessage(datetime.now(UTC), payload), {table_id})
 
     assert snapshot is not None
-    assert snapshot.players[0].stack_units == 580
-    assert snapshot.players[0].is_active is True
+    alice, bob = snapshot.players
+    assert (alice.name, alice.seat_idx, alice.stack_units, alice.is_active) == ("alice", 1, 580, True)
+    # The block after alice's record is bob's: reading it as hers handed every
+    # player their neighbour's funds and active bit (#829).
+    assert (bob.name, bob.seat_idx, bob.stack_units, bob.is_active) == ("bob", 3, 1500, False)
+
+
+def test_decode_native_amount_reads_the_room_amount_encoding():
+    assert decode_native_amount(b"\x05", 0) == (5, 1)
+    assert decode_native_amount(bytes.fromhex("5c2e00"), 0) == (1500, 3)
+    assert decode_native_amount(bytes.fromhex("480100"), 0) == (40, 3)
+    assert decode_native_amount(bytes.fromhex("44ff00"), 0) == (4 + (0xFF << 5), 3)
+    assert decode_native_amount(bytes.fromhex("4801"), 0) is None  # three bytes promised, two present
+    assert decode_native_amount(bytes.fromhex("a0"), 0) is None  # an unobserved form is refused
+    for value in (0, 31, 32, 580, 3152, 123_456):
+        encoded = encode_native_amount(value)
+        assert decode_native_amount(encoded, 0) == (value, len(encoded))
+
+
+def test_extract_game_state_leaves_seat_state_unread_when_the_seat_array_does_not_fit():
+    table_id = 28248
+    hand_id = 298328340
+    payload = bytearray(
+        native_state_payload(
+            table_id, hand_id, [(native_seat_block(funds=580, active=True), native_player_record(9, "alice"))]
+        )
+    )
+    payload[14] = 0x07  # neither an empty nor an occupied seat
+
+    snapshot = extract_game_state(NativeProtocolMessage(datetime.now(UTC), bytes(payload)), {table_id})
+
+    assert snapshot is not None
+    assert snapshot.players == (NativePlayerIdentity(9, "alice"),)
 
 
 @pytest.mark.parametrize(
@@ -581,7 +615,7 @@ def test_extract_native_boards_reads_run_it_twice_at_showdown_with_hand_eval_str
     table_id = 299672838
     hand_id = 301461752
     b1_cards = [31, 38, 10, 46, 12]  # 9s, Jh, 4h, Kh, 5c
-    b2_cards = [31, 38, 10, 8, 24]   # 9s, Jh, 4h, 4c, 8c (shared flop: 9s, Jh, 4h)
+    b2_cards = [31, 38, 10, 8, 24]  # 9s, Jh, 4h, 4c, 8c (shared flop: 9s, Jh, 4h)
     eval_text1 = b"Flush high Kh"
     eval_text2 = b"Two Pairs 9 4 and K"
     strings_block = (
@@ -643,7 +677,7 @@ def test_extract_native_animation_events_reads_observed_type_9_suffix():
 def test_extract_native_animation_events_recovers_unique_type_9_from_unknown_list():
     table_id = 28248
     hand_id = 298328340
-    action = b"\x09\x08\x50\x02" + (b"\0" * 8)
+    action = native_action_event(8, 80, 2)
     payload = (
         b"\x16\0state"
         + hand_id.to_bytes(4, "little")
@@ -657,6 +691,22 @@ def test_extract_native_animation_events_recovers_unique_type_9_from_unknown_lis
     events = extract_native_animation_events(NativeProtocolMessage(datetime.now(UTC), payload), {table_id})
 
     assert [(event.type_code, event.action_code, event.funds, event.seat_idx) for event in events] == [(9, 8, 80, 2)]
+
+
+def test_extract_native_animation_events_reads_a_long_amount_and_the_seat_after_it():
+    table_id = 28248
+    hand_id = 298328340
+    payload = native_state_payload(
+        table_id,
+        hand_id,
+        [(native_seat_block(funds=900), native_player_record(9, "alice"))],
+        events=native_event_list(native_action_event(9, 40, 0), native_action_event(3, 5, 0)),
+    )
+
+    events = extract_native_animation_events(NativeProtocolMessage(datetime.now(UTC), payload), {table_id})
+
+    # ``09 09 48 01 00 00``: 40 chips from seat 0, which a one-byte read took for 72 from seat 1.
+    assert [(event.action_code, event.funds, event.seat_idx) for event in events] == [(9, 40, 0), (3, 5, 0)]
 
 
 def test_extract_native_animation_events_walks_observed_four_byte_auxiliary_types():
@@ -808,66 +858,117 @@ def test_collect_native_game_changes_binds_latest_change_to_hand():
     assert changes[(table_id, 1002)]["game_label"] == "Hold'em"
 
 
-def _stud_snapshot(records):
-    """Build a stud snapshot from [(name, [slot bytes]), ...] player records."""
-    body = b"start"
-    players = []
-    for index, (name, slots) in enumerate(records):
-        total = len(slots) + 2  # two hole cards plus the shown board slots
-        body += name.encode() + b"\x00\x00\xf0\xbf" + bytes([total]) + b"\xff\xff" + bytes(slots) + b"\x00\x00"
-        players.append(NativePlayerIdentity(index + 1, name, None, False, None))
-    return NativeGameStateSnapshot(datetime.now(UTC), 1, 1, 5, tuple(players), body)
+def _stud_seat(player_id, name, cards, seat_idx, funds=1500):
+    """A seated stud player whose state block carries ``cards`` (0xFF hidden)."""
+    block = native_seat_block(funds=funds, cards=bytes([len(cards), *cards]))
+    return NativePlayerIdentity(player_id, name, funds, False, 0, seat_idx=seat_idx, state_block=block)
+
+
+def _stud_snapshot(*players):
+    return NativeGameStateSnapshot(datetime.now(UTC), 1, 1, 5, tuple(players), b"")
+
+
+HIDDEN = 0xFF
 
 
 def test_extract_native_stud_upcards_maps_streets_and_hidden_slots():
-    snap = _stud_snapshot([("BingoBob", [37, 40, 43, 0xFF])])
+    snap = _stud_snapshot(_stud_seat(1, "alice", [HIDDEN, HIDDEN, 37, 40, 43, HIDDEN], seat_idx=2))
+
     rows = extract_native_stud_upcards([snap])
 
-    assert len(rows) == 1
-    row = rows[0]
-    assert row["player"] == "BingoBob"
-    assert row["seat_idx"] is None
-    assert list(row["up_cards"]) == ["THIRD", "FOURTH", "FIFTH", "SIXTH"]
-    assert all(isinstance(row["up_cards"][s], str) for s in ("THIRD", "FOURTH", "FIFTH"))
-    assert row["up_cards"]["SIXTH"] is None  # 0xFF is a hidden card
+    assert rows == [
+        {
+            "player": "alice",
+            "seat_idx": 2,
+            "up_cards": {
+                "THIRD": card_id_to_str(37),
+                "FOURTH": card_id_to_str(40),
+                "FIFTH": card_id_to_str(43),
+                "SIXTH": None,
+            },
+        }
+    ]
 
 
-def test_extract_native_stud_upcards_picks_richest_snapshot():
-    early = _stud_snapshot([("BingoBob", [37])])
-    late = _stud_snapshot([("BingoBob", [37, 40, 43])])
+def test_extract_native_stud_upcards_reads_each_seat_its_own_block():
+    # Each player's cards come from their own seat block, so the bring-in's low
+    # card stays with the bring-in (#829: it used to land on the next player).
+    rows = extract_native_stud_upcards(
+        [
+            _stud_snapshot(
+                _stud_seat(1, "alice", [HIDDEN, HIDDEN, 0], seat_idx=0),
+                _stud_seat(2, "bob", [HIDDEN, HIDDEN, 50], seat_idx=3),
+            )
+        ]
+    )
+
+    assert {row["player"]: row["up_cards"]["THIRD"] for row in rows} == {
+        "alice": card_id_to_str(0),
+        "bob": card_id_to_str(50),
+    }
+
+
+def test_extract_native_stud_upcards_merges_snapshots_slot_by_slot():
+    early = _stud_snapshot(_stud_seat(1, "alice", [HIDDEN, HIDDEN, 37], seat_idx=0))
+    late = _stud_snapshot(_stud_seat(1, "alice", [HIDDEN, HIDDEN, 37, 40, 43], seat_idx=0))
+
     rows = extract_native_stud_upcards([early, late])
 
     assert list(rows[0]["up_cards"]) == ["THIRD", "FOURTH", "FIFTH"]
 
 
+def test_extract_native_stud_upcards_drops_a_seat_whose_readings_disagree():
+    first = _stud_snapshot(_stud_seat(1, "alice", [HIDDEN, HIDDEN, 37], seat_idx=0))
+    second = _stud_snapshot(_stud_seat(1, "alice", [HIDDEN, HIDDEN, 38], seat_idx=0))
+
+    assert extract_native_stud_upcards([first, second]) == []
+
+
 def test_extract_native_stud_upcards_rejects_duplicate_cards():
     # The same card id in two players means a false match, so nothing decodes.
-    snap = _stud_snapshot([("BingoBob", [37, 40]), ("Allinred", [37, 44])])
+    snap = _stud_snapshot(
+        _stud_seat(1, "alice", [HIDDEN, HIDDEN, 37, 40], seat_idx=0),
+        _stud_seat(2, "bob", [HIDDEN, HIDDEN, 37, 44], seat_idx=1),
+    )
     assert extract_native_stud_upcards([snap]) == []
 
 
-def test_extract_native_stud_upcards_adds_only_proven_revealed_down_cards():
-    hidden = _stud_snapshot([("BingoBob", [37, 40, 43, 44, 0xFF])])
-    revealed = _stud_snapshot([("BingoBob", [37, 40, 43, 44, 0xFF])])
-    marker = revealed.raw_payload.find(b"\x07\xff\xff\x25\x28\x2b\x2c\xff")
-    payload = bytearray(revealed.raw_payload)
-    payload[marker + 1 : marker + 3] = bytes([1, 12])
-    payload[marker + 7] = 31
-    revealed = replace(revealed, raw_payload=bytes(payload))
+def test_extract_native_stud_upcards_reads_visible_down_cards():
+    # The local player always sees their own down cards; anyone else only at showdown.
+    hidden = _stud_snapshot(_stud_seat(1, "alice", [HIDDEN, HIDDEN, 37, 40, 43, 44, HIDDEN], seat_idx=0))
+    revealed = _stud_snapshot(_stud_seat(1, "alice", [1, 12, 37, 40, 43, 44, 31], seat_idx=0))
 
     rows = extract_native_stud_upcards([hidden, revealed])
 
     assert rows[0]["down_cards"] == {"THIRD": [card_id_to_str(1), card_id_to_str(12)], "SEVENTH": card_id_to_str(31)}
+    assert "SEVENTH" not in rows[0]["up_cards"]
 
 
-def test_extract_native_stud_upcards_does_not_guess_unanchored_card_block():
-    snap = _stud_snapshot([("BingoBob", [37, 40])])
-    payload = snap.raw_payload + b"BingoBob\x05\x01\x02\x03\x04\x05"
-    snap = replace(snap, raw_payload=payload)
+def test_native_seat_cards_find_the_cards_after_variable_length_amounts():
+    for funds in (0, 31, 1500):
+        block = native_seat_block(funds=funds, cards=bytes([3, HIDDEN, HIDDEN, 30]))
+        assert native_seat_cards(block) == bytes([HIDDEN, HIDDEN, 30])
+    assert native_seat_cards(b"\x01\x02\x80") is None
 
-    rows = extract_native_stud_upcards([snap])
 
-    assert "down_cards" not in rows[0]
+def test_native_stud_hole_cards_follow_the_text_importers_street_shape():
+    rows = [
+        {
+            "player": "alice",
+            "seat_idx": 0,
+            "up_cards": {"THIRD": "Td", "FOURTH": "9s"},
+            "down_cards": {"THIRD": ["5h", "3c"], "SEVENTH": "2d"},
+        },
+        {"player": "bob", "seat_idx": 1, "up_cards": {"THIRD": "Kc"}},
+        {"player": "watcher", "seat_idx": 2, "up_cards": {"THIRD": "Ah"}},
+    ]
+
+    assert native_stud_hole_cards(rows, {"alice", "bob"}) == [
+        {"player": "alice", "street": "THIRD", "open": ["Td"], "closed": ["5h", "3c"], "dealt": True},
+        {"player": "alice", "street": "FOURTH", "open": ["9s"], "closed": []},
+        {"player": "alice", "street": "SEVENTH", "open": [], "closed": ["2d"]},
+        {"player": "bob", "street": "THIRD", "open": ["Kc"], "closed": [], "dealt": True},
+    ]
 
 
 def test_extract_native_stud_forced_bets_preserves_indexes_and_exact_amounts():
@@ -1038,57 +1139,19 @@ def test_native_stud_stateful_amounts_advance_through_anonymous_fixed_raise():
     assert [action["amount_native"] for action in actions if action["action"] == "call"] == [30, 30]
 
 
-def test_match_native_previous_active_action_uses_actor_before_transition():
-    active = NativePlayerIdentity(7, "Allinred", None, True, 64)
-    waiting = NativePlayerIdentity(8, "BingoBob", None, False, 0)
-    previous = NativeGameStateSnapshot(datetime.now(UTC), 1, 2, 1, (active, waiting), b"")
-    event = NativeAnimationEvent(1, 2, 1, 4, 9, 1, 0, 8, b"fold")
+def test_native_hand_seat_map_keeps_only_seats_every_snapshot_agrees_on():
+    alice = NativePlayerIdentity(7, "alice", seat_idx=0)
+    bob = NativePlayerIdentity(8, "bob", seat_idx=2)
+    carol_in_bobs_seat = NativePlayerIdentity(9, "carol", seat_idx=2)
+    unseated = NativePlayerIdentity(10, "dave")
 
-    matched = match_native_previous_active_action(previous, (event,))
+    def snapshot(*players):
+        return NativeGameStateSnapshot(datetime.now(UTC), 1, 2, 1, players, b"")
 
-    assert matched == (4, active)
-
-
-def test_match_native_previous_active_action_rejects_ambiguous_actor():
-    players = (
-        NativePlayerIdentity(7, "Allinred", None, True, 64),
-        NativePlayerIdentity(8, "BingoBob", None, True, 64),
-    )
-    previous = NativeGameStateSnapshot(datetime.now(UTC), 1, 2, 1, players, b"")
-    event = NativeAnimationEvent(1, 2, 1, 0, 9, 2, 0, 8, b"check")
-
-    assert match_native_previous_active_action(previous, (event,)) is None
-
-
-def test_match_native_local_player_action_requires_empty_active_flag():
-    local = NativePlayerIdentity(9, "Hero")
-    event = NativeAnimationEvent(1, 2, 1, 0, 9, 2, 0, 8, b"check")
-    previous = NativeGameStateSnapshot(
-        datetime.now(UTC),
-        1,
-        2,
-        1,
-        (NativePlayerIdentity(7, "Villain"), local),
-        b"",
-    )
-
-    assert match_native_local_player_action(previous, (event,), local) == (0, local)
-    active_previous = replace(
-        previous,
-        players=(NativePlayerIdentity(7, "Villain", is_active=True), local),
-    )
-    assert match_native_local_player_action(active_previous, (event,), local) is None
-
-
-def test_match_native_departed_active_action_uses_unique_active_set_difference():
-    alice = NativePlayerIdentity(7, "Alice", is_active=True)
-    bob = NativePlayerIdentity(8, "Bob", is_active=True)
-    previous = NativeGameStateSnapshot(datetime.now(UTC), 1, 2, 2, (alice, bob), b"")
-    current = replace(previous, players=(replace(alice, is_active=False), bob))
-    event = NativeAnimationEvent(1, 2, 2, 0, 9, 2, 0, 8, b"check")
-
-    assert match_native_departed_active_action(previous, current, (event,)) == (0, alice)
-    assert match_native_departed_active_action(previous, previous, (event,)) is None
+    assert _native_hand_seat_map([snapshot(alice, bob, unseated), snapshot(alice, bob)]) == {0: alice, 2: bob}
+    assert _native_hand_seat_map([snapshot(alice, bob), snapshot(alice, carol_in_bobs_seat)]) == {0: alice}
+    alice_elsewhere = replace(alice, seat_idx=3)
+    assert _native_hand_seat_map([snapshot(alice, bob), snapshot(alice_elsewhere, bob)]) == {2: bob}
 
 
 def test_parse_native_dealer_draw_decodes_counts_and_stands_pat():
@@ -1259,17 +1322,11 @@ def test_normalize_native_hands_builds_capture_only_snapshot_envelope():
     )
 
     def state_payload(stack):
-        player = (
-            (7).to_bytes(4, "little")
-            + len(name).to_bytes(2, "little")
-            + name
-            + b"\0\0prefix\xf0\xbf\0\x16\x80"
-            + (b"\0" * 6)
-            + stack.to_bytes(3, "little")
-            + b"suffix"
-        )
-        return (
-            b"\x16\0" + player + hand_id.to_bytes(4, "little") + table_id.to_bytes(4, "little") + (b"\0" * 5) + b"\x01"
+        return native_state_payload(
+            table_id,
+            hand_id,
+            [(native_seat_block(funds=stack), native_player_record(7, name.decode())), None],
+            game_code=b"OP",
         )
 
     hands = normalize_native_hands(
@@ -1293,7 +1350,7 @@ def test_normalize_native_hands_builds_capture_only_snapshot_envelope():
     assert hand["steps"][1]["stacks"] == {"Player": 580}
     assert hand["steps"][1]["diff"]["candidates"][0]["amount_delta"] == "-4"
     assert hand["steps"][1]["native_events"] == []
-    assert hand["metadata"]["player_funds_field"] == "opaque_native_value_not_money"
+    assert hand["metadata"]["player_funds_field"] == "native_seat_funds_amount"
     assert hand["metadata"]["importability"]["status"] == "capture_only"
     assert hand["actions"] == []
     assert hand["action_evidence"] == []
@@ -1535,7 +1592,7 @@ def test_extract_native_table_player_stacks_decodes_type_23_roster():
             + len(encoded).to_bytes(2, "little")
             + encoded
             + b"\0\0"
-            + stack.to_bytes(3, "little")
+            + encode_native_amount(stack).ljust(3, b"\0")
             + suffix
         )
 
@@ -1993,3 +2050,39 @@ def test_swc_native_tailing_thread_stops_cleanly(tmp_path, monkeypatch):
 
     assert not thread.isRunning()
 
+
+def test_a_chip_animation_with_a_long_amount_keeps_the_rest_of_its_event_list():
+    table_id = 28248
+    hand_id = 298328340
+    chips = b"\x04\x00" + encode_native_amount(40) + b"\x02"  # an ante of 40, seat 2: six bytes, not four
+    payload = native_state_payload(
+        table_id,
+        hand_id,
+        [(native_seat_block(funds=900), native_player_record(9, "alice")), None, None],
+        events=native_event_list(chips, native_action_event(4, 40, 2)),
+    )
+
+    events = extract_native_animation_events(NativeProtocolMessage(datetime.now(UTC), payload), {table_id})
+
+    assert [(event.type_code, event.funds, event.seat_idx) for event in events] == [(4, 40, 2), (9, 40, 2)]
+
+
+def test_the_seat_walk_steps_over_a_showdown_label():
+    table_id = 28248
+    hand_id = 298328340
+    payload = native_state_payload(
+        table_id,
+        hand_id,
+        [
+            (native_seat_block(funds=100), native_player_record(9, "alice", label="Pair of 3s and K Q 7")),
+            None,
+            (native_seat_block(funds=200), native_player_record(10, "bob")),
+        ],
+    )
+
+    snapshot = extract_game_state(NativeProtocolMessage(datetime.now(UTC), payload), {table_id})
+
+    assert [(player.name, player.seat_idx, player.stack_units) for player in snapshot.players] == [
+        ("alice", 0, 100),
+        ("bob", 2, 200),
+    ]

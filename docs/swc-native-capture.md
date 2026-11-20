@@ -155,14 +155,43 @@ length-prefixed player id/name. The full payload remains attached to every
 snapshot while the variable card/action suffix is decoded.
 
 Observed Hold'em and Omaha round values are `0` reset, `1` preflop, `2` flop,
-`3` turn, `4` river, `5` showdown, and `6` settlement. Player records contain
-an opaque three-byte funds value and have two observed
-layouts because an optional byte precedes their flag word; the decoder anchors
-the value relative to that flag word. Its changes do not match the known blind
-amounts, so normalized metadata explicitly marks it as non-monetary. A unique
-decrease aligned with one type-9 event was tested as player evidence, then
-rejected: in complete Hold'em hand `298328340` it produces an action sequence
-whose apparent winner contradicts the explicit Dealer settlement.
+`3` turn, `4` river, `5` showdown, and `6` settlement. Each player's funds,
+active bit and cards live in the seat state block that *precedes* the player's
+record; see "Seat array and native amounts" below. (Earlier notes here called
+the funds opaque and non-monetary: they were read from the block after the
+name -- the next player's -- and as a plain integer.)
+
+### Seat array and native amounts
+
+Established on the 2026-11-20 session (a 7-Card Stud freeroll, PLO, Drawmaha;
+#829) and checked against the room's own `<nick s="N">` seat attributes, every
+seat the Hold'em evidence had proven, and the Dealer's settlements.
+
+- **Amounts.** Funds, roster stacks and animation amounts are one byte when
+  under 32; otherwise the first byte sets `0x40` and keeps the low five bits,
+  and the next two bytes hold the rest: `5c 2e 00` is 28 + 46 x 32 = 1500,
+  `48 01 00` is 40 (`decode_native_amount`). Read as plain integers, every
+  stack and every amount of 32 or more was wrong -- 1500 chips read as 11868,
+  a $4.00 roster stack as 31.52.
+- **Seat array.** A class-22 snapshot is `16 00`, a sequence number, four
+  bytes, a flag, the two-letter game code (`SF`, `OP`, ...), the seat count at
+  offset 13, then one entry per seat: `00` for an empty seat, or `01` + the
+  seat's state block + the player's record (id, name, ..., `f0 bf`, then at a
+  showdown a length-prefixed hand label). The type-9 index is this seat
+  number (`_walk_native_seats`). 1755 of 1763 snapshots of the session walk;
+  the rest are left unseated rather than guessed.
+- **Seat state block.** `01 <flags> <8x> 00 <status> 00 00 00 00`, then the
+  funds (amount), the street bet (amount), six bytes, and the cards: a count and
+  that many slots, `ff` for a hidden card -- two down cards, the door card,
+  fourth to sixth street, the seventh down card for stud (`native_seat_cards`).
+  Status bit `0x40` is the player to act.
+- **Animation events.** Types 1, 2, 3, 4, 6 and 25 are type, action, amount,
+  seat: four bytes, six with a long amount. Types 7, 9 and 12 add a
+  length-prefixed label and six bytes; the label is `TO` on an action the room
+  takes for a player who timed out and `UB` on an uncalled bet, empty
+  otherwise. Read at fixed lengths, either form threw the whole event list away.
+- A snapshot's funds already reflect the actions it lists: 452 of 452 stud
+  actions match their seat's funds change exactly.
 
 Native type-15 settlement events are decoded separately. They provide the
 winner roster index/name and the exact integer from `<money a="…">`; normalized hands
@@ -178,7 +207,8 @@ Snapshot player order is exposed as `roster_index`, never as an FPDB seat.
 Likewise, type-15 `<nick s="…">` is `player_index`; all four captured examples
 match the winner's roster position. Both normalized player and collection
 `seat_idx` fields remain null until the separate animation/table-seat mapping
-is decoded.
+is decoded. (It now is -- "Seat array and native amounts"; stud players carry
+their seat, Hold'em and draw still take theirs from the evidence below.)
 
 Normalized animation and action evidence likewise exposes the raw fourth byte
 as `native_index`; `seat_idx` stays null even when a player identity is proven.
@@ -249,6 +279,8 @@ player for 13 type-9 events and 10 recognized poker actions. All others retain
 their native index, code, funds byte, and raw bytes without an invented player.
 
 The type-9 funds field is preserved as `funds_byte`, not as an FPDB amount.
+(Since #829 it is the decoded amount: the "80 ... 48" below is a long amount
+read as one byte, see "Seat array and native amounts".)
 Small cash blinds happen to match their native units, but hand `298328344`
 contains a final bet byte of `80` followed by an exact return of `48`, proving
 that direct amount semantics do not generalize. No action byte is summed into a
@@ -291,7 +323,9 @@ even one player attribution is unresolved or its beginning/settlement is not
 present; this also makes captures that started mid-hand explicit.
 
 The player flag word exposes an observed active-player bit, but it is not used
-as seat evidence. Pairing it with type 6 or type 9 produces contradictions, so
+as seat evidence. (The contradictions below came from reading it in the next
+player's block; read from the player's own, it is consistent, and the seat
+array now gives seats outright.) Pairing it with type 6 or type 9 produces contradictions, so
 neither animation index can safely be treated as a stable player seat.
 
 The complete observed native status byte is also preserved per player as
@@ -437,31 +471,50 @@ rounds 2/4/6); settlement is the last round and showdown the one before it.
 Hold'em/Omaha keep their existing family profile and the community-card
 round-before-reveal shift; stud and draw never take that shift.
 
-## Stud up cards
+## Stud hands (#829)
 
-Stud up cards are visible to the whole table and are stored in each player
-record as a `<total-cards> 0xFF 0xFF <board slots>` block: `total-cards` counts
-the two hole cards plus the shown board, and the slots run from the third-street
-door card onward (`0xFF` marks a hidden card — an opponent's hole card or an
-un-revealed seventh street). `extract_native_stud_upcards` reads the snapshot
-that exposes the most up cards and maps the slots to `THIRD, FOURTH, FIFTH,
-SIXTH, SEVENTH`, leaving hidden slots `null`, into `native_stud_cards`. A decode
-is rejected outright if any card repeats across players, guarding against a
-false block match. On `test4.raw` this recovers 52 up cards across the ten stud
-hands (studhi/studhilo/razz), each street's door and later up cards in order.
-Third-street hole cards and hidden seventh-street cards are not claimed, and no
-seat is resolved.
+**Cards.** Each seat's cards are read from its own state block
+(`native_seat_cards`): two down cards, the door card, fourth to sixth street,
+then the seventh-street down card, `0xFF` where hidden. `extract_native_stud_upcards`
+merges the readings of every snapshot slot by slot, so a card shown later fills
+a slot hidden earlier; the down cards are compared as a set, because the
+showdown lists them in hand-ranking order. A seat whose readings disagree is
+dropped, and a card appearing twice rejects the whole decode. Down cards show
+for the local player throughout, and for anyone else once all in or at the
+showdown. The local player is the captured login, or else the single seat
+showing its down cards on the first snapshot that deals them; the envelope
+names it `hero`, which `StudHand.join_holecards` needs to file those cards as
+down cards.
 
-Stud hands stay capture-only. On tournament stud tables the snapshot's
-name-to-funds pairing contradicts the Dealer chat in nearly every captured hand:
-the player whose funds rise is not the one the Dealer names as the winner, and
-one name is credited with folds made from several native indexes. Until that
-pairing is proven against the room's own hand histories, importing these hands
-would credit the wrong players with actions and pots (#829).
+**Actions.** A stud action's player is whoever the seat array puts in the seat
+the type-9 event names (`player_evidence_source: native_seat_record`); the
+earlier guesses from the active bit and from departures are gone. Amounts are
+the events' own. The first bet or raise on third street after the bring-in is a
+completion (`completes`, `StudHand.addComplete`). A hand is reconstructed only
+when its actions add up exactly to what the Dealer paid out and returned.
 
-The stakes a stud hand's envelope carries do not wait for that: the gametype's
-`ante` is the ante the capture read, and on a fixed-limit table `sb`/`bb` are
-half the small bet and the small bet derived from it, the convention
-`SealsWithClubsToFpdb` uses for the room's text histories (a `10-20` table is
-`sb` 5, `bb` 10). They used to read 0/0 with no ante even when the structure
-had been derived.
+**Stacks.** `audit_native_seat_ledger` takes each player's stack as the first
+snapshot's funds plus what that snapshot shows them paying (the antes), and
+keeps it only if the hand closes for every participant: starting stack, less
+their actions, plus what they collected and had returned, must be the funds the
+last snapshot shows. It runs for every family whose amounts conserve; a closed
+ledger's stacks take precedence over the type-23 roster ledger, which on the
+2026-11-20 PLO table never closed.
+
+**Stakes.** The gametype's `ante` is the ante read; on a fixed-limit table `sb`
+and `bb` are half the small bet and the small bet, the convention
+`SealsWithClubsToFpdb` uses for the room's text histories. The ratios (small
+bet 5 x ante, big bet 10 x ante, bring-in 2.5 x ante rounded down) hold on every
+level of the 2026-11-20 freeroll. In a tournament half a chip is kept (`sb` 7.5
+on a 15/30 level), as the text importer writes it; at a cash table an odd small
+bet leaves `sb`/`bb` at 0. Antes without blinds are never a bomb pot outside a
+board game.
+
+**Import.** `promote_native_stud_importability` opens a fixed-limit stud hand
+to `Hand.py` when every participant has a distinct seat and a proven stack, the
+ledger closes, every action has a player, the Dealer announced the start and the
+end, a pot was collected and, in a tournament, the tournament is known. On the
+2026-11-20 session that is 70 of 73 stud hands; the other three are the hand
+the capture opened on, a hand joined after the deal, and the table's last hand,
+whose all-in carries an unknown action code (24). Across every local capture,
+92 of 100.
