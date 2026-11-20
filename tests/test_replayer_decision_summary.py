@@ -140,7 +140,7 @@ def test_hero_facing_a_bet_shows_the_call_its_pot_odds_and_the_street_spr(monkey
             ],
         )
     ]
-    title, rows = _sections(replayer, 10, detailed=True)[0]
+    rows = _sections(replayer, 10, detailed=True)[0][1]
     assert ("Pot odds", "2.3:1") in rows
     assert ("Facing", "75% of the pot") in rows
     assert ("Pot on the table", "$7.00") in rows

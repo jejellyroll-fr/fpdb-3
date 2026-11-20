@@ -357,5 +357,5 @@ def test_panel_visibility_drops_sections_left_empty_in_the_compact_view() -> Non
     detail_only = PanelSection("Detail", (PanelRow("Only in detail", "1", detail=True),))
     panel = DecisionPanel("Hero bets", (detail_only,))
 
-    assert panel.visible(False) == ()
+    assert not panel.visible(False)
     assert [section.title for section in panel.visible(True)] == ["Detail"]
