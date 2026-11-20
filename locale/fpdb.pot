@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-15 20:49+0100\n"
+"POT-Creation-Date: 2026-11-20 08:07+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -470,7 +470,7 @@ msgstr ""
 msgid "Ring"
 msgstr ""
 
-#: fpdb_3_legacy/Filters.py
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiTourneyPlayerStats.py
 msgid "All tournaments"
 msgstr ""
 
@@ -818,7 +818,8 @@ msgstr ""
 msgid "Idle"
 msgstr ""
 
-#: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py fpdb_3_legacy/hud_options_panel.py
 #: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
 #: fpdb_3_legacy/research_labels.py
 msgid "Player"
@@ -845,7 +846,7 @@ msgid "Latest: -"
 msgstr ""
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/GuiBulkImport.py
-#: fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py fpdb_3_legacy/hand_share_dialog.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Site"
 msgstr ""
@@ -1207,7 +1208,8 @@ msgstr ""
 msgid "Host / Path"
 msgstr ""
 
-#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/pack_share_dialog.py
+#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiTourneyPlayerStats.py
+#: fpdb_3_legacy/pack_share_dialog.py
 msgid "Name"
 msgstr ""
 
@@ -1333,7 +1335,7 @@ msgid "Export to File"
 msgstr ""
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiHandViewer.py
-#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/capture/swc_poker_console.py
+#: fpdb_3_legacy/capture/swc_poker_console.py fpdb_3_legacy/results_calendar.py
 msgid "Showdown"
 msgstr ""
 
@@ -1346,8 +1348,8 @@ msgid "Net profit excluding splash"
 msgstr ""
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResearchBrowser.py
-#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/GuiTrackerMigration.py
-#: fpdb_3_legacy/session_guard_dialog.py
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py fpdb_3_legacy/GuiTrackerMigration.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/session_guard_dialog.py
 msgid "Hands"
 msgstr ""
 
@@ -1666,7 +1668,7 @@ msgid "Filter by Module:"
 msgstr ""
 
 #: fpdb_3_legacy/GuiLogView.py fpdb_3_legacy/GuiOpponentsReport.py
-#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/pack_gallery_dialog.py
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/results_calendar.py
 msgid "Refresh"
 msgstr ""
 
@@ -1789,11 +1791,12 @@ msgstr ""
 msgid "Previous action"
 msgstr ""
 
-#: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/session_guard_dialog.py
+#: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/GuiTourneyPlayerStats.py
+#: fpdb_3_legacy/session_guard_dialog.py
 msgid "Start"
 msgstr ""
 
-#: fpdb_3_legacy/GuiReplayer.py
+#: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/GuiTourneyPlayerStats.py
 msgid "End"
 msgstr ""
 
@@ -1811,6 +1814,25 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
 msgid "Hide Cards"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/results_calendar.py
+msgid "Big blinds"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "Show stacks, bets and pots in big blinds"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "Odds for all players"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid ""
+"Show SPR, bet sizing, pot odds, MDF and fold equity for every player, not "
+"only the hero"
 msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
@@ -1863,6 +1885,50 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, python-format
+msgid "%(name)s %(action)s %(size)s%% of the pot"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "MDF %(mdf)s%% · fold equity needed %(fe)s%% (heads-up)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "MDF / fold equity: heads-up only"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(name)s SPR %(spr)s"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(name)s to call %(amount)s"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "pot odds %(odds)s%%"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "facing %(size)s%% of the pot"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(name)s to act"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "SPR %(spr)s"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
 msgid "Bounty: %s"
 msgstr ""
 
@@ -1898,60 +1964,6 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
 msgid "(this table taken as the whole field)"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "%(name)s %(action)s %(size)s%% of the pot"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "%(name)s SPR %(spr)s"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "%(name)s to act"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "%(name)s to call %(amount)s"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "MDF %(mdf)s%% · fold equity needed %(fe)s%% (heads-up)"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-msgid "MDF / fold equity: heads-up only"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-msgid "Odds for all players"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "SPR %(spr)s"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-msgid ""
-"Show SPR, bet sizing, pot odds, MDF and fold equity for every player, not "
-"only the hero"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "facing %(size)s%% of the pot"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "pot odds %(odds)s%%"
 msgstr ""
 
 #: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/GuiResearchViews.py
@@ -2339,118 +2351,6 @@ msgid ""
 "Realized {realized} over {hands} hands; EV-adjusted {ev} ({luck} of it luck)."
 msgstr ""
 
-#: fpdb_3_legacy/results_calendar.py
-#, python-brace-format
-msgid "Week of {date}"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Period:"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Days"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Months"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Weeks"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Unit:"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Review hands"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Open the hands of the selected period in the Hand Viewer"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Previous month"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Next month"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Click to select the whole month"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Week"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "All-in EV"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Profit (BB)"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "All-in EV (BB)"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "BB/100"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "EV BB/100"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Showdown (BB)"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Non-showdown (BB)"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Loading…"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-#, python-brace-format
-msgid ""
-"Hands: {hands} · Profit: {profit} · All-in EV: {ev} · BB/100: {bb100} · EV "
-"BB/100: {ev100} · Days played: {days} ({winning} winning)"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-#, python-brace-format
-msgid "{hands} hands"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-#, python-brace-format
-msgid "Profit: {profit}"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-#, python-brace-format
-msgid "All-in EV: {ev}"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-#, python-brace-format
-msgid "BB/100: {bb100}"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "All hands of the filtered dates"
-msgstr ""
-
 #: fpdb_3_legacy/GuiSessionViewer.py
 msgid "Hand Breakdown for all levels listed above"
 msgstr ""
@@ -2511,7 +2411,325 @@ msgid "ICM $EV-adjusted: %(total)s | %(priced)s of %(allins)s all-ins priced"
 msgstr ""
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Net won"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "ROI %"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "ITM %"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Show or hide this curve"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Graphs need the pyqtgraph package."
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Tournaments played"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+#, python-format
+msgid "#%(n)s %(when)s · Net %(net)s · ROI %(roi)s · ITM %(itm)s"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
 msgid "Refresh Stats"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Tournament results"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid ""
+"Choose a hero and the tournaments to include on the left, then press Refresh "
+"Stats."
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "← Back"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Back to the previous view (Esc)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Tournaments"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Buy-ins"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Buy-ins and fees paid"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Prizes and bounties, less buy-ins and fees"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Net won as a share of the buy-ins and fees"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "ROI"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "ITM"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Share of the tournaments that paid a prize"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Average finishing place, when known"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Avg finish"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "1st · 2nd · 3rd"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Number of 1st, 2nd and 3rd places"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Bounties"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Part of the winnings paid as bounties"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "By description"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "One row per tournament type"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "By buy-in"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "One row per buy-in level"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "By date"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "One row per day played"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "By tournament"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "One row per tournament"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Filter rows…"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Show only the rows containing this text"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Open hands"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Open the selected tournament's hands in a Tourney Viewer tab (Enter)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "No tournament matches these filters."
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Choose a site and a hero on the left, then press Refresh Stats."
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+#, python-format
+msgid "%s without a result"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid ""
+"Imported from their hands only: no prize was recorded. They are left out of "
+"the buy-ins, net won, ROI and ITM rather than counted as losses. Import the "
+"tournament summaries to complete them."
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+#, python-format
+msgid "%(cashes)s cashes in %(count)s tournaments"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+#, python-format
+msgid "Curves show the %(currency)s tournaments only"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Tournament #"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Description"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Buy-in"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Buy-in + fee"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Entrants"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Finish"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Prize and bounties"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Won"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Hands stored for this tournament"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Date"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Tourneys"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "No result"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Tournaments imported without their result (no summary)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Average buy-in + fee"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Avg buy-in"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Cashes"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Prizes and bounties"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Avg profit"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Net won per tournament"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "1st"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "2nd"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "3rd"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Avg entrants"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Unknown date"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+#, python-format
+msgid "%s tournaments"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+#, python-format
+msgid "Net %(net)s · ROI %(roi)s"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+#, python-format
+msgid "%(shown)s of %(total)s rows shown"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Double-click a tournament to open its hands"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Double-click a row to see its tournaments"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Fit columns to contents"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Tournament hands"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+#, python-format
+msgid ""
+"No hands stored for tournament #%s.\n"
+"\n"
+"This tournament was imported from a summary without its hand histories."
 msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
@@ -3543,14 +3761,6 @@ msgstr ""
 msgid "Money / chips"
 msgstr ""
 
-#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/hand_share_dialog.py
-msgid "Big blinds"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-msgid "Show stacks, bets and pots in big blinds"
-msgstr ""
-
 #: fpdb_3_legacy/hand_share_dialog.py
 msgid "Table name"
 msgstr ""
@@ -3677,7 +3887,7 @@ msgstr ""
 msgid "Blinds"
 msgstr ""
 
-#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/hud_options_panel.py fpdb_3_legacy/results_calendar.py
 msgid "Period"
 msgstr ""
 
@@ -3915,6 +4125,14 @@ msgstr ""
 msgid "Session Stats"
 msgstr ""
 
+#: fpdb_3_legacy/menu_layout.py
+msgid "Results Calendar"
+msgstr ""
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Cash results per day, week and month, with their profit curves"
+msgstr ""
+
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/research_labels.py
 #: fpdb_3_legacy/tourney_payouts_dialog.py
 msgid "Tournament"
@@ -4087,14 +4305,6 @@ msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "About the program"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Results Calendar"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Cash results per day, week and month, with their profit curves"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
@@ -5721,11 +5931,6 @@ msgid "Search stats"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
-#: fpdb_3_legacy/pack_share_dialog.py
-msgid "Description"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
 #, python-brace-format
 msgid "Showing {shown} of {total} stats"
 msgstr ""
@@ -6002,6 +6207,14 @@ msgstr ""
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
 msgid "Import Successful"
+msgstr ""
+
+#: fpdb_3_legacy/replay_history_dialog.py
+msgid "Action history"
+msgstr ""
+
+#: fpdb_3_legacy/replay_history_dialog.py
+msgid "Click an action, or select it and press Enter, to jump to it."
 msgstr ""
 
 #: fpdb_3_legacy/research_labels.py
@@ -6882,6 +7095,124 @@ msgstr ""
 msgid "PLO 4c + 5c"
 msgstr ""
 
+#: fpdb_3_legacy/results_calendar.py
+#, python-brace-format
+msgid "Week of {date}"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+#, python-brace-format
+msgid "{hands} hands"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+#, python-brace-format
+msgid "Profit: {profit}"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+#, python-brace-format
+msgid "All-in EV: {ev}"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+#, python-brace-format
+msgid "BB/100: {bb100}"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Week"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "All-in EV"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Profit (BB)"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "All-in EV (BB)"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "BB/100"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "EV BB/100"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Showdown (BB)"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Non-showdown (BB)"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+#, python-brace-format
+msgid ""
+"Hands: {hands} · Profit: {profit} · All-in EV: {ev} · BB/100: {bb100} · EV "
+"BB/100: {ev100} · Days played: {days} ({winning} winning)"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Review hands"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Period:"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Days"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Months"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Weeks"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Unit:"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Open the hands of the selected period in the Hand Viewer"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Previous month"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Next month"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Click to select the whole month"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Loading…"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "All hands of the filtered dates"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+msgid "Net profit"
+msgstr ""
+
 #: fpdb_3_legacy/ring_stats/__init__.py
 msgid "Columns"
 msgstr ""
@@ -7163,12 +7494,6 @@ msgstr ""
 
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
 msgid "Hands played"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
-#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
-msgid "Net profit"
 msgstr ""
 
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
@@ -7760,12 +8085,4 @@ msgstr ""
 
 #: fpdb_3_legacy/update_notice.py
 msgid "GitHub could not be reached. Check your connection and try again later."
-msgstr ""
-
-#: fpdb_3_legacy/replay_history_dialog.py
-msgid "Action history"
-msgstr ""
-
-#: fpdb_3_legacy/replay_history_dialog.py
-msgid "Click an action, or select it and press Enter, to jump to it."
 msgstr ""
