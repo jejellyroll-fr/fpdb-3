@@ -209,3 +209,23 @@ def test_the_results_query_matches_the_detailed_stats(two_sngs) -> None:
     assert summary.cost == pytest.approx(sum(row["spent"] for row in detailed))
     assert summary.net == pytest.approx(sum(row["net"] for row in detailed))
     assert summary.bounties == pytest.approx(sum(row["bounties"] for row in detailed))
+
+
+def test_a_re_entered_tournament_counts_its_hands_once() -> None:
+    # Every entry carries the tournament-wide hand count.
+    entries = [result(1, hands=100, entries=2), result(1, hands=100), result(2, hands=40)]
+
+    (group,) = group_results(BY_BUYIN, entries)
+
+    assert group.summary.count == 3
+    assert group.summary.hands == 140
+    assert summarize(entries)["EUR"].hands == 140
+
+
+def test_a_row_combining_aliases_names_all_of_them() -> None:
+    results = [result(1), result(2, player_id=8, player_name="bob"), result(3, buy_in=1.0)]
+
+    combined, alone = group_results(BY_BUYIN, results)
+
+    assert combined.player_name == "alice, bob"
+    assert alone.player_name == "alice"

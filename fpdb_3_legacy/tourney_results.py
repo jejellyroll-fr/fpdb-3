@@ -254,10 +254,15 @@ class Summary:  # pylint: disable=too-many-instance-attributes  # one running to
     entries_total: int = 0
     entries_known: int = 0
     hands: int = 0
+    # Re-entries (and aliases seated in the same tournament) repeat its
+    # tournament-wide hand count: it is added once per tournament.
+    hand_tourneys: set[int] = field(default_factory=set, repr=False, compare=False)
 
     def add(self, result: TourneyResult) -> None:
         self.count += 1
-        self.hands += result.hands
+        if result.tourney_id not in self.hand_tourneys:
+            self.hand_tourneys.add(result.tourney_id)
+            self.hands += result.hands
         if result.known:
             self.cost += result.cost
             self.won += result.won
@@ -360,6 +365,7 @@ class Group:
     results: list[TourneyResult] = field(default_factory=list)
     player_name: str = ""
     names: Counter[str] = field(default_factory=Counter)
+    players: set[str] = field(default_factory=set)
 
 
 def group_key(mode: str, result: TourneyResult) -> tuple[Any, ...]:
@@ -388,11 +394,14 @@ def group_results(mode: str, results: Iterable[TourneyResult]) -> list[Group]:
                 label=result.description if mode == BY_DESCRIPTION else "",
                 site=result.site,
                 summary=Summary(currency=result.currency),
-                player_name=result.player_name,
             )
             groups[key] = group
         elif group.site != result.site:
             group.site = ""
+        if result.player_name not in group.players:
+            # A buy-in or date row can combine aliases: it names all of them.
+            group.players.add(result.player_name)
+            group.player_name = ", ".join(sorted(name for name in group.players if name))
         group.summary.add(result)
         group.results.append(result)
         if result.name:
