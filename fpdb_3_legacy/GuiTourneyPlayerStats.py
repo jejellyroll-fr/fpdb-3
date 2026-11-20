@@ -155,6 +155,9 @@ class _Scope:
     mode: str
     key: tuple[Any, ...]
     label: str
+    # The row search of that view, put back when the step is left: it was
+    # typed against its rows, which the tournaments below need not share.
+    search: str = ""
 
 
 @dataclass(frozen=True)
@@ -1356,8 +1359,9 @@ class GuiTourneyPlayerStats(QSplitter):
         if group is None or self.group_mode == BY_TOURNAMENT:
             return
         label, _sort = self._group_label(self.group_mode, group)
-        self._scopes.append(_Scope(self.group_mode, key, label))
+        self._scopes.append(_Scope(self.group_mode, key, label, self.search_edit.text()))
         self.group_mode = BY_TOURNAMENT
+        self._set_search("")
         self._render()
         if self.proxy.rowCount():
             self.table.selectRow(0)
@@ -1370,6 +1374,7 @@ class GuiTourneyPlayerStats(QSplitter):
             return
         scope = self._scopes.pop()
         self.group_mode = scope.mode
+        self._set_search(scope.search)
         self._render(select_key=scope.key)
         self.table.setFocus()
 
@@ -1380,6 +1385,7 @@ class GuiTourneyPlayerStats(QSplitter):
         left = self._scopes[depth]
         self._scopes = self._scopes[:depth]
         self.group_mode = left.mode
+        self._set_search(left.search)
         self._render(select_key=left.key)
 
     def _on_breadcrumb_link(self, link: str) -> None:
@@ -1395,6 +1401,13 @@ class GuiTourneyPlayerStats(QSplitter):
     def _focus_search(self) -> None:
         self.search_edit.setFocus()
         self.search_edit.selectAll()
+
+    def _set_search(self, text: str) -> None:
+        """Put ``text`` in the search box; the next render applies it."""
+        self._search_timer.stop()
+        blocked = self.search_edit.blockSignals(True)
+        self.search_edit.setText(text)
+        self.search_edit.blockSignals(blocked)
 
     def _apply_search(self) -> None:
         self.proxy.setFilterFixedString(self.search_edit.text().strip())

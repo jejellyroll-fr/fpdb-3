@@ -211,3 +211,20 @@ def test_player_stats_only_show_where_they_describe_the_row(tab) -> None:
     tab._set_column_shown(_column(tab, "stat:0"), "stat:0", True)
     tab._render()
     assert tab.table.isColumnHidden(_column(tab, "stat:0"))
+
+
+def test_a_drill_down_starts_unsearched_and_back_restores_the_search(tab) -> None:
+    tab.set_group_mode(BY_BUYIN)
+    tab.search_edit.setText("0.25")
+    tab._apply_search()
+    assert tab.proxy.rowCount() == 1
+
+    # Its tournaments show the buy-in as 0.23+0.02: the level's search would hide them all.
+    tab.drill_into(("EUR", 0.25))
+    assert tab.search_edit.text() == ""
+    assert tab.proxy.rowCount() == 3
+
+    tab.go_back()
+    assert tab.search_edit.text() == "0.25"
+    assert tab.proxy.rowCount() == 1
+    assert tab._selected_key() == ("EUR", 0.25)
