@@ -181,7 +181,7 @@ def test_a_hand_missing_an_action_stays_capture_only():
     hand = _hand(drop_raise=True)
 
     assert not native_hand_is_publicly_importable(hand)
-    assert hand["actions"] == []
+    assert not hand["actions"]
 
 
 def test_a_hand_whose_stacks_do_not_close_stays_capture_only():

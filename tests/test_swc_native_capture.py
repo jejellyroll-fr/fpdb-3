@@ -921,7 +921,7 @@ def test_extract_native_stud_upcards_drops_a_seat_whose_readings_disagree():
     first = _stud_snapshot(_stud_seat(1, "alice", [HIDDEN, HIDDEN, 37], seat_idx=0))
     second = _stud_snapshot(_stud_seat(1, "alice", [HIDDEN, HIDDEN, 38], seat_idx=0))
 
-    assert extract_native_stud_upcards([first, second]) == []
+    assert not extract_native_stud_upcards([first, second])
 
 
 def test_extract_native_stud_upcards_rejects_duplicate_cards():
@@ -930,7 +930,7 @@ def test_extract_native_stud_upcards_rejects_duplicate_cards():
         _stud_seat(1, "alice", [HIDDEN, HIDDEN, 37, 40], seat_idx=0),
         _stud_seat(2, "bob", [HIDDEN, HIDDEN, 37, 44], seat_idx=1),
     )
-    assert extract_native_stud_upcards([snap]) == []
+    assert not extract_native_stud_upcards([snap])
 
 
 def test_extract_native_stud_upcards_reads_visible_down_cards():
