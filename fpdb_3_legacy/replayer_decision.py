@@ -30,10 +30,19 @@ class HeroDecision:  # pylint: disable=too-many-instance-attributes  # one flat 
     fold_equity_pct: Decimal | None = None
     street_pot: Decimal = ZERO
     effective: tuple[tuple[str, Decimal], ...] = ()
+    effective_pot: Decimal | None = None
+    pot_before_call: Decimal | None = None
+    uncalled_excess: Decimal | None = None
 
     @property
     def spr(self) -> tuple[Decimal, ...]:
         return tuple(stack / self.street_pot for _, stack in self.effective) if self.street_pot > 0 else ()
+
+    @property
+    def effective_pot_before(self) -> Decimal | None:
+        if self.effective_pot is not None:
+            return max(ZERO, self.effective_pot - self.call_amount)
+        return None
 
 
 def _live(player: Any) -> bool:
@@ -90,17 +99,11 @@ def _sizing(previous: Any, current: Any, name: str) -> tuple[Decimal, Decimal | 
     return investment, investment / pot * HUNDRED if pot > 0 else None
 
 
-def _call_odds(state: Any, hero: Any, amount: Decimal) -> Decimal | None:
-    """The share of the pot after the call that the call is, counting only what it can win.
-
-    Only an all-in call is capped: a caller with chips behind can match any
-    later money. Capped, each player's betting counts up to the caller's total,
-    while antes stay whole: they are dead money in the main pot, which the
-    caller always contests.
-    """
+def _call_pot_and_odds(state: Any, hero: Any, amount: Decimal) -> tuple[Decimal, Decimal | None]:
     players = state.players.values()
+    displayed_pot = _pot(state)
     if amount < hero.stack or not all(hasattr(p, "startStack") for p in players):
-        final_pot = _pot(state) + amount
+        final_pot = displayed_pot + amount
     else:
 
         def antes(player: Any) -> Decimal:
@@ -115,7 +118,19 @@ def _call_odds(state: Any, hero: Any, amount: Decimal) -> Decimal | None:
             )
             + amount
         )
-    return amount / final_pot * HUNDRED if final_pot > 0 else None
+    odds = amount / final_pot * HUNDRED if final_pot > 0 else None
+    return final_pot, odds
+
+
+def _call_odds(state: Any, hero: Any, amount: Decimal) -> Decimal | None:
+    """The share of the pot after the call that the call is, counting only what it can win.
+
+    Only an all-in call is capped: a caller with chips behind can match any
+    later money. Capped, each player's betting counts up to the caller's total,
+    while antes stay whole: they are dead money in the main pot, which the
+    caller always contests.
+    """
+    return _call_pot_and_odds(state, hero, amount)[1]
 
 
 def _street_start(states: list[Any], index: int) -> int:
@@ -148,7 +163,18 @@ def _call_decision(states: list[Any], index: int, start: int, hero_name: str, hi
     sizing = None
     if event and event[2].players[event[0]].chips == highest:
         sizing = _sizing(event[1], event[2], event[0])[1]
-    return {"mode": "call", "call_amount": call, "pot_odds_pct": _call_odds(state, hero, call), "bet_pct": sizing}
+    final_pot, odds = _call_pot_and_odds(state, hero, call)
+    displayed_pot = _pot(state)
+    excess = max(ZERO, (displayed_pot + call) - final_pot)
+    return {
+        "mode": "call",
+        "call_amount": call,
+        "pot_odds_pct": odds,
+        "bet_pct": sizing,
+        "effective_pot": final_pot,
+        "pot_before_call": displayed_pot,
+        "uncalled_excess": excess,
+    }
 
 
 def _bet_decision(states: list[Any], index: int, start: int, hero_name: str) -> dict[str, Any] | None:
@@ -231,5 +257,13 @@ def action_decision(states: list[Any], index: int, hero_name: str) -> tuple[str 
     actor = next_decision_actor(states, index)
     metrics = hero_decision(states, index, actor or hero_name)
     if actor is None:
-        metrics = replace(metrics, mode="neutral", call_amount=ZERO, pot_odds_pct=None)
+        metrics = replace(
+            metrics,
+            mode="neutral",
+            call_amount=ZERO,
+            pot_odds_pct=None,
+            effective_pot=None,
+            pot_before_call=None,
+            uncalled_excess=None,
+        )
     return actor, metrics

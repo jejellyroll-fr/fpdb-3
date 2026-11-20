@@ -26,8 +26,18 @@ from math import cos, hypot, pi, sin
 from typing import Any
 
 import defusedxml.minidom
-from PySide6.QtCore import QPointF, QRectF, Qt, QTimer
-from PySide6.QtGui import QColor, QFont, QFontMetrics, QImage, QLinearGradient, QPainter, QPen, QPixmap
+from PySide6.QtCore import QEvent, QPointF, QRectF, Qt, QTimer
+from PySide6.QtGui import (
+    QColor,
+    QFont,
+    QFontMetrics,
+    QImage,
+    QLinearGradient,
+    QMouseEvent,
+    QPainter,
+    QPen,
+    QPixmap,
+)
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -35,6 +45,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QPushButton,
     QSlider,
+    QToolTip,
     QVBoxLayout,
     QWidget,
 )
@@ -52,6 +63,7 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.replay_history import replay_history_entries
 from fpdb_3_legacy.replay_history_dialog import ReplayHistoryDialog
 from fpdb_3_legacy.replayer_decision import HeroDecision, action_decision, hero_decision
+from fpdb_3_legacy.replayer_decision_panel import DecisionPanelModel, build_decision_panel_model
 
 # import L10n
 # _ = L10n.get_translation()
@@ -840,6 +852,15 @@ class GuiReplayer(QWidget):
         self.all_decisions.toggled.connect(self.update)
         self.buttonBox2.addWidget(self.all_decisions)
 
+        # Progressive disclosure of detailed decision metrics (#872).
+        self.detailed_analysis = QCheckBox(_("Detailed analysis"))
+        self.detailed_analysis.setToolTip(
+            _("Show detailed breakdown: pot arithmetic, ratios, sizing, MDF/fold equity, and model assumptions")
+        )
+        self.detailed_analysis.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.detailed_analysis.toggled.connect(self.update)
+        self.buttonBox2.addWidget(self.detailed_analysis)
+
         self.deckLabel = QLabel(_("Deck:"))
         self.deckLabel.setStyleSheet("font-weight: 600; color: #9aa5ad; margin-left: 10px;")
         self.buttonBox2.addWidget(self.deckLabel)
@@ -922,9 +943,17 @@ class GuiReplayer(QWidget):
 
         self.cardImages: list[Any] | None = None
         self.deck_inst = Deck.Deck(self.conf, deck_type=self.deckType, height=CARD_HEIGHT, width=CARD_WIDTH)
+        self._summary_hit_targets: list[tuple[QRectF, str]] = []
+        self._toggle_rect = QRectF()
+        self._summary_rect = QRectF()
+        self.setMouseTracking(True)
         self._apply_replayer_style()
         self._update_deck_preview()
         self.show()
+
+    def _is_detailed(self) -> bool:
+        checkbox = getattr(self, "detailed_analysis", None)
+        return bool(checkbox is not None and checkbox.isChecked())
 
     def _remembered_bb_amounts(self) -> bool:
         getter = getattr(self.conf, "get_replayer_amounts_in_bb", None)
@@ -2430,15 +2459,31 @@ class GuiReplayer(QWidget):
         facing_call = call_amount > 0 and frame.pot > 0
         pot_odds_pct = None
         pot_odds_ratio = None
+        effective_pot = None
+        pot_before_call = None
+        uncalled_excess = None
         if facing_call:
             pot_after_call = frame.pot + call_amount
             if pot_after_call > 0:
                 pot_odds_pct = (call_amount / pot_after_call) * Decimal(100)
                 pot_odds_ratio = frame.pot / call_amount
+                effective_pot = pot_after_call
+                pot_before_call = frame.pot
+                uncalled_excess = Decimal(0)
+        replay_decision = self._replay_decision(current_index, self.Heroes)
+        if replay_decision and replay_decision.mode == "call":
+            if replay_decision.effective_pot is not None:
+                effective_pot = replay_decision.effective_pot
+            if replay_decision.pot_before_call is not None:
+                pot_before_call = replay_decision.pot_before_call
+            if replay_decision.uncalled_excess is not None:
+                uncalled_excess = replay_decision.uncalled_excess
         capped = self._capped_hero_call(current_index)
         if capped is not None:
             call_amount, pot_odds_pct, pot_odds_ratio = capped
             facing_call = True
+            if effective_pot is None and pot_odds_pct and pot_odds_pct > 0:
+                effective_pot = (call_amount * Decimal(100)) / pot_odds_pct
 
         hand = getattr(getattr(self, "replay_model", None), "hand", None)
         category = hand.gametype.get("category", "") if hand else ""
@@ -2453,22 +2498,40 @@ class GuiReplayer(QWidget):
             # its equity depends on draws poker-eval does not play (#831).
             game = None
         equity = None
-        if game:
-            cache: dict[Any, Decimal | None] = getattr(self, "_equity_cache", None) or {}
-            self._equity_cache = cache
-            key = (
-                game,
-                tuple((player.name, tuple(player.holecards), player.action) for player in frame.players),
-                tuple(sorted(frame.render_board)),
-                tuple((street, tuple(frame.board.get(street) or [])) for street in ("FLOP", "TURN", "RIVER")),
-            )
-            if key not in cache:
-                cache[key] = replay_hero_equity(frame, self.Heroes, game)
-            equity = cache[key]
+        equity_reason = None
+        if not game:
+            if game_info and game_info[0] == "draw" and frame.street != game_info[4]:
+                equity_reason = _("draw street not reached")
+            else:
+                equity_reason = _("unsupported variant")
+        else:
+            active_players = [p for p in frame.players if p.action != "folds"]
+            missing_cards = [
+                p.name for p in active_players
+                if not p.holecards or not all(_is_real_card(c) for c in p.holecards)
+            ]
+            if missing_cards:
+                equity_reason = _("missing cards")
+            else:
+                cache: dict[Any, Decimal | None] = getattr(self, "_equity_cache", None) or {}
+                self._equity_cache = cache
+                key = (
+                    game,
+                    tuple((player.name, tuple(player.holecards), player.action) for player in frame.players),
+                    tuple(sorted(frame.render_board)),
+                    tuple((street, tuple(frame.board.get(street) or [])) for street in ("FLOP", "TURN", "RIVER")),
+                )
+                if key not in cache:
+                    cache[key] = replay_hero_equity(frame, self.Heroes, game)
+                equity = cache[key]
+                if equity is None:
+                    equity_reason = _("calculation unavailable")
 
-        call_equity_pct = (equity * Decimal(100)) if equity is not None else None
-        push_equity_pct = (equity * Decimal(100)) if equity is not None else None
-        call_edge_pts = (call_equity_pct - pot_odds_pct) if (call_equity_pct is not None and pot_odds_pct is not None) else None
+        hand_equity_pct = (equity * Decimal(100)) if equity is not None else None
+        equity_diff_pts = (hand_equity_pct - pot_odds_pct) if (hand_equity_pct is not None and pot_odds_pct is not None) else None
+        call_equity_pct = hand_equity_pct
+        push_equity_pct = hand_equity_pct
+        call_edge_pts = equity_diff_pts
         is_allin = any(player.allin for player in frame.players if player.action != "folds")
 
         return {
@@ -2477,9 +2540,15 @@ class GuiReplayer(QWidget):
             "facing_call": facing_call,
             "pot_odds_pct": pot_odds_pct,
             "pot_odds_ratio": pot_odds_ratio,
+            "effective_pot": effective_pot,
+            "pot_before_call": pot_before_call,
+            "uncalled_excess": uncalled_excess,
+            "hand_equity_pct": hand_equity_pct,
+            "equity_diff_pts": equity_diff_pts,
             "call_equity_pct": call_equity_pct,
             "call_edge_pts": call_edge_pts,
             "push_equity_pct": push_equity_pct,
+            "equity_reason": equity_reason,
             "is_allin": is_allin,
             "is_hero_turn": self._next_actor_name(current_index) == self.Heroes,
         }
@@ -2710,55 +2779,91 @@ class GuiReplayer(QWidget):
             text += " " + _("(this table taken as the whole field)")
         return text, "#4ade80" if ev >= 0 else "#ff6b6b"
 
+    def _summary_model(self, frame: ReplayFrame, current_index: int) -> DecisionPanelModel:
+        hero = self.Heroes
+        shows_spr = self._shows_spr(frame.street)
+        actor = self._next_actor_name(current_index) or hero
+        if not self._show_all_decisions() and actor != hero:
+            actor = hero
+        decision = self._replay_decision(current_index, actor)
+        metrics = self._hero_decision_metrics(frame, current_index) if actor == hero else {}
+        if actor != hero and decision:
+            facing = decision.mode == "call"
+            metrics = {
+                "facing_call": facing,
+                "call_amount": decision.call_amount,
+                "pot_odds_pct": decision.pot_odds_pct,
+                "pot_odds_ratio": (
+                    ((Decimal(100) - decision.pot_odds_pct) / decision.pot_odds_pct)
+                    if decision.pot_odds_pct
+                    else None
+                ),
+                "effective_pot": decision.effective_pot,
+                "pot_before_call": decision.pot_before_call,
+                "uncalled_excess": decision.uncalled_excess,
+                "hand_equity_pct": None,
+                "equity_diff_pts": None,
+                "is_allin": any(p.allin for p in frame.players if getattr(p, "action", "") != "folds"),
+                "is_hero_turn": False,
+            }
+
+        hand = getattr(getattr(self, "replay_model", None), "hand", None)
+        header = self._current_action_summary(frame)
+
+        return build_decision_panel_model(
+            header=header,
+            frame=frame,
+            metrics=metrics,
+            decision=decision,
+            hand=hand,
+            currency_code=self.currency_code,
+            amount_formatter=self._amount,
+            hand_icm=getattr(self, "hand_icm", None),
+            hand_bounty=getattr(self, "hand_bounty", None),
+            actor_name=actor,
+            hero_name=hero,
+            shows_spr=shows_spr,
+            is_detailed=self._is_detailed(),
+        )
+
     def _summary_lines(self, frame: ReplayFrame, current_index: int) -> list[tuple[str, str]]:
         """The summary's lines under the action, as (text, colour)."""
-        lines: list[tuple[str, str]] = [(text, DECISION_LINE_COLOR) for text in self._decision_lines(current_index)]
-        metrics = self._hero_decision_metrics(frame, current_index)
-        if metrics.get("is_hero_turn"):
-            # Pot odds & call equity
-            line2_parts = []
-            if metrics.get("facing_call"):
-                call_amt = self._amount(metrics["call_amount"])
-                odds_pct = format_number(metrics["pot_odds_pct"], 1)
-                ratio = format_number(metrics["pot_odds_ratio"], 1)
-                line2_parts.append(f"Pot Odds: {odds_pct}% ({ratio}:1) [Call {call_amt}]")
-            if metrics.get("call_equity_pct") is not None:
-                eq_pct = format_number(metrics["call_equity_pct"], 1)
-                line2_parts.append(f"Call Eq: {eq_pct}%")
-                if metrics.get("call_edge_pts") is not None:
-                    edge = format_number(metrics["call_edge_pts"], 1, show_plus=True)
-                    line2_parts.append(f"Edge: {edge} pts")
-            if line2_parts:
-                edge_val = metrics.get("call_edge_pts")
-                color = "#ffe769"
-                if edge_val is not None:
-                    color = "#4ade80" if edge_val >= 0 else "#ff6b6b"
-                lines.append(("  ·  ".join(line2_parts), color))
-
-            # Push / all-in equity
-            if metrics.get("push_equity_pct") is not None:
-                push_pct = format_number(metrics["push_equity_pct"], 1)
-                label = "Push/All-in Eq" if metrics.get("is_allin") else "Push Eq"
-                lines.append((f"{label}: {push_pct}%", "#a78bfa"))
-
-        if not lines:
-            lines.append(("Use arrows/space to review decisions", "#9aa5ad"))
-        # Last: the bounty a knockout all-in can win (#447), then prize equity (#446).
-        for extra in (self._bounty_line(frame), self._icm_line(frame)):
-            if extra:
-                lines.append(extra)
-        return lines
+        model = self._summary_model(frame, current_index)
+        return model.to_summary_lines(is_detailed=self._is_detailed())
 
     def _draw_summary(self, painter: QPainter, frame: ReplayFrame, layout: ReplayLayout, current_index: int) -> None:
-        lines = self._summary_lines(frame, current_index)
-        box_height = 34 + 22 * len(lines)
-        summary_width = min(640, max(320, layout.table_rect.width() * 0.48))
+        model = self._summary_model(frame, current_index)
+        is_det = self._is_detailed()
+        sections = model.visible_sections(is_det)
+
+        summary_width = min(640, max(340, layout.table_rect.width() * 0.48))
+        try:
+            total_width = self.width()
+        except (RuntimeError, TypeError, AttributeError):
+            total_width = int(layout.table_rect.width())
         if layout.timeline_rect.isNull():
-            x = self.width() - summary_width - 28
+            x = total_width - summary_width - 28
         else:
             x = layout.timeline_rect.x() - summary_width - 16
         x = max(28, x)
+
+        header_height = 32
+        content_height = 0
+        if not sections:
+            content_height = 26
+        else:
+            for section in sections:
+                if section.title and section.id not in {"summary", "bet_summary"}:
+                    content_height += 22
+                content_height += 20 * len(section.rows)
+                content_height += 18 * len(section.notes)
+                content_height += 6
+        box_height = header_height + content_height + 8
+
         rect = QRectF(x, 12, summary_width, box_height)
+        self._summary_rect = rect
+        self._summary_hit_targets = []
+
         painter.setPen(QPen(QColor("#46505a"), 1))
         painter.setBrush(QColor("#171d22"))
         painter.drawRoundedRect(rect, 8, 8)
@@ -2766,20 +2871,100 @@ class GuiReplayer(QWidget):
         # Line 1: Action Summary
         painter.setFont(QFont("Helvetica", 10, QFont.Weight.Bold))
         painter.setPen(QColor("#eef3f7"))
+        header_text = model.header
+        header_rect = QRectF(rect.x() + 12, rect.y() + 6, rect.width() - 24 - 82, 20)
         painter.drawText(
-            QRectF(rect.x() + 12, rect.y() + 6, rect.width() - 24, 20),
-            Qt.AlignmentFlag.AlignLeft,
-            self._current_action_summary(frame),
+            header_rect,
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
+            QFontMetrics(painter.font()).elidedText(header_text, Qt.TextElideMode.ElideRight, int(header_rect.width())),
         )
 
-        painter.setFont(QFont("Helvetica", 9, QFont.Weight.DemiBold))
-        for row, (text, color) in enumerate(lines):
-            painter.setPen(QColor(color))
+        # Toggle button: [+ Details] / [- Compact]
+        toggle_text = _("[- Compact]") if is_det else _("[+ Details]")
+        toggle_rect = QRectF(rect.x() + rect.width() - 12 - 78, rect.y() + 6, 78, 20)
+        self._toggle_rect = toggle_rect
+        self._summary_hit_targets.append(
+            (toggle_rect, _("Click to toggle between compact and detailed decision analysis"))
+        )
+        painter.setFont(QFont("Helvetica", 8, QFont.Weight.Bold))
+        painter.setPen(QColor("#74b9ff"))
+        painter.drawText(toggle_rect, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter, toggle_text)
+
+        # Divider line
+        painter.setPen(QPen(QColor("#2d3741"), 1))
+        painter.drawLine(QPointF(rect.x() + 12, rect.y() + 30), QPointF(rect.x() + rect.width() - 12, rect.y() + 30))
+
+        curr_y = rect.y() + 36
+
+        if not sections:
+            painter.setFont(QFont("Helvetica", 9, QFont.Weight.Normal))
+            painter.setPen(QColor("#9aa5ad"))
             painter.drawText(
-                QRectF(rect.x() + 12, rect.y() + 28 + 22 * row, rect.width() - 24, 20),
-                Qt.AlignmentFlag.AlignLeft,
-                text,
+                QRectF(rect.x() + 12, curr_y, rect.width() - 24, 20),
+                Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
+                model.guidance,
             )
+            return
+
+        label_font = QFont("Helvetica", 9, QFont.Weight.Medium)
+        value_font = QFont("Helvetica", 9, QFont.Weight.Bold)
+        note_font = QFont("Helvetica", 8, QFont.Weight.Normal)
+        title_font = QFont("Helvetica", 8, QFont.Weight.Bold)
+
+        for section in sections:
+            if section.title and section.id not in {"summary", "bet_summary"}:
+                painter.setFont(title_font)
+                painter.setPen(QColor("#74b9ff"))
+                painter.drawText(
+                    QRectF(rect.x() + 12, curr_y, rect.width() - 24, 18),
+                    Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
+                    section.title,
+                )
+                curr_y += 22
+
+            col_width = rect.width() - 24
+            label_w = col_width * 0.58
+            value_w = col_width * 0.42
+
+            for row in section.rows:
+                row_rect = QRectF(rect.x() + 12, curr_y, col_width, 20)
+                if row.tooltip:
+                    self._summary_hit_targets.append((row_rect, row.tooltip))
+
+                if row.is_note:
+                    painter.setFont(note_font)
+                    painter.setPen(QColor("#9aa5ad"))
+                    painter.drawText(row_rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, row.label)
+                else:
+                    painter.setFont(label_font)
+                    painter.setPen(QColor("#c8d6e5"))
+                    painter.drawText(
+                        QRectF(rect.x() + 12, curr_y, label_w, 20),
+                        Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
+                        QFontMetrics(label_font).elidedText(row.label, Qt.TextElideMode.ElideRight, int(label_w)),
+                    )
+
+                    painter.setFont(value_font)
+                    painter.setPen(QColor(row.neutral_color or "#eef3f7"))
+                    painter.drawText(
+                        QRectF(rect.x() + 12 + label_w, curr_y, value_w, 20),
+                        Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter,
+                        row.value,
+                    )
+                curr_y += 20
+
+            for note in section.notes:
+                painter.setFont(note_font)
+                painter.setPen(QColor("#9aa5ad"))
+                note_rect = QRectF(rect.x() + 12, curr_y, col_width, 18)
+                painter.drawText(
+                    note_rect,
+                    Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
+                    QFontMetrics(note_font).elidedText(note, Qt.TextElideMode.ElideRight, int(col_width)),
+                )
+                curr_y += 18
+
+            curr_y += 6
 
     def _draw_timeline(self, painter: QPainter, layout: ReplayLayout) -> None:
         if layout.timeline_rect.isNull():
@@ -3112,6 +3297,44 @@ class GuiReplayer(QWidget):
                 self.play_hand(self.handidx - 1)
         else:
             QWidget.keyPressEvent(self, event)
+
+    def event(self, event: QEvent) -> bool:
+        if event.type() == QEvent.Type.ToolTip:
+            pos = event.position().toPoint() if hasattr(event, "position") else event.pos()
+            for target_rect, tooltip_text in getattr(self, "_summary_hit_targets", []):
+                if target_rect.contains(pos):
+                    global_pos = (
+                        event.globalPosition().toPoint()
+                        if hasattr(event, "globalPosition")
+                        else event.globalPos()
+                    )
+                    try:
+                        QToolTip.showText(global_pos, tooltip_text, self)
+                    except (RuntimeError, TypeError):
+                        pass
+                    return True
+            try:
+                QToolTip.hideText()
+            except (RuntimeError, TypeError):
+                pass
+        try:
+            return super().event(event)
+        except (RuntimeError, TypeError):
+            return False
+
+    def mousePressEvent(self, event: QMouseEvent) -> None:  # noqa: F811
+        if event.button() == Qt.MouseButton.LeftButton:
+            pos = event.position().toPoint() if hasattr(event, "position") else event.pos()
+            toggle_rect = getattr(self, "_toggle_rect", None)
+            if toggle_rect and toggle_rect.contains(pos):
+                if hasattr(self, "detailed_analysis"):
+                    self.detailed_analysis.setChecked(not self.detailed_analysis.isChecked())
+                    event.accept()
+                    return
+        try:
+            super().mousePressEvent(event)
+        except (RuntimeError, TypeError):
+            pass
 
     def start_clicked(self, checkState) -> None:
         self.stateSlider.setValue(0)
