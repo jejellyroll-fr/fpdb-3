@@ -11,6 +11,8 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QCheckBox
 
 from fpdb_3_legacy.GuiReplayer import GuiReplayer
+from fpdb_3_legacy.replay_history import ReplayHistoryEntry
+from fpdb_3_legacy.replay_history_dialog import ReplayHistoryDialog
 
 pytestmark = pytest.mark.qt
 
@@ -77,6 +79,34 @@ def test_enter_seeks_to_the_selected_entry(qtbot, replayer) -> None:
     qtbot.keyClick(dialog.list, Qt.Key.Key_Return)
 
     assert replayer.stateSlider.value() == dialog.entries[row].index
+
+
+def test_keypad_enter_seeks_too(qtbot, replayer) -> None:
+    replayer.history_clicked()
+    dialog = replayer.history_dialog
+    row = rows(dialog).index("Flop dealt: As Ks 2d")
+    dialog.list.setCurrentRow(row)
+    dialog.list.setFocus()
+
+    qtbot.keyClick(dialog.list, Qt.Key.Key_Enter, Qt.KeyboardModifier.KeypadModifier)
+
+    assert replayer.stateSlider.value() == dialog.entries[row].index
+
+
+def test_enter_seeks_once_on_every_platform(qtbot) -> None:
+    # Enter is handled by the dialog, not left to itemActivated: on macOS the
+    # list does not emit it for Enter, and elsewhere it would seek a second time.
+    seeks: list[int] = []
+    dialog = ReplayHistoryDialog(None, seeks.append)
+    qtbot.addWidget(dialog)
+    dialog.set_entries([ReplayHistoryEntry(index=i, kind="action", text=f"step {i}") for i in (3, 7)], 3)
+    dialog.show()
+    dialog.list.setCurrentRow(1)
+    dialog.list.setFocus()
+
+    qtbot.keyClick(dialog.list, Qt.Key.Key_Return)
+
+    assert seeks == [7]
 
 
 def test_the_selection_follows_the_replay(qtbot, replayer) -> None:
