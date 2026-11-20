@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 13:12+0100\n"
+"POT-Creation-Date: 2026-11-20 20:02+0100\n"
 "PO-Revision-Date: 2011-10-08 08:58+0000\n"
 "Last-Translator: greg20 <greg20@hushmail.com>\n"
 "Language-Team: Polish (Poland) (http://www.transifex.net/projects/p/fpdb/"
@@ -2147,32 +2147,9 @@ msgid "Window"
 msgstr "Okno"
 
 #: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "%(name)s %(action)s %(size)s%% of the pot"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "%(name)s SPR %(spr)s"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "%(name)s to act"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "%(name)s to call %(amount)s"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "(%(head)s to your own bounty)"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-msgid "(this table taken as the whole field)"
+msgid ""
+"Also show the pot odds ratio, the pot breakdown, MDF and fold equity, and "
+"each figure's assumptions"
 msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/hand_share_dialog.py
@@ -2180,21 +2157,6 @@ msgstr ""
 #, fuzzy
 msgid "Big blinds"
 msgstr "Big blindy"
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "Bounty EV %(ev)s"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "Bounty EV %(ev)s: winning does not bust your opponent"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "Bounty: %s"
-msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
@@ -2215,6 +2177,12 @@ msgstr "Podgląd bieżącej talii"
 #, fuzzy
 msgid "Deck:"
 msgstr "Talia:"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
+#| msgid "Detailed Filters"
+msgid "Detailed analysis"
+msgstr "Szczegółowe filtry:"
 
 #: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/GuiTourneyPlayerStats.py
 #, fuzzy
@@ -2240,26 +2208,7 @@ msgid "History..."
 msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "ICM $EV %(ev)s · result %(result)s · chip EV %(chips)s"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "ICM: %s"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
 msgid "List the hand's actions and jump to one of them (A)"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "MDF %(mdf)s%% · fold equity needed %(fe)s%% (heads-up)"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-msgid "MDF / fold equity: heads-up only"
 msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
@@ -2294,11 +2243,6 @@ msgstr "Poprz."
 #, fuzzy
 msgid "Previous action"
 msgstr "Poprzednia akcja"
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "SPR %(spr)s"
-msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
@@ -2337,19 +2281,9 @@ msgid "This hand has no big blind to count amounts in"
 msgstr "Ta gra nie ma big blinda do przeliczenia."
 
 #: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "bounty-adjusted chip EV %(chips)s"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "facing %(size)s%% of the pot"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "pot odds %(odds)s%%"
-msgstr ""
+#, fuzzy
+msgid "Use the arrows or space to review the decisions"
+msgstr "Trzech lub więcej graczy widziało decyzję."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy
@@ -7353,6 +7287,352 @@ msgstr ""
 msgid "Click an action, or select it and press Enter, to jump to it."
 msgstr ""
 
+#: fpdb_3_legacy/replayer_panel.py
+#, python-format
+msgid "%(chips)s chips"
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+#, python-format
+msgid "%(name)s %(action)s"
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+#, python-format
+msgid "%(name)s to act"
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+#, fuzzy, python-format
+msgid "%(name)s to call"
+msgstr "Kwota do sprawdzenia"
+
+#: fpdb_3_legacy/replayer_panel.py
+#, python-format
+msgid "%(ratio)s:1"
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+#, fuzzy, python-format
+msgid "%(size)s%% of the pot"
+msgstr "Wielkość zakładu (% puli)"
+
+#: fpdb_3_legacy/replayer_panel.py
+#, python-format
+msgid "%(value)s pts"
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+#, python-format
+msgid "%(value)s%%"
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Added to own bounty"
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+#, fuzzy
+#| msgid "Ring Player Stats"
+msgid "Available"
+msgstr "Statystyki"
+
+#: fpdb_3_legacy/replayer_panel.py fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Bet size"
+msgstr "Wielkość zakładu"
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Bounty EV"
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Bounty-adjusted chip EV"
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+#, fuzzy
+msgid "Call amount"
+msgstr "Sprawdzenie otwarcia"
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Chip EV"
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"Chip EV plus the bounty EV converted to chips at the buy-in's chip value."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Chip pot odds: not an ICM threshold."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+#, fuzzy
+msgid "Effective pot after call"
+msgstr "Efektywny stack"
+
+#: fpdb_3_legacy/replayer_panel.py
+#, fuzzy
+msgid "Effective pot before call"
+msgstr "Obowiązujący profil dla tych selektorów"
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Equity against the hands shown, estimated from simulated boards."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Equity against the hands shown, every remaining board enumerated."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Equity against the hands shown."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Equity at the all-in"
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+#, fuzzy
+msgid "Equity difference"
+msgstr "Edytuj swoje preferencje"
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Estimated hand equity"
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"Estimated hand equity less the required equity, in percentage points. It "
+"describes the spot; it is not a fold, call or raise recommendation, and it "
+"leaves out later betting and prize equity."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"Everything the call can win, the call included. An all-in caller only wins "
+"as much of each bet as they match: the rest is returned uncalled or goes to "
+"a side pot."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Facing"
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Fold equity needed (heads-up)"
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Heads-up all-in, priced with the stored payouts."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"How often the hand wins the pot, ties counted as shares, against the other "
+"hands shown in this history if every card were dealt now. Known only after "
+"the hand: these cards were hidden at the table."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"How often the opponent must fold for a bet that never wins when called to "
+"break even. Same simplified heads-up model as MDF, not a solver prescription."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "ICM $EV"
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+#, fuzzy
+msgid "ICM result"
+msgstr "Wynik netto (BB)"
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"Independent Chip Model: the prize equity expected after the all-in less the "
+"prize equity the stacks held before the hand, in the payout's unit."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+#, fuzzy
+msgid "Knockout bounty"
+msgstr "Turnieje"
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "MDF (heads-up)"
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "MDF and fold equity: heads-up only."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"Minimum defence frequency: how often the opponent must continue so that a "
+"bet that never wins when called makes no profit. Simplified heads-up model, "
+"not a solver prescription."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+#, fuzzy
+msgid "Model status"
+msgstr "Dodaj statystykę"
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"Money on the table the call cannot win: the part of a bet larger than the "
+"caller's stack, which goes back uncalled, or a side pot between other "
+"players."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Not added to ICM $EV: this is not a complete PKO model."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Pot odds"
+msgstr "Pot odds"
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"Pot odds in chips: the share of the final pot the call costs. In a "
+"tournament chips are not prize money, so this is not an ICM calling "
+"threshold."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"Pot odds: the share of the final pot the call costs. A hand that wins at "
+"least this often breaks even in chips if it goes to showdown with no more "
+"betting."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+#, fuzzy
+msgid "Pot on the table"
+msgstr "Pozycja przy stole"
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"Priced as if this table were the whole field: the other stacks are unknown."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"Prize equity of the all-in under the Independent Chip Model, with the "
+"existing payout structure and stacks. Separate from chip EV and from any "
+"bounty."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"Progressive knockout: what winning adds to the player's own bounty on "
+"average, paid later if at all."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Required chip equity"
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Required equity"
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "SPR"
+msgstr "SPR"
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Simplified model: one opponent, a bluff that never wins when called."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"Stack-to-pot ratio: the effective stack at the start of the street divided "
+"by the pot then. A range when the opponents' stacks differ."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+#, fuzzy
+msgid "The bet faced, in percent of the pot before it."
+msgstr "Wielkość napotkanego zakładu, jako procent puli."
+
+#: fpdb_3_legacy/replayer_panel.py
+#, fuzzy
+msgid "The bet or raise, in percent of the pot before it."
+msgstr "Wielkość postawionego zakładu, jako procent puli."
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"The bounty cash the all-in wins on average: the chance to win the whole pot "
+"times the bounty paid now."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"The bounty the all-in can win. Separate from ICM $EV: the two are not added."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"The hand's equity share of the pot less what the player put in, in chips. "
+"Chip EV is not tournament money."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"The pot drawn on the table: every chip put in so far, including any bet the "
+"caller cannot match."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "The pot on the table less the money the call cannot win."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"The prize equity the hand actually moved: read it next to ICM $EV as "
+"winnings next to chip EV."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+#, fuzzy
+msgid "Tournament — ICM"
+msgstr "Turnieje"
+
+#: fpdb_3_legacy/replayer_panel.py
+#, fuzzy
+msgid "Unavailable"
+msgstr "Odśwież podgląd"
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Uncalled or side money"
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"What the call can win from the others against what it costs: 3:1 wins three "
+"times the call."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "What the player still has to put in to call, capped at their stack."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Whether the hand could be priced, and under which assumptions."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Winning does not bust the opponent: there is no bounty to win."
+msgstr ""
+
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
 msgid "% of pot"
@@ -7406,11 +7686,6 @@ msgstr "Duża w ciemno"
 #, fuzzy
 msgid "Beats how much of the range"
 msgstr "Jaką część zakresu bije"
-
-#: fpdb_3_legacy/research_labels.py
-#, fuzzy
-msgid "Bet size"
-msgstr "Wielkość zakładu"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -7883,11 +8158,6 @@ msgstr "Pula przed akcją"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-msgid "Pot odds"
-msgstr "Pot odds"
-
-#: fpdb_3_legacy/research_labels.py
-#, fuzzy
 msgid "Pot type"
 msgstr "Typ puli"
 
@@ -7945,11 +8215,6 @@ msgstr "Rola"
 #, fuzzy
 msgid "Runout"
 msgstr "Runout"
-
-#: fpdb_3_legacy/research_labels.py
-#, fuzzy
-msgid "SPR"
-msgstr "SPR"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
