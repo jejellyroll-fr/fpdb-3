@@ -7,6 +7,7 @@ from dataclasses import dataclass, replace
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
+from fpdb_3_legacy import config_xml as cx
 from fpdb_3_legacy.AutoNotePlo import (
     is_aaxx,
     is_non_aaxx,
@@ -266,7 +267,7 @@ def autonotes_enabled(config=None) -> bool:
     node = _autonotes_node(config)
     if node is None:
         return True
-    return _string_to_bool(node.getAttribute("enabled"), default=True)
+    return _string_to_bool(cx.attr(node, "enabled"), default=True)
 
 
 def max_auto_notes_per_hand(config=None) -> int | None:
@@ -280,13 +281,13 @@ def max_auto_notes_per_player_per_hand(config=None) -> int | None:
 def set_autonotes_enabled(config, enabled: bool) -> None:
     """Set the global automatic-note switch in the XML config."""
     node = ensure_autonotes_node(config)
-    node.setAttribute("enabled", _bool_to_string(enabled))
+    cx.set_attr(node, "enabled", _bool_to_string(enabled))
 
 
 def set_rule_set_enabled(config, rule_set_name: str, enabled: bool) -> None:
     """Set one automatic-note rule-set switch in the XML config."""
     rule_set_node = ensure_rule_set_node(config, rule_set_name)
-    rule_set_node.setAttribute("enabled", _bool_to_string(enabled))
+    cx.set_attr(rule_set_node, "enabled", _bool_to_string(enabled))
 
 
 def set_rule_enabled(
@@ -297,7 +298,7 @@ def set_rule_enabled(
 ) -> None:
     """Set one automatic-note rule switch in the XML config."""
     rule_node = ensure_rule_node(config, rule_set_name, rule_id)
-    rule_node.setAttribute("enabled", _bool_to_string(enabled))
+    cx.set_attr(rule_node, "enabled", _bool_to_string(enabled))
 
 
 def set_rule_note_template(
@@ -308,7 +309,7 @@ def set_rule_note_template(
 ) -> None:
     """Set one automatic-note rule text template in the XML config."""
     rule_node = ensure_rule_node(config, rule_set_name, rule_id)
-    rule_node.setAttribute("noteTemplate", note_template)
+    cx.set_attr(rule_node, "noteTemplate", note_template)
 
 
 def rule_note_template(
@@ -319,68 +320,66 @@ def rule_note_template(
 ) -> str:
     """Return a configured note template for one rule, falling back to default."""
     node = _autonotes_node(config)
-    if node is None:
+    rule_node = _configured_rule(node, rule_set_name, rule_id) if node is not None else None
+    if rule_node is None:
         return default
-    for rule_set_node in node.getElementsByTagName("ruleset"):
-        if rule_set_node.getAttribute("name") != rule_set_name:
+    return cx.attr(rule_node, "noteTemplate") or default
+
+
+def _configured_rule(node, rule_set_name: str, rule_id: str):
+    """The ``<rule>`` for ``rule_id`` in the first rule set named ``rule_set_name`` that has one, or None."""
+    for rule_set_node in cx.find_all(node, "ruleset"):
+        if cx.attr(rule_set_node, "name") != rule_set_name:
             continue
-        for rule_node in rule_set_node.getElementsByTagName("rule"):
-            if rule_node.getAttribute("id") == rule_id:
-                return rule_node.getAttribute("noteTemplate") or default
-    return default
+        for rule_node in cx.find_all(rule_set_node, "rule"):
+            if cx.attr(rule_node, "id") == rule_id:
+                return rule_node
+    return None
 
 
 def ensure_autonotes_node(config):
     """Return the config autonotes node, creating it when absent."""
     doc = getattr(config, "doc", None)
     if doc is None:
-        msg = "config must expose a minidom document as .doc"
+        msg = "config must expose an XML document as .doc"
         raise ValueError(msg)
 
     node = _autonotes_node(config)
     if node is not None:
         return node
 
-    root = doc.documentElement
+    root = cx.root(doc)
     if root is None:
-        root = doc.createElement("FreePokerToolsConfig")
-        doc.appendChild(root)
-    node = doc.createElement("autonotes")
-    root.appendChild(node)
-    return node
+        # Only an empty minidom document has no root; an ElementTree one always has.
+        root = doc.appendChild(cx.create_element(doc, "FreePokerToolsConfig"))
+    return cx.append(doc, root, cx.create_element(doc, "autonotes"))
 
 
 def ensure_rule_set_node(config, rule_set_name: str):
     """Return a rule-set config node, creating it when absent."""
     node = ensure_autonotes_node(config)
-    for rule_set_node in node.getElementsByTagName("ruleset"):
-        if rule_set_node.getAttribute("name") == rule_set_name:
+    for rule_set_node in cx.find_all(node, "ruleset"):
+        if cx.attr(rule_set_node, "name") == rule_set_name:
             return rule_set_node
 
-    rule_set_node = config.doc.createElement("ruleset")
-    rule_set_node.setAttribute("name", rule_set_name)
-    node.appendChild(rule_set_node)
-    return rule_set_node
+    return cx.append(config.doc, node, cx.create_element(config.doc, "ruleset", {"name": rule_set_name}))
 
 
 def ensure_rule_node(config, rule_set_name: str, rule_id: str):
     """Return a rule config node, creating it under its rule set when absent."""
     rule_set_node = ensure_rule_set_node(config, rule_set_name)
-    for rule_node in rule_set_node.getElementsByTagName("rule"):
-        if rule_node.getAttribute("id") == rule_id:
+    for rule_node in cx.find_all(rule_set_node, "rule"):
+        if cx.attr(rule_node, "id") == rule_id:
             return rule_node
 
-    rule_node = config.doc.createElement("rule")
-    rule_node.setAttribute("id", rule_id)
-    rule_set_node.appendChild(rule_node)
-    return rule_node
+    return cx.append(config.doc, rule_set_node, cx.create_element(config.doc, "rule", {"id": rule_id}))
 
 
 def _autonote_int_attribute(config, attribute_name: str) -> int | None:
     node = _autonotes_node(config)
     if node is None:
         return None
-    value = node.getAttribute(attribute_name)
+    value = cx.attr(node, attribute_name)
     if value == "":
         return None
     try:
@@ -422,9 +421,9 @@ def rule_set_enabled(config, rule_set_name: str, default: bool = True) -> bool:
     node = _autonotes_node(config)
     if node is None:
         return default
-    for rule_set_node in node.getElementsByTagName("ruleset"):
-        if rule_set_node.getAttribute("name") == rule_set_name:
-            return _string_to_bool(rule_set_node.getAttribute("enabled"), default=True)
+    for rule_set_node in cx.find_all(node, "ruleset"):
+        if cx.attr(rule_set_node, "name") == rule_set_name:
+            return _string_to_bool(cx.attr(rule_set_node, "enabled"), default=True)
     return default
 
 
@@ -433,16 +432,13 @@ def rule_enabled(config, rule_id: str, rule_set_name: str = RULE_SET_HWANG_PLO_P
     if node is None:
         return True
 
-    for rule_set_node in node.getElementsByTagName("ruleset"):
-        if rule_set_node.getAttribute("name") != rule_set_name:
-            continue
-        for rule_node in rule_set_node.getElementsByTagName("rule"):
-            if rule_node.getAttribute("id") == rule_id:
-                return _string_to_bool(rule_node.getAttribute("enabled"), default=True)
+    rule_node = _configured_rule(node, rule_set_name, rule_id)
+    if rule_node is not None:
+        return _string_to_bool(cx.attr(rule_node, "enabled"), default=True)
 
-    for child in node.childNodes:
-        if getattr(child, "tagName", None) == "rule" and child.getAttribute("id") == rule_id:
-            return _string_to_bool(child.getAttribute("enabled"), default=True)
+    for child in cx.children(node, "rule"):
+        if cx.attr(child, "id") == rule_id:
+            return _string_to_bool(cx.attr(child, "enabled"), default=True)
     return True
 
 
@@ -455,13 +451,10 @@ def _autonotes_node(config):
     ten times per hand, which was a third of the import time (#443).
     """
     doc = getattr(config, "doc", None)
-    root = getattr(doc, "documentElement", None) if doc is not None else None
+    root = cx.root(doc) if doc is not None else None
     if root is None:
         return None
-    for child in root.childNodes:
-        if getattr(child, "tagName", None) == "autonotes":
-            return child
-    return None
+    return next(iter(cx.children(root, "autonotes")), None)
 
 
 def _string_to_bool(value: str, default=True) -> bool:
