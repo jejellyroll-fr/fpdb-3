@@ -536,3 +536,10 @@ def preceding_comment(doc: Node, node: Node) -> Node | None:
     if previous.tag is not ET.Comment or (previous.tail or "").strip():
         return None
     return previous
+
+
+def document_comments(doc: Node) -> list[str]:
+    """The text of each comment outside the root element, above it then below it, in file order."""
+    if _is_dom(doc):
+        return [node.data for node in doc.childNodes if node.nodeType == node.COMMENT_NODE]
+    return [node.text or "" for node in doc.before_root + doc.after_root if node.tag is ET.Comment]

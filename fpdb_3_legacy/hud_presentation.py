@@ -36,7 +36,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Final
 
-import defusedxml.minidom
+from fpdb_3_legacy import config_xml as cx
 
 # ---------------------------------------------------------------------------
 # Roles: what a cell is, and how that is shown twice.
@@ -332,14 +332,8 @@ class PackagePresentation:
         )
 
 
-def _text_of(node: Any) -> str:
-    return "".join(
-        child.data for child in node.childNodes if child.nodeType == child.TEXT_NODE
-    )
-
-
 def _stat_from(node: Any) -> PresentationStat:
-    raw = node.getAttribute("_rowcol") or "(1,1)"
+    raw = cx.attr(node, "_rowcol") or "(1,1)"
     try:
         row, col = (int(part) for part in raw.strip("()").split(","))
     except ValueError:
@@ -347,53 +341,50 @@ def _stat_from(node: Any) -> PresentationStat:
     return PresentationStat(
         row=row,
         col=col,
-        name=node.getAttribute("_stat_name"),
-        prefix=node.getAttribute("hudprefix"),
-        tip=node.getAttribute("tip"),
-        display_label=node.getAttribute("display_label"),
-        popup=node.getAttribute("popup"),
-        background=node.getAttribute("hudbgcolor"),
-        low_threshold=node.getAttribute("stat_loth"),
-        high_threshold=node.getAttribute("stat_hith"),
-        low_color=node.getAttribute("stat_locolor"),
-        mid_color=node.getAttribute("stat_midcolor"),
-        high_color=node.getAttribute("stat_hicolor"),
+        name=cx.attr(node, "_stat_name"),
+        prefix=cx.attr(node, "hudprefix"),
+        tip=cx.attr(node, "tip"),
+        display_label=cx.attr(node, "display_label"),
+        popup=cx.attr(node, "popup"),
+        background=cx.attr(node, "hudbgcolor"),
+        low_threshold=cx.attr(node, "stat_loth"),
+        high_threshold=cx.attr(node, "stat_hith"),
+        low_color=cx.attr(node, "stat_locolor"),
+        mid_color=cx.attr(node, "stat_midcolor"),
+        high_color=cx.attr(node, "stat_hicolor"),
     )
 
 
 def _panels_from(stat_set: Any) -> tuple[PresentationPanel, ...]:
-    title_font_scale = float(stat_set.getAttribute("title_font_scale") or 0)
-    heading_font_scale = float(stat_set.getAttribute("heading_font_scale") or 0)
-    blocks = [
-        child for child in stat_set.childNodes
-        if child.nodeType == child.ELEMENT_NODE and child.tagName == "block"
-    ]
+    title_font_scale = float(cx.attr(stat_set, "title_font_scale") or 0)
+    heading_font_scale = float(cx.attr(stat_set, "heading_font_scale") or 0)
+    blocks = cx.children(stat_set, "block")
     if not blocks:
         # A flat stat set is one unnamed panel; naming it here keeps every
         # caller from having to special-case the shape.
         return (
             PresentationPanel(
-                id=stat_set.getAttribute("name"),
+                id=cx.attr(stat_set, "name"),
                 label="",
-                rows=int(stat_set.getAttribute("rows") or 0),
-                cols=int(stat_set.getAttribute("cols") or 0),
-                stats=tuple(_stat_from(node) for node in stat_set.getElementsByTagName("stat")),
+                rows=int(cx.attr(stat_set, "rows") or 0),
+                cols=int(cx.attr(stat_set, "cols") or 0),
+                stats=tuple(_stat_from(node) for node in cx.find_all(stat_set, "stat")),
                 title_font_scale=title_font_scale,
                 heading_font_scale=heading_font_scale,
             ),
         )
     return tuple(
         PresentationPanel(
-            id=block.getAttribute("id"),
-            label=block.getAttribute("label"),
-            position=block.getAttribute("position"),
-            rows=int(block.getAttribute("rows") or 0),
-            cols=int(block.getAttribute("cols") or 0),
-            stats=tuple(_stat_from(node) for node in block.getElementsByTagName("stat")),
-            title_bgcolor=block.getAttribute("title_bgcolor"),
-            title_fgcolor=block.getAttribute("title_fgcolor"),
-            title_font_scale=float(block.getAttribute("title_font_scale") or title_font_scale),
-            heading_font_scale=float(block.getAttribute("heading_font_scale") or heading_font_scale),
+            id=cx.attr(block, "id"),
+            label=cx.attr(block, "label"),
+            position=cx.attr(block, "position"),
+            rows=int(cx.attr(block, "rows") or 0),
+            cols=int(cx.attr(block, "cols") or 0),
+            stats=tuple(_stat_from(node) for node in cx.find_all(block, "stat")),
+            title_bgcolor=cx.attr(block, "title_bgcolor"),
+            title_fgcolor=cx.attr(block, "title_fgcolor"),
+            title_font_scale=float(cx.attr(block, "title_font_scale") or title_font_scale),
+            heading_font_scale=float(cx.attr(block, "heading_font_scale") or heading_font_scale),
         )
         for block in blocks
     )
@@ -401,20 +392,20 @@ def _panels_from(stat_set: Any) -> tuple[PresentationPanel, ...]:
 
 def _popups_from(document: Any) -> tuple[PresentationPopup, ...]:
     popups = []
-    for node in document.getElementsByTagName("pu"):
+    for node in cx.find_all(document, "pu"):
         own: list[str] = []
         navigation: list[tuple[str, str]] = []
-        for entry in node.getElementsByTagName("pu_stat"):
-            name = entry.getAttribute("pu_stat_name")
-            submenu = entry.getAttribute("pu_stat_submenu")
+        for entry in cx.find_all(node, "pu_stat"):
+            name = cx.attr(entry, "pu_stat_name")
+            submenu = cx.attr(entry, "pu_stat_submenu")
             if submenu:
                 navigation.append((name, submenu))
             else:
                 own.append(name)
         popups.append(
             PresentationPopup(
-                name=node.getAttribute("pu_name"),
-                title=node.getAttribute("pu_title"),
+                name=cx.attr(node, "pu_name"),
+                title=cx.attr(node, "pu_title"),
                 stats=tuple(own),
                 submenus=tuple(navigation),
             ),
@@ -425,19 +416,17 @@ def _popups_from(document: Any) -> tuple[PresentationPopup, ...]:
 def describe_package(path: str | Path) -> PackagePresentation:
     """Read one ``.fpdbhud`` as the presentation contract sees it."""
     path = Path(path)
-    # defusedxml, like every other parser in this project: a package is a
-    # file players pass to each other, and the stock parser would fetch
-    # whatever an entity declaration told it to.
-    document = defusedxml.minidom.parse(str(path))
-    stat_sets = document.getElementsByTagName("ss")
+    # config_xml parses through defusedxml, like every other parser in this
+    # project: a package is a file players pass to each other, and the stock
+    # parser would fetch whatever an entity declaration told it to.
+    document = cx.parse_file(path)
+    stat_sets = cx.find_all(document, "ss")
     panels: list[PresentationPanel] = []
     for stat_set in stat_sets:
         panels.extend(_panels_from(stat_set))
-    comment = "\n".join(
-        node.data for node in document.childNodes if node.nodeType == node.COMMENT_NODE
-    )
+    comment = "\n".join(cx.document_comments(document))
     return PackagePresentation(
-        name=stat_sets[0].getAttribute("name") if stat_sets else path.stem,
+        name=cx.attr(stat_sets[0], "name") if stat_sets else path.stem,
         path=path,
         panels=tuple(panels),
         popups=_popups_from(document),
