@@ -399,6 +399,78 @@ class ThemeManager:  # pylint: disable=too-many-public-methods  # the themes' wh
                 border: 0;
                 border-radius: 4px;
             }}
+            /* Results overview (Tourney Stats): titles, summary cards,
+               segmented group-by buttons and the drill-down breadcrumb. */
+            QLabel#viewTitle {{
+                color: {c["window_text"]};
+                font-size: 16px;
+                font-weight: 700;
+            }}
+            QLabel#mutedLabel {{
+                color: {c["muted_text"]};
+            }}
+            QLabel#totalsLabel {{
+                color: {c["window_text"]};
+                font-weight: 600;
+            }}
+            QFrame#kpiCard {{
+                background-color: {c["surface_panel"]};
+                border: 1px solid {c["border"]};
+                border-radius: 6px;
+            }}
+            QLabel#kpiTitle {{
+                color: {c["muted_text"]};
+                font-size: 11px;
+                font-weight: 700;
+            }}
+            QLabel#kpiValue {{
+                color: {c["window_text"]};
+                font-size: 18px;
+                font-weight: 700;
+            }}
+            QLabel#kpiValue[tone="up"] {{
+                color: {c["graph_up"]};
+            }}
+            QLabel#kpiValue[tone="down"] {{
+                color: {c["graph_down"]};
+            }}
+            QToolButton#segmentButton {{
+                background-color: {c["panel"]};
+                color: {c["window_text"]};
+                border: 1px solid {c["border"]};
+                border-radius: 0;
+                padding: 6px 14px;
+                margin-left: -1px;
+                font-weight: 600;
+            }}
+            QToolButton#segmentButton:hover {{
+                background-color: {c["panel_alt"]};
+            }}
+            QToolButton#segmentButton:checked {{
+                background-color: {c["accent"]};
+                color: {c["highlighted_text"]};
+                border-color: {c["accent"]};
+            }}
+            QFrame#breadcrumbBar {{
+                background-color: {c["panel"]};
+                border: 1px solid {c["border"]};
+                border-left: 3px solid {c["accent"]};
+                border-radius: 6px;
+            }}
+            QToolButton#breadcrumbBack {{
+                background-color: transparent;
+                color: {c["window_text"]};
+                border: 0;
+                padding: 2px 8px;
+                font-weight: 700;
+            }}
+            QToolButton#breadcrumbBack:hover {{
+                background-color: {c["panel_alt"]};
+                border-radius: 4px;
+            }}
+            QLabel#breadcrumbLabel {{
+                color: {c["window_text"]};
+            }}
             QSplitter::handle {{
                 background-color: {c["border"]};
                 margin: 0;

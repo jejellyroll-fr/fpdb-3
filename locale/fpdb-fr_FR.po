@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-15 20:49+0100\n"
+"POT-Creation-Date: 2026-11-20 08:33+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -310,7 +310,7 @@ msgstr "Tout"
 msgid "All Players"
 msgstr "Tous les joueurs"
 
-#: fpdb_3_legacy/Filters.py
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiTourneyPlayerStats.py
 msgid "All tournaments"
 msgstr "Tous les tournois"
 
@@ -861,7 +861,8 @@ msgstr "Charger les notes"
 msgid "Notes: 0"
 msgstr "Notes : 0"
 
-#: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py fpdb_3_legacy/hud_options_panel.py
 #: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
 #: fpdb_3_legacy/research_labels.py
 msgid "Player"
@@ -896,7 +897,7 @@ msgid "Search"
 msgstr "Rechercher"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/GuiBulkImport.py
-#: fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py fpdb_3_legacy/hand_share_dialog.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Site"
 msgstr "Site"
@@ -1304,7 +1305,8 @@ msgstr "Migrer vers…"
 msgid "Migrating database"
 msgstr "Migration de la base de données"
 
-#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/pack_share_dialog.py
+#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiTourneyPlayerStats.py
+#: fpdb_3_legacy/pack_share_dialog.py
 msgid "Name"
 msgstr "Nom"
 
@@ -1419,8 +1421,8 @@ msgid "FPDB 3 info"
 msgstr "Infos FPDB 3"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResearchBrowser.py
-#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/GuiTrackerMigration.py
-#: fpdb_3_legacy/session_guard_dialog.py
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py fpdb_3_legacy/GuiTrackerMigration.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/session_guard_dialog.py
 msgid "Hands"
 msgstr "Mains"
 
@@ -1441,7 +1443,7 @@ msgid "Refresh Graph"
 msgstr "Rafraîchir Graphique"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiHandViewer.py
-#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/capture/swc_poker_console.py
+#: fpdb_3_legacy/capture/swc_poker_console.py fpdb_3_legacy/results_calendar.py
 msgid "Showdown"
 msgstr "Showdown"
 
@@ -1763,7 +1765,7 @@ msgid "Log Viewer"
 msgstr "Visionneuse de journaux"
 
 #: fpdb_3_legacy/GuiLogView.py fpdb_3_legacy/GuiOpponentsReport.py
-#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/pack_gallery_dialog.py
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/results_calendar.py
 msgid "Refresh"
 msgstr "Rafraîchir"
 
@@ -1877,12 +1879,37 @@ msgstr "Fenetre"
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, python-format
+msgid "%(name)s %(action)s %(size)s%% of the pot"
+msgstr "%(name)s %(action)s %(size)s%% du pot"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(name)s SPR %(spr)s"
+msgstr "SPR de %(name)s : %(spr)s"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(name)s to act"
+msgstr "À %(name)s de jouer"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(name)s to call %(amount)s"
+msgstr "%(name)s doit payer %(amount)s"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
 msgid "(%(head)s to your own bounty)"
 msgstr "(%(head)s ajoutés à votre propre prime)"
 
 #: fpdb_3_legacy/GuiReplayer.py
 msgid "(this table taken as the whole field)"
 msgstr "(cette table prise pour tout le field)"
+
+#: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/results_calendar.py
+msgid "Big blinds"
+msgstr "Grosses blindes"
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, python-format
@@ -1915,7 +1942,7 @@ msgstr "Aperçu du jeu de cartes actuel"
 msgid "Deck:"
 msgstr "Jeu de cartes :"
 
-#: fpdb_3_legacy/GuiReplayer.py
+#: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/GuiTourneyPlayerStats.py
 msgid "End"
 msgstr "Fin"
 
@@ -1933,6 +1960,10 @@ msgid "Hide Cards"
 msgstr "Masquer les cartes"
 
 #: fpdb_3_legacy/GuiReplayer.py
+msgid "History..."
+msgstr "Historique..."
+
+#: fpdb_3_legacy/GuiReplayer.py
 #, python-format
 msgid "ICM $EV %(ev)s · result %(result)s · chip EV %(chips)s"
 msgstr "$EV ICM %(ev)s · résultat %(result)s · EV en jetons %(chips)s"
@@ -1943,12 +1974,29 @@ msgid "ICM: %s"
 msgstr "ICM : %s"
 
 #: fpdb_3_legacy/GuiReplayer.py
+msgid "List the hand's actions and jump to one of them (A)"
+msgstr "Lister les actions de la main et aller à l'une d'elles (A)"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "MDF %(mdf)s%% · fold equity needed %(fe)s%% (heads-up)"
+msgstr "MDF %(mdf)s%% · fold equity nécessaire %(fe)s%% (heads-up)"
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "MDF / fold equity: heads-up only"
+msgstr "MDF / fold equity : heads-up uniquement"
+
+#: fpdb_3_legacy/GuiReplayer.py
 msgid "Next"
 msgstr "Suiv."
 
 #: fpdb_3_legacy/GuiReplayer.py
 msgid "Next action"
 msgstr "Action suivante"
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "Odds for all players"
+msgstr "Cotes de tous les joueurs"
 
 #: fpdb_3_legacy/GuiReplayer.py
 msgid "Payouts..."
@@ -1967,12 +2015,25 @@ msgid "Previous action"
 msgstr "Action précédente"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "SPR %(spr)s"
+msgstr "SPR %(spr)s"
+
+#: fpdb_3_legacy/GuiReplayer.py
 msgid "Send this hand's preflop decisions to PreflopAdvisor"
 msgstr "Envoyer les décisions préflop de cette main à PreflopAdvisor"
 
 #: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/hand_share_dialog.py
 msgid "Share..."
 msgstr "Partager..."
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid ""
+"Show SPR, bet sizing, pot odds, MDF and fold equity for every player, not "
+"only the hero"
+msgstr ""
+"Afficher le SPR, la taille des mises, les cotes du pot, le MDF et la fold "
+"equity de chaque joueur, pas seulement du héros"
 
 #: fpdb_3_legacy/GuiReplayer.py
 msgid "Show stacks, bets and pots in big blinds"
@@ -1982,7 +2043,8 @@ msgstr "Afficher les tapis, mises et pots en grosses blindes"
 msgid "Solver review..."
 msgstr "Revue solver..."
 
-#: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/session_guard_dialog.py
+#: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/GuiTourneyPlayerStats.py
+#: fpdb_3_legacy/session_guard_dialog.py
 msgid "Start"
 msgstr "Début"
 
@@ -1994,52 +2056,6 @@ msgstr "Cette main n'a pas de grosse blinde pour compter les montants"
 #, python-format
 msgid "bounty-adjusted chip EV %(chips)s"
 msgstr "chip EV ajustée des primes %(chips)s"
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "%(name)s %(action)s %(size)s%% of the pot"
-msgstr "%(name)s %(action)s %(size)s%% du pot"
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "%(name)s SPR %(spr)s"
-msgstr "SPR de %(name)s : %(spr)s"
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "%(name)s to act"
-msgstr "À %(name)s de jouer"
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "%(name)s to call %(amount)s"
-msgstr "%(name)s doit payer %(amount)s"
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "MDF %(mdf)s%% · fold equity needed %(fe)s%% (heads-up)"
-msgstr "MDF %(mdf)s%% · fold equity nécessaire %(fe)s%% (heads-up)"
-
-#: fpdb_3_legacy/GuiReplayer.py
-msgid "MDF / fold equity: heads-up only"
-msgstr "MDF / fold equity : heads-up uniquement"
-
-#: fpdb_3_legacy/GuiReplayer.py
-msgid "Odds for all players"
-msgstr "Cotes de tous les joueurs"
-
-#: fpdb_3_legacy/GuiReplayer.py
-#, python-format
-msgid "SPR %(spr)s"
-msgstr "SPR %(spr)s"
-
-#: fpdb_3_legacy/GuiReplayer.py
-msgid ""
-"Show SPR, bet sizing, pot odds, MDF and fold equity for every player, not "
-"only the hero"
-msgstr ""
-"Afficher le SPR, la taille des mises, les cotes du pot, le MDF et la fold "
-"equity de chaque joueur, pas seulement du héros"
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, python-format
@@ -2475,118 +2491,6 @@ msgid "{n} decisions are counted apart: their cards were never known."
 msgstr ""
 "{n} décisions sont comptées à part : leurs cartes n'ont jamais été connues."
 
-#: fpdb_3_legacy/results_calendar.py
-msgid "All hands of the filtered dates"
-msgstr "Toutes les mains des dates filtrées"
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "All-in EV"
-msgstr "EV all-in"
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "All-in EV (BB)"
-msgstr "EV all-in (BB)"
-
-#: fpdb_3_legacy/results_calendar.py
-#, python-brace-format
-msgid "All-in EV: {ev}"
-msgstr "EV all-in : {ev}"
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "BB/100"
-msgstr "BB/100"
-
-#: fpdb_3_legacy/results_calendar.py
-#, python-brace-format
-msgid "BB/100: {bb100}"
-msgstr "BB/100 : {bb100}"
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Click to select the whole month"
-msgstr "Cliquer pour sélectionner tout le mois"
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Days"
-msgstr "Jours"
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "EV BB/100"
-msgstr "EV BB/100"
-
-#: fpdb_3_legacy/results_calendar.py
-#, python-brace-format
-msgid ""
-"Hands: {hands} · Profit: {profit} · All-in EV: {ev} · BB/100: {bb100} · EV "
-"BB/100: {ev100} · Days played: {days} ({winning} winning)"
-msgstr "Mains : {hands} · Profit : {profit} · EV all-in : {ev} · BB/100 : {bb100} · EV BB/100 : {ev100} · Jours joués : {days} (dont {winning} gagnants)"
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Loading…"
-msgstr "Chargement…"
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Months"
-msgstr "Mois"
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Next month"
-msgstr "Mois suivant"
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Non-showdown (BB)"
-msgstr "Sans-showdown (BB)"
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Open the hands of the selected period in the Hand Viewer"
-msgstr "Ouvrir les mains de la période sélectionnée dans la visionneuse de mains"
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Period:"
-msgstr "Période :"
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Previous month"
-msgstr "Mois précédent"
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Profit (BB)"
-msgstr "Profit (BB)"
-
-#: fpdb_3_legacy/results_calendar.py
-#, python-brace-format
-msgid "Profit: {profit}"
-msgstr "Profit : {profit}"
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Review hands"
-msgstr "Revoir les mains"
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Showdown (BB)"
-msgstr "Showdown (BB)"
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Unit:"
-msgstr "Unité :"
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Week"
-msgstr "Semaine"
-
-#: fpdb_3_legacy/results_calendar.py
-#, python-brace-format
-msgid "Week of {date}"
-msgstr "Semaine du {date}"
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Weeks"
-msgstr "Semaines"
-
-#: fpdb_3_legacy/results_calendar.py
-#, python-brace-format
-msgid "{hands} hands"
-msgstr "{hands} mains"
-
 #: fpdb_3_legacy/GuiSessionViewer.py
 msgid "Cumulative result (BB)"
 msgstr "Résultat cumulé (BB)"
@@ -2653,8 +2557,347 @@ msgstr ""
 "Plus lent : chaque main à tapis est reconstruite et chiffrée."
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
+#, python-format
+msgid "#%(n)s %(when)s · Net %(net)s · ROI %(roi)s · ITM %(itm)s"
+msgstr "n°%(n)s %(when)s · Net %(net)s · ROI %(roi)s · ITM %(itm)s"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+#, python-format
+msgid "%(cashes)s cashes in %(count)s tournaments"
+msgstr "%(cashes)s places payées sur %(count)s tournois"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+#, python-format
+msgid "%(shown)s of %(total)s rows shown"
+msgstr "%(shown)s lignes affichées sur %(total)s"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+#, python-format
+msgid "%s tournaments"
+msgstr "%s tournois"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+#, python-format
+msgid "%s without a result"
+msgstr "%s sans résultat"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "1st"
+msgstr "1er"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "1st · 2nd · 3rd"
+msgstr "1er · 2e · 3e"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "2nd"
+msgstr "2nd"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "3rd"
+msgstr "3ème"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Average buy-in + fee"
+msgstr "Buy-in + frais moyen"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Average finishing place, when known"
+msgstr "Place finale moyenne, lorsqu’elle est connue"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Avg buy-in"
+msgstr "Buy-in moy."
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Avg entrants"
+msgstr "Inscrits moy."
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Avg finish"
+msgstr "Place moy."
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Avg profit"
+msgstr "Profit moy."
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Back to the previous view (Esc)"
+msgstr "Revenir à la vue précédente (Échap)"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Bounties"
+msgstr "Primes"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Buy-in"
+msgstr "Buy-in"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Buy-in + fee"
+msgstr "Buy-in + frais"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Buy-ins"
+msgstr "Buy-ins"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Buy-ins and fees paid"
+msgstr "Buy-ins et frais payés"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "By buy-in"
+msgstr "Par buy-in"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "By date"
+msgstr "Par date"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "By description"
+msgstr "Par description"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "By tournament"
+msgstr "Par tournoi"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Cashes"
+msgstr "Places payées"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid ""
+"Choose a hero and the tournaments to include on the left, then press Refresh "
+"Stats."
+msgstr ""
+"Choisissez à gauche un héros et les tournois à inclure, puis cliquez sur "
+"Rafraîchir Stats."
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Choose a site and a hero on the left, then press Refresh Stats."
+msgstr ""
+"Choisissez à gauche un site et un héros, puis cliquez sur Rafraîchir Stats."
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+#, python-format
+msgid "Curves show the %(currency)s tournaments only"
+msgstr "Les courbes ne montrent que les tournois en %(currency)s"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Date"
+msgstr "Date"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Description"
+msgstr "Description"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Double-click a row to see its tournaments"
+msgstr "Double-cliquez sur une ligne pour voir ses tournois"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Double-click a tournament to open its hands"
+msgstr "Double-cliquez sur un tournoi pour ouvrir ses mains"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Entrants"
+msgstr "Inscrits"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Filter rows…"
+msgstr "Filtrer les lignes…"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Finish"
+msgstr "Place"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Fit columns to contents"
+msgstr "Ajuster les colonnes au contenu"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Graphs need the pyqtgraph package."
+msgstr "Les graphiques nécessitent le paquet pyqtgraph."
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Hands stored for this tournament"
+msgstr "Mains enregistrées pour ce tournoi"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "ITM"
+msgstr "ITM"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "ITM %"
+msgstr "ITM %"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid ""
+"Imported from their hands only: no prize was recorded. They are left out of "
+"the buy-ins, net won, ROI and ITM rather than counted as losses. Import the "
+"tournament summaries to complete them."
+msgstr ""
+"Importés depuis leurs seules mains : aucun gain n'a été enregistré. Ils sont "
+"exclus des buy-ins, du gain net, du ROI et de l'ITM plutôt que comptés comme "
+"des pertes. Importez les résumés de tournoi pour les compléter."
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+#, python-format
+msgid "Net %(net)s · ROI %(roi)s"
+msgstr "Net %(net)s · ROI %(roi)s"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Net won"
+msgstr "Gain net"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Net won as a share of the buy-ins and fees"
+msgstr "Gain net rapporté aux buy-ins et frais"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Net won per tournament"
+msgstr "Gain net par tournoi"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+#, python-format
+msgid ""
+"No hands stored for tournament #%s.\n"
+"\n"
+"This tournament was imported from a summary without its hand histories."
+msgstr ""
+"Aucune main enregistrée pour le tournoi n°%s.\n"
+"\n"
+"Ce tournoi a été importé depuis un résumé, sans ses historiques de mains."
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "No result"
+msgstr "Sans résultat"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "No tournament matches these filters."
+msgstr "Aucun tournoi ne correspond à ces filtres."
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid ""
+"Not available in this drill-down: computed over every tournament of the type"
+msgstr ""
+"Indisponible dans ce détail : calculé sur tous les tournois du type"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Number of 1st, 2nd and 3rd places"
+msgstr "Nombre de 1res, 2es et 3es places"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "One row per buy-in level"
+msgstr "Une ligne par niveau de buy-in"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "One row per day played"
+msgstr "Une ligne par jour joué"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "One row per tournament"
+msgstr "Une ligne par tournoi"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "One row per tournament type"
+msgstr "Une ligne par type de tournoi"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Open hands"
+msgstr "Ouvrir les mains"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Open the selected tournament's hands in a Tourney Viewer tab (Enter)"
+msgstr ""
+"Ouvrir les mains du tournoi sélectionné dans un onglet Tourney Viewer "
+"(Entrée)"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Over every tournament of this type in the filters"
+msgstr "Sur tous les tournois de ce type dans les filtres"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Part of the winnings paid as bounties"
+msgstr "Part des gains versée en primes"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Prize and bounties"
+msgstr "Gain et primes"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Prizes and bounties"
+msgstr "Gains et primes"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Prizes and bounties, less buy-ins and fees"
+msgstr "Gains et primes, moins les buy-ins et les frais"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "ROI"
+msgstr "ROI"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "ROI %"
+msgstr "ROI %"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
 msgid "Refresh Stats"
 msgstr "Rafraîchir Stats"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Share of the tournaments that paid a prize"
+msgstr "Part des tournois terminés dans les places payées"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Show only the rows containing this text"
+msgstr "Afficher seulement les lignes contenant ce texte"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Show or hide this curve"
+msgstr "Afficher ou masquer cette courbe"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Tournament #"
+msgstr "Tournoi n°"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Tournament hands"
+msgstr "Mains du tournoi"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Tournament results"
+msgstr "Résultats des tournois"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Tournaments"
+msgstr "Tournois"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Tournaments imported without their result (no summary)"
+msgstr "Tournois importés sans leur résultat (pas de résumé)"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Tournaments played"
+msgstr "Tournois joués"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Tourneys"
+msgstr "Tournois"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Unknown date"
+msgstr "Date inconnue"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Won"
+msgstr "Gagné"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "← Back"
+msgstr "← Retour"
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
 #, python-format
@@ -3737,10 +3980,6 @@ msgstr "Cette main ne peut pas être envoyée à PreflopAdvisor."
 msgid "Amounts"
 msgstr "Montants"
 
-#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/hand_share_dialog.py
-msgid "Big blinds"
-msgstr "Grosses blindes"
-
 #: fpdb_3_legacy/hand_share_dialog.py fpdb_3_legacy/table_export.py
 msgid "Copy"
 msgstr "Copier"
@@ -3899,7 +4138,7 @@ msgstr "n derniers jours"
 msgid "Opponents"
 msgstr "Adversaires"
 
-#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/hud_options_panel.py fpdb_3_legacy/results_calendar.py
 msgid "Period"
 msgstr "Période"
 
@@ -4066,6 +4305,10 @@ msgstr "Récupérer vos mains depuis PokerTracker 4 ou Holdem Manager 3"
 #: fpdb_3_legacy/menu_layout.py
 msgid "Cash"
 msgstr "Cash"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Cash results per day, week and month, with their profit curves"
+msgstr "Résultats cash par jour, semaine et mois, avec leurs courbes de profit"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/update_notice.py
 msgid "Check for updates"
@@ -4247,6 +4490,10 @@ msgid "Research Browser for Omaha"
 msgstr "Research Browser pour l'Omaha"
 
 #: fpdb_3_legacy/menu_layout.py
+msgid "Results Calendar"
+msgstr "Calendrier des résultats"
+
+#: fpdb_3_legacy/menu_layout.py
 msgid ""
 "Save a PokerTracker 4 HUD layout as a package you can share or re-import"
 msgstr ""
@@ -4352,14 +4599,6 @@ msgid "Write a HUD profile or a stat pack ready to submit to the pack gallery"
 msgstr ""
 "Écrire un profil de HUD ou un pack de stats prêt à proposer à la galerie de "
 "packs"
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Cash results per day, week and month, with their profit curves"
-msgstr "Résultats cash par jour, semaine et mois, avec leurs courbes de profit"
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Results Calendar"
-msgstr "Calendrier des résultats"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "(label)"
@@ -6095,11 +6334,6 @@ msgid "stats.d"
 msgstr "stats.d"
 
 #: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
-#: fpdb_3_legacy/pack_share_dialog.py
-msgid "Description"
-msgstr "Description"
-
-#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
 msgid "Search stats"
 msgstr "Rechercher des stats"
 
@@ -6397,6 +6631,16 @@ msgid ""
 msgstr ""
 "Ce paquet a été converti depuis PokerTracker 4 : %d de ses stats n'ont pas "
 "d'équivalent fpdb et n'y figurent pas :"
+
+#: fpdb_3_legacy/replay_history_dialog.py
+msgid "Action history"
+msgstr "Historique des actions"
+
+#: fpdb_3_legacy/replay_history_dialog.py
+msgid "Click an action, or select it and press Enter, to jump to it."
+msgstr ""
+"Cliquez sur une action, ou sélectionnez-la et appuyez sur Entrée, pour y "
+"aller."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "% of pot"
@@ -7295,6 +7539,127 @@ msgstr "Pot-Limit Omaha 4 cartes"
 msgid "Pot-Limit Omaha 5c"
 msgstr "Pot-Limit Omaha 5 cartes"
 
+#: fpdb_3_legacy/results_calendar.py
+msgid "All hands of the filtered dates"
+msgstr "Toutes les mains des dates filtrées"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "All-in EV"
+msgstr "EV all-in"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "All-in EV (BB)"
+msgstr "EV all-in (BB)"
+
+#: fpdb_3_legacy/results_calendar.py
+#, python-brace-format
+msgid "All-in EV: {ev}"
+msgstr "EV all-in : {ev}"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "BB/100"
+msgstr "BB/100"
+
+#: fpdb_3_legacy/results_calendar.py
+#, python-brace-format
+msgid "BB/100: {bb100}"
+msgstr "BB/100 : {bb100}"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Click to select the whole month"
+msgstr "Cliquer pour sélectionner tout le mois"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Days"
+msgstr "Jours"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "EV BB/100"
+msgstr "EV BB/100"
+
+#: fpdb_3_legacy/results_calendar.py
+#, python-brace-format
+msgid ""
+"Hands: {hands} · Profit: {profit} · All-in EV: {ev} · BB/100: {bb100} · EV "
+"BB/100: {ev100} · Days played: {days} ({winning} winning)"
+msgstr ""
+"Mains : {hands} · Profit : {profit} · EV all-in : {ev} · BB/100 : {bb100} · "
+"EV BB/100 : {ev100} · Jours joués : {days} (dont {winning} gagnants)"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Loading…"
+msgstr "Chargement…"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Months"
+msgstr "Mois"
+
+#: fpdb_3_legacy/results_calendar.py
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+msgid "Net profit"
+msgstr "Profit net"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Next month"
+msgstr "Mois suivant"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Non-showdown (BB)"
+msgstr "Sans-showdown (BB)"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Open the hands of the selected period in the Hand Viewer"
+msgstr ""
+"Ouvrir les mains de la période sélectionnée dans la visionneuse de mains"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Period:"
+msgstr "Période :"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Previous month"
+msgstr "Mois précédent"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Profit (BB)"
+msgstr "Profit (BB)"
+
+#: fpdb_3_legacy/results_calendar.py
+#, python-brace-format
+msgid "Profit: {profit}"
+msgstr "Profit : {profit}"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Review hands"
+msgstr "Revoir les mains"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Showdown (BB)"
+msgstr "Showdown (BB)"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Unit:"
+msgstr "Unité :"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Week"
+msgstr "Semaine"
+
+#: fpdb_3_legacy/results_calendar.py
+#, python-brace-format
+msgid "Week of {date}"
+msgstr "Semaine du {date}"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Weeks"
+msgstr "Semaines"
+
+#: fpdb_3_legacy/results_calendar.py
+#, python-brace-format
+msgid "{hands} hands"
+msgstr "{hands} mains"
+
 #: fpdb_3_legacy/ring_stats/__init__.py
 msgid "Column Configuration"
 msgstr "Configuration des colonnes"
@@ -7588,12 +7953,6 @@ msgstr "Agression (AF)"
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
 msgid "Hands played"
 msgstr "Mains jouées"
-
-#: fpdb_3_legacy/results_calendar.py
-#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
-#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
-msgid "Net profit"
-msgstr "Profit net"
 
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
 msgid "Preflop Profile (VPIP vs PFR)"
@@ -8247,22 +8606,6 @@ msgstr ""
 "\n"
 "Rechercher les mises à jour automatiquement ?"
 
-#: fpdb_3_legacy/GuiReplayer.py
-msgid "History..."
-msgstr "Historique..."
-
-#: fpdb_3_legacy/GuiReplayer.py
-msgid "List the hand's actions and jump to one of them (A)"
-msgstr "Lister les actions de la main et aller à l'une d'elles (A)"
-
-#: fpdb_3_legacy/replay_history_dialog.py
-msgid "Action history"
-msgstr "Historique des actions"
-
-#: fpdb_3_legacy/replay_history_dialog.py
-msgid "Click an action, or select it and press Enter, to jump to it."
-msgstr "Cliquez sur une action, ou sélectionnez-la et appuyez sur Entrée, pour y aller."
-
 #~ msgid ""
 #~ "\n"
 #~ "SwC Native Live HUD tailing thread started."
@@ -8444,15 +8787,6 @@ msgstr "Cliquez sur une action, ou sélectionnez-la et appuyez sur Entrée, pour
 
 #~ msgid "***Error sending finish:"
 #~ msgstr "***Erreur lors de l'arrêt:"
-
-#~ msgid "1st"
-#~ msgstr "1er"
-
-#~ msgid "2nd"
-#~ msgstr "2nd"
-
-#~ msgid "3rd"
-#~ msgstr "3ème"
 
 #~ msgid "<control>A"
 #~ msgstr "<control>A"
@@ -8861,9 +9195,6 @@ msgstr "Cliquez sur une action, ou sélectionnez-la et appuyez sur Entrée, pour
 
 #~ msgid "Creating index %s %s"
 #~ msgstr "Creation de l'index %s %s"
-
-#~ msgid "DB Description"
-#~ msgstr "Description de BDD"
 
 #~ msgid "DB Name"
 #~ msgstr "Nom de BDD"
@@ -9354,9 +9685,6 @@ msgstr "Cliquez sur une action, ou sélectionnez-la et appuyez sur Entrée, pour
 
 #~ msgid "IS SHOOTOUT"
 #~ msgstr "EST UN SHOOTOUT"
-
-#~ msgid "ITM%"
-#~ msgstr "ITM%"
 
 #~ msgid "Idle."
 #~ msgstr "Inactif."
@@ -9873,9 +10201,6 @@ msgstr "Cliquez sur une action, ou sélectionnez-la et appuyez sur Entrée, pour
 #~ msgid "REBUY COST"
 #~ msgstr "COUT RECAVE"
 
-#~ msgid "ROI%"
-#~ msgstr "ROI%"
-
 #~ msgid "Raising FpdbParseError"
 #~ msgstr "Déclenchement d'une erreur de parsing FpdbParseError"
 
@@ -10203,9 +10528,6 @@ msgstr "Cliquez sur une action, ou sélectionnez-la et appuyez sur Entrée, pour
 #~ msgid "Too many deadlocks - failed to store hand"
 #~ msgstr "Trop de deadlocks - échec du stockage de la main"
 
-#~ msgid "Tournament Results Import"
-#~ msgstr "Importation des Résultats de tournois"
-
 #, fuzzy
 #~ msgid "Tournament Summary Path"
 #~ msgstr "Aucun résumé de tournoi trouvé."
@@ -10346,9 +10668,6 @@ msgstr "Cliquez sur une action, ou sélectionnez-la et appuyez sur Entrée, pour
 
 #~ msgid "Window %s not found. Skipping."
 #~ msgstr "Fenêtre %s non trouvé. Ignorée."
-
-#~ msgid "Won"
-#~ msgstr "Gagné"
 
 #~ msgid "X location to open window"
 #~ msgstr "Position d'ouverture en X de la fenêtre"
