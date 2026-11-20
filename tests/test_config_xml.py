@@ -433,3 +433,62 @@ def test_a_comment_can_be_carried_to_another_document(backend) -> None:
     cx.append(target, cx.root(target), cx.import_node(target, comment))
 
     assert "<!-- the room the HUD opens on -->" in cx.to_xml(target)
+
+
+def test_bytes_name_their_encoding(doc, backend) -> None:
+    data = cx.to_bytes(doc)
+
+    assert data.startswith(b'<?xml version="1.0" encoding="utf-8"?>')
+    reread = cx.parse_string(data, backend=backend)
+    assert _meaning(cx.to_xml(reread)) == _meaning(cx.to_xml(doc))
+
+
+def test_canonical_ignores_layout_and_comments() -> None:
+    tight = '<pu b="2" a="1"><pu_stat pu_stat_name="vpip"/>text</pu>'
+    loose = '<pu a="1" b="2">\n  <!-- note -->\n  <pu_stat pu_stat_name="vpip"/>\n  text\n</pu>'
+    forms = [
+        cx.canonical(cx.root(cx.parse_string(text, backend=backend)))
+        for backend in cx.BACKENDS
+        for text in (tight, loose)
+    ]
+
+    assert all(form == forms[0] for form in forms)
+    assert forms[0] == ("pu", (("a", "1"), ("b", "2")), (("pu_stat", (("pu_stat_name", "vpip"),), ()), "text"))
+
+
+def test_canonical_tells_different_content_apart(backend) -> None:
+    first = cx.root(cx.parse_string('<pu><pu_stat pu_stat_name="vpip"/></pu>', backend=backend))
+    second = cx.root(cx.parse_string('<pu><pu_stat pu_stat_name="pfr"/></pu>', backend=backend))
+
+    assert cx.canonical(first) != cx.canonical(second)
+
+
+def test_prepend_puts_children_before_the_leading_text() -> None:
+    written = []
+    for backend in cx.BACKENDS:
+        document = cx.parse_string("<s>\n  <old/>\n</s>", backend=backend)
+        section = cx.root(document)
+        cx.prepend(document, section, [cx.create_element(document, "a"), cx.create_element(document, "b")])
+        written.append(cx.to_xml(section).replace(" />", "/>"))
+
+    assert written[0] == written[1] == "<s><a/><b/>\n  <old/>\n</s>"
+
+
+def test_prepend_into_an_empty_element(backend) -> None:
+    document = cx.parse_string("<s/>", backend=backend)
+
+    cx.prepend(document, cx.root(document), [cx.create_element(document, "a")])
+
+    assert cx.to_xml(cx.root(document)).replace(" />", "/>") == "<s><a/></s>"
+
+
+def test_a_root_snapshot_can_be_put_back(doc, backend) -> None:
+    before = cx.to_xml(doc)
+    snapshot = cx.import_node(doc, cx.root(doc))
+
+    cx.remove(doc, _site(doc, "PokerStars"))
+    cx.replace_root(doc, snapshot)
+
+    assert cx.to_xml(doc) == before
+    assert cx.backend_of(doc) == backend
+    assert [cx.attr(site, "name") for site in cx.find_all(doc, "site")] == ["PokerStars", "Winamax"]

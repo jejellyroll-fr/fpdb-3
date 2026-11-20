@@ -30,8 +30,7 @@ from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import Any, Final
 
-import defusedxml.minidom
-
+from fpdb_3_legacy import config_xml as cx
 from fpdb_3_legacy import pack_gallery, stat_packs
 from fpdb_3_legacy.hud_package import _stock_popups
 from fpdb_3_legacy.pack_gallery import GalleryError
@@ -42,7 +41,7 @@ ENTRY_NAME: Final = "index-entry.json"
 
 def profile_names(config_doc: Any) -> list[str]:
     """The HUD profiles of a configuration, as it lists them."""
-    return [node.getAttribute("name") for node in config_doc.getElementsByTagName("ss") if node.getAttribute("name")]
+    return [cx.attr(node, "name") for node in cx.find_all(config_doc, "ss") if cx.attr(node, "name")]
 
 
 def _stock_popup_nodes() -> dict[str, Any]:
@@ -52,21 +51,11 @@ def _stock_popup_nodes() -> dict[str, Any]:
     template = _parse_example_config(_find_example_config("HUD_config.xml"))
     if template is None:
         return {name: None for name in _stock_popups()}
-    return {node.getAttribute("pu_name"): node for node in template.getElementsByTagName("pu")}
-
-
-def _canonical(node: Any) -> Any:
-    """A node as data: its tag, attributes and children, layout whitespace aside."""
-    if node.nodeType == node.TEXT_NODE:
-        return node.data.strip()
-    if node.nodeType != node.ELEMENT_NODE:
-        return ""
-    children = tuple(child for child in (_canonical(child) for child in node.childNodes) if child)
-    return (node.tagName, tuple(sorted(node.attributes.items())), children)
+    return {cx.attr(node, "pu_name"): node for node in cx.find_all(template, "pu")}
 
 
 def _submenus(popup: Any) -> list[str]:
-    return [row.getAttribute("pu_stat_submenu") for row in popup.getElementsByTagName("pu_stat")]
+    return [cx.attr(row, "pu_stat_submenu") for row in cx.find_all(popup, "pu_stat")]
 
 
 def _needed(popups: Mapping[str, Any], stock: Mapping[str, Any]) -> set[str]:
@@ -80,7 +69,7 @@ def _needed(popups: Mapping[str, Any], stock: Mapping[str, Any]) -> set[str]:
     needed = {
         name
         for name, node in popups.items()
-        if name not in stock or (stock[name] is not None and _canonical(node) != _canonical(stock[name]))
+        if name not in stock or (stock[name] is not None and cx.canonical(node) != cx.canonical(stock[name]))
     }
     grew = True
     while grew:
@@ -101,10 +90,10 @@ def _popups(document: Any, config_doc: Any, profile_node: Any, profile: str) -> 
     popup (Codex, #643); every reference to it, from the profile and from the other
     popups, follows.
     """
-    popups = {node.getAttribute("pu_name"): node for node in config_doc.getElementsByTagName("pu")}
+    popups = {cx.attr(node, "pu_name"): node for node in cx.find_all(config_doc, "pu")}
     stock = _stock_popup_nodes()
     needed = _needed(popups, stock)
-    wanted = [cell.getAttribute("popup") for cell in profile_node.getElementsByTagName("stat")]
+    wanted = [cx.attr(cell, "popup") for cell in cx.find_all(profile_node, "stat")]
     chosen: list[str] = []
     while wanted:
         name = wanted.pop()
@@ -114,24 +103,24 @@ def _popups(document: Any, config_doc: Any, profile_node: Any, profile: str) -> 
     renamed: dict[str, str] = {}
     for name in sorted(name for name in chosen if name in stock):
         renamed[name] = _free_name(f"{name} ({profile})", {*popups, *renamed.values()})
-    _rename(profile_node.getElementsByTagName("stat"), "popup", renamed)
+    _rename(cx.find_all(profile_node, "stat"), "popup", renamed)
     if not chosen:
         return None
-    container = document.createElement("popup_windows")
+    container = cx.create_element(document, "popup_windows")
     for name in sorted(chosen):
-        node = document.importNode(popups[name], True)
-        node.setAttribute("pu_name", renamed.get(name, name))
-        _rename(node.getElementsByTagName("pu_stat"), "pu_stat_submenu", renamed)
-        container.appendChild(document.createTextNode("\n  "))
-        container.appendChild(node)
-    container.appendChild(document.createTextNode("\n"))
+        node = cx.import_node(document, popups[name])
+        cx.set_attr(node, "pu_name", renamed.get(name, name))
+        _rename(cx.find_all(node, "pu_stat"), "pu_stat_submenu", renamed)
+        cx.append_text(document, container, "\n  ")
+        cx.append(document, container, node)
+    cx.append_text(document, container, "\n")
     return container
 
 
 def _rename(nodes: Any, attribute: str, renamed: Mapping[str, str]) -> None:
     for node in nodes:
-        if node.getAttribute(attribute) in renamed:
-            node.setAttribute(attribute, renamed[node.getAttribute(attribute)])
+        if cx.attr(node, attribute) in renamed:
+            cx.set_attr(node, attribute, renamed[cx.attr(node, attribute)])
 
 
 def _free_name(name: str, taken: Iterable[str]) -> str:
@@ -148,7 +137,7 @@ def _carries(section: Any) -> bool:
     One with a ``source`` and no rule of its own counts, whether or not it says
     ``enabled``: the configuration reads an unstated ``enabled`` as on (Codex, #643).
     """
-    return bool(section.getElementsByTagName("hud_panel_rule")) or bool(section.getAttribute("source").strip())
+    return bool(cx.find_all(section, "hud_panel_rule")) or bool(cx.attr(section, "source").strip())
 
 
 def _rules_for(section: Any, profile: str, scope: str) -> list[Any]:
@@ -164,8 +153,8 @@ def _rules_for(section: Any, profile: str, scope: str) -> list[Any]:
 
     wanted, default = _text(profile, "all"), _text(scope, "all")
     kept = []
-    for rule in section.getElementsByTagName("hud_panel_rule"):
-        own = _text(rule.getAttribute("profile"), "all")
+    for rule in cx.find_all(section, "hud_panel_rule"):
+        own = _text(cx.attr(rule, "profile"), "all")
         if profile_matches(default if own == "all" else own, wanted):
             kept.append(rule)
     return kept
@@ -180,21 +169,19 @@ def _panel_rules(document: Any, config_doc: Any, profile: str) -> list[Any]:
     section per profile, and would drop the others (Codex, #643).
     """
     # A disabled section is not read, however many there are (Codex, #643).
-    enabled = [section for section in config_doc.getElementsByTagName("hud_panel_rules") if _enabled(section)]
+    enabled = [section for section in cx.find_all(config_doc, "hud_panel_rules") if _enabled(section)]
     sections = [section for section in enabled if _carries(section)]
     wanted = profile.strip().casefold()
     prepared = []
     for section in sections:
-        scope = section.getAttribute("profile").strip()
+        scope = cx.attr(section, "profile").strip()
         foreign = scope.casefold() not in ("", "all", wanted)
-        copy = document.importNode(section, True)
+        copy = cx.import_node(document, section)
         # Another profile's library is not this one's: only its rules naming this profile can come.
         _materialise_source(document, copy, shipped=foreign)
         prepared.append((copy, scope))
     contributing = [
-        (copy, scope)
-        for copy, scope in prepared
-        if _rules_for(copy, profile, scope) or copy.getAttribute("source").strip()
+        (copy, scope) for copy, scope in prepared if _rules_for(copy, profile, scope) or cx.attr(copy, "source").strip()
     ]
     if not contributing:
         return []
@@ -202,10 +189,9 @@ def _panel_rules(document: Any, config_doc: Any, profile: str) -> list[Any]:
         # The shipped library is written out too, so its rules keep their place among the others.
         for copy, _scope in contributing:
             _materialise_source(document, copy, shipped=True)
-    merged = document.createElement("hud_panel_rules")
-    merged.setAttribute("enabled", "true")
+    merged = cx.create_element(document, "hud_panel_rules", {"enabled": "true"})
     own_scope = next((scope for _copy, scope in contributing if scope.casefold() == wanted), profile)
-    merged.setAttribute("profile", own_scope)
+    cx.set_attr(merged, "profile", own_scope)
     # The fallback is the first one read, from any enabled section, one with nothing
     # else in it included (Codex, #643); a section's file source gave it its own.
     copies = {id(section): copy for section, (copy, _scope) in zip(sections, prepared, strict=True)}
@@ -214,32 +200,32 @@ def _panel_rules(document: Any, config_doc: Any, profile: str) -> list[Any]:
     for copy, scope in contributing:
         _carry_attributes(merged, copy, source=True)
         for rule in _rules_for(copy, profile, scope):
-            merged.appendChild(document.createTextNode("\n  "))
-            merged.appendChild(rule)
-    merged.appendChild(document.createTextNode("\n"))
+            cx.append_text(document, merged, "\n  ")
+            cx.append(document, merged, rule)
+    cx.append_text(document, merged, "\n")
     return [merged]
 
 
 def _carry_attributes(merged: Any, section: Any, *, source: bool) -> None:
     """The first fallback read, or the shipped library a lone section still names."""
     if not source:
-        if merged.getAttribute("fallback").strip():
+        if cx.attr(merged, "fallback").strip():
             return
-        fallback = section.getAttribute("fallback").strip()
-        if not fallback and section.getAttribute("source").strip():
+        fallback = cx.attr(section, "fallback").strip()
+        if not fallback and cx.attr(section, "source").strip():
             # A library still named by its source brings its own fallback, read in its turn (Codex, #643).
             from fpdb_3_legacy import hud_situation  # noqa: PLC0415
 
-            fallback = hud_situation.load_source(section.getAttribute("source").strip())[1]
+            fallback = hud_situation.load_source(cx.attr(section, "source").strip())[1]
         if fallback:
-            merged.setAttribute("fallback", fallback)
+            cx.set_attr(merged, "fallback", fallback)
         return
-    if section.getAttribute("source").strip():
-        merged.setAttribute("source", section.getAttribute("source").strip())
+    if cx.attr(section, "source").strip():
+        cx.set_attr(merged, "source", cx.attr(section, "source").strip())
 
 
 def _enabled(section: Any) -> bool:
-    return section.getAttribute("enabled").strip().lower() not in ("false", "no", "0", "off")
+    return cx.attr(section, "enabled").strip().lower() not in ("false", "no", "0", "off")
 
 
 def _materialise_source(document: Any, section: Any, *, shipped: bool = False) -> None:
@@ -253,7 +239,7 @@ def _materialise_source(document: Any, section: Any, *, shipped: bool = False) -
     """
     from fpdb_3_legacy import hud_situation  # noqa: PLC0415
 
-    source = section.getAttribute("source").strip()
+    source = cx.attr(section, "source").strip()
     library = source.casefold() in (hud_situation.BUILTIN_SOURCE, hud_situation.PLO_BUILTIN_SOURCE)
     if not source or (library and not shipped):
         return
@@ -261,16 +247,12 @@ def _materialise_source(document: Any, section: Any, *, shipped: bool = False) -
         rules, fallback = hud_situation.load_source(source)
     except (OSError, ValueError) as exc:
         raise GalleryError([f"the panel rules in {source} cannot be read: {exc}"]) from exc
-    section.removeAttribute("source")
-    if fallback and not section.getAttribute("fallback").strip():
-        section.setAttribute("fallback", fallback)
+    cx.del_attr(section, "source")
+    if fallback and not cx.attr(section, "fallback").strip():
+        cx.set_attr(section, "fallback", fallback)
     # The source's rules come before the section's own, as the configuration reads them.
-    first = section.firstChild
-    for rule in rules:
-        node = document.createElement("hud_panel_rule")
-        for name, value in rule.as_xml_attributes().items():
-            node.setAttribute(name, value)
-        section.insertBefore(node, first)
+    nodes = [cx.create_element(document, "hud_panel_rule", rule.as_xml_attributes()) for rule in rules]
+    cx.prepend(document, section, nodes)
 
 
 def hud_package(config_doc: Any, profile: str) -> bytes:
@@ -279,22 +261,20 @@ def hud_package(config_doc: Any, profile: str) -> bytes:
     Game bindings and table layouts are the sharer's own, and are not shared: a
     gallery HUD never binds itself to a game.
     """
-    source = next(
-        (node for node in config_doc.getElementsByTagName("ss") if node.getAttribute("name") == profile), None
-    )
+    source = next((node for node in cx.find_all(config_doc, "ss") if cx.attr(node, "name") == profile), None)
     if source is None:
         raise GalleryError([f"there is no HUD profile named {profile!r}"])
-    document = config_doc.implementation.createDocument(None, "fpdb_hud_package", None)
-    root = document.documentElement
-    root.setAttribute("version", "1.0")
-    profile_node = document.importNode(source, True)
+    document = cx.new_document("fpdb_hud_package", backend=cx.backend_of(config_doc))
+    root = cx.root(document)
+    cx.set_attr(root, "version", "1.0")
+    profile_node = cx.import_node(document, source)
     popups = _popups(document, config_doc, profile_node, profile)
     parts = [profile_node, *([popups] if popups is not None else []), *_panel_rules(document, config_doc, profile)]
     for part in parts:
-        root.appendChild(document.createTextNode("\n"))
-        root.appendChild(part)
-    root.appendChild(document.createTextNode("\n"))
-    return document.toxml(encoding="utf-8") + b"\n"
+        cx.append_text(document, root, "\n")
+        cx.append(document, root, part)
+    cx.append_text(document, root, "\n")
+    return cx.to_bytes(document) + b"\n"
 
 
 def share_hud(
@@ -311,8 +291,8 @@ def share_hud(
 ) -> Path:
     """Write *profile* as a HUD ready to submit; the folder written."""
     package = hud_package(config_doc, profile)
-    cells = defusedxml.minidom.parseString(package).getElementsByTagName("stat")
-    stats = list(dict.fromkeys(cell.getAttribute("_stat_name") for cell in cells if cell.getAttribute("_stat_name")))
+    cells = cx.find_all(cx.parse_string(package), "stat")
+    stats = list(dict.fromkeys(cx.attr(cell, "_stat_name") for cell in cells if cx.attr(cell, "_stat_name")))
     fields = {
         "id": pack_id,
         "kind": "hud",
