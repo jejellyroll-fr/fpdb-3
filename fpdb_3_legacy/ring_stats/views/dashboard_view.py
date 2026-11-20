@@ -13,6 +13,7 @@ from PySide6.QtWidgets import QGridLayout, QLabel, QVBoxLayout, QWidget
 
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_currency, format_number
+from fpdb_3_legacy.plot_performance import enable_large_curve_rendering
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 from fpdb_3_legacy.ring_stats.views.widgets import GapMeter, KpiCard
 
@@ -23,6 +24,7 @@ class ProfitGraphWidget(pg.PlotWidget):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.showGrid(x=True, y=True, alpha=0.3)
+        enable_large_curve_rendering(self)
         self.update_style()
 
     def update_style(self) -> None:

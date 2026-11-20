@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 08:33+0100\n"
+"POT-Creation-Date: 2026-11-20 13:12+0100\n"
 "PO-Revision-Date: 2011-04-07 08:53+0000\n"
 "Last-Translator: steffen123 <steffen@schaumburger.info>\n"
 "Language-Team: Chinese (China) <>\n"
@@ -1661,6 +1661,10 @@ msgid "75–100% pot"
 msgstr "底池的 75–100%"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+msgid "Abort"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
 msgid "Advanced review filters"
 msgstr "高级分析筛选"
@@ -1808,8 +1812,32 @@ msgstr "最终底池 (BB)"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
+msgid "Find hand #"
+msgstr "成牌"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Folded"
 msgstr "弃牌"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Hand is not among the loaded hands (check the filters)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, python-brace-format
+msgid "Hand is on page {} but hidden (no hero or card filter)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Hand not found"
+msgstr "文件%s无法找到"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, python-brace-format
+msgid "Hand {} on page {}"
+msgstr ""
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
@@ -1830,6 +1858,16 @@ msgstr "反选"
 #, fuzzy
 msgid "Limp"
 msgstr "溜入"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Load hands first"
+msgstr "加载手牌"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Loading hands"
+msgstr "正在加载手牌…"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
@@ -1884,6 +1922,12 @@ msgid "Raised"
 msgstr "加注"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+msgid ""
+"Room hand number (as in the hand history) or fpdb hand id; searches every "
+"loaded page"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
 msgid "Saw flop"
 msgstr "看到翻牌"
@@ -1897,6 +1941,11 @@ msgstr "看到河牌"
 #, fuzzy
 msgid "Saw turn"
 msgstr "看到转牌"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Search failed"
+msgstr "搜索站点..."
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
@@ -1937,6 +1986,11 @@ msgstr "这些分析数据由更新版本的 fpdb 生成: {names}。"
 #, fuzzy, python-brace-format
 msgid "These filters need missing or outdated analytics data: {names}."
 msgstr "这些筛选需要缺失或过时的分析数据: {names}。"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Type a hand number"
+msgstr "手牌编号"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
