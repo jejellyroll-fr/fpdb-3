@@ -653,8 +653,9 @@ def _bound_games(config_doc: Any, profiles: set[str]) -> list[str]:
     """The games, as ``game (type)``, whose HUD is one of *profiles*."""
     return sorted(
         {
-            f"{cx.attr(cx.parent_of(config_doc, node), 'game_name')} ({cx.attr(node, 'game_type')})"
-            for node in cx.find_all(config_doc, "game_stat_set")
+            f"{cx.attr(game, 'game_name')} ({cx.attr(node, 'game_type')})"
+            for game in cx.find_all(config_doc, "game")
+            for node in cx.children(game, "game_stat_set")
             if cx.attr(node, "stat_set") in profiles
         }
     )
