@@ -443,6 +443,19 @@ def test_bytes_name_their_encoding(doc, backend) -> None:
     assert _meaning(cx.to_xml(reread)) == _meaning(cx.to_xml(doc))
 
 
+def test_pretty_xml_puts_one_element_per_line(backend) -> None:
+    package = cx.new_document("package", backend=backend)
+    section = cx.append(package, cx.root(package), cx.create_element(package, "ss", {"name": "mine"}))
+    cx.append(package, section, cx.create_element(package, "stat", {"_stat_name": "vpip"}))
+
+    text = cx.to_pretty_xml(package, indent="  ")
+
+    assert text.replace(" />", "/>") == (
+        '<?xml version="1.0" ?>\n<package>\n  <ss name="mine">\n    <stat _stat_name="vpip"/>\n  </ss>\n</package>\n'
+    )
+    assert "\n" not in cx.to_xml(package), "laying the text out leaves the document as it was"
+
+
 def test_canonical_ignores_layout_and_comments() -> None:
     tight = '<pu b="2" a="1"><pu_stat pu_stat_name="vpip"/>text</pu>'
     loose = '<pu a="1" b="2">\n  <!-- note -->\n  <pu_stat pu_stat_name="vpip"/>\n  text\n</pu>'

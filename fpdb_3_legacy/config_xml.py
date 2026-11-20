@@ -200,6 +200,15 @@ def to_bytes(doc: Node, encoding: str = "utf-8") -> bytes:
     return f'<?xml version="1.0" encoding="{encoding}"?>{body}'.encode(encoding)
 
 
+def to_pretty_xml(doc: Node, indent: str = "    ") -> str:
+    """A document built without layout whitespace, one element per line (``toprettyxml``)."""
+    if _is_dom(doc):
+        return doc.toprettyxml(indent=indent)
+    laid_out = copy.deepcopy(root(doc))
+    ET.indent(laid_out, space=indent)
+    return f"{XML_DECLARATION}\n{_element_xml(laid_out)}\n"
+
+
 def canonical(node: Node) -> Any:
     """An element as data: its tag, its sorted attributes and its children, layout whitespace aside.
 
