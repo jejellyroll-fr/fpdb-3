@@ -8,6 +8,9 @@ model the widget only has to paint:
 
 - a :class:`DecisionPanel` holds :class:`PanelSection` groups, each of
   :class:`PanelRow` label/value pairs with an explanatory tooltip;
+- a row marked ``key`` is one of a section's few key figures, shown first and
+  larger (the call, the required equity, the pot odds), ``accent`` setting the
+  one the section is about apart;
 - a row marked ``detail`` is only shown in the detailed view;
 - a row without a value is a note, wrapped across the panel's width.
 
@@ -62,6 +65,8 @@ class PanelRow:
     tooltip: str = ""
     detail: bool = False  # only in the detailed view
     muted: bool = False  # an unavailable state or an assumption, drawn quieter
+    key: bool = False  # one of the section's few key figures, shown first and larger
+    accent: bool = False  # the key figure the section is about, set apart without implying a verdict
 
     @property
     def is_note(self) -> bool:
@@ -238,12 +243,12 @@ def _pot_breakdown(call: CallFigures, amount: Callable[[Any], str]) -> list[Pane
 
 
 def _call_rows(call: CallFigures, amount: Callable[[Any], str], *, tournament: bool) -> list[PanelRow]:
-    rows = [PanelRow(_("Call amount"), amount(call.call_amount), tip("call_amount"))]
+    rows = [PanelRow(_("Call amount"), amount(call.call_amount), tip("call_amount"), key=True)]
     if call.final_pot:
         rows.append(PanelRow(_("Effective pot after call"), amount(call.final_pot), tip("final_pot")))
     if call.pot_odds_pct is not None:
         label, key = (_("Required chip equity"), "required_chips") if tournament else (_("Required equity"), "required")
-        rows.append(PanelRow(label, _pct(call.pot_odds_pct), tip(key)))
+        rows.append(PanelRow(label, _pct(call.pot_odds_pct), tip(key), key=True, accent=True))
     if call.equity_pct is not None:
         rows.append(PanelRow(_("Estimated hand equity"), _pct(call.equity_pct), tip("equity")))
         if call.pot_odds_pct is not None:
@@ -251,7 +256,7 @@ def _call_rows(call: CallFigures, amount: Callable[[Any], str], *, tournament: b
     ratio = call.ratio
     if ratio is not None:
         rows.append(
-            PanelRow(_("Pot odds"), _("%(ratio)s:1") % {"ratio": format_number(ratio, 1)}, tip("ratio"), detail=True)
+            PanelRow(_("Pot odds"), _("%(ratio)s:1") % {"ratio": format_number(ratio, 1)}, tip("ratio"), key=True)
         )
     if call.facing_pct is not None:
         rows.append(PanelRow(_("Facing"), _of_pot(call.facing_pct), tip("facing"), detail=True))
@@ -285,8 +290,8 @@ def actor_section(  # noqa: PLR0913 - the figures of one decision, all keyword-o
         title = _("%(name)s to act") % {"name": name}
     if spr:
         rows.append(PanelRow(_("SPR"), spr, tip("spr")))
-    # The summary first, then what the detailed view adds.
-    rows.sort(key=lambda row: row.detail)
+    # The key figures first, then the summary, then what the detailed view adds.
+    rows.sort(key=lambda row: (not row.key, row.detail))
     return PanelSection(title, tuple(rows)) if rows else None
 
 
@@ -305,7 +310,7 @@ def bet_section(
     multiway: bool,
 ) -> PanelSection:
     """The bet or raise just made: its size, and in detail what it asks of a lone opponent."""
-    rows = [PanelRow(_("Bet size"), _of_pot(bet_pct), tip("bet_size"))]
+    rows = [PanelRow(_("Bet size"), _of_pot(bet_pct), tip("bet_size"), key=True)]
     if mdf_pct is not None and fold_equity_pct is not None:
         rows.append(PanelRow(_("MDF (heads-up)"), _pct(mdf_pct), tip("mdf"), detail=True))
         rows.append(
@@ -346,9 +351,11 @@ def icm_section(priced: Any, hero: str) -> PanelSection | None:
     if hero not in allin.players:
         return None
     rows = [
-        PanelRow(_("Chip EV"), _chips(allin.chip_ev[hero]), tip("chip_ev")),
-        PanelRow(_("ICM $EV"), format_number(allin.icm_ev[hero], 2, show_plus=True), tip("icm_ev")),
-        PanelRow(_("ICM result"), format_number(allin.icm_result[hero], 2, show_plus=True), tip("icm_result")),
+        PanelRow(_("Chip EV"), _chips(allin.chip_ev[hero]), tip("chip_ev"), key=True),
+        PanelRow(_("ICM $EV"), format_number(allin.icm_ev[hero], 2, show_plus=True), tip("icm_ev"), key=True),
+        PanelRow(
+            _("ICM result"), format_number(allin.icm_result[hero], 2, show_plus=True), tip("icm_result"), key=True
+        ),
         PanelRow(_("Model status"), _("Available"), tip("model")),
     ]
     if allin.table_only:
@@ -385,16 +392,18 @@ def bounty_section(priced: Any, hero: str) -> PanelSection | None:
 
     if not allin.collects[hero]:
         rows = [
-            PanelRow(_("Bounty EV"), money(0), tip("bounty_ev")),
+            PanelRow(_("Bounty EV"), money(0), tip("bounty_ev"), key=True),
             PanelRow(_("Winning does not bust the opponent: there is no bounty to win."), muted=True),
         ]
         return PanelSection(title, tuple(rows), tip("bounty_section"))
-    rows = [PanelRow(_("Bounty EV"), money(allin.bounty_ev[hero]), tip("bounty_ev"))]
+    rows = [PanelRow(_("Bounty EV"), money(allin.bounty_ev[hero]), tip("bounty_ev"), key=True)]
     if allin.head_ev[hero]:
-        rows.append(PanelRow(_("Added to own bounty"), money(allin.head_ev[hero]), tip("head_ev")))
+        rows.append(PanelRow(_("Added to own bounty"), money(allin.head_ev[hero]), tip("head_ev"), key=True))
     if allin.adjusted_chip_ev is not None:
         rows.append(
-            PanelRow(_("Bounty-adjusted chip EV"), _chips(allin.adjusted_chip_ev[hero]), tip("adjusted_chip_ev"))
+            PanelRow(
+                _("Bounty-adjusted chip EV"), _chips(allin.adjusted_chip_ev[hero]), tip("adjusted_chip_ev"), key=True
+            )
         )
     rows.append(PanelRow(_("Model status"), _("Available"), tip("model")))
     rows.append(PanelRow(_("Not added to ICM $EV: this is not a complete PKO model."), detail=True, muted=True))

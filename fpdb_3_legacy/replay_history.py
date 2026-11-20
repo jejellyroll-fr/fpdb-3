@@ -122,6 +122,11 @@ def _phase_text(state: Any) -> str:
     return f"{label}: " + " | ".join(" ".join(cards) for cards in boards)
 
 
+def phase_heading(state: Any) -> str:
+    """The heading of the street *state* starts: its name and the board cards it deals."""
+    return _phase_text(state)
+
+
 def _players(state: Any) -> list[Any]:
     return list((getattr(state, "players", None) or {}).values())
 

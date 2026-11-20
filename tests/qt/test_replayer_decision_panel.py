@@ -6,11 +6,8 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
-from PySide6.QtCore import QEvent, QPoint
-from PySide6.QtGui import QHelpEvent
 
-from fpdb_3_legacy import replayer_panel
-from fpdb_3_legacy.GuiReplayer import GuiReplayer, build_replay_layout, order_players_clockwise
+from fpdb_3_legacy.GuiReplayer import GuiReplayer
 
 pytestmark = pytest.mark.qt
 
@@ -38,20 +35,6 @@ def replay(qtbot, config, importer, fresh_db, tmp_path, relative: str) -> GuiRep
     return replayer
 
 
-def panel_box(replayer: GuiReplayer) -> tuple[float, float, float]:
-    """The panel's left edge, right edge, and the timeline's left edge (or the window's right margin)."""
-    state = replayer.states[replayer.stateSlider.value()]
-    frame = replayer._frame_from_state(state)
-    frame.players = order_players_clockwise(frame.players, replayer.Heroes)
-    category = replayer.replay_model.hand.gametype.get("category", "")
-    layout = build_replay_layout(
-        replayer.width(), replayer.height(), [p.name for p in frame.players], replayer.Heroes, category
-    )
-    x, width = replayer._summary_rect_x_width(layout)
-    limit = replayer.width() - 28 if layout.timeline_rect.isNull() else layout.timeline_rect.x() - 16
-    return x, x + width, limit
-
-
 def paint_every_step(replayer: GuiReplayer) -> None:
     for index in range(replayer.stateSlider.maximum() + 1):
         replayer.stateSlider.setValue(index)
@@ -72,45 +55,36 @@ def test_the_controls_keep_odds_for_all_players_and_add_the_detailed_view(
             paint_every_step(replayer)
 
 
-@pytest.mark.parametrize("size", [(800, 600), (1000, 700), (1600, 1000)])
-def test_the_panel_stays_beside_the_timeline_with_long_translations(
-    qtbot, config, importer, fresh_db, tmp_path, monkeypatch, size
-) -> None:
-    long = " ".join(["much longer translated wording"] * 3)
-    monkeypatch.setattr(replayer_panel, "_", lambda message: f"{message} {long}")
+def test_the_inspector_follows_the_step_and_a_click_seeks(qtbot, config, importer, fresh_db, tmp_path) -> None:
     replayer = replay(qtbot, config, importer, fresh_db, tmp_path, "holdem/cash_nl_6max.txt")
-    replayer.resize(*size)
-    replayer.all_decisions.setChecked(True)
-    replayer.detailed_analysis.setChecked(True)
+    replayer.stateSlider.setValue(replayer.stateSlider.maximum() - 3)
 
+    rows = replayer.inspector.timeline_rows
+    assert rows and rows[-1].index <= replayer.stateSlider.value()
+    assert any(row.kind == "street" for row in rows)
+    first_action = next(row for row in rows if row.kind == "action")
+    replayer.inspector.seek_requested.emit(first_action.index)
+    assert replayer.stateSlider.value() == first_action.index
+
+
+def test_the_advanced_toggle_and_the_checkbox_stay_in_step(qtbot, config, importer, fresh_db, tmp_path) -> None:
+    replayer = replay(qtbot, config, importer, fresh_db, tmp_path, "holdem/cash_nl_6max.txt")
     for index in range(replayer.stateSlider.maximum() + 1):
         replayer.stateSlider.setValue(index)
-        replayer.grab()
-        left, right, limit = panel_box(replayer)
-        assert left >= 28
-        assert right <= limit + 0.5
-        for area, _text in replayer._panel_tips:
-            assert area.right() <= right
-            assert area.bottom() <= replayer.height()
-
-
-def test_hovering_a_figure_explains_it(qtbot, config, importer, fresh_db, tmp_path) -> None:
-    replayer = replay(qtbot, config, importer, fresh_db, tmp_path, "holdem/cash_nl_6max.txt")
-    replayer.all_decisions.setChecked(True)
-    replayer.detailed_analysis.setChecked(True)
-
-    tips = []
-    for index in range(replayer.stateSlider.maximum() + 1):
-        replayer.stateSlider.setValue(index)
-        replayer.grab()
-        if replayer._panel_tips:
-            tips = list(replayer._panel_tips)
+        if replayer.inspector.advanced_button is not None:
             break
-    assert tips, "no step of the hand showed a decision figure"
+    assert replayer.inspector.advanced_button is not None
 
-    area, text = tips[0]
-    center = area.center().toPoint()
-    assert text
-    assert replayer.event(QHelpEvent(QEvent.Type.ToolTip, center, replayer.mapToGlobal(center)))
-    # Outside every figure, no tooltip: the event is still handled.
-    assert replayer.event(QHelpEvent(QEvent.Type.ToolTip, QPoint(1, 1), replayer.mapToGlobal(QPoint(1, 1))))
+    replayer.inspector.advanced_button.click()
+    assert replayer.detailed_analysis.isChecked()
+    replayer.detailed_analysis.setChecked(False)
+    assert not replayer.inspector.detailed
+
+
+def test_the_inspector_folds_to_a_strip(qtbot, config, importer, fresh_db, tmp_path) -> None:
+    replayer = replay(qtbot, config, importer, fresh_db, tmp_path, "holdem/cash_nl_6max.txt")
+    replayer.inspector.set_collapsed(True)
+    assert replayer.inspector.maximumWidth() <= 40
+    replayer.grab()
+    replayer.inspector.set_collapsed(False)
+    assert replayer.inspector.minimumWidth() >= 300

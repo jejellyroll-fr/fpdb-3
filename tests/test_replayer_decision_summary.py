@@ -134,8 +134,9 @@ def test_hero_facing_a_bet_shows_the_call_its_pot_odds_and_the_street_spr(monkey
             "Hero to call",
             [
                 ("Call amount", "$3.00"),
-                ("Effective pot after call", "$10.00"),
                 ("Required equity", "30.0%"),
+                ("Pot odds", "2.3:1"),
+                ("Effective pot after call", "$10.00"),
                 ("SPR", "24.5"),
             ],
         )
@@ -158,8 +159,9 @@ def test_all_players_toggle_prices_the_opponents_decisions() -> None:
             "Villain to call",
             [
                 ("Call amount", "$1.00"),
-                ("Effective pot after call", "$4.00"),
                 ("Required equity", "25.0%"),
+                ("Pot odds", "3.0:1"),
+                ("Effective pot after call", "$4.00"),
                 ("SPR", "49.5"),
             ],
         ),
@@ -238,7 +240,12 @@ def test_hero_call_against_a_covering_bet_is_capped_at_the_hero_stack(monkeypatc
     # The villain's 50 is shown, but 41 of it goes back uncalled: the call wins 9 + 9 + 2.
     title, rows = _sections(replayer, bet, detailed=True)[0]
     assert title == "Hero to call"
-    assert rows[:3] == [("Call amount", "$9.00"), ("Effective pot after call", "$20.00"), ("Required equity", "45.0%")]
+    assert rows[:4] == [
+        ("Call amount", "$9.00"),
+        ("Required equity", "45.0%"),
+        ("Pot odds", "1.2:1"),
+        ("Effective pot after call", "$20.00"),
+    ]
     assert ("Facing", "2,500% of the pot") in rows
     assert ("Pot on the table", "$52.00") in rows
     assert ("Uncalled or side money", "$41.00") in rows
@@ -274,8 +281,9 @@ def test_tournament_antes_are_in_the_street_pot() -> None:
     assert title == "Hero to call"
     assert rows == [
         ("Call amount", "40.00"),
-        ("Effective pot after call", "160.00"),
         ("Required chip equity", "25.0%"),
+        ("Pot odds", "3.0:1"),
+        ("Effective pot after call", "160.00"),
         ("SPR", "12"),
     ]
     detail = _sections(replayer, len(states) - 2, detailed=True)[0][1]

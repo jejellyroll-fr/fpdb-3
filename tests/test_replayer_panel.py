@@ -84,6 +84,7 @@ def test_one_hand_equity_and_its_difference_are_shown_once() -> None:
         "Required equity": "22.0%",
         "Estimated hand equity": "52.1%",
         "Equity difference": "+30.1 pts",
+        "Pot odds": "3.6:1",
         "SPR": "1.27",
     }
     assert not any("Call Eq" in label or "Push" in label for label in compact)
@@ -235,7 +236,11 @@ def test_plo5_short_all_in_call_explains_the_effective_pot() -> None:
     assert detail["Effective pot before call"] == "$105.40"
     assert detail["Pot odds"] == "3.6:1"
     # The compact view keeps the call and its price, not the breakdown.
-    assert set(rows(section)) == {"Call amount", "Effective pot after call", "Required equity", "SPR"}
+    assert set(rows(section)) == {"Call amount", "Required equity", "Pot odds", "Effective pot after call", "SPR"}
+    # The three key figures come first, the required equity set apart.
+    keys = [row for row in section.rows if row.key]
+    assert [row.label for row in keys] == ["Call amount", "Required equity", "Pot odds"]
+    assert [row.label for row in keys if row.accent] == ["Required equity"]
 
 
 # --- ICM ----------------------------------------------------------------------
