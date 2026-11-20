@@ -300,7 +300,8 @@ class GuiHandViewer(QSplitter):
         self.all_handids: list[Any] = []
         self.page = 0
         self.page_size = 100
-        # The rebuilt hands, bounded to a few pages (see hand_viewer_paging).
+        # The rebuilt hands, bounded to a few pages (see hand_viewer_paging; #857,
+        # after thecrawler1's fork, like the hand-number search below).
         self.hands: HandCache = HandCache()
         # Each loaded hand id's place in all_handids, built on the first search.
         self._positions: dict[Any, int] | None = None

@@ -10,6 +10,10 @@ Finding a hand by number used to mean paging until it showed up.
 ``search_numbers`` turns what the user typed into the numbers stored in the
 database, and ``locate_hand`` finds which page of the loaded hands holds it,
 without rebuilding any hand.
+
+Both ideas come from thecrawler1's fork (thecrawler1/fpdb-3, branch
+``personal``, commit 7d818ea: ``_trim_hand_cache`` and ``_apply_id_search``),
+re-implemented here on the current Hand Viewer (#857).
 """
 
 from __future__ import annotations

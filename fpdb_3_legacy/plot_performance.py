@@ -9,6 +9,9 @@ however far out the view is; the data itself is untouched.
 
 Both rely on the x values rising, which holds for curves drawn against a hand
 or tournament count.
+
+After thecrawler1's fork (thecrawler1/fpdb-3, branch ``personal``, commit
+abd677c), which set both on its profit graph (#857).
 """
 
 from __future__ import annotations
