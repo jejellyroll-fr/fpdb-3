@@ -30,6 +30,10 @@ class HeroDecision:  # pylint: disable=too-many-instance-attributes  # one flat 
     fold_equity_pct: Decimal | None = None
     street_pot: Decimal = ZERO
     effective: tuple[tuple[str, Decimal], ...] = ()
+    # A call only: the pot on the table before it, and the pot the call can win,
+    # the call included -- smaller when part of the bet is uncalled or side money (#872).
+    pot_before_call: Decimal = ZERO
+    final_pot: Decimal = ZERO
 
     @property
     def spr(self) -> tuple[Decimal, ...]:
@@ -91,7 +95,13 @@ def _sizing(previous: Any, current: Any, name: str) -> tuple[Decimal, Decimal | 
 
 
 def _call_odds(state: Any, hero: Any, amount: Decimal) -> Decimal | None:
-    """The share of the pot after the call that the call is, counting only what it can win.
+    """The share of the pot after the call that the call is, counting only what it can win."""
+    final_pot = _final_pot(state, hero, amount)
+    return amount / final_pot * HUNDRED if final_pot > 0 else None
+
+
+def _final_pot(state: Any, hero: Any, amount: Decimal) -> Decimal:
+    """The pot a call of `amount` can win, the call included.
 
     Only an all-in call is capped: a caller with chips behind can match any
     later money. Capped, each player's betting counts up to the caller's total,
@@ -115,7 +125,7 @@ def _call_odds(state: Any, hero: Any, amount: Decimal) -> Decimal | None:
             )
             + amount
         )
-    return amount / final_pot * HUNDRED if final_pot > 0 else None
+    return final_pot
 
 
 def _street_start(states: list[Any], index: int) -> int:
@@ -148,7 +158,14 @@ def _call_decision(states: list[Any], index: int, start: int, hero_name: str, hi
     sizing = None
     if event and event[2].players[event[0]].chips == highest:
         sizing = _sizing(event[1], event[2], event[0])[1]
-    return {"mode": "call", "call_amount": call, "pot_odds_pct": _call_odds(state, hero, call), "bet_pct": sizing}
+    return {
+        "mode": "call",
+        "call_amount": call,
+        "pot_odds_pct": _call_odds(state, hero, call),
+        "bet_pct": sizing,
+        "pot_before_call": _pot(state),
+        "final_pot": _final_pot(state, hero, call),
+    }
 
 
 def _bet_decision(states: list[Any], index: int, start: int, hero_name: str) -> dict[str, Any] | None:

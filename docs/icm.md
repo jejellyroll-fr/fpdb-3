@@ -57,7 +57,8 @@ imported before these fixes need importing again.
 ## A hand's all-in, in the replayer
 
 `fpdb_3_legacy/hand_icm.py` prices a tournament hand's all-in. The replayer shows the result
-under its summary as soon as the hero is all-in. For each of the two players, it computes:
+in the **Tournament — ICM** section of its decision panel as soon as the hero is all-in
+(`docs/replayer-decision-panel.md`). For each of the two players, it computes:
 
 - **equity** when the money went in, on the board known at that street: wins, losses and
   ties, with a split pot as its own outcome;

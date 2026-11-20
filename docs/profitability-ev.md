@@ -136,13 +136,14 @@ the hand viewer is the consumer.
 
 In a knockout tournament, busting a player pays their bounty, so an all-in is worth more
 than its chip EV. When the hero is all-in heads-up in a knockout tournament hand, the
-replayer adds a **bounty line** above the ICM line (`fpdb_3_legacy/hand_bounty.py`).
+replayer adds a **Knockout bounty** section after the ICM section of its decision panel
+(`fpdb_3_legacy/hand_bounty.py`, `docs/replayer-decision-panel.md`). The two are never added together.
 
 - **The bounty at stake.** A player collects the opponent's bounty by winning only if that
   busts the opponent, that is when the opponent has put in every chip, antes and blinds
   included. The pot is a single one, so its winner takes everything they had left. A
-  split pot busts nobody. An all-in that cannot bust the opponent reads "winning does not
-  bust your opponent".
+  split pot busts nobody. An all-in that cannot bust the opponent reads "Winning does not
+  bust the opponent: there is no bounty to win".
 - **How it is paid.**
   - A regular knockout pays the tournament's fixed bounty in cash.
   - A progressive one (PKO) pays half in cash and adds the other half to the winner's own
