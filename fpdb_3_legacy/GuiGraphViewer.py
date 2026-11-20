@@ -39,6 +39,7 @@ from fpdb_3_legacy import Database, Filters, gui_empty_state
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import currency_symbol, format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.plot_performance import enable_large_curve_rendering
 
 # import L10n
 # _ = L10n.get_translation()
@@ -202,6 +203,7 @@ class GuiGraphViewer(QSplitter):
         self.plot_widget = pg.PlotWidget()
         self.plot_widget.setBackground(bg_color)
         self.plot_widget.showGrid(x=True, y=True, alpha=0.3)
+        enable_large_curve_rendering(self.plot_widget)
         self.plot_widget.setTitle(f"<span style='color:{fg_color}; font-size:11pt; font-weight:bold;'>Profit graph for ring games{names}</span>")
         self.plot_widget.setLabel("bottom", "Hands", **{"color": fg_color, "font-size": "9pt"})
         self.plot_widget.setLabel("left", display_in, **{"color": fg_color, "font-size": "9pt"})

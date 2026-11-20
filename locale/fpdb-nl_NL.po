@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 08:33+0100\n"
+"POT-Creation-Date: 2026-11-20 13:12+0100\n"
 "PO-Revision-Date: 2011-12-03 21:57+0000\n"
 "Last-Translator: LimburgCwboy <hdps.een@gmail.com>\n"
 "Language-Team: Dutch (Netherlands) (http://www.transifex.net/projects/p/fpdb/"
@@ -1661,6 +1661,10 @@ msgid "75–100% pot"
 msgstr "75–100% pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+msgid "Abort"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
 msgid "Advanced review filters"
 msgstr "Geavanceerde reviewfilters"
@@ -1808,8 +1812,32 @@ msgstr "Eindpot (BB)"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
+msgid "Find hand #"
+msgstr "Gemaakte hand"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Folded"
 msgstr "Gefold"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Hand is not among the loaded hands (check the filters)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, python-brace-format
+msgid "Hand is on page {} but hidden (no hero or card filter)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Hand not found"
+msgstr "niet gevonden"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, python-brace-format
+msgid "Hand {} on page {}"
+msgstr ""
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
@@ -1830,6 +1858,16 @@ msgstr "Omkeren"
 #, fuzzy
 msgid "Limp"
 msgstr "Limp"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Load hands first"
+msgstr "Handen laden"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Loading hands"
+msgstr "Handen laden…"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
@@ -1886,6 +1924,12 @@ msgid "Raised"
 msgstr "Geraised"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+msgid ""
+"Room hand number (as in the hand history) or fpdb hand id; searches every "
+"loaded page"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
 msgid "Saw flop"
 msgstr "Flop gezien"
@@ -1899,6 +1943,11 @@ msgstr "River gezien"
 #, fuzzy
 msgid "Saw turn"
 msgstr "Turn gezien"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Search failed"
+msgstr "Sites zoeken..."
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
@@ -1941,6 +1990,11 @@ msgstr "Deze analyserijen zijn gemaakt door een nieuwere fpdb-versie: {names}."
 msgid "These filters need missing or outdated analytics data: {names}."
 msgstr ""
 "Deze filters hebben ontbrekende of verouderde analysegegevens nodig: {names}."
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Type a hand number"
+msgstr "Handnummer"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy

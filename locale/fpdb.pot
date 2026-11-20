@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 08:33+0100\n"
+"POT-Creation-Date: 2026-11-20 13:12+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1390,6 +1390,16 @@ msgid "◀ Prev"
 msgstr ""
 
 #: fpdb_3_legacy/GuiHandViewer.py
+msgid "Find hand #"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid ""
+"Room hand number (as in the hand history) or fpdb hand id; searches every "
+"loaded page"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
 msgid "Filter: "
 msgstr ""
 
@@ -1649,6 +1659,44 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Analytics data unavailable"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Abort"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Loading hands"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Type a hand number"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Load hands first"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Search failed"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Hand is not among the loaded hands (check the filters)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Hand not found"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, python-brace-format
+msgid "Hand is on page {} but hidden (no hero or card filter)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, python-brace-format
+msgid "Hand {} on page {}"
 msgstr ""
 
 #: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiTourHandViewer.py

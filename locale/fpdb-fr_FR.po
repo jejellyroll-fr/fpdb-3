@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 08:33+0100\n"
+"POT-Creation-Date: 2026-11-20 13:12+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -1472,6 +1472,10 @@ msgid "75–100% pot"
 msgstr "75–100 % du pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+msgid "Abort"
+msgstr "Interrompre"
+
+#: fpdb_3_legacy/GuiHandViewer.py
 msgid "Advanced review filters"
 msgstr "Filtres de revue avancés"
 
@@ -1589,8 +1593,30 @@ msgid "Final pot (BB)"
 msgstr "Pot final (BB)"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+msgid "Find hand #"
+msgstr "Trouver la main n°"
+
+#: fpdb_3_legacy/GuiHandViewer.py
 msgid "Folded"
 msgstr "Couché"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Hand is not among the loaded hands (check the filters)"
+msgstr "La main ne fait pas partie des mains chargées (vérifiez les filtres)"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, python-brace-format
+msgid "Hand is on page {} but hidden (no hero or card filter)"
+msgstr "La main est en page {} mais masquée (pas de héros ou filtre de cartes)"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Hand not found"
+msgstr "Main introuvable"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, python-brace-format
+msgid "Hand {} on page {}"
+msgstr "Main {} en page {}"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Hold'em starting hand"
@@ -1607,6 +1633,14 @@ msgstr "Inverser"
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Limp"
 msgstr "Limp"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Load hands first"
+msgstr "Chargez d'abord les mains"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Loading hands"
+msgstr "Chargement des mains"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Net result (BB)"
@@ -1653,6 +1687,14 @@ msgid "Raised"
 msgstr "Relancé"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+msgid ""
+"Room hand number (as in the hand history) or fpdb hand id; searches every "
+"loaded page"
+msgstr ""
+"Numéro de main de la room (comme dans l'historique) ou identifiant fpdb ; "
+"cherche dans toutes les pages chargées"
+
+#: fpdb_3_legacy/GuiHandViewer.py
 msgid "Saw flop"
 msgstr "A vu le flop"
 
@@ -1663,6 +1705,10 @@ msgstr "A vu la river"
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Saw turn"
 msgstr "A vu la turn"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Search failed"
+msgstr "La recherche a échoué"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Splash pots only"
@@ -1703,6 +1749,10 @@ msgstr ""
 msgid "These filters need missing or outdated analytics data: {names}."
 msgstr ""
 "Ces filtres ont besoin de données d'analyse manquantes ou périmées : {names}."
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Type a hand number"
+msgstr "Saisissez un numéro de main"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Under 25% pot"
@@ -2782,8 +2832,7 @@ msgstr "Aucun tournoi ne correspond à ces filtres."
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
 msgid ""
 "Not available in this drill-down: computed over every tournament of the type"
-msgstr ""
-"Indisponible dans ce détail : calculé sur tous les tournois du type"
+msgstr "Indisponible dans ce détail : calculé sur tous les tournois du type"
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
 msgid "Number of 1st, 2nd and 3rd places"
