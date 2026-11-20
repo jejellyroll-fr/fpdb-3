@@ -60,8 +60,7 @@ from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Any, Final
 
-import defusedxml.minidom
-
+from fpdb_3_legacy import config_xml as cx
 from fpdb_3_legacy import stat_packs
 from fpdb_3_legacy.hud_package import package_problems
 
@@ -312,7 +311,7 @@ def package_problems_for(entry: GalleryEntry, data: bytes, *, fpdb_version: str 
         return [too_new]
     if entry.kind == "hud":
         try:
-            root = defusedxml.minidom.parseString(data).documentElement
+            root = cx.root(cx.parse_string(data))
         except Exception as exc:  # noqa: BLE001 - expat, defusedxml and decoding errors alike
             return [f"is not a readable HUD package: {exc}"]
         return package_problems(root)
@@ -476,7 +475,7 @@ def installed_versions(record: Path, packs_dir: Path | None = None) -> dict[str,
 
 
 def _hud_root(package: Path) -> Any:
-    root = defusedxml.minidom.parse(str(package)).documentElement
+    root = cx.root(cx.parse_file(package))
     problems = package_problems(root)
     if problems:
         raise GalleryError(problems, package.name)
@@ -484,31 +483,31 @@ def _hud_root(package: Path) -> Any:
 
 
 def _named_children(root: Any, tag: str, attribute: str) -> list[str]:
-    return [node.getAttribute(attribute) for node in root.childNodes if getattr(node, "tagName", "") == tag]
+    return [cx.attr(node, attribute) for node in cx.children(root, tag)]
 
 
 def _remove_named(config_doc: Any, tag: str, attribute: str, names: Iterable[str]) -> None:
     wanted = set(names)
-    for node in list(config_doc.getElementsByTagName(tag)):
-        if node.getAttribute(attribute) in wanted:
-            node.parentNode.removeChild(node)
+    for node in list(cx.find_all(config_doc, tag)):
+        if cx.attr(node, attribute) in wanted:
+            cx.remove(config_doc, node)
 
 
 def _panel_rules(config_doc: Any) -> list[Any]:
     from fpdb_3_legacy.hud_package import _is_panel_rule_placeholder  # noqa: PLC0415
 
-    return [node for node in config_doc.getElementsByTagName("hud_panel_rules") if not _is_panel_rule_placeholder(node)]
+    return [node for node in cx.find_all(config_doc, "hud_panel_rules") if not _is_panel_rule_placeholder(node)]
 
 
 def _panel_scope(section: Any) -> str:
-    return section.getAttribute("profile").strip().casefold()
+    return cx.attr(section, "profile").strip().casefold()
 
 
 def _remove_panel_rules(config_doc: Any, scopes: Iterable[str]) -> None:
     wanted = set(scopes)
     for section in _panel_rules(config_doc):
         if _panel_scope(section) in wanted:
-            section.parentNode.removeChild(section)
+            cx.remove(config_doc, section)
 
 
 def _committed(
@@ -521,7 +520,7 @@ def _committed(
     record of a pack the configuration never received, and no pack in the
     configuration the record does not know (Codex, #641).
     """
-    snapshot = config_doc.documentElement.cloneNode(True)
+    snapshot = cx.import_node(config_doc, cx.root(config_doc))
     saved = False
     try:
         changed = change()
@@ -530,7 +529,7 @@ def _committed(
             saved = True
         commit()
     except BaseException:
-        config_doc.replaceChild(snapshot, config_doc.documentElement)
+        cx.replace_root(config_doc, snapshot)
         if saved and save is not None:
             save()
         raise
@@ -597,7 +596,7 @@ def install_entry(
             ],
             entry.id,
         )
-    new_popups = {popup.getAttribute("pu_name") for popup in package_popups(root)}
+    new_popups = {cx.attr(popup, "pu_name") for popup in package_popups(root)}
     ours_rules = set(previous.get("panel_rules") or [])
     added: dict[str, list[str]] = {}
 
@@ -636,12 +635,10 @@ def install_entry(
 def _unused_popups(config_doc: Any, candidates: set[str]) -> set[str]:
     """The *candidates* nothing else opens: no remaining stat, and no popup outside them, even through a chain."""
     submenus = {
-        popup.getAttribute("pu_name"): {
-            row.getAttribute("pu_stat_submenu") for row in popup.getElementsByTagName("pu_stat")
-        }
-        for popup in config_doc.getElementsByTagName("pu")
+        cx.attr(popup, "pu_name"): {cx.attr(row, "pu_stat_submenu") for row in cx.find_all(popup, "pu_stat")}
+        for popup in cx.find_all(config_doc, "pu")
     }
-    kept = {node.getAttribute("popup") for node in config_doc.getElementsByTagName("stat")} & candidates
+    kept = {cx.attr(node, "popup") for node in cx.find_all(config_doc, "stat")} & candidates
     for name, opens in submenus.items():
         if name not in candidates:
             kept |= opens & candidates
@@ -656,15 +653,16 @@ def _bound_games(config_doc: Any, profiles: set[str]) -> list[str]:
     """The games, as ``game (type)``, whose HUD is one of *profiles*."""
     return sorted(
         {
-            f"{node.parentNode.getAttribute('game_name')} ({node.getAttribute('game_type')})"
-            for node in config_doc.getElementsByTagName("game_stat_set")
-            if node.getAttribute("stat_set") in profiles
+            f"{cx.attr(game, 'game_name')} ({cx.attr(node, 'game_type')})"
+            for game in cx.find_all(config_doc, "game")
+            for node in cx.children(game, "game_stat_set")
+            if cx.attr(node, "stat_set") in profiles
         }
     )
 
 
 def _exists(config_doc: Any, tag: str, attribute: str, name: str) -> bool:
-    return any(node.getAttribute(attribute) == name for node in config_doc.getElementsByTagName(tag))
+    return any(cx.attr(node, attribute) == name for node in cx.find_all(config_doc, tag))
 
 
 def uninstall_entry(
