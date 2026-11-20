@@ -36,6 +36,8 @@ import struct
 from dataclasses import dataclass, field
 from xml.sax.saxutils import quoteattr
 
+from fpdb_3_legacy import config_xml as cx
+
 MAGIC = "PT4.Hud.Layout.Export"
 
 # PT4 stat full name (as stored in the export) -> fpdb Stats.py function name.
@@ -1073,37 +1075,37 @@ def _panel_groups(cells: list[Cell]) -> list[tuple[str, list[Cell]]]:
 
 
 def _hline_el(doc, c: Cell, r: int, col: int):
-    h = doc.createElement("hline")
-    h.setAttribute("_rowcol", f"({r + 1},{col + 1})")
+    h = cx.create_element(doc, "hline")
+    cx.set_attr(h, "_rowcol", f"({r + 1},{col + 1})")
     if c.hudcolor:
-        h.setAttribute("color", c.hudcolor)
+        cx.set_attr(h, "color", c.hudcolor)
     return h
 
 
 def _stat_el(doc, c: Cell, r: int, col: int):
-    st = doc.createElement("stat")
-    st.setAttribute("_rowcol", f"({r + 1},{col + 1})")
-    st.setAttribute("_stat_name", c.fpdb_stat)
-    st.setAttribute("popup", "default")
-    st.setAttribute("tip", _tip(c))
-    st.setAttribute("click", "")
+    st = cx.create_element(doc, "stat")
+    cx.set_attr(st, "_rowcol", f"({r + 1},{col + 1})")
+    cx.set_attr(st, "_stat_name", c.fpdb_stat)
+    cx.set_attr(st, "popup", "default")
+    cx.set_attr(st, "tip", _tip(c))
+    cx.set_attr(st, "click", "")
     if c.hudcolor:
-        st.setAttribute("hudcolor", c.hudcolor)
+        cx.set_attr(st, "hudcolor", c.hudcolor)
     if c.hudbgcolor:
-        st.setAttribute("hudbgcolor", c.hudbgcolor)
+        cx.set_attr(st, "hudbgcolor", c.hudbgcolor)
     return st
 
 
 def _blank_el(doc, c: Cell, r: int, col: int):
     """The empty, coloured slot of a stat fpdb cannot compute, as PT4 laid it out."""
-    t = doc.createElement("text")
-    t.setAttribute("_rowcol", f"({r + 1},{col + 1})")
-    t.setAttribute("label", "")
+    t = cx.create_element(doc, "text")
+    cx.set_attr(t, "_rowcol", f"({r + 1},{col + 1})")
+    cx.set_attr(t, "label", "")
     fg = _legible_fg(c.hudcolor, c.hudbgcolor)
     if fg:
-        t.setAttribute("fgcolor", fg)
+        cx.set_attr(t, "fgcolor", fg)
     if c.hudbgcolor:
-        t.setAttribute("bgcolor", c.hudbgcolor)
+        cx.set_attr(t, "bgcolor", c.hudbgcolor)
     return t
 
 
@@ -1126,16 +1128,16 @@ def _legible_fg(fg: str, bg: str) -> str:
 
 
 def _text_el(doc, c: Cell, r: int, col: int, span: int):
-    t = doc.createElement("text")
-    t.setAttribute("_rowcol", f"({r + 1},{col + 1})")
-    t.setAttribute("label", c.label or c.pt4_name)
+    t = cx.create_element(doc, "text")
+    cx.set_attr(t, "_rowcol", f"({r + 1},{col + 1})")
+    cx.set_attr(t, "label", c.label or c.pt4_name)
     if span > 1:
-        t.setAttribute("colspan", str(span))
+        cx.set_attr(t, "colspan", str(span))
     fg = _legible_fg(c.hudcolor, c.hudbgcolor)
     if fg:
-        t.setAttribute("fgcolor", fg)
+        cx.set_attr(t, "fgcolor", fg)
     if c.hudbgcolor:
-        t.setAttribute("bgcolor", c.hudbgcolor)
+        cx.set_attr(t, "bgcolor", c.hudbgcolor)
     return t
 
 
@@ -1177,49 +1179,49 @@ def _build_stat_set(doc, layout: Layout, name: str, multiblock: bool = True):
     # Place stat cells and (PT4-style) text-label items together.
     place_cells = [c for c in layout.cells if c.kind == "text" or c.fpdb_stat]
     n_stats = sum(1 for c in place_cells if c.fpdb_stat)
-    ss = doc.createElement("ss")
-    ss.setAttribute("name", name)
-    ss.setAttribute("cols", str(cols))
+    ss = cx.create_element(doc, "ss")
+    cx.set_attr(ss, "name", name)
+    cx.set_attr(ss, "cols", str(cols))
     n_blocks = 0
     if multiblock and layout.groups:
-        ss.setAttribute("show_hero_hud", "false")
+        cx.set_attr(ss, "show_hero_hud", "false")
         total_rows = 0
         max_cols = 4
         for g in layout.groups:
-            blk = doc.createElement("block")
-            blk.setAttribute("id", g.id)
-            blk.setAttribute("label", g.name)
-            blk.setAttribute("scope", g.scope)
-            blk.setAttribute("audience", g.audience)
-            blk.setAttribute("position", panel_position(g.name))
+            blk = cx.create_element(doc, "block")
+            cx.set_attr(blk, "id", g.id)
+            cx.set_attr(blk, "label", g.name)
+            cx.set_attr(blk, "scope", g.scope)
+            cx.set_attr(blk, "audience", g.audience)
+            cx.set_attr(blk, "position", panel_position(g.name))
             for attr, value in panel_style(g.name).items():
-                blk.setAttribute(attr, value)
-            blk.setAttribute("rows", str(g.rows))
-            blk.setAttribute("cols", str(g.cols))
+                cx.set_attr(blk, attr, value)
+            cx.set_attr(blk, "rows", str(g.rows))
+            cx.set_attr(blk, "cols", str(g.cols))
 
             for c in g.cells:
                 r, col = c.row, c.col
                 if c.kind == "text":
                     span = g.cols if c.full_width else 1
-                    blk.appendChild(_text_el(doc, c, r, col, span))
+                    cx.append(doc, blk, _text_el(doc, c, r, col, span))
                 elif c.kind == "hline":
-                    blk.appendChild(_hline_el(doc, c, r, col))
+                    cx.append(doc, blk, _hline_el(doc, c, r, col))
                 elif c.fpdb_stat:
-                    blk.appendChild(_stat_el(doc, c, r, col))
+                    cx.append(doc, blk, _stat_el(doc, c, r, col))
                 else:
-                    blk.appendChild(_blank_el(doc, c, r, col))  # an untranslated stat keeps its slot
-            ss.appendChild(blk)
+                    cx.append(doc, blk, _blank_el(doc, c, r, col))  # an untranslated stat keeps its slot
+            cx.append(doc, ss, blk)
             total_rows += g.rows
             max_cols = max(max_cols, g.cols)
             n_blocks += 1
-        ss.setAttribute("rows", str(max(total_rows, 1)))
-        ss.setAttribute("cols", str(max_cols))
+        cx.set_attr(ss, "rows", str(max(total_rows, 1)))
+        cx.set_attr(ss, "cols", str(max_cols))
     else:
         stat_cells = [c for c in place_cells if c.fpdb_stat]
         placements, rows = grouped_placements(stat_cells, cols)
-        ss.setAttribute("rows", str(rows))
+        cx.set_attr(ss, "rows", str(rows))
         for c, r, col in placements:
-            ss.appendChild(_stat_el(doc, c, r, col))
+            cx.append(doc, ss, _stat_el(doc, c, r, col))
     return ss, n_stats, n_blocks
 
 
@@ -1242,14 +1244,14 @@ def import_to_config(
     doc = config.doc
     name = (name or layout.name or "pt4_import")[:40]
     ss, n_stats, n_blocks = _build_stat_set(doc, layout, name, multiblock)
-    ss_parent = doc.getElementsByTagName("stat_sets")
-    if ss_parent:
+    stat_sets = cx.find_first(doc, "stat_sets")
+    if stat_sets is not None:
         # Re-importing the same layout should replace its stat-set, not pile up
         # duplicate <ss name="..."> entries.
-        for existing in list(ss_parent[0].getElementsByTagName("ss")):
-            if existing.getAttribute("name") == name:
-                ss_parent[0].removeChild(existing)
-        ss_parent[0].appendChild(ss)
+        for existing in cx.find_all(stat_sets, "ss"):
+            if cx.attr(existing, "name") == name:
+                cx.remove(doc, existing)
+        cx.append(doc, stat_sets, ss)
 
     popup_name = None
     if layout.charts:
@@ -1260,16 +1262,15 @@ def import_to_config(
         with open(charts_path, "w", encoding="utf-8") as fh:
             json.dump(to_dict(layout), fh, indent=2)
         popup_name = f"{name} charts"
-        pu = doc.createElement("pu")
-        pu.setAttribute("pu_name", popup_name)
-        pu.setAttribute("pu_class", "RangeChartPopup")
-        pu.setAttribute("pu_source", charts_path)
-        pu_parent = doc.getElementsByTagName("popup_windows")
-        if pu_parent:
-            for existing in list(pu_parent[0].getElementsByTagName("pu")):
-                if existing.getAttribute("pu_name") == popup_name:
-                    pu_parent[0].removeChild(existing)
-            pu_parent[0].appendChild(pu)
+        pu = cx.create_element(
+            doc, "pu", {"pu_name": popup_name, "pu_class": "RangeChartPopup", "pu_source": charts_path}
+        )
+        popup_windows = cx.find_first(doc, "popup_windows")
+        if popup_windows is not None:
+            for existing in cx.find_all(popup_windows, "pu"):
+                if cx.attr(existing, "pu_name") == popup_name:
+                    cx.remove(doc, existing)
+            cx.append(doc, popup_windows, pu)
 
     # Import PT4 popup groups (info popups + text-grid push charts) as BlockPopup
     # windows pointing at a JSON sidecar with their full text/stat grid.
@@ -1280,19 +1281,19 @@ def import_to_config(
         popups_path = f"{base}.{slug}.popups.json"
         with open(popups_path, "w", encoding="utf-8") as fh:
             json.dump({"popup_groups": to_dict(layout)["popup_groups"]}, fh, indent=2)
-        pu_parent = doc.getElementsByTagName("popup_windows")
-        if pu_parent:
+        popup_windows = cx.find_first(doc, "popup_windows")
+        if popup_windows is not None:
             for group in layout.popup_groups:
                 pu_pname = f"{name} - {group.name}"
-                for existing in list(pu_parent[0].getElementsByTagName("pu")):
-                    if existing.getAttribute("pu_name") == pu_pname:
-                        pu_parent[0].removeChild(existing)
-                pu = doc.createElement("pu")
-                pu.setAttribute("pu_name", pu_pname)
-                pu.setAttribute("pu_class", "BlockPopup")
-                pu.setAttribute("pu_source", popups_path)
-                pu.setAttribute("pu_group", group.name)
-                pu_parent[0].appendChild(pu)
+                for existing in cx.find_all(popup_windows, "pu"):
+                    if cx.attr(existing, "pu_name") == pu_pname:
+                        cx.remove(doc, existing)
+                pu = cx.create_element(
+                    doc,
+                    "pu",
+                    {"pu_name": pu_pname, "pu_class": "BlockPopup", "pu_source": popups_path, "pu_group": group.name},
+                )
+                cx.append(doc, popup_windows, pu)
                 popup_group_names.append(pu_pname)
 
     return {
@@ -1329,9 +1330,9 @@ def untranslated(layout: Layout) -> list[dict[str, str]]:
 def package_untranslated(package_root) -> list[dict[str, str]]:
     """The untranslated PT4 stats an ``.fpdbhud`` package lists (from :func:`to_package`); empty for others."""
     return [
-        {key: node.getAttribute(key) for key in ("label", "section", "pt4_name", "formula")}
-        for listing in package_root.getElementsByTagName("untranslated")
-        for node in listing.getElementsByTagName("pt4_stat")
+        {key: cx.attr(node, key) for key in ("label", "section", "pt4_name", "formula")}
+        for listing in cx.find_all(package_root, "untranslated")
+        for node in cx.find_all(listing, "pt4_stat")
     ]
 
 
@@ -1345,29 +1346,22 @@ def to_package(source: str | bytes, name: str | None = None, multiblock: bool = 
     and info popups are not in it: they live in JSON files beside a configuration,
     and only importing the ``.pt4hud`` itself writes them.
     """
-    import defusedxml.minidom
-
     layout = parse(source)
     name = (name or layout.name or "pt4_import")[:40]
-    # A minidom document from a fixed skeleton, through defusedxml like every XML in the project.
-    doc = defusedxml.minidom.parseString("<fpdb_hud_package/>")
-    root = doc.documentElement
-    root.setAttribute("version", "1.0")
-    root.setAttribute("source", "pt4hud")
+    doc = cx.new_document("fpdb_hud_package")
+    root = cx.root(doc)
+    cx.set_attr(root, "version", "1.0")
+    cx.set_attr(root, "source", "pt4hud")
     ss, n_stats, n_blocks = _build_stat_set(doc, layout, name, multiblock)
-    root.appendChild(ss)
+    cx.append(doc, root, ss)
 
     missing = untranslated(layout)
     if missing:
-        listing = doc.createElement("untranslated")
-        listing.setAttribute("count", str(len(missing)))
+        listing = cx.create_element(doc, "untranslated", {"count": len(missing)})
         for stat in missing:
-            node = doc.createElement("pt4_stat")
-            for key, value in stat.items():
-                if value:
-                    node.setAttribute(key, value)
-            listing.appendChild(node)
-        root.appendChild(listing)
+            node = cx.create_element(doc, "pt4_stat", {key: value for key, value in stat.items() if value})
+            cx.append(doc, listing, node)
+        cx.append(doc, root, listing)
 
     summary = {
         "name": name,
@@ -1377,7 +1371,7 @@ def to_package(source: str | bytes, name: str | None = None, multiblock: bool = 
         # A push/fold chart is both a range chart and a popup group: name it once.
         "left_out": list(dict.fromkeys([c.name for c in layout.charts] + [g.name for g in layout.popup_groups])),
     }
-    return doc.toprettyxml(indent="    "), summary
+    return cx.to_pretty_xml(doc, indent="    "), summary
 
 
 def main(argv: list[str] | None = None) -> int:
