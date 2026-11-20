@@ -1273,7 +1273,9 @@ class GuiHandViewer(QSplitter):
     def row_activated(self, index) -> None:
         try:
             hand_id = int(index.sibling(index.row(), self.colnum["HandId"]).data())
-            handlist = sorted(self.hands.keys())
+            # Every loaded hand, not the bounded cache: the replayer rebuilds each
+            # hand from the database, so its Up/Down reach hands the cache forgot.
+            handlist = sorted(set(self.all_handids))
             hand_index = handlist.index(hand_id)
 
             if getattr(self, "replayer", None) is not None and self.replayer.isVisible():

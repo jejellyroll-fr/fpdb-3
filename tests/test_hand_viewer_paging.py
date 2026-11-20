@@ -232,6 +232,26 @@ def test_the_rows_on_screen_stay_usable_while_new_hands_load(monkeypatch) -> Non
     assert list(viewer.hands) == [7, 8]
 
 
+def test_the_replayer_reaches_the_hands_the_cache_forgot(monkeypatch) -> None:
+    # Up/Down in the replayer walk its hand list: it must hold every loaded
+    # hand, not only the few pages the cache still keeps (Codex, #859).
+    viewer = _viewer(monkeypatch, range(1, 1001), page_size=100)
+    for page in range(5):
+        viewer.render_page(page)
+    assert 1 not in viewer.hands
+    replayer = MagicMock()
+    monkeypatch.setattr(viewer_module.GuiReplayer, "GuiReplayer", replayer)
+    viewer.colnum = {"HandId": 0}
+    viewer.config = viewer.sql = viewer.main_window = viewer.db = None
+    index = MagicMock()
+    index.sibling.return_value.data.return_value = "450"
+
+    viewer.row_activated(index)
+
+    assert replayer.call_args.args[3] == list(range(1, 1001))
+    replayer.return_value.play_hand.assert_called_once_with(449)
+
+
 class _Cursor:
     def __init__(self, rows_by_number) -> None:
         self.rows_by_number = rows_by_number
