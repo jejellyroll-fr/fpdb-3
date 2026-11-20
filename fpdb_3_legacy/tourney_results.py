@@ -355,7 +355,7 @@ def running_curves(results: Iterable[TourneyResult]) -> Curves:
 
 
 @dataclass
-class Group:
+class Group:  # pylint: disable=too-many-instance-attributes  # a row and what it is made of
     """One row of a grouped view."""
 
     key: tuple[Any, ...]
