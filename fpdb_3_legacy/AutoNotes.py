@@ -320,15 +320,21 @@ def rule_note_template(
 ) -> str:
     """Return a configured note template for one rule, falling back to default."""
     node = _autonotes_node(config)
-    if node is None:
+    rule_node = _configured_rule(node, rule_set_name, rule_id) if node is not None else None
+    if rule_node is None:
         return default
+    return cx.attr(rule_node, "noteTemplate") or default
+
+
+def _configured_rule(node, rule_set_name: str, rule_id: str):
+    """The ``<rule>`` for ``rule_id`` in the first rule set named ``rule_set_name`` that has one, or None."""
     for rule_set_node in cx.find_all(node, "ruleset"):
         if cx.attr(rule_set_node, "name") != rule_set_name:
             continue
         for rule_node in cx.find_all(rule_set_node, "rule"):
             if cx.attr(rule_node, "id") == rule_id:
-                return cx.attr(rule_node, "noteTemplate") or default
-    return default
+                return rule_node
+    return None
 
 
 def ensure_autonotes_node(config):
@@ -426,12 +432,9 @@ def rule_enabled(config, rule_id: str, rule_set_name: str = RULE_SET_HWANG_PLO_P
     if node is None:
         return True
 
-    for rule_set_node in cx.find_all(node, "ruleset"):
-        if cx.attr(rule_set_node, "name") != rule_set_name:
-            continue
-        for rule_node in cx.find_all(rule_set_node, "rule"):
-            if cx.attr(rule_node, "id") == rule_id:
-                return _string_to_bool(cx.attr(rule_node, "enabled"), default=True)
+    rule_node = _configured_rule(node, rule_set_name, rule_id)
+    if rule_node is not None:
+        return _string_to_bool(cx.attr(rule_node, "enabled"), default=True)
 
     for child in cx.children(node, "rule"):
         if cx.attr(child, "id") == rule_id:
