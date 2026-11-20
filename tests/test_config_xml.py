@@ -435,6 +435,13 @@ def test_a_comment_can_be_carried_to_another_document(backend) -> None:
     assert "<!-- the room the HUD opens on -->" in cx.to_xml(target)
 
 
+def test_document_comments_are_the_ones_outside_the_root(backend) -> None:
+    text = "<!-- above -->\n<package><!-- inside --><ss/></package>\n<!-- below -->"
+
+    assert cx.document_comments(cx.parse_string(text, backend=backend)) == [" above ", " below "]
+    assert cx.document_comments(cx.parse_string("<package/>", backend=backend)) == []
+
+
 def test_bytes_name_their_encoding(doc, backend) -> None:
     data = cx.to_bytes(doc)
 
