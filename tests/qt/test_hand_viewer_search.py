@@ -13,7 +13,7 @@ pytestmark = pytest.mark.qt
 
 
 @pytest.fixture
-def viewer():
+def viewer(monkeypatch):
     if QApplication.instance() is None:
         QApplication([])
     from fpdb_3_legacy.GuiHandViewer import GuiHandViewer
@@ -31,7 +31,7 @@ def viewer():
         row[widget.colnum["HandId"]] = QStandardItem(str(hand_id))
         widget.model.appendRow(row)
 
-    widget.addHandRow = add_row
+    monkeypatch.setattr(widget, "addHandRow", add_row)
     yield widget
     widget.deleteLater()
 
@@ -52,4 +52,4 @@ def test_a_search_opens_the_page_of_the_hand_and_selects_it(viewer) -> None:
     assert _shown_ids(viewer) == list(range(1201, 1251))
     selected = viewer.view.selectionModel().selectedRows(viewer.colnum["HandId"])
     assert [int(index.data()) for index in selected] == [1234]
-    assert "page 3" in viewer.handSearchStatus.text()
+    assert "page 3" in viewer.hand_search_status.text()

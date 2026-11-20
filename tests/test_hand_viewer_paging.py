@@ -104,7 +104,7 @@ def test_a_hand_outside_the_loaded_hands_is_not_located() -> None:
 # -- the viewer -------------------------------------------------------------------
 
 
-class _Progress:
+class _Progress:  # pylint: disable=invalid-name  # stands in for QProgressDialog
     """A QProgressDialog stand-in that aborts once ``cancel_at`` hands are loaded."""
 
     cancel_at: int | None = None
@@ -125,7 +125,7 @@ class _Progress:
         return self.cancel_at is not None and self.value >= self.cancel_at
 
 
-class _Model:
+class _Model:  # pylint: disable=invalid-name  # stands in for QStandardItemModel
     def __init__(self) -> None:
         self.rows: list = []
 
@@ -153,7 +153,7 @@ def _viewer(monkeypatch, hand_ids, page_size=2):
     viewer.pageLabel = MagicMock()
     viewer.prevPageButton = MagicMock()
     viewer.nextPageButton = MagicMock()
-    viewer.handSearchStatus = MagicMock()
+    viewer.hand_search_status = MagicMock()
     viewer.imported = []
 
     def importhand(hand_id):
@@ -161,7 +161,7 @@ def _viewer(monkeypatch, hand_ids, page_size=2):
         return SimpleNamespace(id=hand_id)
 
     viewer.importhand = importhand
-    viewer.addHandRow = lambda hand_id, _hand: viewer.model.rows.append(hand_id)
+    monkeypatch.setattr(viewer, "addHandRow", lambda hand_id, _hand: viewer.model.rows.append(hand_id))
     viewer._result_colors = dict  # pylint: disable=protected-access
     return viewer
 
@@ -185,7 +185,7 @@ def test_a_page_seen_recently_is_not_rebuilt(monkeypatch) -> None:
 
     viewer.render_page(0)
 
-    assert viewer.imported == []
+    assert not viewer.imported
 
 
 def test_aborting_a_page_leaves_the_page_shown_before(monkeypatch) -> None:
@@ -210,6 +210,26 @@ def test_aborting_new_hands_leaves_the_hands_shown_before(monkeypatch) -> None:
     assert viewer.model.rows == [1, 2]
     assert viewer.sent_heroes == {}
     assert 7 not in viewer.hands
+
+
+def test_the_rows_on_screen_stay_usable_while_new_hands_load(monkeypatch) -> None:
+    # The table stays clickable during processEvents(): a right-click or a
+    # double-click on a row shown before must still find its hand (Codex, #859).
+    viewer = _viewer(monkeypatch, [1, 2, 3])
+    viewer.render_page(0)
+    readable_during_load = []
+
+    def importhand(hand_id):
+        readable_during_load.append(all(shown in viewer.hands for shown in viewer.model.rows))
+        return SimpleNamespace(id=hand_id)
+
+    viewer.importhand = importhand
+
+    viewer.reload_hands([7, 8, 9])
+
+    assert readable_during_load == [True, True]
+    assert viewer.model.rows == [7, 8]
+    assert list(viewer.hands) == [7, 8]
 
 
 class _Cursor:
@@ -262,14 +282,14 @@ def test_search_says_when_the_hand_is_outside_the_loaded_hands(monkeypatch) -> N
     assert not viewer.find_hand("555")
 
     assert viewer.page == 0
-    assert "not among the loaded hands" in viewer.handSearchStatus.setText.call_args.args[0]
+    assert "not among the loaded hands" in viewer.hand_search_status.setText.call_args.args[0]
 
 
 def test_search_for_an_unknown_number(monkeypatch) -> None:
     viewer, _cursor = _searchable(monkeypatch, {})
 
     assert not viewer.find_hand("123")
-    assert viewer.handSearchStatus.setText.call_args.args[0] == "Hand not found"
+    assert viewer.hand_search_status.setText.call_args.args[0] == "Hand not found"
 
 
 # -- graphs -----------------------------------------------------------------------
