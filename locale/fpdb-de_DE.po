@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 08:07+0100\n"
+"POT-Creation-Date: 2026-11-20 08:33+0100\n"
 "PO-Revision-Date: 2011-12-04 06:20+0200\n"
 "Last-Translator: Steffen Schaumburg <steffen@schaumburger.info>\n"
 "Language-Team: Fpdb\n"
@@ -3076,6 +3076,11 @@ msgid "No tournament matches these filters."
 msgstr "Keine Hand passt zu den gewählten Filtern."
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid ""
+"Not available in this drill-down: computed over every tournament of the type"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
 #, fuzzy
 #| msgid "Number of hands played"
 msgid "Number of 1st, 2nd and 3rd places"
@@ -3107,6 +3112,11 @@ msgstr "Quellhände"
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
 msgid "Open the selected tournament's hands in a Tourney Viewer tab (Enter)"
 msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+#, fuzzy
+msgid "Over every tournament of this type in the filters"
+msgstr "Keine Hand passt zu den gewählten Filtern."
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
 msgid "Part of the winnings paid as bounties"

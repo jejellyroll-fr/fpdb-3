@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 08:07+0100\n"
+"POT-Creation-Date: 2026-11-20 08:33+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2687,6 +2687,15 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
 msgid "Avg entrants"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Over every tournament of this type in the filters"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid ""
+"Not available in this drill-down: computed over every tournament of the type"
 msgstr ""
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py

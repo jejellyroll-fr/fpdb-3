@@ -173,3 +173,41 @@ def test_a_hidden_column_stays_hidden_across_views(tab) -> None:
     tab.set_group_mode(BY_DATE)
 
     assert tab.table.isColumnHidden(_column(tab, "cashes"))
+
+
+def test_a_re_entered_tournament_adds_its_entries_up(tab) -> None:
+    """Codex (#858): each entry is its own TourneysPlayers row; showing the first hid the others."""
+    first = _result(5, 1, 0.0, 22)
+    second = TourneyResult(**{**first.__dict__, "prize": 1.00, "finish": 1})
+    tab.results = [first, second]
+    tab.set_group_mode(BY_TOURNAMENT)
+    tab._render()
+
+    assert tab.proxy.rowCount() == 1
+    assert _texts(tab, "buyin")[0].endswith("×2")
+    assert _texts(tab, "finish") == ["1"]
+    # Two 0.25 entries and a 1.00 prize.
+    assert tab.proxy.index(0, _column(tab, "net")).data(module._SORT_ROLE) == pytest.approx(0.50)
+
+
+def test_player_stats_only_show_where_they_describe_the_row(tab) -> None:
+    """Codex (#858): stats over a whole type must not stand for a type narrowed to one date."""
+    tab._descriptor_specs = [["vpip", True, "VPIP", 1.0, "%s", "str"]]
+    tab._descriptor_values = {(1, 7): ["25.0"], (2, 7): ["30.0"]}
+    tab._render()
+    vpip = _column(tab, "stat:0")
+    assert not tab.table.isColumnHidden(vpip)
+
+    tab.drill_into((1, 7))
+    tab.set_group_mode(BY_DESCRIPTION)
+    assert not tab.table.isColumnHidden(_column(tab, "stat:0"))
+
+    tab.clear_scope()
+    tab.set_group_mode(BY_DATE)
+    tab.drill_into(tab._key_at(tab.proxy.index(0, 0)))
+    tab.set_group_mode(BY_DESCRIPTION)
+    assert tab.table.isColumnHidden(_column(tab, "stat:0"))
+    # Not even through the header menu.
+    tab._set_column_shown(_column(tab, "stat:0"), "stat:0", True)
+    tab._render()
+    assert tab.table.isColumnHidden(_column(tab, "stat:0"))

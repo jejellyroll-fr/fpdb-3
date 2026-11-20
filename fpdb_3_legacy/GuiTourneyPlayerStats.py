@@ -166,6 +166,8 @@ class _Column:
     tooltip: str = ""
     align: Qt.AlignmentFlag = _ALIGN_RIGHT
     hidden: bool = False
+    # False when the values would not describe the rows shown: never displayed then.
+    available: bool = True
 
 
 class _ToneDelegate(QStyledItemDelegate):
@@ -1071,8 +1073,20 @@ class GuiTourneyPlayerStats(QSplitter):
                 _Column("hands", _("Hands")),
             ]
             if mode == BY_DESCRIPTION:
+                # The player stats are computed per tournament type over the whole filter range:
+                # they still describe a row narrowed to some types, not one narrowed to a date or
+                # a buy-in, which covers only part of each type's tournaments.
+                in_range = all(scope.mode == BY_DESCRIPTION for scope in self._scopes)
                 columns.extend(
-                    _Column(f"stat:{index}", str(spec[colheading]), hidden=str(spec[colalias]) not in _DEFAULT_STATS)
+                    _Column(
+                        f"stat:{index}",
+                        str(spec[colheading]),
+                        _("Over every tournament of this type in the filters")
+                        if in_range
+                        else _("Not available in this drill-down: computed over every tournament of the type"),
+                        hidden=str(spec[colalias]) not in _DEFAULT_STATS,
+                        available=in_range,
+                    )
                     for index, spec in enumerate(self._descriptor_specs)
                 )
         players = {group.player_name for group in groups}
@@ -1090,7 +1104,14 @@ class GuiTourneyPlayerStats(QSplitter):
         if not any(result.name for group in groups for result in group.results):
             auto_hidden.add("name")
         return [
-            _Column(column.key, column.title, column.tooltip, column.align, column.hidden or column.key in auto_hidden)
+            _Column(
+                column.key,
+                column.title,
+                column.tooltip,
+                column.align,
+                column.hidden or column.key in auto_hidden,
+                column.available,
+            )
             for column in columns
         ]
 
@@ -1115,26 +1136,7 @@ class GuiTourneyPlayerStats(QSplitter):
             text, sort = self._group_label(mode, group)
             return text, sort, ""
         if mode == BY_TOURNAMENT:
-            r = group.results[0]
-            values: dict[str, tuple[str, Any, str]] = {
-                "start": (format_utc_datetime(r.start) if r.start else "", r.start.isoformat() if r.start else "", ""),
-                "end": (format_utc_datetime(r.end) if r.end else "", r.end.isoformat() if r.end else "", ""),
-                "site": (r.site, r.site, ""),
-                "tourney_no": (str(r.tourney_no or ""), _sortable(r.tourney_no), ""),
-                "description": (r.description, r.description, ""),
-                "name": (r.name, r.name, ""),
-                "player": (r.player_name, r.player_name, ""),
-                "buyin": (f"{format_currency(r.buy_in, cur)}+{format_currency(r.fee, cur)}", r.cost, ""),
-                "entries": (_number(r.entries), r.entries or 0, ""),
-                "finish": (_number(r.finish), r.finish or 10**9, ""),
-                "won": (format_currency(r.won, cur), r.won, "") if r.known else ("–", -(10**12), ""),
-                "bounties": (format_currency(r.bounties, cur) if r.bounties else "", r.bounties, ""),
-                "net": (format_currency(r.net, cur, show_plus=True), r.net, _tone(r.net))
-                if r.known
-                else ("–", -(10**12), ""),
-                "hands": (format_number(r.hands, 0), r.hands, ""),
-            }
-            return values.get(column, ("", "", ""))
+            return self._tournament_cell(column, group)
         if column.startswith("stat:"):
             index = int(column.split(":", 1)[1])
             extras = self._descriptor_values.get(group.key, [])
@@ -1168,6 +1170,42 @@ class GuiTourneyPlayerStats(QSplitter):
         }
         return values.get(column, ("", "", ""))
 
+    @staticmethod
+    def _tournament_cell(column: str, group: Group) -> tuple[str, Any, str]:
+        """(text, sort value, tone) of a tournament row.
+
+        A re-entered tournament has one TourneysPlayers row per entry: the row
+        adds their costs and winnings up, and shows the best finish.
+        """
+        r = group.results[0]
+        s = group.summary
+        cur = s.currency
+        entries = len(group.results)
+        finishes = [result.finish for result in group.results if result.finish]
+        finish = min(finishes) if finishes else None
+        buyin = f"{format_currency(r.buy_in, cur)}+{format_currency(r.fee, cur)}"
+        if entries > 1:
+            buyin = f"{buyin} ×{format_number(entries, 0)}"
+        unknown = ("–", -(10**12), "")
+        values: dict[str, tuple[str, Any, str]] = {
+            "start": (format_utc_datetime(r.start) if r.start else "", r.start.isoformat() if r.start else "", ""),
+            "end": (format_utc_datetime(r.end) if r.end else "", r.end.isoformat() if r.end else "", ""),
+            "site": (r.site, r.site, ""),
+            "tourney_no": (str(r.tourney_no or ""), _sortable(r.tourney_no), ""),
+            "description": (r.description, r.description, ""),
+            "name": (r.name, r.name, ""),
+            "player": (r.player_name, r.player_name, ""),
+            "buyin": (buyin, r.cost * entries, ""),
+            "entries": (_number(r.entries), r.entries or 0, ""),
+            "finish": (_number(finish), finish or 10**9, ""),
+            "won": (format_currency(s.won, cur), s.won, "") if s.known else unknown,
+            "bounties": (format_currency(s.bounties, cur) if s.bounties else "", s.bounties, ""),
+            "net": (format_currency(s.net, cur, show_plus=True), s.net, _tone(s.net)) if s.known else unknown,
+            # Every entry is the same tournament: its hands are counted once.
+            "hands": (format_number(r.hands, 0), r.hands, ""),
+        }
+        return values.get(column, ("", "", ""))
+
     def _render_table(self, results: list[TourneyResult], select_key: tuple[Any, ...] | None) -> None:
         mode = self.group_mode
         groups = group_results(mode, results)
@@ -1184,7 +1222,8 @@ class GuiTourneyPlayerStats(QSplitter):
         self.table.setSortingEnabled(False)
         self._fill_model(mode, groups, columns)
         for index, column in enumerate(columns):
-            self.table.setColumnHidden(index, self._column_overrides.get(column.key, column.hidden))
+            hidden = not column.available or self._column_overrides.get(column.key, column.hidden)
+            self.table.setColumnHidden(index, hidden)
         self.table.setSortingEnabled(True)
         self._restore_sort(mode, columns, sort_column, sort_order)
         self.table.resizeColumnsToContents()
@@ -1397,6 +1436,8 @@ class GuiTourneyPlayerStats(QSplitter):
             action = menu.addAction(column.title)
             action.setCheckable(True)
             action.setChecked(not self.table.isColumnHidden(index))
+            action.setEnabled(column.available)
+            action.setToolTip(column.tooltip)
             action.toggled.connect(lambda checked, i=index, k=column.key: self._set_column_shown(i, k, checked))
         menu.addSeparator()
         fit = menu.addAction(_("Fit columns to contents"))

@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 08:07+0100\n"
+"POT-Creation-Date: 2026-11-20 08:33+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -2669,11 +2669,14 @@ msgstr "Places payées"
 msgid ""
 "Choose a hero and the tournaments to include on the left, then press Refresh "
 "Stats."
-msgstr "Choisissez à gauche un héros et les tournois à inclure, puis cliquez sur Rafraîchir Stats."
+msgstr ""
+"Choisissez à gauche un héros et les tournois à inclure, puis cliquez sur "
+"Rafraîchir Stats."
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
 msgid "Choose a site and a hero on the left, then press Refresh Stats."
-msgstr "Choisissez à gauche un site et un héros, puis cliquez sur Rafraîchir Stats."
+msgstr ""
+"Choisissez à gauche un site et un héros, puis cliquez sur Rafraîchir Stats."
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
 #, python-format
@@ -2735,7 +2738,10 @@ msgid ""
 "Imported from their hands only: no prize was recorded. They are left out of "
 "the buy-ins, net won, ROI and ITM rather than counted as losses. Import the "
 "tournament summaries to complete them."
-msgstr "Importés depuis leurs seules mains : aucun gain n'a été enregistré. Ils sont exclus des buy-ins, du gain net, du ROI et de l'ITM plutôt que comptés comme des pertes. Importez les résumés de tournoi pour les compléter."
+msgstr ""
+"Importés depuis leurs seules mains : aucun gain n'a été enregistré. Ils sont "
+"exclus des buy-ins, du gain net, du ROI et de l'ITM plutôt que comptés comme "
+"des pertes. Importez les résumés de tournoi pour les compléter."
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
 #, python-format
@@ -2760,7 +2766,10 @@ msgid ""
 "No hands stored for tournament #%s.\n"
 "\n"
 "This tournament was imported from a summary without its hand histories."
-msgstr "Aucune main enregistrée pour le tournoi n°%s.\n\nCe tournoi a été importé depuis un résumé, sans ses historiques de mains."
+msgstr ""
+"Aucune main enregistrée pour le tournoi n°%s.\n"
+"\n"
+"Ce tournoi a été importé depuis un résumé, sans ses historiques de mains."
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
 msgid "No result"
@@ -2769,6 +2778,12 @@ msgstr "Sans résultat"
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
 msgid "No tournament matches these filters."
 msgstr "Aucun tournoi ne correspond à ces filtres."
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid ""
+"Not available in this drill-down: computed over every tournament of the type"
+msgstr ""
+"Indisponible dans ce détail : calculé sur tous les tournois du type"
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
 msgid "Number of 1st, 2nd and 3rd places"
@@ -2796,7 +2811,13 @@ msgstr "Ouvrir les mains"
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
 msgid "Open the selected tournament's hands in a Tourney Viewer tab (Enter)"
-msgstr "Ouvrir les mains du tournoi sélectionné dans un onglet Tourney Viewer (Entrée)"
+msgstr ""
+"Ouvrir les mains du tournoi sélectionné dans un onglet Tourney Viewer "
+"(Entrée)"
+
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Over every tournament of this type in the filters"
+msgstr "Sur tous les tournois de ce type dans les filtres"
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
 msgid "Part of the winnings paid as bounties"
