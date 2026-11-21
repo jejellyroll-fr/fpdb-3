@@ -1,0 +1,59 @@
+SwCPoker Hand #305151477:  Omaha Pot Limit (0.02/0.04) - 2026/11/08 17:10:02 UTC
+Table 'No-Rake Micro Stakes PLO Double Board Bomb Pots #1'(299672838) 8-max (Real Money) Seat #5 is the button
+Seat 2: alice-b.c (3.58 in chips)
+Seat 5: bob (4.10 in chips)
+Seat 6: Hero (6 in chips)
+Hero: posts small blind 0.02
+alice-b.c: posts big blind 0.04
+*** HOLE CARDS ***
+Dealt to Hero [9s 6d 7s 8s]
+bob: calls 0.04
+Hero: folds
+alice-b.c: raises 0.10 to 0.14
+bob: calls 0.10
+*** FLOP *** [5s 4d Kd]
+alice-b.c: bets 0.30
+bob: folds
+Uncalled bet (0.30) returned to alice-b.c
+*** SHOW DOWN ***
+alice-b.c: doesn't show hand
+alice-b.c collected 0.30 from pot
+*** SUMMARY ***
+Total pot 0.30 | Rake 0
+Board [5s 4d Kd]
+Seat 2: alice-b.c (big blind) collected (0.30)
+Seat 5: bob (button) folded on the Flop
+Seat 6: Hero (small blind) folded before Flop
+
+SwCPoker Hand #305151389:  Omaha Pot Limit (0.04/0.08) - 2026/11/08 17:05:41 UTC
+Table 'No-Rake Micro Stakes PLO Double Board Bomb Pots #1'(299672838) 8-max (Real Money) Seat #2 is the button
+Seat 2: alice-b.c (3.44 in chips)
+Seat 5: bob (4.10 in chips)
+Seat 6: Hero (6 in chips)
+alice-b.c: posts the ante 0.12
+bob: posts the ante 0.12
+Hero: posts the ante 0.12
+*** HOLE CARDS ***
+Dealt to Hero [Ac Kc 7h 2d]
+*** FLOP *** [Jh Th 3c]
+bob: checks
+Hero: checks
+alice-b.c: bets 0.24
+bob: calls 0.24
+Hero: folds
+*** TURN *** [Jh Th 3c] [2s]
+bob: checks
+alice-b.c: checks
+*** RIVER *** [Jh Th 3c 2s] [8d]
+bob: checks
+alice-b.c: checks
+*** SHOW DOWN ***
+alice-b.c: shows [Qh 9c 5d 4s] (a straight, Queen high)
+bob: shows [Jc Js 6h 6d] (three of a kind, Jacks)
+alice-b.c collected 0.84 from pot
+*** SUMMARY ***
+Total pot 0.84 | Rake 0
+Board [Jh Th 3c 2s 8d]
+Seat 2: alice-b.c (button) showed [Qh 9c 5d 4s] and won (0.84) with a straight, Queen high
+Seat 5: bob showed [Jc Js 6h 6d] and lost with three of a kind, Jacks
+Seat 6: Hero folded on the Flop
