@@ -600,6 +600,7 @@ class ConfigSitesMixin(ConfigBase):
                 "Bet365.fr Poker": 132,
                 "Betclic": 142,
                 "BetRivers": 144,
+                "PokerStars on Betfair": 143,
             }
             return fallbacks.get(site, 2)
         return self.site_ids[site]

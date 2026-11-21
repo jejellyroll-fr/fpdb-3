@@ -416,6 +416,26 @@ def append(doc: Node, parent: Node, child: Node, *, indent: str | None = None) -
     return child
 
 
+def insert_before(doc: Node, parent: Node, child: Node, reference: Node) -> Node:
+    """Add ``child`` to ``parent`` just before its child ``reference``.
+
+    On ElementTree the new element takes the whitespace that preceded
+    ``reference``, and ``reference`` keeps it, so both line up with their
+    siblings. A ``child`` already in the tree moves, as minidom's does.
+    """
+    parent = _element(parent)
+    if _is_dom(parent):
+        parent.insertBefore(child, reference)
+        return child
+    if parent_of(doc, child) is not None:
+        remove(doc, child)
+    siblings = list(parent)
+    index = siblings.index(reference)
+    child.tail = siblings[index - 1].tail if index else parent.text
+    parent.insert(index, child)
+    return child
+
+
 def append_text(doc: Node, parent: Node, text: str) -> None:
     """Add ``text`` after the last child of ``parent`` (minidom's ``appendChild(createTextNode(text))``).
 

@@ -358,6 +358,28 @@ def test_appending_a_sibling_to_its_own_parent_reorders_it(doc, backend) -> None
     assert [cx.attr(site, "name") for site in cx.find_all(reread, "site")] == ["Winamax", "PokerStars"]
 
 
+def test_insert_before_puts_the_element_ahead_of_its_reference(doc, backend) -> None:
+    # A new skin's <hhc> goes ahead of its converter's existing one (#733).
+    sites = cx.find_first(doc, "sites")
+    cx.insert_before(doc, sites, cx.create_element(doc, "site", {"name": "Betfair"}), _site(doc, "Winamax"))
+
+    text = cx.to_xml(doc)
+    reread = cx.parse_string(text, backend=backend)
+    assert [cx.attr(site, "name") for site in cx.find_all(reread, "site")] == ["PokerStars", "Betfair", "Winamax"]
+    if backend == "etree":
+        # Each sibling keeps a line of its own.
+        assert '<site name="Betfair" />' in text or '<site name="Betfair"/>' in text
+        assert not re.search(r'name="Betfair" ?/><site', text)
+
+
+def test_insert_before_the_first_child(doc, backend) -> None:
+    sites = cx.find_first(doc, "sites")
+    cx.insert_before(doc, sites, cx.create_element(doc, "site", {"name": "Betfair"}), _site(doc, "PokerStars"))
+
+    reread = cx.parse_string(cx.to_xml(doc), backend=backend)
+    assert [cx.attr(site, "name") for site in cx.find_all(reread, "site")] == ["Betfair", "PokerStars", "Winamax"]
+
+
 @pytest.mark.parametrize("name", ["PokerStars", "Winamax"])
 def test_a_removed_element_leaves_its_siblings(doc, backend, name) -> None:
     cx.remove(doc, _site(doc, name))
