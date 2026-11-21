@@ -30,6 +30,7 @@ from fpdb_3_legacy.Filters import parse_tourney_buyin_key
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import currency_symbol, format_currency, format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.plot_performance import enable_large_curve_rendering
 
 # import Charset
 
@@ -209,6 +210,7 @@ class GuiTourneyGraphViewer(QSplitter):
         self.plot_widget = pg.PlotWidget()
         self.plot_widget.setBackground(bg_color)
         self.plot_widget.showGrid(x=True, y=True, alpha=0.3)
+        enable_large_curve_rendering(self.plot_widget)
         self.plot_widget.setTitle(f"<span style='color:{fg_color}; font-size:11pt; font-weight:bold;'>Tournament Results{names}</span>")
         self.plot_widget.setLabel("bottom", "Tournaments", **{"color": fg_color, "font-size": "9pt"})
         display_currency = currencies[0] if currencies else "USD"

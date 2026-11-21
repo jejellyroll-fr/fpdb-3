@@ -116,7 +116,7 @@ SITES_ADDED_IN_90 = ("Unibet",)  # #729: the 2026 Relax Gaming client
 SITES_ADDED_IN_91 = ("Betclic",)  # #730: the 2025+ in-house client, apart from the iPoker skin
 SITES_ADDED_IN_94 = ("CoinPoker",)  # #732: text hand-history import, nothing live
 SITES_ADDED_IN_95 = ("BetRivers",)  # #731: text hand-history import, nothing live
-SITES_ADDED_IN_96 = ("PokerStars on Betfair",)  # #733: a PokerStars skin with its own folders
+SITES_ADDED_IN_97 = ("PokerStars on Betfair",)  # #733: a PokerStars skin with its own folders
 
 
 def _child_section(doc, section: str):
@@ -274,8 +274,18 @@ def _add_sites_94_to_95(doc, template) -> None:
     _add_sites(doc, template, SITES_ADDED_IN_95)
 
 
-def _add_sites_95_to_96(doc, template) -> None:
-    """Advance to v96, adding the PokerStars on Betfair skin (#733).
+def _add_summary_importers_95_to_96(doc, template) -> None:
+    """Advance to v96, giving GGPoker its tournament-summary importer (#868).
+
+    GG summaries were never recognised: the room declared no summary importer.
+    The v89 rule is applied again, so a room whose <hhc> names none gains the
+    template's; one the user set is kept.
+    """
+    _add_summary_importers_88_to_89(doc, template)
+
+
+def _add_sites_96_to_97(doc, template) -> None:
+    """Advance to v97, adding the PokerStars on Betfair skin (#733).
 
     The room is new, so every configuration lacks it: its <site> (off, with
     Betfair's client folders) and its <hhc> on the PokerStars converters come
@@ -284,7 +294,7 @@ def _add_sites_95_to_96(doc, template) -> None:
     keeps PokerStars' entry (an Excel summary is filed under that entry as it
     is).
     """
-    _add_sites(doc, template, SITES_ADDED_IN_96, before_same_converter=True)
+    _add_sites(doc, template, SITES_ADDED_IN_97, before_same_converter=True)
 
 
 def _repair_renamed_references(doc) -> None:
@@ -314,7 +324,8 @@ MIGRATIONS = (
     (92, 93, _zero_padding_92_to_93),
     (93, 94, _add_sites_93_to_94),
     (94, 95, _add_sites_94_to_95),
-    (95, 96, _add_sites_95_to_96),
+    (95, 96, _add_summary_importers_95_to_96),
+    (96, 97, _add_sites_96_to_97),
 )
 
 

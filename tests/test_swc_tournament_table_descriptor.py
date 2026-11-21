@@ -168,9 +168,16 @@ def test_stud_bets_are_only_written_for_a_fixed_limit_table(limit_type: str) -> 
     assert native_stud_gametype_stakes(FREEROLL_STRUCTURE, limit_type) == {"sb": 0, "bb": 0, "ante": 2}
 
 
-def test_stud_bets_need_a_whole_half_small_bet() -> None:
+def test_cash_stud_bets_need_a_whole_half_small_bet() -> None:
     odd = {**FREEROLL_STRUCTURE, "ante": 1, "bring_in": 2, "small_bet": 5, "big_bet": 10}
     assert native_stud_gametype_stakes(odd, "fl") == {"sb": 0, "bb": 0, "ante": 1}
+
+
+def test_tournament_stud_keeps_half_a_chip_as_the_text_importer_does() -> None:
+    """A 15/30 level (ante 3) is sb 7.50 in SealsWithClubsToFpdb; both paths must share one gametype."""
+    odd = {**FREEROLL_STRUCTURE, "ante": 3, "bring_in": 7, "small_bet": 15, "big_bet": 30}
+    assert native_stud_gametype_stakes(odd, "fl", tournament=True) == {"sb": 7.5, "bb": 15, "ante": 3}
+    assert native_stud_gametype_stakes(FREEROLL_STRUCTURE, "fl", tournament=True) == {"sb": 5, "bb": 10, "ante": 2}
 
 
 def test_the_tournament_stud_hand_carries_its_stakes(monkeypatch: pytest.MonkeyPatch) -> None:

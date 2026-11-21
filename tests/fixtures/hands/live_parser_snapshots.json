@@ -47,6 +47,10 @@
     "hand_count": 13,
     "sha256": "da786ff423e1263ecf166d42c6c85d3da5d43bd52ed5f0e01c49774c0740e17b"
   },
+  "ggpoker/spin_gold_2025.txt": {
+    "hand_count": 10,
+    "sha256": "5bbf3b2db374a07bc8fb2f7f892d84c7013f95a2442496e198b4c6ec552c1230"
+  },
   "kingclub/5card_plo.txt": {
     "hand_count": 1,
     "sha256": "d2cf7c00bdfe2b6a339f5138cdb46c3850237da212d465fbff5c79cf2317c468"
@@ -94,6 +98,10 @@
   "pokerstars/holdem/Sample.txt": {
     "hand_count": 1,
     "sha256": "e5dbecf34603a770d82d28925f88d449ea0931c56e8cf22d7d0205d52ddef06d"
+  },
+  "pokerstars/holdem/cash_nl_3way_allin.txt": {
+    "hand_count": 1,
+    "sha256": "41dc0a226ba50167e35356b4517e47fce0107ae417261f807931bbe90f9c1638"
   },
   "pokerstars/holdem/cash_nl_6max.txt": {
     "hand_count": 1,
@@ -1774,6 +1782,10 @@
   "regression/SealsWithClubs/Flop/NLHE-9max-mBTC-1.00-1.00-201304.side.pot.txt": {
     "hand_count": 1,
     "sha256": "fd1327a6341047c698ec065358d054a358a8e41b3a94038dee44eac6e5211b28"
+  },
+  "regression/SealsWithClubs/Flop/PLO-8max-mBTC-0.02-0.04-nonword-player-name-20261108.txt": {
+    "hand_count": 2,
+    "sha256": "c03ae298d8ce0ca95d5a6d4459b5b9c3c554ff6cbaa3395fc7ed676ec2b98686"
   },
   "regression/SealsWithClubs/Flop/PLO-8max-mBTC-0.04-0.08-double-board-bomb-pot-20261108.txt": {
     "hand_count": 1,

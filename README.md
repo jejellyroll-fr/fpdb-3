@@ -245,6 +245,14 @@ The Python 3 continuation is credited to MegaphoneJon and ChazDazzle, with
 contributions from Bruno Duyé, Carl Gherardi and Samuele Fiorin (`sf-87`),
 and current maintenance, release and documentation work by jejellyroll-fr.
 
+Several features come from the fork of Gabriel Alves de Lisboa
+([`thecrawler1`](https://github.com/thecrawler1/fpdb-3)): the replayer's
+amounts in big blinds, its action history and its decision metrics (SPR, bet
+sizing, MDF, fold equity), the results calendar, and the Hand Viewer's bounded
+cache, hand-number search and faster profit curves. The decision metrics
+module is contributed as written in the fork; the others were rewritten on
+fpdb-3 from that work.
+
 ### Existing clones after a history rewrite
 
 If you cloned the repository before a history rewrite, do not pull directly

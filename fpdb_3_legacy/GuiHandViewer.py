@@ -64,6 +64,7 @@ from fpdb_3_legacy.analytics_query import escape_literal_percent
 from fpdb_3_legacy.hand_review_dialog import add_batch_review_action, add_review_action
 from fpdb_3_legacy.hand_share_dialog import add_share_actions
 from fpdb_3_legacy.hand_viewer_filters import build_filter_clauses, required_analytics_subsystems
+from fpdb_3_legacy.hand_viewer_paging import HandCache, cache_limit, hand_positions, locate_hand, search_numbers
 from fpdb_3_legacy.holdem_classes import RANKS, grid_labels
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_currency, format_number, format_utc_datetime
@@ -299,6 +300,14 @@ class GuiHandViewer(QSplitter):
         self.all_handids: list[Any] = []
         self.page = 0
         self.page_size = 100
+        # The rebuilt hands, bounded to a few pages (see hand_viewer_paging; #857,
+        # after thecrawler1's fork, like the hand-number search below).
+        self.hands: HandCache = HandCache()
+        # Each loaded hand id's place in all_handids, built on the first search.
+        self._positions: dict[Any, int] | None = None
+        # True while a page is being rebuilt, so a click on Prev/Next or a
+        # search during its processEvents() cannot start another one.
+        self._loading = False
         # Won/Net and Flags text colours, read from the theme once per page.
         self._cell_colors: dict[str, QColor] | None = None
 
@@ -311,6 +320,17 @@ class GuiHandViewer(QSplitter):
         self.pagerBox.addWidget(self.prevPageButton)
         self.pagerBox.addWidget(self.nextPageButton)
         self.pagerBox.addWidget(self.pageLabel)
+        self.hand_search = QLineEdit()
+        self.hand_search.setPlaceholderText(_("Find hand #"))
+        self.hand_search.setToolTip(
+            _("Room hand number (as in the hand history) or fpdb hand id; searches every loaded page")
+        )
+        self.hand_search.setClearButtonEnabled(True)
+        self.hand_search.setMaximumWidth(220)
+        self.hand_search.returnPressed.connect(lambda: self.find_hand(self.hand_search.text()))
+        self.pagerBox.addWidget(self.hand_search)
+        self.hand_search_status = QLabel("")
+        self.pagerBox.addWidget(self.hand_search_status)
         self.pagerBox.addStretch(1)
         # Flag filters (applied at the SQL level on the next Load Hands).
         self.flagAllIn = QCheckBox("AI")
@@ -693,49 +713,102 @@ class GuiHandViewer(QSplitter):
         given hand by hand, never as a set of names, which on another site can
         be an opponent's.
         """
-        self.sent_heroes = dict(heroes or {})
-        self.hands: dict[Any, Any] = {}
-        self.all_handids = list(handids)
-        self.page = 0
-        self.model.removeRows(0, self.model.rowCount())
-        if len(self.all_handids) == 0:
+        if self._loading:
+            return
+        self._set_search_status("")
+        handids = list(handids)
+        if not handids:
+            self.sent_heroes = dict(heroes or {})
+            self.hands = HandCache()
+            self.all_handids = []
+            self._positions = None
+            self.page = 0
+            self.model.removeRows(0, self.model.rowCount())
             self._update_pager()
             gui_empty_state.show_no_data(self, context="Hand viewer", db=self.db)
             return
-        self.render_page()
+        previous_heroes = self.sent_heroes
+        # importhand reads it while the new hands are rebuilt.
+        self.sent_heroes = dict(heroes or {})
+        # The hero of a cached hand depends on the filters it was loaded with,
+        # so the new hands go into a cache of their own. The table on screen
+        # keeps its cache, and stays usable, until the new page replaces it;
+        # aborting leaves both as they were.
+        if not self._show_page(handids, 0, HandCache()):
+            self.sent_heroes = previous_heroes
 
     def page_count(self) -> int:
         if not self.all_handids:
             return 1
         return (len(self.all_handids) + self.page_size - 1) // self.page_size
 
-    def render_page(self) -> None:
-        """Reconstruct and display only the current page of hands."""
+    def render_page(self, page: int | None = None) -> bool:
+        """Rebuild and show page ``page`` of the loaded hands (the current one by default).
+
+        Returns False, leaving the page shown before untouched, when aborted.
+        """
+        return self._show_page(self.all_handids, self.page if page is None else page, self.hands)
+
+    def _show_page(self, handids: list[Any], page: int, cache: HandCache) -> bool:
+        """Rebuild page ``page`` of ``handids`` into ``cache``, then show it.
+
+        The hands are rebuilt first and the table, the hand list and the cache
+        are only replaced once they all are, so aborting leaves the page shown
+        before, and the cache its rows read, untouched.
+        """
+        if self._loading:
+            return False
+        page_ids = handids[page * self.page_size : (page + 1) * self.page_size]
+        hands = self._rebuild_hands(page_ids, cache)
+        if hands is None:
+            if cache is self.hands:
+                shown = self.all_handids[self.page * self.page_size : (self.page + 1) * self.page_size]
+                cache.trim(cache_limit(self.page_size), keep=shown)
+            return False
+        if handids is not self.all_handids:
+            self._positions = None
+        self.all_handids, self.hands, self.page = handids, cache, page
+        cache.trim(cache_limit(self.page_size), keep=page_ids)
         self.model.removeRows(0, self.model.rowCount())
-        start = self.page * self.page_size
-        page_ids = self.all_handids[start : start + self.page_size]
-        progress = QProgressDialog("Loading hands", "Abort", 0, len(page_ids), self)
+        self._cell_colors = self._result_colors()
+        for handid, hand in hands:
+            try:
+                self.addHandRow(handid, hand)
+            except Exception as e:  # noqa: BLE001 - skip a bad hand, keep showing the rest.
+                log.exception(f"Skipping hand {handid}: {e}")
+        self.view.resizeColumnsToContents()
+        self._update_pager()
+        return True
+
+    def _rebuild_hands(self, page_ids: list[Any], cache: HandCache) -> list[tuple[Any, Any]] | None:
+        """The hands of ``page_ids``, from ``cache`` or the database; None if aborted."""
+        progress = QProgressDialog(_("Loading hands"), _("Abort"), 0, len(page_ids), self)
         progress.setValue(0)
         progress.show()
-        self._cell_colors = self._result_colors()
+        self._loading = True
+        hands: list[tuple[Any, Any]] = []
         try:
             for idx, handid in enumerate(page_ids):
                 if progress.wasCanceled():
-                    break
+                    return None
                 try:
-                    if handid not in self.hands:
-                        self.hands[handid] = self.importhand(handid)
-                    self.addHandRow(handid, self.hands[handid])
+                    if handid in cache:
+                        cache.touch(handid)
+                    else:
+                        cache[handid] = self.importhand(handid)
+                    hands.append((handid, cache[handid]))
                 except Exception as e:  # noqa: BLE001 - skip a bad hand, keep loading the rest.
                     log.exception(f"Skipping hand {handid}: {e}")
-                    self.hands.pop(handid, None)
+                    cache.pop(handid, None)
                 progress.setValue(idx + 1)
                 if idx % 25 == 0:
                     QCoreApplication.processEvents()
+            if progress.wasCanceled():
+                return None
         finally:
+            self._loading = False
             progress.close()
-        self.view.resizeColumnsToContents()
-        self._update_pager()
+        return hands
 
     def _update_pager(self) -> None:
         total = len(self.all_handids)
@@ -746,13 +819,84 @@ class GuiHandViewer(QSplitter):
 
     def prev_page(self) -> None:
         if self.page > 0:
-            self.page -= 1
-            self.render_page()
+            self.render_page(self.page - 1)
 
     def next_page(self) -> None:
         if self.page < self.page_count() - 1:
-            self.page += 1
-            self.render_page()
+            self.render_page(self.page + 1)
+
+    def _set_search_status(self, text: str) -> None:
+        label = getattr(self, "hand_search_status", None)
+        if label is not None:
+            label.setText(text)
+
+    def find_hand(self, text: str) -> bool:
+        """Show and select the loaded hand whose number is ``text``, on whatever page it is.
+
+        It looks the number up in the database, so pages never shown are
+        searched too, and no hand is rebuilt but the page it is on.
+        """
+        found = self._lookup_hand(text)
+        if isinstance(found, str):
+            self._set_search_status(found)
+            return False
+        hand_id, page = found
+        if page != self.page and not self.render_page(page):
+            self._set_search_status("")
+            return False
+        selected = self._select_hand_row(hand_id)
+        if selected:
+            self._set_search_status(_("Hand {} on page {}").format(hand_id, page + 1))
+        else:
+            self._set_search_status(_("Hand is on page {} but hidden (no hero or card filter)").format(page + 1))
+        return selected
+
+    def _lookup_hand(self, text: str) -> tuple[Any, int] | str:
+        """The loaded hand numbered ``text`` and its page, or what to tell the user."""
+        numbers = search_numbers(text)
+        if not numbers:
+            return _("Type a hand number") if text.strip() else ""
+        if not self.all_handids:
+            return _("Load hands first")
+        try:
+            matches = self._hands_matching(numbers)
+        except Exception:  # noqa: BLE001 - a failed search must not break the viewer
+            log.warning("Hand Viewer: hand search failed", exc_info=True)
+            return _("Search failed")
+        if self._positions is None:
+            self._positions = hand_positions(self.all_handids)
+        found = locate_hand(matches, numbers, self._positions, self.page_size)
+        if found is not None:
+            return found
+        return _("Hand is not among the loaded hands (check the filters)") if matches else _("Hand not found")
+
+    def _hands_matching(self, numbers: list[int]) -> list[tuple[Any, Any]]:
+        """The ``(id, siteHandNo)`` of every stored hand numbered one of ``numbers``."""
+        placeholder = self.db.sql.query.get("placeholder", "%s")
+        query = self.db.sql.query["handsMatchingNumber"].replace("%s", placeholder)
+        cursor = self.db.get_cursor()
+        rows: list[tuple[Any, Any]] = []
+        try:
+            for number in numbers:
+                cursor.execute(query, (number, number))
+                rows.extend((row[0], row[1]) for row in cursor.fetchall())
+        finally:
+            # Leave no read transaction open on the tab's connection.
+            with contextlib.suppress(Exception):
+                self.db.rollback()
+        return rows
+
+    def _select_hand_row(self, hand_id: Any) -> bool:
+        """Select and scroll to the row of ``hand_id`` on the page shown."""
+        column = self.colnum["HandId"]
+        wanted = str(hand_id)
+        for row in range(self.filterModel.rowCount()):
+            index = self.filterModel.index(row, column)
+            if str(index.data()) == wanted:
+                self.view.selectRow(row)
+                self.view.scrollTo(index)
+                return True
+        return False
 
     @staticmethod
     def _result_colors() -> dict[str, QColor]:
@@ -1129,7 +1273,9 @@ class GuiHandViewer(QSplitter):
     def row_activated(self, index) -> None:
         try:
             hand_id = int(index.sibling(index.row(), self.colnum["HandId"]).data())
-            handlist = sorted(self.hands.keys())
+            # Every loaded hand, not the bounded cache: the replayer rebuilds each
+            # hand from the database, so its Up/Down reach hands the cache forgot.
+            handlist = sorted(set(self.all_handids))
             hand_index = handlist.index(hand_id)
 
             if getattr(self, "replayer", None) is not None and self.replayer.isVisible():

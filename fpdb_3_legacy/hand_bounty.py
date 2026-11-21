@@ -119,7 +119,8 @@ def hand_allin_bounty(
         adjusted = {name: chip_ev[name] + bounty_ev[name] / rules.chip_value for name in chip_ev}
     return HandBounty(
         AllInBounty(
-            players=allin.players,
+            # heads_up_allin returns two players or none.
+            players=(allin.players[0], allin.players[1]),
             win=win,
             collects=collects,
             cash=cash,

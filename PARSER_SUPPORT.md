@@ -15,7 +15,9 @@ These converters have file-by-file semantic snapshots in
 - Bovada/Ignition
 - BetOnline
 - Cake
-- GGPoker
+- GGPoker (hand histories and the client's tournament summaries, Spin&Gold
+  included; `Poker Hand #ring_...` files from third-party converters are
+  refused as an unsupported export variant)
 - iPoker
 - KingsClub
 - PacificPoker/888

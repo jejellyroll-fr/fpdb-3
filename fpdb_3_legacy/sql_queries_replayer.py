@@ -63,6 +63,16 @@ def replayer_queries() -> dict[str, str]:
         <position_test>
     """
 
+    ####################################
+    # The hands whose room hand number or fpdb id is the number searched for
+    # in the Hand Viewer
+    ####################################
+    query["handsMatchingNumber"] = """
+        SELECT id, siteHandNo
+        FROM Hands
+        WHERE siteHandNo = %s OR id = %s
+    """
+
     query["getPlayerId"] = """
         SELECT id
         FROM Players

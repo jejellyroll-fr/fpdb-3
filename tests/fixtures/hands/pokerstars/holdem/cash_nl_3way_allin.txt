@@ -1,0 +1,26 @@
+PokerStars Hand #999999999999:  Hold'em No Limit ($0.50/$1.00 USD) - 2026/11/08 20:00:00 CET
+Table 'Cash III' 6-max Seat #1 is the button
+Seat 1: Hero ($100.00 in chips)
+Seat 2: Villain ($100.00 in chips)
+Seat 3: Short ($100.00 in chips)
+Villain: posts small blind $0.50
+Short: posts big blind $1.00
+*** HOLE CARDS ***
+Dealt to Hero [As Ks]
+Hero: raises $99.00 to $100.00 and is all-in
+Villain: calls $99.50 and is all-in
+Short: calls $99.00 and is all-in
+*** FLOP *** [2c 7d 9h]
+*** TURN *** [2c 7d 9h] [Jc]
+*** RIVER *** [2c 7d 9h Jc] [3s]
+*** SHOW DOWN ***
+Hero: shows [As Ks] (a pair of Aces)
+Villain: shows [Qh Qd] (a pair of Queens)
+Short: shows [Jh Jd] (a pair of Jacks)
+Hero collected $300.00 from pot
+*** SUMMARY ***
+Total pot $300.00 | Rake $0.00
+Board [2c 7d 9h Jc 3s]
+Seat 1: Hero (button) showed [As Ks] and won ($300.00) with a pair of Aces
+Seat 2: Villain (small blind) showed [Qh Qd] and lost with a pair of Queens
+Seat 3: Short (big blind) showed [Jh Jd] and lost with a pair of Jacks

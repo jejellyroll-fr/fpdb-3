@@ -14,6 +14,7 @@ import pytest
 
 from fpdb_3_legacy.GuiReplayer import GuiReplayer, format_replay_amount
 from fpdb_3_legacy.localized_formats import format_number
+from fpdb_3_legacy.replayer_panel import CallFigures, actor_section
 
 pytestmark = pytest.mark.qt
 
@@ -97,24 +98,17 @@ def test_a_cash_hand_shows_stacks_bets_pots_and_actions_in_big_blinds(
     replayer.grab()
 
 
-def test_the_hero_decision_summary_follows_the_toggle(qtbot, config, importer, fresh_db, tmp_path, monkeypatch) -> None:
+def test_the_hero_decision_summary_follows_the_toggle(qtbot, config, importer, fresh_db, tmp_path) -> None:
     replayer = replay(qtbot, config, fresh_db, import_hand(importer, fresh_db, tmp_path, "holdem/cash_nl_6max.txt"))
-    monkeypatch.setattr(
-        replayer,
-        "_hero_decision_metrics",
-        lambda frame, index: {
-            "is_hero_turn": True,
-            "facing_call": True,
-            "call_amount": Decimal("2.50"),
-            "pot_odds_pct": Decimal(25),
-            "pot_odds_ratio": Decimal(3),
-        },
-    )
-    frame = replayer._frame_from_state(replayer.states[0])
 
-    assert "Hero call $" in replayer._hero_odds_summary(frame, 0)
+    def call_amount() -> str:
+        call = CallFigures(call_amount=Decimal("2.50"), pot_odds_pct=Decimal(25))
+        section = actor_section("Hero", amount=replayer._amount, call=call)
+        return dict((row.label, row.value) for row in section.rows)["Call amount"]
+
+    assert call_amount().startswith("$")
     replayer.bb_amounts_box.setChecked(True)
-    assert f"Hero call {format_number(Decimal('2.5'), 1)} BB" in replayer._hero_odds_summary(frame, 0)
+    assert call_amount() == f"{format_number(Decimal('2.5'), 1)} BB"
 
 
 def test_a_tournament_hand_counts_chips_in_its_big_blind(qtbot, config, importer, fresh_db, tmp_path) -> None:

@@ -14,7 +14,7 @@ from PySide6.QtGui import QBrush, QColor, QFont, QKeyEvent
 from PySide6.QtWidgets import QDialog, QLabel, QListWidget, QListWidgetItem, QVBoxLayout, QWidget
 
 from fpdb_3_legacy.i18n import gettext as _
-from fpdb_3_legacy.replay_history import ACTION, ReplayHistoryEntry, history_row_for_index
+from fpdb_3_legacy.replay_history import ACTION, ReplayHistoryEntry, action_style, history_row_for_index
 
 # Keys the replayer handles that keep working while this window has the focus.
 _FORWARDED_KEYS = {
@@ -26,6 +26,10 @@ _FORWARDED_KEYS = {
 }
 
 _ENTRY_ROLE = Qt.ItemDataRole.UserRole
+
+# Return, and Enter on the keypad, which arrives with the keypad modifier.
+_ENTER_KEYS = {Qt.Key.Key_Return, Qt.Key.Key_Enter}
+_ENTER_MODIFIERS = {Qt.KeyboardModifier.NoModifier, Qt.KeyboardModifier.KeypadModifier}
 
 
 class ReplayHistoryDialog(QDialog):
@@ -77,6 +81,10 @@ class ReplayHistoryDialog(QDialog):
                     font.setBold(True)
                     item.setFont(font)
                     item.setForeground(QBrush(QColor("#8fa3b3")))
+                else:
+                    # The same action colours as the inspector's timeline, from the
+                    # entry's action verb rather than its text.
+                    item.setForeground(QBrush(QColor(action_style(entry.action).foreground)))
                 self.list.addItem(item)
         finally:
             self.list.blockSignals(False)
@@ -111,9 +119,18 @@ class ReplayHistoryDialog(QDialog):
             self._seek(int(index))
 
     def _handle_key(self, event: QKeyEvent) -> bool:
-        """A closes the window and the replayer's stepping keys step the replay."""
+        """A closes the window, Enter seeks to the selected entry, the stepping keys step the replay."""
         if event.key() == Qt.Key.Key_A and event.modifiers() == Qt.KeyboardModifier.NoModifier:
             self.close()
+            return True
+        if event.key() in _ENTER_KEYS and event.modifiers() in _ENTER_MODIFIERS:
+            # Seek here rather than on the list's itemActivated: on macOS the
+            # list opens the item for editing on Enter and activates it on
+            # Cmd+O only, so Enter did nothing there (#860).
+            item = self.list.currentItem()
+            if item is None:
+                return False
+            self._item_chosen(item)
             return True
         if event.key() in _FORWARDED_KEYS and self._forward_key is not None:
             self._forward_key(event)

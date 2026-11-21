@@ -192,6 +192,46 @@ def to_xml(node: Node) -> str:
     return _element_xml(node)
 
 
+def to_bytes(doc: Node, encoding: str = "utf-8") -> bytes:
+    """A document as encoded bytes, its XML declaration naming the encoding (``toxml(encoding=...)``)."""
+    if _is_dom(doc):
+        return doc.toxml(encoding=encoding)
+    body = to_xml(doc).removeprefix(XML_DECLARATION)
+    return f'<?xml version="1.0" encoding="{encoding}"?>{body}'.encode(encoding)
+
+
+def to_pretty_xml(doc: Node, indent: str = "    ") -> str:
+    """A document built without layout whitespace, one element per line (``toprettyxml``)."""
+    if _is_dom(doc):
+        return doc.toprettyxml(indent=indent)
+    laid_out = copy.deepcopy(root(doc))
+    ET.indent(laid_out, space=indent)
+    return f"{XML_DECLARATION}\n{_element_xml(laid_out)}\n"
+
+
+def canonical(node: Node) -> Any:
+    """An element as data: its tag, its sorted attributes and its children, layout whitespace aside.
+
+    Text counts once stripped and comments not at all, so two elements that say
+    the same thing compare equal however they are indented, on either backend.
+    """
+    node = _element(node)
+    if _is_dom(node):
+        parts: list[Any] = []
+        for child in node.childNodes:
+            if child.nodeType == child.TEXT_NODE:
+                parts.append(child.data.strip())
+            elif child.nodeType == child.ELEMENT_NODE:
+                parts.append(canonical(child))
+        return (node.tagName, tuple(sorted(attributes(node).items())), tuple(part for part in parts if part))
+    parts = [(node.text or "").strip()]
+    for child in node:
+        if _is_element(child):
+            parts.append(canonical(child))
+        parts.append((child.tail or "").strip())
+    return (node.tag, tuple(sorted(attributes(node).items())), tuple(part for part in parts if part))
+
+
 # --------------------------------------------------------------------------
 # Finding elements
 # --------------------------------------------------------------------------
@@ -461,6 +501,34 @@ def clone_document(doc: Node) -> Node:
     return copy.deepcopy(doc)
 
 
+def prepend(doc: Node, parent: Node, children: list[Node]) -> None:
+    """Put ``children``, in order, before everything ``parent`` holds (its leading text included)."""
+    parent = _element(parent)
+    if _is_dom(parent):
+        first = parent.firstChild
+        for child in children:
+            parent.insertBefore(child, first)
+        return
+    lead, parent.text = parent.text, None
+    for index, child in enumerate(children):
+        if parent_of(doc, child) is not None:
+            remove(doc, child)
+        child.tail = None
+        parent.insert(index, child)
+    if children:
+        children[-1].tail = lead
+    else:
+        parent.text = lead
+
+
+def replace_root(doc: Node, new_root: Node) -> None:
+    """Make ``new_root`` (an element of ``doc``'s backend, not in the tree) the document's root."""
+    if _is_dom(doc):
+        doc.replaceChild(new_root, doc.documentElement)
+        return
+    doc.root = new_root
+
+
 def import_node(doc: Node, node: Node) -> Node:
     """A deep copy of ``node`` (from any document of the same backend) that ``doc`` can hold."""
     if _is_dom(doc):
@@ -488,3 +556,10 @@ def preceding_comment(doc: Node, node: Node) -> Node | None:
     if previous.tag is not ET.Comment or (previous.tail or "").strip():
         return None
     return previous
+
+
+def document_comments(doc: Node) -> list[str]:
+    """The text of each comment outside the root element, above it then below it, in file order."""
+    if _is_dom(doc):
+        return [node.data for node in doc.childNodes if node.nodeType == node.COMMENT_NODE]
+    return [node.text or "" for node in doc.before_root + doc.after_root if node.tag is ET.Comment]

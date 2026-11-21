@@ -56,6 +56,7 @@ def _viewer(cls):
     """A viewer with just the attributes row_activated reads."""
     viewer = cls.__new__(cls)
     viewer.hands = {101: MagicMock(), 102: MagicMock()}
+    viewer.all_handids = [102, 101]
     viewer.colnum = {"HandId": 0}
     viewer.config = MagicMock()
     viewer.sql = MagicMock()

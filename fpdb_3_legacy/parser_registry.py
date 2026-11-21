@@ -24,6 +24,7 @@ from fpdb_3_legacy.EverestToFpdb import Everest
 from fpdb_3_legacy.EverleafToFpdb import Everleaf
 from fpdb_3_legacy.FullTiltPokerSummary import FullTiltPokerSummary
 from fpdb_3_legacy.FulltiltToFpdb import Fulltilt
+from fpdb_3_legacy.GGPokerSummary import GGPokerSummary
 from fpdb_3_legacy.GGPokerToFpdb import GGPoker
 from fpdb_3_legacy.HandHistoryConverter import HandHistoryConverter
 from fpdb_3_legacy.iPokerSummary import iPokerSummary
@@ -67,6 +68,7 @@ LEGACY_MODULE_REGISTRY: dict[str, str] = {
     "EverleafToFpdb": "fpdb_3_legacy.EverleafToFpdb",
     "FullTiltPokerSummary": "fpdb_3_legacy.FullTiltPokerSummary",
     "FulltiltToFpdb": "fpdb_3_legacy.FulltiltToFpdb",
+    "GGPokerSummary": "fpdb_3_legacy.GGPokerSummary",
     "GGPokerToFpdb": "fpdb_3_legacy.GGPokerToFpdb",
     "KingsClubToFpdb": "fpdb_3_legacy.KingsClubToFpdb",
     "MergeSummary": "fpdb_3_legacy.MergeSummary",
@@ -130,6 +132,7 @@ PARSER_CLASS_REGISTRY: dict[str, type[HandHistoryConverter]] = {
 SUMMARY_CLASS_REGISTRY: dict[str, type[TourneySummary]] = {
     "BovadaSummary": BovadaSummary,
     "FullTiltPokerSummary": FullTiltPokerSummary,
+    "GGPokerSummary": GGPokerSummary,
     "MergeSummary": MergeSummary,
     "PacificPokerSummary": PacificPokerSummary,
     "PokerStarsSummary": PokerStarsSummary,
