@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-21 08:24+0100\n"
+"POT-Creation-Date: 2026-11-22 00:13+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3235,7 +3235,7 @@ msgid "🔍 Auto-Detect All Visible Sites"
 msgstr ""
 
 #: fpdb_3_legacy/ModernSitePreferences.py
-msgid "(search in enabled sites only)"
+msgid "Show disabled sites"
 msgstr ""
 
 #: fpdb_3_legacy/ModernSitePreferences.py

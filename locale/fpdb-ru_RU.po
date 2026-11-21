@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-21 08:24+0100\n"
+"POT-Creation-Date: 2026-11-22 00:13+0100\n"
 "PO-Revision-Date: 2011-06-16 13:21+0000\n"
 "Last-Translator: Lexej <alexej@glyvin.com>\n"
 "Language-Team: Russian (Russia) (http://www.transifex.net/projects/p/fpdb/"
@@ -3739,11 +3739,6 @@ msgstr "Псевдонимы героя для %s:"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
-msgid "(search in enabled sites only)"
-msgstr "Не найдены лимиты"
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-#, fuzzy
 msgid ""
 "A data source such as PHH is not a poker room: it has no screen name. Name "
 "the players that are you in its hands, and the reports read them as one "
@@ -3833,6 +3828,12 @@ msgstr "Удалить связь"
 #, fuzzy
 msgid "Screen Name:"
 msgstr "Ник:"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+#| msgid "Show Limits"
+msgid "Show disabled sites"
+msgstr "Показать Лимиты"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "Site Preferences"
@@ -10060,6 +10061,10 @@ msgstr ""
 
 #~ msgid "%s was toggled %s"
 #~ msgstr "%s был переключен %s"
+
+#, fuzzy
+#~ msgid "(search in enabled sites only)"
+#~ msgstr "Не найдены лимиты"
 
 #, fuzzy
 #~ msgid "*** %s was not found"

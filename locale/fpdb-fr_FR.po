@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-21 08:24+0100\n"
+"POT-Creation-Date: 2026-11-22 00:13+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -3360,10 +3360,6 @@ msgid "%s hero aliases:"
 msgstr "Alias du héros %s :"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
-msgid "(search in enabled sites only)"
-msgstr "(recherche dans les sites activés uniquement)"
-
-#: fpdb_3_legacy/ModernSitePreferences.py
 msgid ""
 "A data source such as PHH is not a poker room: it has no screen name. Name "
 "the players that are you in its hands, and the reports read them as one "
@@ -3437,6 +3433,10 @@ msgstr "Retirer le lien"
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "Screen Name:"
 msgstr "Pseudo :"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+msgid "Show disabled sites"
+msgstr "Afficher les sites désactivés"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "Site Preferences"
@@ -9227,6 +9227,9 @@ msgstr ""
 
 #~ msgid "(btw, the key was %s and statd is %s"
 #~ msgstr "(quoiqu'il en soit, la clé était %s, et le statd est %s"
+
+#~ msgid "(search in enabled sites only)"
+#~ msgstr "(recherche dans les sites activés uniquement)"
 
 #~ msgid "(this table taken as the whole field)"
 #~ msgstr "(cette table prise pour tout le field)"

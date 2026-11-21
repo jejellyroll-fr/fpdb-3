@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-21 08:24+0100\n"
+"POT-Creation-Date: 2026-11-22 00:13+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -3713,11 +3713,6 @@ msgstr "%s hős-álnevei:"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
-msgid "(search in enabled sites only)"
-msgstr "Nem található limit"
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-#, fuzzy
 msgid ""
 "A data source such as PHH is not a poker room: it has no screen name. Name "
 "the players that are you in its hands, and the reports read them as one "
@@ -3807,6 +3802,12 @@ msgstr "Kapcsolat eltávolítása"
 #, fuzzy
 msgid "Screen Name:"
 msgstr "Játékosnév:"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+#| msgid "Show Limits"
+msgid "Show disabled sites"
+msgstr "Limitek"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "Site Preferences"
@@ -10363,6 +10364,10 @@ msgstr ""
 
 #~ msgid "(btw, the key was %s and statd is %s"
 #~ msgstr "(ja, a kulcs %s volt, a statd pedig %s)"
+
+#, fuzzy
+#~ msgid "(search in enabled sites only)"
+#~ msgstr "Nem található limit"
 
 #, fuzzy
 #~ msgid "*** %s was not found"

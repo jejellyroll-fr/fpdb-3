@@ -243,3 +243,64 @@ def test_the_data_sources_tab_edits_the_phh_hero_aliases(qtbot) -> None:
     # One name per line: a PHH name is any string, a comma included, matched exactly.
     dia.data_source_inputs["PHH"].setPlainText("koko\n\nSmith, John\n koko76 \nkoko")
     assert dia.get_data_source_changes() == {"PHH": ["koko", "Smith, John", "koko76"]}
+
+
+# --------------------------------------------------------------------------- #
+# Sites tab: disabled rooms                                                    #
+# --------------------------------------------------------------------------- #
+
+
+def _card_order(dia) -> list[str]:
+    layout = dia.sites_layout
+    widgets = (layout.itemAt(i).widget() for i in range(layout.count()))
+    return [w.site_name for w in widgets if w is not None]
+
+
+@pytest.mark.qt
+def test_a_disabled_room_can_be_listed_and_turned_on(qtbot) -> None:
+    """#889: a room arrives off, and the tab listed only rooms that were on."""
+    cfg, dia = _dialog(qtbot)
+    room = "PokerStars.UK"
+    assert not cfg.supported_sites[room].enabled
+
+    assert room not in dia.visible_cards
+
+    dia.show_disabled_cb.setChecked(True)
+    assert room in dia.visible_cards
+    card = dia.site_cards[room]
+    assert not card.enable_toggle.isChecked()
+
+    card.enable_toggle.setChecked(True)
+    dia.show_disabled_cb.setChecked(False)
+    # Turned on, it stays listed, and is saved as on.
+    assert room in dia.visible_cards
+    assert dia.get_changes()[room]["enabled"] is True
+
+
+@pytest.mark.qt
+def test_a_room_turned_off_stays_listed_while_disabled_rooms_are_shown(qtbot) -> None:
+    cfg, dia = _dialog(qtbot)
+    dia.show_disabled_cb.setChecked(True)
+    room = next(name for name in sorted(dia.enabled_sites))
+
+    dia.site_cards[room].enable_toggle.setChecked(False)
+
+    assert room in dia.visible_cards
+    dia.show_disabled_cb.setChecked(False)
+    assert room not in dia.visible_cards
+
+
+@pytest.mark.qt
+def test_cards_keep_alphabetical_order_when_hidden_ones_stay_in_the_layout(qtbot) -> None:
+    cfg, dia = _dialog(qtbot)
+    # A search hides the enabled cards it does not match; they stay in the layout.
+    dia.search_input.setText("pokerstars")
+    hidden = set(dia.site_cards) - dia.visible_cards
+    assert hidden
+    # Showing disabled rooms then builds new cards among the hidden ones.
+    dia.show_disabled_cb.setChecked(True)
+    dia.search_input.setText("")
+
+    order = _card_order(dia)
+    assert len(order) > len(hidden)
+    assert order == sorted(order)

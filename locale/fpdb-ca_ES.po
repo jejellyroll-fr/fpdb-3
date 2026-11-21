@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-21 08:24+0100\n"
+"POT-Creation-Date: 2026-11-22 00:13+0100\n"
 "PO-Revision-Date: 2011-11-11 20:56+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Catalan (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -3768,11 +3768,6 @@ msgstr "Àlies d'heroi de %s:"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
-msgid "(search in enabled sites only)"
-msgstr "(cerca només a les sales activades)"
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-#, fuzzy
 msgid ""
 "A data source such as PHH is not a poker room: it has no screen name. Name "
 "the players that are you in its hands, and the reports read them as one "
@@ -3862,6 +3857,12 @@ msgstr "Treu l'enllaç"
 #, fuzzy
 msgid "Screen Name:"
 msgstr "Nom de jugador:"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+#| msgid "Show Limits"
+msgid "Show disabled sites"
+msgstr "Mostra Limits"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
@@ -10054,6 +10055,10 @@ msgstr ""
 #~ msgstr ""
 #~ "\n"
 #~ "S'ha iniciat el fil de seguiment del HUD natiu de SwC."
+
+#, fuzzy
+#~ msgid "(search in enabled sites only)"
+#~ msgstr "(cerca només a les sales activades)"
 
 #~ msgid "*** WARNING UNKNOWN MYSQL ERROR:"
 #~ msgstr "*** ALERTA MYSQL ERROR DESCONEGUT:"

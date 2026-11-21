@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-21 08:24+0100\n"
+"POT-Creation-Date: 2026-11-22 00:13+0100\n"
 "PO-Revision-Date: 2011-04-07 08:53+0000\n"
 "Last-Translator: steffen123 <steffen@schaumburger.info>\n"
 "Language-Team: Chinese (China) <>\n"
@@ -3740,11 +3740,6 @@ msgstr "%s 主角别名:"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
-msgid "(search in enabled sites only)"
-msgstr "（仅在已启用的站点中搜索）"
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-#, fuzzy
 msgid ""
 "A data source such as PHH is not a poker room: it has no screen name. Name "
 "the players that are you in its hands, and the reports read them as one "
@@ -3833,6 +3828,11 @@ msgstr "删除关联"
 #, fuzzy
 msgid "Screen Name:"
 msgstr "昵称:"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Show disabled sites"
+msgstr "显示级别"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
@@ -9957,6 +9957,10 @@ msgstr ""
 #, fuzzy
 #~ msgid "%s was not found"
 #~ msgstr "文件%s无法找到"
+
+#, fuzzy
+#~ msgid "(search in enabled sites only)"
+#~ msgstr "（仅在已启用的站点中搜索）"
 
 #, fuzzy
 #~ msgid "*** %s was not found"

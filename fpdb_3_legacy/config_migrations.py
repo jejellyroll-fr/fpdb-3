@@ -118,6 +118,7 @@ SITES_ADDED_IN_94 = ("CoinPoker",)  # #732: text hand-history import, nothing li
 SITES_ADDED_IN_95 = ("BetRivers",)  # #731: text hand-history import, nothing live
 SITES_ADDED_IN_98 = ("PokerStars on Paddy Power",)  # #888: Paddy Power on PokerStars software
 SITES_ADDED_IN_99 = ("PokerStars on Betfair",)  # #733: a PokerStars skin with its own folders
+SITES_ADDED_IN_100 = ("PokerStars.UK",)  # #889: the retired UK client, for its old histories
 
 
 def _child_section(doc, section: str):
@@ -292,7 +293,8 @@ def _preserve_96_to_97(doc, template) -> None:
     HUD_config.xml only, not in the example templates an upgrade copies sites
     from. An existing configuration needs nothing: its hands reach the room
     through the PokerStars converter's own entry, and its site id has a fallback
-    in code. No document rewrite is needed for this version.
+    in code. No document rewrite is needed for this version. v100 gives
+    existing configurations the room after all, so it can be set up.
     """
     del doc, template
 
@@ -322,6 +324,19 @@ def _add_sites_98_to_99(doc, template) -> None:
     is).
     """
     _add_sites(doc, template, SITES_ADDED_IN_99, before_same_converter=True)
+
+
+def _add_sites_99_to_100(doc, template) -> None:
+    """Advance to v100, adding the legacy PokerStars.UK room (#889).
+
+    v97 left it out of existing configurations, so it could be neither turned
+    on nor given a screen name or the old client's folders. Its <site> (off,
+    PokerStars' network and layouts, the UK client's folders) now comes from the
+    templates. It has no <hhc>: its files go through the PokerStars converter
+    entry the configuration already has. A configuration that already declares
+    the room keeps it.
+    """
+    _add_sites(doc, template, SITES_ADDED_IN_100)
 
 
 def _repair_renamed_references(doc) -> None:
@@ -355,6 +370,7 @@ MIGRATIONS = (
     (96, 97, _preserve_96_to_97),
     (97, 98, _add_sites_97_to_98),
     (98, 99, _add_sites_98_to_99),
+    (99, 100, _add_sites_99_to_100),
 )
 
 
