@@ -492,6 +492,30 @@ class ConfigSitesMixin(ConfigBase):
             return list(self.supported_sites.keys())
         return [site_name for (site_name, site) in list(self.supported_sites.items()) if site.enabled]
 
+    def get_site_hhc(self, site):
+        """The <hhc> converter entry ``site``'s files go through, or None.
+
+        A room declares its own <hhc> as a rule. A skin of a network may have
+        none and go through the network's entry instead -- PokerStars on Paddy
+        Power (#888) has none, so that IdentifySite keeps PokerStars' own entry
+        -- so a site without one takes the entry named after its ``network``,
+        else the first entry of a site on the same network.
+        """
+        hhcs = getattr(self, "hhcs", None) or {}
+        if site in hhcs:
+            return hhcs[site]
+        own = (getattr(self, "supported_sites", None) or {}).get(site)
+        network = str(getattr(own, "network", "") or "")
+        if not network or network.casefold() == "unknown":
+            return None
+        if network in hhcs:
+            return hhcs[network]
+        for name, hhc in hhcs.items():
+            other = self.supported_sites.get(name)
+            if other is not None and str(getattr(other, "network", "") or "").casefold() == network.casefold():
+                return hhc
+        return None
+
     def get_site_parameters(self, site):
         """Returns a dict of the site parameters for the specified site."""
         parms = {}
@@ -500,7 +524,7 @@ class ConfigSitesMixin(ConfigBase):
         # KeyError here: callers that iterate every enabled site (auto-import,
         # HUD_main.read_stdin) would otherwise abort on the first such site and
         # the HUD would never create a table window.
-        hhc = self.hhcs.get(site)
+        hhc = self.get_site_hhc(site)
         if hhc is None:
             log.warning("No <hhc> converter configured for site '%s'; import/HUD disabled for it", site)
         parms["converter"] = hhc.converter if hhc is not None else None
@@ -602,6 +626,7 @@ class ConfigSitesMixin(ConfigBase):
                 "BetRivers": 144,
                 "PokerStars on Betfair": 143,
                 "PokerStars.UK": 145,
+                "PokerStars on Paddy Power": 146,
             }
             return fallbacks.get(site, 2)
         return self.site_ids[site]

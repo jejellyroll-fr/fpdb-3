@@ -23,7 +23,7 @@ them, are in [what fpdb does while you play](fair-play.md#rooms).
 
 | Room | Static | Positional | Dynamic | Live context | Why |
 | --- | --- | --- | --- | --- | --- |
-| PokerStars, every regional site (.FR, .ES, .COM, .DE…; the retired .UK client is [historical imports only](pokerstars-uk-legacy.md)) | ✔ | — | — | — | Forbids in-game statistics that change automatically with the game state |
+| PokerStars, every regional site (.FR, .ES, .COM, .DE…; the retired .UK client is [historical imports only](pokerstars-uk-legacy.md)) and skin ([PokerStars on Paddy Power](pokerstars-paddy-power.md)) | ✔ | — | — | — | Forbids in-game statistics that change automatically with the game state |
 | Winamax | ✔ | — | — | — | Prohibits dynamic range software and certain dynamic HUD features; off until its integrity team approves fpdb's |
 | iPoker network, under every skin's own name (Betclic Poker, PMU Poker, FDJ Poker, Bet365.fr Poker, Barrière Poker, Unibet Poker…) | ✔ | — | — | — | Positional and dynamic HUDs documented as not allowed on the network |
 | Unibet (the 2026 Relax Gaming client, Unibet.fr) | ✔ | — | — | — | Not reviewed: its rules do not mention HUDs, see below |

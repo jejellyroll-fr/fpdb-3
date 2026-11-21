@@ -1181,8 +1181,18 @@ def getTableNoRe(config, sitename, *args, **kwargs):
 
 
 def getSiteHhc(config, sitename):
-    """Returns HHC class for current site."""
-    hhcName = config.hhcs[sitename].converter
+    """Returns HHC class for current site.
+
+    A skin with no <hhc> of its own goes through its network's (#888).
+    """
+    if sitename in config.hhcs:
+        hhc = config.hhcs[sitename]
+    else:
+        resolve = getattr(config, "get_site_hhc", None)
+        hhc = resolve(sitename) if callable(resolve) else None
+        if hhc is None:
+            raise KeyError(sitename)
+    hhcName = hhc.converter
     # Local import to avoid a circular import at module load time.
     from fpdb_3_legacy.IdentifySite import import_fpdb_module
 

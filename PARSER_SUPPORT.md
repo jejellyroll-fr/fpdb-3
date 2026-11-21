@@ -25,9 +25,13 @@ These converters have file-by-file semantic snapshots in
 - PokerStars (and its regional sites, and the PokerStars on Betfair skin, whose
   "Betfair Hand #" histories and "Betfair Tournament #" summaries are filed
   under their own room wherever they lie -- a real sit & go export is in the
-  corpus (#854); the
-  retired PokerStars.UK client's histories are filed under a legacy room of
-  their own, see [docs/pokerstars-uk-legacy.md](docs/pokerstars-uk-legacy.md))
+  corpus (#854); the retired PokerStars.UK client's histories are filed under a
+  legacy room of their own, see
+  [docs/pokerstars-uk-legacy.md](docs/pokerstars-uk-legacy.md); Paddy Power's
+  client on PokerStars software is filed under a room of its own from the
+  folder you configure for it, see
+  [docs/pokerstars-paddy-power.md](docs/pokerstars-paddy-power.md); no real
+  export from the UK or Paddy Power clients is in the corpus yet)
 - PokerTracker (its own export format, cash and tournaments: Everest, iPoker,
   Merge and Microgaming hands, each filed under the room in its header -- pinned
   by `tests/test_pokertracker_rooms.py`)

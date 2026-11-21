@@ -1,5 +1,5 @@
 <?xml version="1.0" ?><FreePokerToolsConfig>
-    <general version="98" config_wrap_len="-1" day_start="5" ui_language="fr_FR" config_difficulty="expert" qt_material_theme="dark_purple.xml" popup_theme="material_dark"/>
+    <general version="99" config_wrap_len="-1" day_start="5" ui_language="fr_FR" config_difficulty="expert" qt_material_theme="dark_purple.xml" popup_theme="material_dark"/>
     <site_ids>
         <site_id site="Full Tilt Poker" id="1"/>
         <site_id site="PokerStars" id="2"/>
@@ -12,6 +12,7 @@
         <site_id site="PokerStars.DE" id="130"/>
         <site_id site="PokerStars on Betfair" id="143"/>
         <site_id site="PokerStars.UK" id="145"/>
+        <site_id site="PokerStars on Paddy Power" id="146"/>
         <site_id site="Betclic Poker" id="131"/>
         <site_id site="Everleaf" id="3"/>
         <site_id site="Boss" id="4"/>
@@ -4579,6 +4580,19 @@
              their own room by the folder Betfair's client writes them to. Turn on
              saving in the client: Settings -> Playing History. -->
         <site site_name="PokerStars on Betfair" enabled="False" screen_name="" site_path="" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Betfair.UK/HandHistory/" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Betfair.UK/TournSummary/" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20" network="PokerStars">
+            <layout_set game_type="ring" ls="ps_default"/>
+            <layout_set game_type="tour" ls="ps_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <!-- PokerStars on Paddy Power (#888): Paddy Power Poker's client on PokerStars
+             software since 28 October 2026, apart from the iPoker Paddy Power Poker
+             room. No default folder is set: none is documented yet. Set the HH and
+             TS paths to the folders the client saves to; hands found there, dated
+             from 28 October 2026, are filed under this room. -->
+        <site site_name="PokerStars on Paddy Power" enabled="False" screen_name="" site_path="" HH_path="" TS_path="" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20" network="PokerStars">
             <layout_set game_type="ring" ls="ps_default"/>
             <layout_set game_type="tour" ls="ps_default"/>
             <fav max="2" fav_seat="0"/>
