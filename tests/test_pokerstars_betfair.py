@@ -1,12 +1,14 @@
 """PokerStars on Betfair: a PokerStars skin with its own room and folders (#733).
 
-Betfair's 2026 client writes native PokerStars hand histories and tournament
+Betfair's 2026 client writes PokerStars hand histories and tournament
 summaries under ``%LOCALAPPDATA%\\Betfair.UK\\HandHistory`` and
-``\\TournSummary`` (PokerTracker 4.19's documentation). Nothing in the files
-names the skin, so the folder is what files them under their own room.
+``\\TournSummary`` (PokerTracker 4.19's documentation), under its own name:
+"Betfair Hand #N" and "Betfair Tournament #N" where PokerStars writes
+"PokerStars". That header files them under their own room wherever they lie;
+the folder still files PokerStars-headed files found in it.
 
-No real Betfair export is public yet: these tests run PokerStars' own fixtures
-from a Betfair folder.
+The real export is a 3-max sit & go shared on #854, anonymised with
+tools/anonymize_hh.py: six hands and the tournament's summary.
 """
 
 from __future__ import annotations
@@ -27,6 +29,10 @@ ROOT = Path(__file__).resolve().parents[1]
 CASH_HAND = ROOT / "regression-test-files/cash/Stars/Flop/2025-NL-uncalled-bet.txt"
 SUMMARY = ROOT / "regression-test-files/summaries/Stars/6+Holdem-3max-STT-USD-1.00-201907.txt"
 SKIN = "PokerStars on Betfair"
+# The real export (#854), hands and summary of the same sit & go.
+BETFAIR_NAME = "NLHE-3max-STT-USD-0.46-0.04-202610.Betfair.txt"
+BETFAIR_HANDS = ROOT / "regression-test-files/tour/Stars/Flop" / BETFAIR_NAME
+BETFAIR_SUMMARY = ROOT / "regression-test-files/summaries/Stars" / BETFAIR_NAME
 
 
 def _parser() -> PokerStars:
@@ -71,6 +77,88 @@ def test_the_room_policy_is_pokerstars() -> None:
 
     assert hud_room_policy.capabilities_at(SKIN) == hud_room_policy.capabilities_at("PokerStars.FR")
     assert hud_room_policy.why_not("dynamic_hud", SKIN)
+
+
+# ---------------------------------------------------------------------------
+# The client's own header (#854)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("path", [BETFAIR_HANDS, BETFAIR_SUMMARY], ids=["hands", "summary"])
+def test_the_betfair_header_names_the_skin_wherever_the_file_lies(path: Path) -> None:
+    text = path.read_text(encoding="utf-8-sig")
+    elsewhere = r"C:\Users\alice\AppData\Local\PokerStars.FR\HandHistory\alice\HH.txt"
+
+    assert _parser().detectPokerStarsSkin(text, elsewhere) == (SKIN, 143)
+    assert _parser().detectPokerStarsSkin("\ufeff" + text, None) == (SKIN, 143)
+
+
+def test_the_betfair_header_outranks_a_hero_mapping() -> None:
+    parser = _parser()
+    parser._hero_mappings = {"hero": "PokerStars.COM"}
+
+    assert parser.detectPokerStarsSkin(BETFAIR_HANDS.read_text(encoding="utf-8-sig")) == (SKIN, 143)
+
+
+def test_both_converters_recognise_the_betfair_header() -> None:
+    from fpdb_3_legacy.PokerStarsSummary import PokerStarsSummary
+
+    assert PokerStars.re_identify.search(BETFAIR_HANDS.read_text(encoding="utf-8-sig"))
+    assert PokerStarsSummary.re_identify.search(BETFAIR_SUMMARY.read_text(encoding="utf-8"))
+
+
+def test_the_old_betfair_poker_client_is_not_taken_for_pokerstars() -> None:
+    old_client = "***** Betfair Poker Hand History for Game 123456789 *****\n"
+
+    assert not PokerStars.re_identify.search(old_client)
+    assert _parser()._detectSkinByContent(old_client) == ("PokerStars.COM", 32)
+
+
+@pytest.fixture
+def parser_config(tmp_path) -> Config:
+    shutil.copyfile(ROOT / "HUD_config.xml.example", tmp_path / "HUD_config.xml")
+    return Config(file=str(tmp_path / "HUD_config.xml"))
+
+
+def test_the_real_hands_are_read_whole(parser_config) -> None:
+    parser = PokerStars(config=parser_config, in_path=str(BETFAIR_HANDS), autostart=True)
+    hands = parser.getProcessedHands()
+
+    assert (parser.numErrors, parser.numPartial) == (0, 0)
+    assert [hand.handid for hand in hands] == [
+        "262450453117",
+        "262450467817",
+        "262450474211",
+        "262450482173",
+        "262450493121",
+        "262450494272",
+    ]
+    for hand in hands:
+        assert (hand.sitename, hand.siteId) == (SKIN, 143)
+        assert hand.gametype["type"] == "tour"
+        assert (hand.tourNo, hand.buyin, hand.fee, hand.buyinCurrency) == ("4040982342", 46, 4, "USD")
+        assert (hand.maxseats, hand.hero) == (3, "Hero")
+        assert hand.totalpot == hand.totalcollected
+    assert [hand.level for hand in hands] == ["I", "II", "II", "III", "IV", "IV"]
+
+
+def test_the_real_summary_ranks_every_player() -> None:
+    from fpdb_3_legacy.PokerStarsSummary import PokerStarsSummary
+    from tests.helpers.summary_regression import make_summary, read_text, summary_fingerprint
+
+    summary = make_summary(PokerStarsSummary, read_text(BETFAIR_SUMMARY), SKIN, 143, "summary")
+    summary.parseSummary()
+    tournament = summary_fingerprint(summary)["tournament"]
+    players = summary_fingerprint(summary)["players"]
+
+    assert tournament["tourNo"] == "4040982342"
+    assert [tournament[key] for key in ("buyin", "fee", "currency", "entries")] == [46, 4, "USD", 3]
+    # The winner's "$1.00 Power Path Step 2 Ticket" is counted at its value.
+    assert [(player["name"], player["rank"], player["winnings"]) for player in players] == [
+        ("alice", 1, 100),
+        ("Hero", 2, 0),
+        ("bob", 3, 0),
+    ]
 
 
 # ---------------------------------------------------------------------------
@@ -131,6 +219,33 @@ def test_summaries_from_the_betfair_folder_are_filed_under_the_skin(importer, tm
     cursor = importer.database.get_cursor()
     cursor.execute("SELECT DISTINCT s.name FROM TourneyTypes t JOIN Sites s ON t.siteId = s.id")
     assert [row[0] for row in cursor.fetchall()] == [SKIN]
+
+
+def test_the_real_export_is_filed_under_the_skin_from_any_folder(importer, tmp_path) -> None:
+    # Neither file lies under Betfair.UK: their header alone names the room.
+    for source in (BETFAIR_HANDS, BETFAIR_SUMMARY):
+        target = tmp_path / "elsewhere" / source.parent.name / source.name
+        target.parent.mkdir(parents=True)
+        shutil.copyfile(source, target)
+        importer.addImportFile(str(target), "auto")
+    _stored, _dups, _partial, _skipped, errors, _time = importer.runImport()
+
+    assert errors == 0
+    cursor = importer.database.get_cursor()
+    cursor.execute("SELECT COUNT(*) FROM Hands")
+    assert cursor.fetchone()[0] == 6
+    cursor.execute(
+        "SELECT DISTINCT s.name FROM Hands h JOIN Gametypes g ON h.gametypeId = g.id JOIN Sites s ON g.siteId = s.id"
+    )
+    assert [row[0] for row in cursor.fetchall()] == [SKIN]
+    cursor.execute(
+        "SELECT p.name, tp.rank, tp.winnings FROM TourneysPlayers tp"
+        " JOIN Tourneys t ON tp.tourneyId = t.id JOIN Players p ON tp.playerId = p.id"
+        " WHERE t.siteTourneyNo = 4040982342 ORDER BY tp.rank"
+    )
+    assert cursor.fetchall() == [("alice", 1, 100), ("Hero", 2, 0), ("bob", 3, 0)]
+    cursor.execute("SELECT DISTINCT p.siteId FROM Players p WHERE p.name IN ('alice', 'Hero', 'bob')")
+    assert [row[0] for row in cursor.fetchall()] == [143]
 
 
 def test_an_older_database_gains_the_sites_row(importer) -> None:

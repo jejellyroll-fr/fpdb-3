@@ -23,8 +23,9 @@ These converters have file-by-file semantic snapshots in
 - PacificPoker/888
 - PartyPoker
 - PokerStars (and its regional sites, and the PokerStars on Betfair skin, whose
-  histories are filed under their own room from the `Betfair.UK` folder its
-  client writes them to -- no real Betfair export is in the corpus yet; the
+  "Betfair Hand #" histories and "Betfair Tournament #" summaries are filed
+  under their own room wherever they lie -- a real sit & go export is in the
+  corpus (#854); the
   retired PokerStars.UK client's histories are filed under a legacy room of
   their own, see [docs/pokerstars-uk-legacy.md](docs/pokerstars-uk-legacy.md))
 - PokerTracker (its own export format, cash and tournaments: Everest, iPoker,
