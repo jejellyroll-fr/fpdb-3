@@ -90,10 +90,15 @@ def non_english_lc_time() -> Iterator[str]:
     else:
         pytest.skip("no French or German locale installed")
     try:
-        # Proof the trap is armed: an English month no longer parses with strptime.
-        with pytest.raises(ValueError):  # noqa: PT011
+        # Only meaningful when the trap is armed: strptime must have stopped
+        # reading English month names (some platforms accept the name but
+        # keep English, e.g. a stub locale).
+        try:
             datetime.datetime.strptime("2010/July/21", "%Y/%B/%d")  # noqa: DTZ007
-        yield name
+        except ValueError:
+            yield name
+        else:
+            pytest.skip(f"{name} still reads English month names")
     finally:
         locale.setlocale(locale.LC_TIME, saved)
 
@@ -144,7 +149,8 @@ def test_hand_dates_import_under_a_non_english_locale(
         assert hands[0].startTime.date() == datetime.date(2010, 7, 21)
 
 
-def test_full_tilt_worded_summary_date_under_a_non_english_locale(non_english_lc_time: str) -> None:
+@pytest.mark.usefixtures("non_english_lc_time")
+def test_full_tilt_worded_summary_date_under_a_non_english_locale() -> None:
     from tests.test_summary_regression import SUMMARIES, fingerprint_of
 
     path = SUMMARIES / "FTP" / "NLHE-USD-SnG-6man-201007.Hero.wins.worded.date.format.txt"
@@ -163,7 +169,10 @@ def _html_summary_dates(site: str, relative: str) -> list[tuple[str | None, str 
 
     summary_class, sitename, site_id = SITES[site]
     text = read_text(SUMMARIES / site / relative)
-    chunks = re.split(summary_class.getSplitRe(summary_class, text), text)
+    # On an instance: getSplitRe records the page type on whatever it is
+    # called on, and the class must not keep it for the next test.
+    splitter = summary_class.__new__(summary_class)
+    chunks = re.split(splitter.getSplitRe(text), text)
     dates = []
     for chunk in chunks[1:]:
         summary = make_summary(summary_class, chunk, sitename, site_id, "html")
