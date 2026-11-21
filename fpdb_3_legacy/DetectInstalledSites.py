@@ -211,14 +211,18 @@ class PokerStarsDetector(SiteDetector):
 
         elif self.platform == "Linux":
             paths = get_linux_paths()
-            # Wine installation
+            # Wine installation. A client that keeps its histories in the user's
+            # AppData, as the UK one did (#889), has them under the Wine user's profile.
+            wine_local = sorted(Path(paths["wine_users"]).glob(f"*/AppData/Local/{variant}"))
             hhpath = self._check_path_exists(
                 str(Path(paths["wine_program_files"]) / variant / "HandHistory"),
                 str(Path(paths["wine_program_files_x86"]) / variant / "HandHistory"),
+                *(str(local / "HandHistory") for local in wine_local),
             )
             tspath = self._check_path_exists(
                 str(Path(paths["wine_program_files"]) / variant / "TournSummary"),
                 str(Path(paths["wine_program_files_x86"]) / variant / "TournSummary"),
+                *(str(local / "TournSummary") for local in wine_local),
             )
 
         elif self.platform == "Darwin":  # macOS

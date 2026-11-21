@@ -294,3 +294,25 @@ def test_the_uk_client_folder_is_found_on_windows(detector, tmp_path) -> None:
     assert found[0]["heroname"] == "alice"
     assert Path(found[0]["hhpath"]) == local / "PokerStars.UK" / "HandHistory" / "alice"
     assert Path(found[0]["tspath"]) == local / "PokerStars.UK" / "TournSummary" / "alice"
+
+
+def test_the_uk_client_folder_is_found_in_a_wine_users_appdata(detector, tmp_path) -> None:
+    users = tmp_path / ".wine" / "drive_c" / "users"
+    local = users / "alice" / "AppData" / "Local" / "PokerStars.UK"
+    (local / "HandHistory" / "alice").mkdir(parents=True)
+    (local / "TournSummary" / "alice").mkdir(parents=True)
+    paths = {
+        "wine_drive_c": str(tmp_path / ".wine" / "drive_c"),
+        "wine_program_files": str(tmp_path / "pf"),
+        "wine_program_files_x86": str(tmp_path / "pf86"),
+        "wine_users": str(users),
+    }
+    detector.platform = "Linux"
+
+    with patch.object(detect_module, "get_linux_paths", return_value=paths):
+        found = detector._detect_variant(SKIN)
+
+    assert found["detected"]
+    assert found["heroname"] == "alice"
+    assert Path(found["hhpath"]) == local / "HandHistory" / "alice"
+    assert Path(found["tspath"]) == local / "TournSummary" / "alice"
