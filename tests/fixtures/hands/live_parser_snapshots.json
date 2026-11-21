@@ -2507,6 +2507,10 @@
     "hand_count": 1,
     "sha256": "d1245772832408b4822cf32fd11734832fc7198387d5b6a2fa42996870706721"
   },
+  "regression/Winning/Stud/7StudHL-8max-USD-0.10-0.20-202607.five.card.showdown.CASHID-TN-Braselton GAMETYPE.txt": {
+    "hand_count": 2,
+    "sha256": "292ff908fb7f32226017c4c8a48c5962a14572b71e81759bc171aef1a11fb686"
+  },
   "regression/Winning/Stud/7StudHL-8max-USD-0.10-0.20-202607.six.card.showdown.CASHID-TN-Braselton GAMETYPE.txt": {
     "hand_count": 1,
     "sha256": "615bcbc8fb72d71a360e9253e4b7ef44b650d7fd5d47edcbc2fb1a4853084eea"
