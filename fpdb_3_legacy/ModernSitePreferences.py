@@ -397,7 +397,10 @@ class ModernSiteCard(QFrame):
 
     def apply_detection_results(self, detection_data) -> None:
         """Apply detection results."""
-        self.screen_name_input.setText(detection_data["heroname"])
+        # A folder that names no hero leaves the name the user typed: emptying
+        # it saved the room with no hero, so no stat knew who they were (#854).
+        if detection_data.get("heroname"):
+            self.screen_name_input.setText(detection_data["heroname"])
         self.hh_path_input.setText(detection_data["hhpath"])
 
         # For tournament path: use tspath if provided, otherwise use hhpath

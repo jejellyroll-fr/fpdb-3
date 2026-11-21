@@ -142,6 +142,40 @@ class SiteDetector:
                 return path
         return None
 
+    # How many of the newest files to read, and how much of each, to name the hero.
+    HERO_FILES = 20
+    HERO_BYTES = 16384
+
+    @staticmethod
+    def _text_files(folder: Path) -> list[Path]:
+        """The ``.txt`` files directly in ``folder``; none when it cannot be listed."""
+        try:
+            return [path for path in folder.iterdir() if path.suffix.lower() == ".txt" and path.is_file()]
+        except OSError as e:
+            log.debug("Cannot list %s: %s", folder, e)
+            return []
+
+    def _hero_in_newest(self, files: Iterable[Path], pattern: re.Pattern[str]) -> str:
+        """The ``NAME`` that ``pattern`` finds in the newest of ``files``, or "" when none says."""
+        try:
+            newest = sorted(files, key=lambda path: path.stat().st_mtime, reverse=True)
+        except OSError as e:
+            log.debug("Cannot stat hand-history files: %s", e)
+            return ""
+        for path in newest[: self.HERO_FILES]:
+            try:
+                with path.open("rb") as handle:
+                    # Windows files carry CRLF; normalise before matching, as the
+                    # converters do when reading.
+                    head = handle.read(self.HERO_BYTES).decode("utf-8", errors="replace").replace("\r\n", "\n")
+            except OSError as e:
+                log.debug("Cannot read %s: %s", path, e)
+                continue
+            match = pattern.search(head)
+            if match:
+                return match.group("NAME").strip()
+        return ""
+
 
 #: PokerStars skins whose client folder is not named after the skin. PokerStars
 #: on Betfair (#733) keeps its histories under %LOCALAPPDATA%\Betfair.UK, per
@@ -151,6 +185,12 @@ POKERSTARS_VARIANT_FOLDERS: dict[str, str] = {"PokerStars on Betfair": "Betfair.
 
 class PokerStarsDetector(SiteDetector):
     """PokerStars detector supporting all regions (.com, .fr, .it, .es, .pt, .de) and Betfair."""
+
+    # Only the hero's hole cards are dealt face down to a history: "Dealt to
+    # Hero [Qd 2d]". A stud opponent's upcard is one card a street ("Dealt to
+    # bob [4h]", then "[4h] [5c]"), so two cards or more in one bracket are the
+    # hero's (#854).
+    RE_HERO = re.compile(r"^Dealt to (?P<NAME>.+?) \[[^\]\s]+(?: [^\]\s]+)+\]", re.MULTILINE)
 
     def detect(self) -> dict[str, Any]:
         """Detect PokerStars installation and heroes."""
@@ -267,11 +307,19 @@ class PokerStarsDetector(SiteDetector):
                     "tspath": final_tspath,
                     "variant": variant,
                 }
-            if any(Path(hhpath).glob("*.txt")):
+            files = self._text_files(Path(hhpath))
+            if files:
                 # Histories written straight into HandHistory, with no folder
                 # per player: the folder itself is the one to import, and the
-                # hero is left for the user to type.
-                return {"detected": True, "hhpath": hhpath, "heroname": "", "tspath": tspath or "", "variant": variant}
+                # newest hands name the hero (#854).
+                hero = self._hero_in_newest(files, self.RE_HERO)
+                return {
+                    "detected": True,
+                    "hhpath": hhpath,
+                    "heroname": hero,
+                    "tspath": tspath or "",
+                    "variant": variant,
+                }
 
         return {"detected": False, "hhpath": "", "heroname": "", "tspath": ""}
 
@@ -1483,9 +1531,6 @@ class UnibetDetector(SiteDetector):
 
     AUTOMATIC = ("Unibet Poker", "History", "Exports", "Automatic")
     RE_HERO = re.compile(r"^Seat\s[0-9]+:\s(?P<NAME>[^\s\[]+)\[Unibet_[0-9a-fA-F]+\]", re.MULTILINE)
-    # How many of the newest files to read, and how much of each, to name the hero.
-    HERO_FILES = 20
-    HERO_BYTES = 16384
 
     def _documents_dirs(self) -> list[Path]:
         """Where the player's Documents folder may be."""
@@ -1513,26 +1558,7 @@ class UnibetDetector(SiteDetector):
 
     def _hero(self, folder: Path) -> str:
         """The hero named in the newest hand-history files, or "" when none says."""
-        try:
-            files = sorted(
-                (path for path in folder.iterdir() if path.suffix.lower() == ".txt" and path.is_file()),
-                key=lambda path: path.stat().st_mtime,
-                reverse=True,
-            )
-        except OSError as e:
-            log.debug("Cannot list %s: %s", folder, e)
-            return ""
-        for path in files[: self.HERO_FILES]:
-            try:
-                with path.open("rb") as handle:
-                    head = handle.read(self.HERO_BYTES).decode("utf-8", errors="replace")
-            except OSError as e:
-                log.debug("Cannot read %s: %s", path, e)
-                continue
-            match = self.RE_HERO.search(head)
-            if match:
-                return match.group("NAME")
-        return ""
+        return self._hero_in_newest(self._text_files(folder), self.RE_HERO)
 
 
 class BetclicDetector(SiteDetector):
@@ -1553,9 +1579,6 @@ class BetclicDetector(SiteDetector):
     EXPORT_GLOB = "*_ExportHH_*.txt"
     RE_EXPORT_HEAD = re.compile(r"^\*\*\* HEADER \*\*\*\nSite: Betclic", re.MULTILINE)
     RE_HERO = re.compile(r"^Seat [0-9]+: (?P<NAME>.+) \([^)]*\) \[[^\]]*\bHero\b\]", re.MULTILINE)
-    # How many of the newest files to read, and how much of each, to name the hero.
-    HERO_FILES = 20
-    HERO_BYTES = 16384
 
     def _candidate_dirs(self) -> list[Path]:
         candidates: list[Path] = []
@@ -1631,22 +1654,7 @@ class BetclicDetector(SiteDetector):
 
     def _hero(self, files: list[Path]) -> str:
         """The hero named in the newest export files, or "" when none says."""
-        try:
-            files = sorted(files, key=lambda path: path.stat().st_mtime, reverse=True)
-        except OSError as e:
-            log.debug("Cannot stat export files: %s", e)
-            return ""
-        for path in files[: self.HERO_FILES]:
-            try:
-                with path.open("rb") as handle:
-                    head = handle.read(self.HERO_BYTES).decode("utf-8", errors="replace").replace("\r\n", "\n")
-            except OSError as e:
-                log.debug("Cannot read %s: %s", path, e)
-                continue
-            match = self.RE_HERO.search(head)
-            if match:
-                return match.group("NAME").strip()
-        return ""
+        return self._hero_in_newest(files, self.RE_HERO)
 
 
 class CPNDetector(SiteDetector):
