@@ -85,14 +85,18 @@ def test_each_site_parameters(cfg: Config) -> None:
         cfg.get_site_id(site)
 
 
-def test_get_site_parameters_without_hhc_returns_none_converter(cfg: Config) -> None:
+def test_get_site_parameters_without_hhc_returns_none_converter(cfg: Config, monkeypatch: pytest.MonkeyPatch) -> None:
     # A supported site with no hand-history converter entry must NOT raise
     # (that would abort auto-import / HUD for every site): get_site_parameters
     # returns converter=None for it instead. See PR #232.
     siteless = [s for s in cfg.supported_sites if s not in cfg.hhcs]
     if not siteless:
         pytest.skip("every supported site has an HHC in this config")
-    params = cfg.get_site_parameters(siteless[0])
+    # A skin with no <hhc> of its own borrows its network's (#888): one on no
+    # known network is the site with no converter at all.
+    site = siteless[0]
+    monkeypatch.setattr(cfg.supported_sites[site], "network", "Unknown")
+    params = cfg.get_site_parameters(site)
     assert params["converter"] is None
     assert params["summaryImporter"] is None
 

@@ -1931,13 +1931,20 @@ class Importer:
             # half-imported summaries committed (mirrors the hand-history
             # path in _import_hh_file above).
             with self.database.transaction():
+                # A converter may file one summary of the file elsewhere than
+                # the file's room (PokerStars, #888): a room's first day is
+                # checked tournament by tournament.
+                room_of_summary = getattr(obj, "room_of_summary", None)
                 for j, summaryText in enumerate(summaryTexts, start=1):
                     log.debug(f"Processing summary {j}/{len(summaryTexts)}, length: {len(summaryText)}")
                     try:
+                        site_name = fpdbfile.site.name
+                        if callable(room_of_summary):
+                            site_name = room_of_summary(self.config, site_name, summaryText, fpdbfile.path)
                         conv = obj(
                             db=self.database,
                             config=self.config,
-                            siteName=fpdbfile.site.name,
+                            siteName=site_name,
                             summaryText=summaryText,
                             in_path=fpdbfile.path,
                             header=summaryTexts[0],

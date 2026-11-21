@@ -116,6 +116,7 @@ SITES_ADDED_IN_90 = ("Unibet",)  # #729: the 2026 Relax Gaming client
 SITES_ADDED_IN_91 = ("Betclic",)  # #730: the 2025+ in-house client, apart from the iPoker skin
 SITES_ADDED_IN_94 = ("CoinPoker",)  # #732: text hand-history import, nothing live
 SITES_ADDED_IN_95 = ("BetRivers",)  # #731: text hand-history import, nothing live
+SITES_ADDED_IN_98 = ("PokerStars on Paddy Power",)  # #888: Paddy Power on PokerStars software
 
 
 def _child_section(doc, section: str):
@@ -274,6 +275,20 @@ def _preserve_96_to_97(doc, template) -> None:
     del doc, template
 
 
+def _add_sites_97_to_98(doc, template) -> None:
+    """Advance to v98, adding PokerStars on Paddy Power (#888).
+
+    Paddy Power Poker moved from iPoker to PokerStars software on 28 October
+    2026. The new client is a room of its own: its <site> (off, PokerStars'
+    network and layouts, no folder, since none is documented) comes from the
+    template. It has no <hhc>: its files go through the PokerStars converter
+    entry the configuration already has. The iPoker Paddy Power Poker room is
+    left as it is, for the hands its client wrote. A configuration that
+    already declares the new room keeps it.
+    """
+    _add_sites(doc, template, SITES_ADDED_IN_98)
+
+
 def _repair_renamed_references(doc) -> None:
     aux_names = {cx.attr(n, "name") for n in cx.find_all(doc, "aw")}
     if "Classic_HUD" not in aux_names and "ClassicHud" in aux_names:
@@ -303,6 +318,7 @@ MIGRATIONS = (
     (94, 95, _add_sites_94_to_95),
     (95, 96, _add_summary_importers_95_to_96),
     (96, 97, _preserve_96_to_97),
+    (97, 98, _add_sites_97_to_98),
 )
 
 
