@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import shutil
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -51,14 +52,13 @@ def _gbp_hand(date: str = "2026/11/02", et_date: str | None = None, hero: str = 
     )
 
 
-class _Site:
-    def __init__(self, hh_path: str = "", ts_path: str = "") -> None:
-        self.HH_path = hh_path
-        self.TS_path = ts_path
+def _site(hh_path: str = "", ts_path: str = "") -> SimpleNamespace:
+    # The configuration's own attribute names, spelled as Configuration spells them.
+    return SimpleNamespace(**{"HH_path": hh_path, "TS_path": ts_path})
 
 
 class _Config:
-    def __init__(self, **sites: _Site) -> None:
+    def __init__(self, **sites: SimpleNamespace) -> None:
         self.supported_sites = {name.replace("_", " "): site for name, site in sites.items()}
 
 
@@ -70,7 +70,7 @@ def _parser(config: object = None, mappings: dict[str, str] | None = None) -> Po
 
 
 def _configured(folder: Path) -> _Config:
-    return _Config(PokerStars_on_Paddy_Power=_Site(str(folder / "HandHistory"), str(folder / "TournSummary")))
+    return _Config(PokerStars_on_Paddy_Power=_site(str(folder / "HandHistory"), str(folder / "TournSummary")))
 
 
 # ---------------------------------------------------------------------------
@@ -137,7 +137,7 @@ def test_a_file_outside_the_configured_folders_is_not(tmp_path: Path, relative: 
 
 def test_an_unconfigured_room_files_nothing(tmp_path: Path) -> None:
     # The shipped room has no folder: nothing is filed under it until the user sets one.
-    parser = _parser(_Config(PokerStars_on_Paddy_Power=_Site()))
+    parser = _parser(_Config(PokerStars_on_Paddy_Power=_site()))
 
     assert parser.detectPokerStarsSkin(_gbp_hand(), str(tmp_path / "HH.txt")) == ("PokerStars.COM", 32)
     assert _parser(None).detectPokerStarsSkin(_gbp_hand(), str(tmp_path / "HH.txt")) == ("PokerStars.COM", 32)
