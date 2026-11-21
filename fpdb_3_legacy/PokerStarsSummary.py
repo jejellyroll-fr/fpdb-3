@@ -57,23 +57,32 @@ class PokerStarsSummary(TourneySummary):
 
     @staticmethod
     def room_of_summary(config: Any, site_name: str, summary_text: Any, in_path: str) -> str:
-        """The room of this one summary, when the file's room had not opened yet at its date.
+        """The room of this one summary, when the file's room may not hold it.
 
-        A file is given one room, from its whole text. An export of several
-        summaries in a room's configured folder can hold tournaments played
-        before the room's client opened (PokerStars on Paddy Power, #888): each
-        of those is filed as its own text and folder say, without that room.
+        A file is given one room, from its whole text. A skin with a first or
+        a last day (PokerStars on Paddy Power #888, PokerStars.UK #889) cannot
+        hold a tournament played outside them, and an export of several
+        summaries can span that day. When the file was given such a skin, or
+        its folder names one, each summary is filed as its own text and folder
+        say: the export's older tournaments are not the new client's, and its
+        newer ones are, whichever came first in the file.
         """
-        from fpdb_3_legacy.PokerStarsToFpdb import POKERSTARS_SKIN_FIRST_DAYS, PokerStars
+        from fpdb_3_legacy.PokerStarsToFpdb import (
+            POKERSTARS_RETIRED_SKINS,
+            POKERSTARS_SKIN_FIRST_DAYS,
+            POKERSTARS_SKIN_IDS,
+            PokerStars,
+        )
 
-        if (
-            site_name not in POKERSTARS_SKIN_FIRST_DAYS
-            or not isinstance(summary_text, str)
-            or PokerStars._skinWasOpen(site_name, summary_text)
-        ):
+        if site_name not in POKERSTARS_SKIN_IDS or not isinstance(summary_text, str):
             return site_name
-        parser = PokerStars(config, in_path=in_path, autostart=False)
-        room, _site_id = parser.detectPokerStarsSkin(summary_text, in_path if in_path != "-" else None)
+        dated = POKERSTARS_SKIN_FIRST_DAYS.keys() | POKERSTARS_RETIRED_SKINS.keys()
+        path = in_path if in_path and in_path != "-" else None
+        parser = PokerStars(config, in_path=path or "-", autostart=False)
+        folder_skin = path and (parser._detectSkinByConfiguredPath(path) or parser._detectSkinByPath(path))
+        if site_name not in dated and not (folder_skin and folder_skin[0] in dated):
+            return site_name
+        room, _site_id = parser.detectPokerStarsSkin(summary_text, path)
         return room
 
     limits: ClassVar[dict[str, str]] = {

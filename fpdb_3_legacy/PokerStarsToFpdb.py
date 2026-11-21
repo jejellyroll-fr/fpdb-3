@@ -54,6 +54,9 @@ SITE_POKERSTARS_ES = 35
 SITE_POKERSTARS_PT = 36
 SITE_POKERSTARS_EU = 37
 SITE_POKERSTARS_DE = 130
+# The standalone PokerStars UK client, retired on 7 October 2026 when its players
+# moved to PokerStars on Betfair (143, #733). Historical imports only (#889).
+SITE_POKERSTARS_UK = 145
 # Paddy Power Poker's client on PokerStars software, opened on 28 October 2026
 # (#888). The older iPoker client keeps its own room, Paddy Power Poker (65).
 SITE_POKERSTARS_PADDY_POWER = 146
@@ -70,7 +73,16 @@ POKERSTARS_SKIN_IDS = {
     "PokerStars.PT": SITE_POKERSTARS_PT,
     "PokerStars.EU": SITE_POKERSTARS_EU,
     "PokerStars.DE": SITE_POKERSTARS_DE,
+    "PokerStars.UK": SITE_POKERSTARS_UK,
     "PokerStars on Paddy Power": SITE_POKERSTARS_PADDY_POWER,
+}
+
+# Skins whose client no longer exists, with the last day it dealt a hand. A hand
+# dated after it cannot come from that client, whatever its folder or hero
+# mapping says: a UK player's PokerStars on Betfair hands keep the same screen
+# name, and may be saved next to the old ones (#889).
+POKERSTARS_RETIRED_SKINS: dict[str, datetime.date] = {
+    "PokerStars.UK": datetime.date(2026, 10, 7),
 }
 
 # Skins whose client opened after PokerStars' own, with the first day it dealt a
@@ -92,6 +104,11 @@ _HEADER_DATE = re.compile(r"\b(?P<Y>\d{4})/(?P<M>\d{1,2})/(?P<D>\d{1,2})\b")
 
 # Path patterns for skin detection
 POKERSTARS_PATH_PATTERNS = [
+    # The UK client wrote under %LOCALAPPDATA%\PokerStars.UK\HandHistory and
+    # \TournSummary. Its histories name no skin, so only that folder tells them
+    # from PokerStars.COM's (#889). Matched as a whole folder name, and never
+    # "pokerstarsuk": no client is known to have used that spelling.
+    ("/pokerstars.uk/", "PokerStars.UK"),
     ("pokerstars.fr", "PokerStars.FR"),
     ("pokerstars.it", "PokerStars.IT"),
     ("pokerstars.es", "PokerStars.ES"),
@@ -665,7 +682,11 @@ class PokerStars(HandHistoryConverter):
             return configured
 
         # Then try to detect the path
-        if file_path and (path_result := self._detectSkinByPath(file_path)):
+        if (
+            file_path
+            and (path_result := self._detectSkinByPath(file_path))
+            and self._skinWasOpen(path_result[0], hand_text)
+        ):
             return path_result
 
         # Finally, analyze content
@@ -700,29 +721,41 @@ class PokerStars(HandHistoryConverter):
     def _skinWasOpen(skin_name: str, hand_text: str) -> bool:
         """Whether ``skin_name``'s client could have dealt the hand in ``hand_text``.
 
-        Only a skin with a first day can say no: a hand whose every header date
-        is before that day comes from somewhere else. The latest date counts,
-        so a hand dealt on the first evening, already the next day in one of
-        the header's two zones, is not turned away. A hand with no readable
-        date is given the benefit of the doubt: its folder or hero mapping is
-        all there is to go on.
+        A skin with a first day or a last day can say no. A hand whose every
+        header date is before a skin's first day, or after its last day, comes
+        from somewhere else (for the UK client, PokerStars on Betfair). The
+        latest date counts against a first day and the earliest against a last
+        day, so a hand dealt across midnight in one of the header's two zones is
+        not turned away. A hand with no readable date is given the benefit of
+        the doubt: its folder or hero mapping is all there is to go on.
         """
         first_day = POKERSTARS_SKIN_FIRST_DAYS.get(skin_name)
-        if first_day is None:
+        last_day = POKERSTARS_RETIRED_SKINS.get(skin_name)
+        if first_day is None and last_day is None:
             return True
         dates = []
         for match in _HEADER_DATE.finditer(hand_text[:2000]):
             with contextlib.suppress(ValueError):
                 dates.append(datetime.date(int(match["Y"]), int(match["M"]), int(match["D"])))
-        if not dates or max(dates) >= first_day:
+        if not dates:
             return True
-        log.warning(
-            "Hand dated %s is before %s opened on %s: not filed under it",
-            max(dates).isoformat(),
-            skin_name,
-            first_day.isoformat(),
-        )
-        return False
+        if first_day is not None and max(dates) < first_day:
+            log.warning(
+                "Hand dated %s is before %s opened on %s: not filed under it",
+                max(dates).isoformat(),
+                skin_name,
+                first_day.isoformat(),
+            )
+            return False
+        if last_day is not None and min(dates) > last_day:
+            log.warning(
+                "Hand dated %s is after %s closed on %s: not filed under it",
+                min(dates).isoformat(),
+                skin_name,
+                last_day.isoformat(),
+            )
+            return False
+        return True
 
     def _detectSkinByContent(self, hand_text: str) -> tuple[str, int]:
         """Detects PokerStars skin using hand text content.

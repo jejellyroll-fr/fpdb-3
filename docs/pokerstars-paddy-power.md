@@ -62,7 +62,7 @@ an export spanning the move files its older tournaments as their own text says.
 
 ## Configuration and database
 
-- Configuration **v97** adds the room, switched off, on the PokerStars network
+- Configuration **v98** adds the room, switched off, on the PokerStars network
   and its layouts, with empty paths. It has no `<hhc>` of its own: its files go
   through the PokerStars converter entry the configuration already has (the
   HUD's table lookup borrows the same entry, through the room's `network`). A

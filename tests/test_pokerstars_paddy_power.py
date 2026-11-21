@@ -411,3 +411,40 @@ def test_a_site_with_no_converter_and_no_network_still_has_none(tmp_path) -> Non
     assert config.get_site_hhc(SKIN) is None
     assert config.get_site_hhc("No Such Room") is None
     assert config.get_site_hhc("PokerStars.FR") is config.hhcs["PokerStars.FR"]
+
+
+def test_newer_summaries_are_filed_under_the_room_after_older_ones(importer, tmp_path) -> None:
+    # The file's own room comes from its first summaries: when they are older
+    # than the room, the file is PokerStars.COM's, and each summary after them
+    # is still judged on its own date (Codex on #892).
+    old = SUMMARY.read_text(encoding="utf-8")
+    olds = [old.replace("#2663538841", f"#26635388{n:02d}") for n in range(7)]
+    new = old.replace("2019/07/31", "2026/11/02").replace("#2663538841", "#4000000001")
+    export = tmp_path / "PP" / "TournSummary" / "Hero" / "export.txt"
+    export.parent.mkdir(parents=True)
+    export.write_text("\n\n\n".join([*olds, new]), encoding="utf-8")
+
+    _import(importer, export)
+
+    cursor = importer.database.get_cursor()
+    cursor.execute(
+        "SELECT t.siteTourneyNo, s.name FROM Tourneys t JOIN TourneyTypes tt ON t.tourneyTypeId = tt.id"
+        " JOIN Sites s ON tt.siteId = s.id ORDER BY t.siteTourneyNo"
+    )
+    rows = [(str(no), site) for no, site in cursor.fetchall()]
+    assert rows[-1] == ("4000000001", SKIN)
+    assert {site for _no, site in rows[:-1]} == {"PokerStars.COM"}
+    assert len(rows) == 8
+
+
+def test_room_of_summary_leaves_other_rooms_alone(tmp_path) -> None:
+    from fpdb_3_legacy.PokerStarsSummary import PokerStarsSummary
+
+    shutil.copyfile(ROOT / "HUD_config.xml", tmp_path / "HUD_config.xml")
+    config = Config(file=str(tmp_path / "HUD_config.xml"))
+    old = SUMMARY.read_text(encoding="utf-8")
+    fr = str(tmp_path / "PokerStars.FR" / "TournSummary" / "TS.txt")
+
+    assert PokerStarsSummary.room_of_summary(config, "PokerStars.FR", old, fr) == "PokerStars.FR"
+    assert PokerStarsSummary.room_of_summary(config, "Run It Once Poker", old, fr) == "Run It Once Poker"
+    assert PokerStarsSummary.room_of_summary(config, "PokerStars.COM", [{"header": ""}], fr) == "PokerStars.COM"

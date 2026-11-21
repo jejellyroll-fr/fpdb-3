@@ -22,10 +22,13 @@ These converters have file-by-file semantic snapshots in
 - KingsClub
 - PacificPoker/888
 - PartyPoker
-- PokerStars (and its regional sites; Paddy Power's client on PokerStars
-  software is filed under a room of its own from the folder you configure for
-  it, see [docs/pokerstars-paddy-power.md](docs/pokerstars-paddy-power.md); no
-  real export from that client is in the corpus yet)
+- PokerStars (and its regional sites; the retired PokerStars.UK client's
+  histories are filed under a legacy room of their own, see
+  [docs/pokerstars-uk-legacy.md](docs/pokerstars-uk-legacy.md); Paddy Power's
+  client on PokerStars software is filed under a room of its own from the
+  folder you configure for it, see
+  [docs/pokerstars-paddy-power.md](docs/pokerstars-paddy-power.md); no real
+  export from either client is in the corpus yet)
 - PokerTracker (its own export format, cash and tournaments: Everest, iPoker,
   Merge and Microgaming hands, each filed under the room in its header -- pinned
   by `tests/test_pokertracker_rooms.py`)

@@ -624,6 +624,7 @@ class ConfigSitesMixin(ConfigBase):
                 "Bet365.fr Poker": 132,
                 "Betclic": 142,
                 "BetRivers": 144,
+                "PokerStars.UK": 145,
                 "PokerStars on Paddy Power": 146,
             }
             return fallbacks.get(site, 2)
