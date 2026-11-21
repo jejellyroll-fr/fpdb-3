@@ -3097,7 +3097,7 @@ class StudHand(Hand):
             # Padding with two more unknown down cards would push his real ones
             # into the up-card positions and invent cards he was never dealt.
             third = self.holecards["THIRD"].get(player)
-            downs_known = bool(third) and len(third[1]) == 2 and "0x" not in third[1]
+            downs_known = third is not None and len(third) > 1 and len(third[1]) == 2 and "0x" not in third[1]
             if player == self.hero or downs_known:
                 if len(holecards) < 3:
                     holecards = ["0x", "0x", *holecards]
