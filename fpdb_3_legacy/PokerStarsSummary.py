@@ -54,6 +54,28 @@ class PokerStarsSummary(TourneySummary):
     """
 
     hhtype = "summary"
+
+    @staticmethod
+    def room_of_summary(config: Any, site_name: str, summary_text: Any, in_path: str) -> str:
+        """The room of this one summary, when the file's room had not opened yet at its date.
+
+        A file is given one room, from its whole text. An export of several
+        summaries in a room's configured folder can hold tournaments played
+        before the room's client opened (PokerStars on Paddy Power, #888): each
+        of those is filed as its own text and folder say, without that room.
+        """
+        from fpdb_3_legacy.PokerStarsToFpdb import POKERSTARS_SKIN_FIRST_DAYS, PokerStars
+
+        if (
+            site_name not in POKERSTARS_SKIN_FIRST_DAYS
+            or not isinstance(summary_text, str)
+            or PokerStars._skinWasOpen(site_name, summary_text)
+        ):
+            return site_name
+        parser = PokerStars(config, in_path=in_path, autostart=False)
+        room, _site_id = parser.detectPokerStarsSkin(summary_text, in_path if in_path != "-" else None)
+        return room
+
     limits: ClassVar[dict[str, str]] = {
         "No Limit": "nl",
         "NO LIMIT": "nl",

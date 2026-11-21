@@ -47,7 +47,9 @@ counts:
 Either way, **a hand dated before 28 October 2026 is never filed there**: it
 cannot come from the new client. The latest date in the header counts, so a
 hand dealt on the first evening, still the 27th in ET, is accepted. A hand with
-no readable date goes by its folder or hero mapping.
+no readable date goes by its folder or hero mapping. The date is read hand by
+hand and, in an export of several tournament summaries, summary by summary:
+an export spanning the move files its older tournaments as their own text says.
 
 ## What does not
 
@@ -62,7 +64,8 @@ no readable date goes by its folder or hero mapping.
 
 - Configuration **v97** adds the room, switched off, on the PokerStars network
   and its layouts, with empty paths. It has no `<hhc>` of its own: its files go
-  through the PokerStars converter entry the configuration already has. A
+  through the PokerStars converter entry the configuration already has (the
+  HUD's table lookup borrows the same entry, through the room's `network`). A
   configuration that already declares the room keeps it as it is.
 - The `Sites` row (146, code `PS`) is in new databases, and an existing database
   gains it when fpdb connects.

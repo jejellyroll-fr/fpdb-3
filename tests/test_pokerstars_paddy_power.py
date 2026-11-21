@@ -337,3 +337,77 @@ def test_the_shipped_configuration_knows_the_room(tmp_path) -> None:
     assert not site.enabled
     assert site.HH_path == site.TS_path == ""
     assert site.network == "PokerStars"
+
+
+def test_each_summary_of_an_export_is_filed_by_its_own_date(importer, tmp_path) -> None:
+    # An export of several summaries spanning the move: the room is decided for
+    # the file as a whole, but a tournament played before 28 October 2026 is
+    # not the new client's and stays where its own text puts it.
+    old = SUMMARY.read_text(encoding="utf-8")
+    new = old.replace("2019/07/31", "2026/11/02").replace("#2663538841", "#4000000001")
+    export = tmp_path / "PP" / "TournSummary" / "Hero" / "export.txt"
+    export.parent.mkdir(parents=True)
+    export.write_text(new + "\n\n\n" + old, encoding="utf-8")
+
+    _import(importer, export)
+
+    cursor = importer.database.get_cursor()
+    cursor.execute(
+        "SELECT t.siteTourneyNo, s.name FROM Tourneys t JOIN TourneyTypes tt ON t.tourneyTypeId = tt.id"
+        " JOIN Sites s ON tt.siteId = s.id ORDER BY t.siteTourneyNo"
+    )
+    assert [(str(no), site) for no, site in cursor.fetchall()] == [
+        ("2663538841", "PokerStars.COM"),
+        ("4000000001", SKIN),
+    ]
+
+
+def test_each_hand_of_a_file_is_filed_by_its_own_date(importer, tmp_path) -> None:
+    old = CASH_HAND.read_text(encoding="utf-8")
+    new = old.replace("2025/04/24", "2026/11/02").replace("#255867983097", "#260000000001")
+    hands = tmp_path / "PP" / "HandHistory" / "Hero" / "mixed.txt"
+    hands.parent.mkdir(parents=True)
+    hands.write_text(old.rstrip("\n") + "\n\n\n\n" + new, encoding="utf-8")
+
+    assert _import(importer, hands) == 0
+
+    cursor = importer.database.get_cursor()
+    cursor.execute(
+        "SELECT h.siteHandNo, s.name FROM Hands h JOIN Gametypes g ON h.gametypeId = g.id"
+        " JOIN Sites s ON g.siteId = s.id ORDER BY h.siteHandNo"
+    )
+    assert [(str(no), site) for no, site in cursor.fetchall()] == [
+        ("255867983097", "PokerStars.COM"),
+        ("260000000001", SKIN),
+    ]
+
+
+# ---------------------------------------------------------------------------
+# The room has no <hhc> of its own: it goes through PokerStars' converter
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("template", ["HUD_config.xml", "HUD_config.xml.example"])
+def test_the_room_borrows_the_pokerstars_converter(tmp_path, template: str) -> None:
+    from fpdb_3_legacy.HandHistoryConverter import getSiteHhc, getTableNoRe
+
+    shutil.copyfile(ROOT / template, tmp_path / "HUD_config.xml")
+    config = Config(file=str(tmp_path / "HUD_config.xml"))
+
+    assert SKIN not in config.hhcs
+    assert config.get_site_hhc(SKIN).converter == "PokerStarsToFpdb"
+    assert config.get_site_parameters(SKIN)["converter"] == "PokerStarsToFpdb"
+    assert config.get_site_parameters(SKIN)["summaryImporter"] == "PokerStarsSummary"
+    # The tournament HUD's table lookup (Table_Window) used to raise KeyError here.
+    assert getSiteHhc(config, SKIN) is PokerStars
+    assert getTableNoRe(config, SKIN, "4000000001") == PokerStars.getTableNoRe("4000000001")
+
+
+def test_a_site_with_no_converter_and_no_network_still_has_none(tmp_path) -> None:
+    shutil.copyfile(ROOT / "HUD_config.xml", tmp_path / "HUD_config.xml")
+    config = Config(file=str(tmp_path / "HUD_config.xml"))
+    config.supported_sites[SKIN].network = "Unknown"
+
+    assert config.get_site_hhc(SKIN) is None
+    assert config.get_site_hhc("No Such Room") is None
+    assert config.get_site_hhc("PokerStars.FR") is config.hhcs["PokerStars.FR"]
