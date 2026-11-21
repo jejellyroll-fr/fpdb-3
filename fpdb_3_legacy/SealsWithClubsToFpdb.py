@@ -63,23 +63,23 @@ def compile_player_regexes(plyr: str) -> dict[str, re.Pattern[str]]:
     subst = {"PLYR": plyr, "BRKTS": BRKTS, "CUR": "(\\$|\xe2\x82\xac|\u20ac||\\£|)"}
     return {
         "re_PostSB": re.compile(
-            r"^{PLYR}: posts small blind (?P<SB>[.0-9]+)".format(**subst),
+            rf"^{plyr}: posts small blind (?P<SB>[.0-9]+)",
             re.MULTILINE,
         ),
         "re_PostBB": re.compile(
-            r"^{PLYR}: posts big blind (?P<BB>[.0-9]+)".format(**subst),
+            rf"^{plyr}: posts big blind (?P<BB>[.0-9]+)",
             re.MULTILINE,
         ),
         "re_Antes": re.compile(
-            r"^{PLYR}: posts the ante (?P<ANTE>[.0-9]+)".format(**subst),
+            rf"^{plyr}: posts the ante (?P<ANTE>[.0-9]+)",
             re.MULTILINE,
         ),
         "re_PostBoth": re.compile(
-            r"^{PLYR}: posts small \& big blind (?P<SBBB>[.0-9]+)".format(**subst),
+            rf"^{plyr}: posts small \& big blind (?P<SBBB>[.0-9]+)",
             re.MULTILINE,
         ),
         "re_HeroCards": re.compile(
-            r"^Dealt to {PLYR}(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])".format(**subst),
+            rf"^Dealt to {plyr}(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])",
             re.MULTILINE,
         ),
         "re_Action": re.compile(
@@ -89,7 +89,7 @@ def compile_player_regexes(plyr: str) -> dict[str, re.Pattern[str]]:
             re.MULTILINE | re.VERBOSE,
         ),
         "re_ShowdownAction": re.compile(
-            r"^{PLYR}: (shows \[(?P<CARDS>.*)\]\s\((?P<FHAND>.*?)\)|doesn't show hand|mucks hand)".format(**subst),
+            rf"^{plyr}: (shows \[(?P<CARDS>.*)\]\s\((?P<FHAND>.*?)\)|doesn't show hand|mucks hand)",
             re.MULTILINE,
         ),
         "re_CollectPot": re.compile(
@@ -101,10 +101,10 @@ def compile_player_regexes(plyr: str) -> dict[str, re.Pattern[str]]:
         # Anchored at the end of the line: unanchored, "returned to A-b-c-d"
         # used to match the name "A" and abort the hand on an unknown player.
         "re_Uncalled": re.compile(
-            r"Uncalled bet \((?P<BET>[,.\d]+)\) returned to {PLYR}\s*$".format(**subst),
+            rf"Uncalled bet \((?P<BET>[,.\d]+)\) returned to {plyr}\s*$",
             re.MULTILINE,
         ),
-        "re_Mucked": re.compile(r"^{PLYR}: mucks hand".format(**subst), re.MULTILINE),
+        "re_Mucked": re.compile(rf"^{plyr}: mucks hand", re.MULTILINE),
         "re_ShownCards": re.compile(
             r"^Seat (?P<SEAT>[0-9]+): {PLYR} {BRKTS}(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \({CUR}(?P<POT>[,\.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\({CUR}[\.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$".format(
                 **subst
