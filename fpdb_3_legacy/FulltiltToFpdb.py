@@ -23,10 +23,10 @@ from fpdb_3_legacy import L10n
 
 _ = L10n.get_translation()
 
-import datetime
 import re
 from decimal import Decimal
 
+from fpdb_3_legacy.en_datetime import parse_en_datetime
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter, log
 
 # import TourneySummary
@@ -483,7 +483,7 @@ class Fulltilt(HandHistoryConverter):
                 if a.group("PARTIAL"):
                     raise FpdbHandPartial(hid=m.group("HID"))
 
-            hand.startTime = datetime.datetime.strptime(datetimestr, dateformat)
+            hand.startTime = parse_en_datetime(datetimestr, dateformat)
             hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, timezone, "UTC")
 
         if m.group("PARTIAL"):

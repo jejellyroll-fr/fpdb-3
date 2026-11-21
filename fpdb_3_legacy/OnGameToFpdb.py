@@ -22,12 +22,12 @@ from fpdb_3_legacy import L10n
 
 _ = L10n.get_translation()
 
-import datetime
 import re
 import sys
 from decimal import Decimal
 from typing import Any
 
+from fpdb_3_legacy.en_datetime import parse_en_datetime
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter, log
 
 # OnGame HH Format
@@ -323,7 +323,7 @@ class OnGame(HandHistoryConverter):
                     # print (_("DEBUG:") + " readHandInfo: " + _("DATETIME not matched: '%s'") % info[key])
                 # changeTimezone handles both named zones (CET/CEST/EEST) and
                 # explicit OnGame offsets such as GMT+0100.
-                hand.startTime = datetime.datetime.strptime(
+                hand.startTime = parse_en_datetime(
                     datetimestr, "%Y/%b/%d %H:%M:%S"
                 )  # also timezone at end, e.g. " ET"
                 hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, tzoffset, "UTC")

@@ -27,6 +27,7 @@ import datetime
 import re
 from decimal import Decimal
 
+from fpdb_3_legacy.en_datetime import parse_en_datetime
 from fpdb_3_legacy.Exceptions import FpdbParseError
 from fpdb_3_legacy.HandHistoryConverter import HandHistoryConverter
 from fpdb_3_legacy.TourneySummary import TourneySummary, log
@@ -448,7 +449,7 @@ class FullTiltPokerSummary(TourneySummary):
             self.startTime = datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S")
         else:
             datetimestr = "{}/{}/{} {}:{}".format(mg["YEAR"], mg["MONTH"], mg["DAY"], mg["HOUR"], mg["MIN2"])
-            self.startTime = datetime.datetime.strptime(datetimestr, "%Y/%B/%d %H:%M")
+            self.startTime = parse_en_datetime(datetimestr, "%Y/%B/%d %H:%M")
 
         if "TZ" in mg and mg["TZ"] is not None:
             self.startTime = HandHistoryConverter.changeTimezone(self.startTime, mg["TZ"], "UTC")
