@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 20:02+0100\n"
+"POT-Creation-Date: 2026-11-21 08:24+0100\n"
 "PO-Revision-Date: 2011-04-07 08:53+0000\n"
 "Last-Translator: steffen123 <steffen@schaumburger.info>\n"
 "Language-Team: Chinese (China) <>\n"
@@ -2200,6 +2200,11 @@ msgstr "值（双击修改）"
 #, fuzzy
 msgid "Window"
 msgstr "窗口"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(street)s · action %(step)s/%(total)s"
+msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
 msgid ""
@@ -7267,13 +7272,35 @@ msgid ""
 "equivalent and are not in it:"
 msgstr ""
 
-#: fpdb_3_legacy/replay_history_dialog.py
+#: fpdb_3_legacy/replay_history_dialog.py fpdb_3_legacy/replay_inspector.py
 msgid "Action history"
 msgstr ""
 
 #: fpdb_3_legacy/replay_history_dialog.py
 msgid "Click an action, or select it and press Enter, to jump to it."
 msgstr ""
+
+#: fpdb_3_legacy/replay_inspector.py
+#, fuzzy
+msgid "Action inspector"
+msgstr "行动"
+
+#: fpdb_3_legacy/replay_inspector.py
+msgid "Click an action to go back to it"
+msgstr ""
+
+#: fpdb_3_legacy/replay_inspector.py
+msgid "Hide or show the inspector"
+msgstr ""
+
+#: fpdb_3_legacy/replay_inspector.py
+msgid "Hide the advanced calculations"
+msgstr ""
+
+#: fpdb_3_legacy/replay_inspector.py
+#, fuzzy
+msgid "Show the advanced calculations"
+msgstr "行动数"
 
 #: fpdb_3_legacy/replayer_panel.py
 #, python-format
@@ -7316,8 +7343,24 @@ msgid "%(value)s%%"
 msgstr ""
 
 #: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"A hand history never carries the payout structure, and a tournament summary "
+"often lists only your own result: out of the money, it settles nothing. "
+"Enter the lobby's payouts, or apply a preset, while you review the hand."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
 msgid "Added to own bounty"
 msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Against the shown hands only; not an action recommendation."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py fpdb_3_legacy/results_calendar.py
+#, fuzzy
+msgid "All-in EV"
+msgstr "全下"
 
 #: fpdb_3_legacy/replayer_panel.py
 #, fuzzy
@@ -7343,6 +7386,14 @@ msgid "Call amount"
 msgstr "跟注开局加注"
 
 #: fpdb_3_legacy/replayer_panel.py
+msgid "Cash game: priced in chips, no ICM."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Cash — all-in"
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
 msgid "Chip EV"
 msgstr ""
 
@@ -7364,6 +7415,10 @@ msgstr "有效筹码"
 #, fuzzy
 msgid "Effective pot before call"
 msgstr "这些选择条件下生效的档案"
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Enter the payouts…"
+msgstr ""
 
 #: fpdb_3_legacy/replayer_panel.py
 msgid "Equity against the hands shown, estimated from simulated boards."
@@ -7410,6 +7465,10 @@ msgstr ""
 
 #: fpdb_3_legacy/replayer_panel.py
 msgid "Fold equity needed (heads-up)"
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Heads-up all-in, priced in chips."
 msgstr ""
 
 #: fpdb_3_legacy/replayer_panel.py
@@ -7477,7 +7536,24 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"Multiway all-in on a single pot: split pots are split evenly among the "
+"players left."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+#, python-format
+msgid ""
+"Multiway pot: %(n)s opponents live; the odds and equity are against all of "
+"them."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
 msgid "Not added to ICM $EV: this is not a complete PKO model."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Payouts needed"
 msgstr ""
 
 #: fpdb_3_legacy/replayer_panel.py fpdb_3_legacy/research_labels.py
@@ -7542,7 +7618,9 @@ msgstr ""
 #: fpdb_3_legacy/replayer_panel.py
 msgid ""
 "Stack-to-pot ratio: the effective stack at the start of the street divided "
-"by the pot then. A range when the opponents' stacks differ."
+"by the pot then. A range when the opponents' stacks differ. Below 3 the "
+"stack is shallow against the pot, above 10 it is deep: descriptive bands, "
+"not advice."
 msgstr ""
 
 #: fpdb_3_legacy/replayer_panel.py
@@ -8704,11 +8782,6 @@ msgstr "样本群体中的所有手牌"
 
 #: fpdb_3_legacy/results_calendar.py
 #, fuzzy
-msgid "All-in EV"
-msgstr "全下"
-
-#: fpdb_3_legacy/results_calendar.py
-#, fuzzy
 msgid "All-in EV (BB)"
 msgstr "盈利 (BB)"
 
@@ -9587,6 +9660,19 @@ msgstr ""
 "%s\n"
 "要替换它吗?"
 
+#: fpdb_3_legacy/tourney_payouts.py
+msgid ""
+"knockout winnings include bounties, so the results do not give the payouts"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts.py
+msgid "lottery tournament: its prize pool and split are drawn per tournament"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts.py
+msgid "no payout structure known: the hand history does not carry it"
+msgstr ""
+
 #: fpdb_3_legacy/tourney_payouts_dialog.py
 #, python-format
 msgid "%(title)s · %(entries)s entries · prize pool %(pool)s"
@@ -9606,6 +9692,14 @@ msgstr ""
 
 #: fpdb_3_legacy/tourney_payouts_dialog.py
 msgid "9-max sit-and-go: 50 / 30 / 20"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid ""
+"A hand history never carries the payout structure, and a tournament summary "
+"often lists only your own result: out of the money, it settles nothing. "
+"Enter the lobby's payouts, or apply a preset, while you review: ICM prices "
+"this tournament's hands with them."
 msgstr ""
 
 #: fpdb_3_legacy/tourney_payouts_dialog.py

@@ -26,7 +26,7 @@ from math import cos, hypot, pi, sin
 from typing import Any
 
 import defusedxml.minidom
-from PySide6.QtCore import QEvent, QPointF, QRectF, Qt, QTimer
+from PySide6.QtCore import QPointF, QRectF, Qt, QTimer
 from PySide6.QtGui import QColor, QFont, QFontMetrics, QImage, QLinearGradient, QPainter, QPen, QPixmap
 from PySide6.QtWidgets import (
     QCheckBox,
@@ -34,8 +34,9 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QPushButton,
+    QSizePolicy,
     QSlider,
-    QToolTip,
+    QSplitter,
     QVBoxLayout,
     QWidget,
 )
@@ -50,17 +51,23 @@ from fpdb_3_legacy.http_capture_ofc import OFCHand, build_ofc_hand, load_ofc_han
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_currency, format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
-from fpdb_3_legacy.replay_history import replay_history_entries
+from fpdb_3_legacy.replay_history import ACTION, PHASE, replay_history_entries
 from fpdb_3_legacy.replay_history_dialog import ReplayHistoryDialog
+from fpdb_3_legacy.replay_inspector import (
+    INSPECTOR_COLLAPSED_WIDTH,
+    INSPECTOR_MIN_WIDTH,
+    ReplayInspector,
+    TimelineRow,
+)
 from fpdb_3_legacy.replayer_decision import HeroDecision, action_decision, hero_decision
 from fpdb_3_legacy.replayer_panel import (
     CallFigures,
     DecisionPanel,
-    PanelRow,
     PanelSection,
     actor_section,
     bet_section,
     bounty_section,
+    cash_allin_section,
     icm_section,
     spr_section,
 )
@@ -76,6 +83,8 @@ CARD_WIDTH = 70
 PLAYER_PANEL_WIDTH = 184
 PLAYER_PANEL_HEIGHT = 50
 CONTROL_RESERVED_HEIGHT = 175
+INSPECTOR_DEFAULT_WIDTH = 370
+CANVAS_BOTTOM_MARGIN = 12  # under the table in its own canvas: the controls are below it
 HEADER_HEIGHT = 92
 TIMELINE_WIDTH = 280
 TIMELINE_MIN_WINDOW_WIDTH = 1500
@@ -93,10 +102,6 @@ _RANK_VALUE = {r: i for i, r in enumerate("23456789TJQKA", start=2)}
 # street on (#826). The hand's own actionStreets take precedence.
 _FIRST_ROUND_STREETS = frozenset({"BLINDSANTES", "PREFLOP", "DEAL", "SECOND", "THIRD"})
 DECISION_LINE_COLOR = "#7dd3fc"
-# The decision panel's neutral palette: figures inform, they are not "do this" signals (#872).
-_PANEL_LABEL = "#b4bec6"
-_PANEL_VALUE = "#eef3f7"
-_PANEL_MUTED = "#8a949c"
 
 
 def format_spr(values: tuple[Decimal, ...]) -> str:
@@ -120,7 +125,9 @@ def _is_real_card(card: str) -> bool:
     return bool(card) and card not in {"0", "0x"} and len(card) == 2 and card[0] in _RANK_VALUE
 
 
-def format_replay_amount(value: Decimal | int | float, currency: str, blind: Decimal | None = None) -> str:
+def format_replay_amount(
+    value: Decimal | int | float, currency: str, blind: Decimal | None = None, *, show_plus: bool = False
+) -> str:
     """Format real money with its currency and tournament/play chips as numbers.
 
     With *blind*, the amount is counted in big blinds instead (#824): rounded to
@@ -129,10 +136,10 @@ def format_replay_amount(value: Decimal | int | float, currency: str, blind: Dec
     if blind:
         ratio = (Decimal(str(value)) / blind).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP).normalize()
         decimals = max(0, -int(ratio.as_tuple().exponent))
-        return f"{format_number(ratio, decimals)} BB"
+        return f"{format_number(ratio, decimals, show_plus=show_plus)} BB"
     if currency in {"", "T$", "play"}:
-        return format_number(value)
-    return format_currency(value, currency)
+        return format_number(value, show_plus=show_plus)
+    return format_currency(value, currency, show_plus=show_plus)
 
 
 def replay_hero_equity(frame, hero_name: str, game: str, *, backend=None, iterations: int = 20_000) -> Decimal | None:
@@ -588,10 +595,17 @@ def build_replay_layout(
     player_names: list[str],
     hero_name: str | None = None,
     category: str = "",
+    *,
+    timeline: bool = True,
+    reserved_bottom: int = CONTROL_RESERVED_HEIGHT,
 ) -> ReplayLayout:
-    """Compute a responsive table layout independent from the old fixed pixels."""
-    usable_bottom = height - CONTROL_RESERVED_HEIGHT
-    has_timeline = width >= TIMELINE_MIN_WINDOW_WIDTH
+    """Compute a responsive table layout independent from the old fixed pixels.
+
+    The replayer paints the table in a canvas of its own beside the inspector
+    (#872): no timeline to leave room for, and the controls are below it.
+    """
+    usable_bottom = height - reserved_bottom
+    has_timeline = timeline and width >= TIMELINE_MIN_WINDOW_WIDTH
     timeline_width = min(340, max(260, int(width * 0.16))) if has_timeline else 0
     right_reserved = timeline_width + TABLE_MARGIN * 2 if has_timeline else TABLE_MARGIN
     table_area_width = max(360, width - TABLE_MARGIN - right_reserved)
@@ -775,76 +789,17 @@ def resolve_replayer_db(config, querylist, mainwin, db=None):
     return Database.Database(config, sql=querylist)
 
 
-_WRAP = int(Qt.TextFlag.TextWordWrap)
+class ReplayCanvas(QWidget):
+    """The table, painted by the replayer in a widget of its own beside the inspector (#872)."""
 
+    def __init__(self, replayer: GuiReplayer) -> None:
+        super().__init__(replayer)
+        self._replayer = replayer
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.setMinimumSize(560, 420)
 
-class _PanelFonts:  # pylint: disable=too-few-public-methods  # the decision panel's fonts, built per paint
-    def __init__(self) -> None:
-        self.headline = QFont("Helvetica", 10, QFont.Weight.Bold)
-        self.title = QFont("Helvetica", 8, QFont.Weight.Bold)
-        self.label = QFont("Helvetica", 9)
-        self.value = QFont("Helvetica", 9, QFont.Weight.DemiBold)
-        self.note = QFont("Helvetica", 8)
-        self.note.setItalic(True)
-
-    @staticmethod
-    def metrics(font: QFont) -> QFontMetrics:
-        return QFontMetrics(font)
-
-
-def _panel_items(
-    panel: DecisionPanel, sections: tuple[PanelSection, ...], inner: float, fonts: _PanelFonts
-) -> list[tuple[str, float, Any]]:
-    """The panel's lines, laid out before painting to size its box: (kind, height, payload)."""
-    label_fm, value_fm, note_fm = fonts.metrics(fonts.label), fonts.metrics(fonts.value), fonts.metrics(fonts.note)
-    items: list[tuple[str, float, Any]] = []
-    if panel.hint:
-        items.append(("hint", 20.0, panel.hint))
-    for index, section in enumerate(sections):
-        items.append(("title", 18.0 if index == 0 else 24.0, section))
-        for row in section.rows:
-            value_width = value_fm.horizontalAdvance(row.value)
-            if row.is_note:
-                height = note_fm.boundingRect(0, 0, int(inner), 400, _WRAP, row.label).height() + 8
-                items.append(("note", float(height), row))
-            elif label_fm.horizontalAdvance(row.label) + 12 + value_width > inner and value_width > inner * 0.5:
-                items.append(("row2", 36.0, row))  # a long value takes a line of its own
-            else:
-                items.append(("row", 19.0, row))
-    return items
-
-
-def _fit_panel_items(items: list[tuple[str, float, Any]], room: float) -> list[tuple[str, float, Any]]:
-    """The lines that fit in `room`, then an ellipsis when some do not."""
-    shown: list[tuple[str, float, Any]] = []
-    used = 0.0
-    for item in items:
-        if used + item[1] > room:
-            shown.append(("more", 18.0, None))
-            break
-        shown.append(item)
-        used += item[1]
-    return shown
-
-
-def _draw_panel_text(painter: QPainter, kind: str, area: QRectF, payload: Any, fonts: _PanelFonts) -> QRectF | None:
-    """A hint, section title, note or ellipsis line; returns a section title's area, for its tooltip."""
-    left = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
-    if kind == "title":
-        painter.setFont(fonts.title)
-        painter.setPen(QColor(DECISION_LINE_COLOR))
-        title_area = QRectF(area.x(), area.bottom() - 16, area.width(), 16)
-        title = fonts.metrics(fonts.title).elidedText(payload.title, Qt.TextElideMode.ElideRight, int(area.width()))
-        painter.drawText(title_area, left, title)
-        return title_area
-    painter.setPen(QColor(_PANEL_MUTED))
-    if kind == "note":
-        painter.setFont(fonts.note)
-        painter.drawText(area.adjusted(0, 4, 0, 0), _WRAP, payload.label)
-    else:
-        painter.setFont(fonts.label)
-        painter.drawText(area, left, payload if kind == "hint" else "…")
-    return None
+    def paintEvent(self, event) -> None:  # noqa: N802  # pylint: disable=invalid-name  # Qt API
+        self._replayer.paint_canvas(self)
 
 
 class GuiReplayer(QWidget):
@@ -853,7 +808,7 @@ class GuiReplayer(QWidget):
     def __init__(self, config, querylist, mainwin, handlist, db=None) -> None:
         QWidget.__init__(self, None)
         self.resize(1800, 1080)
-        self.setMinimumSize(800, 600)
+        self.setMinimumSize(900, 620)
         self.conf = config
         self.main_window = mainwin
         self.sql = querylist
@@ -914,6 +869,7 @@ class GuiReplayer(QWidget):
 
         self.showCards = QCheckBox(_("Hide Cards"))
         self.showCards.setChecked(True)
+        self.showCards.toggled.connect(self._hidden_cards_changed)
         self.buttonBox2.addWidget(self.showCards)
 
         # Amounts in big blinds rather than money or chips (#824, after thecrawler1's
@@ -933,7 +889,7 @@ class GuiReplayer(QWidget):
             _("Show SPR, bet sizing, pot odds, MDF and fold equity for every player, not only the hero")
         )
         self.all_decisions.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.all_decisions.toggled.connect(self.update)
+        self.all_decisions.toggled.connect(self._decision_options_changed)
         self.buttonBox2.addWidget(self.all_decisions)
 
         # The decision panel's pot breakdown, models and assumptions (#872).
@@ -942,10 +898,8 @@ class GuiReplayer(QWidget):
             _("Also show the pot odds ratio, the pot breakdown, MDF and fold equity, and each figure's assumptions")
         )
         self.detailed_analysis.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.detailed_analysis.toggled.connect(self.update)
+        self.detailed_analysis.toggled.connect(self._decision_options_changed)
         self.buttonBox2.addWidget(self.detailed_analysis)
-        # The painted panel's tooltips: (area, text), refreshed on every paint.
-        self._panel_tips: list[tuple[QRectF, str]] = []
 
         self.deckLabel = QLabel(_("Deck:"))
         self.deckLabel.setStyleSheet("font-weight: 600; color: #9aa5ad; margin-left: 10px;")
@@ -1009,7 +963,26 @@ class GuiReplayer(QWidget):
         self.stateSlider.valueChanged.connect(self.slider_changed)
         self.stateSlider.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
-        self.replayBox.addStretch()
+        # The table and, beside it, the inspector: the decision and the actions so far (#872).
+        # The table is never covered; the inspector can be resized or folded to a strip.
+        self.canvas = ReplayCanvas(self)
+        self.inspector = ReplayInspector()
+        self.inspector.seek_requested.connect(self.inspector_seek)
+        self.inspector.detailed_toggled.connect(self.detailed_analysis.setChecked)
+        self.inspector.collapsed_changed.connect(self.inspector_collapsed)
+        self.inspector.action_requested.connect(self.inspector_action)
+        self.main_splitter = QSplitter(Qt.Orientation.Horizontal)
+        self.main_splitter.setObjectName("replayerSplitter")
+        self.main_splitter.setChildrenCollapsible(False)
+        self.main_splitter.setHandleWidth(8)
+        self.main_splitter.addWidget(self.canvas)
+        self.main_splitter.addWidget(self.inspector)
+        self.main_splitter.setStretchFactor(0, 1)
+        self.main_splitter.setStretchFactor(1, 0)
+        self.main_splitter.setSizes([900, INSPECTOR_DEFAULT_WIDTH])
+        self._inspector_open_width = INSPECTOR_DEFAULT_WIDTH
+        self.main_splitter.splitterMoved.connect(self._inspector_resized)
+        self.replayBox.addWidget(self.main_splitter, 1)
         self.replayBox.addWidget(self.stateSlider, False)
         self.replayBox.addLayout(self.playbackBox)
         self.replayBox.addLayout(self.buttonBox)
@@ -1050,9 +1023,9 @@ class GuiReplayer(QWidget):
             return None
         return getattr(self, "replay_blind", None)
 
-    def _amount(self, value: Decimal | int | float) -> str:
+    def _amount(self, value: Decimal | int | float, *, show_plus: bool = False) -> str:
         """An amount of the hand being replayed, in big blinds when they are shown."""
-        return format_replay_amount(value, self.currency_code, blind=self._active_big_blind())
+        return format_replay_amount(value, self.currency_code, blind=self._active_big_blind(), show_plus=show_plus)
 
     def _sync_bb_amounts_toggle(self) -> None:
         available = self.replay_blind is not None
@@ -1072,6 +1045,7 @@ class GuiReplayer(QWidget):
                 log.warning("Could not save the replayer's big-blind setting: %s", exc)
         if getattr(self, "replay_mode", None) == "hand" and self.shared_hand is not None:
             self.info = self._format_hand_info(self.shared_hand)
+        self._refresh_inspector()
         self.update()
 
     def _ensure_replayer_assets(self) -> None:
@@ -1229,6 +1203,21 @@ class GuiReplayer(QWidget):
             """,
         )
         self.deckLabel.setStyleSheet(f"font-weight: 600; color: {muted}; margin-left: 10px;")
+        inspector = getattr(self, "inspector", None)
+        if inspector is not None:
+            inspector.apply_theme(
+                {
+                    "panel": panel,
+                    "border": border,
+                    "text": text,
+                    "muted": muted,
+                    "accent": accent,
+                    "accent_soft": active_bg,
+                    "tile": background,
+                    "row": panel_hover if dark else background,
+                    "dark": "1" if dark else "0",
+                }
+            )
         self._update_deck_preview()
         self.update()
 
@@ -1463,29 +1452,29 @@ class GuiReplayer(QWidget):
     def _draw_ofc_header(self, painter: QPainter) -> None:
         painter.setPen(QColor("#eef3f7"))
         painter.setFont(QFont("Helvetica", 14, QFont.Weight.Bold))
-        painter.drawText(QRectF(28, 18, self.width() - 56, 28), Qt.AlignmentFlag.AlignLeft, self.info)
+        painter.drawText(QRectF(28, 18, self._canvas_width() - 56, 28), Qt.AlignmentFlag.AlignLeft, self.info)
         state = self.states[self.stateSlider.value()] if self.states else None
         label = self._ofc_state_label(state) if state else "Result"
         actor = f"  ·  {state.actor}" if state and state.actor else ""
         painter.setFont(QFont("Helvetica", 10, QFont.Weight.DemiBold))
         painter.setPen(QColor("#9aa5ad"))
         painter.drawText(
-            QRectF(28, 48, self.width() - 56, 24),
+            QRectF(28, 48, self._canvas_width() - 56, 24),
             Qt.AlignmentFlag.AlignLeft,
             f"{label}{actor}  ·  step {self.stateSlider.value() + 1}/{max(1, len(self.states))}",
         )
 
     def _ofc_table_rect(self) -> QRectF:
-        right_margin = TIMELINE_WIDTH + 68 if self.width() >= TIMELINE_MIN_WINDOW_WIDTH else 28
+        right_margin = TIMELINE_WIDTH + 68 if self._canvas_width() >= TIMELINE_MIN_WINDOW_WIDTH else 28
         return QRectF(
             28,
             HEADER_HEIGHT,
-            max(620, self.width() - right_margin - 28),
-            max(360, self.height() - HEADER_HEIGHT - CONTROL_RESERVED_HEIGHT - 18),
+            max(620, self._canvas_width() - right_margin - 28),
+            max(360, self._canvas_height() - HEADER_HEIGHT - self._reserved_bottom() - 18),
         )
 
     def _draw_ofc_table(self, painter: QPainter, table_rect: QRectF) -> None:
-        painter.fillRect(self.rect(), QColor(getattr(self, "_replayer_background_color", "#20262b")))
+        painter.fillRect(self._canvas_rect(), QColor(getattr(self, "_replayer_background_color", "#20262b")))
         rail = QLinearGradient(table_rect.topLeft(), table_rect.bottomRight())
         rail.setColorAt(0, QColor("#57636c"))
         rail.setColorAt(0.45, QColor("#11161a"))
@@ -1689,10 +1678,10 @@ class GuiReplayer(QWidget):
     def _draw_ofc_timeline(self, painter: QPainter, state: OFCReplayState) -> None:
         width = 280
         rect = QRectF(
-            self.width() - width - 28,
+            self._canvas_width() - width - 28,
             HEADER_HEIGHT,
             width,
-            self.height() - HEADER_HEIGHT - CONTROL_RESERVED_HEIGHT - 18,
+            self._canvas_height() - HEADER_HEIGHT - self._reserved_bottom() - 18,
         )
         if rect.x() < 680:
             return
@@ -1979,6 +1968,7 @@ class GuiReplayer(QWidget):
             button.style().polish(button)
         self.prevButton.setEnabled(self.stateSlider.value() > 0)
         self.nextButton.setEnabled(self.stateSlider.value() < self.stateSlider.maximum())
+        self._refresh_inspector()
 
     def _draw_cards(
         self,
@@ -2119,7 +2109,7 @@ class GuiReplayer(QWidget):
         painter.restore()
 
     def _draw_table(self, painter: QPainter, layout: ReplayLayout) -> None:
-        painter.fillRect(self.rect(), QColor(getattr(self, "_replayer_background_color", "#20262b")))
+        painter.fillRect(self._canvas_rect(), QColor(getattr(self, "_replayer_background_color", "#20262b")))
         outer = QLinearGradient(layout.table_rect.topLeft(), layout.table_rect.bottomRight())
         outer.setColorAt(0, QColor("#565e66"))
         outer.setColorAt(0.5, QColor("#161a1f"))
@@ -2165,13 +2155,13 @@ class GuiReplayer(QWidget):
     def _draw_header(self, painter: QPainter) -> None:
         painter.setPen(QColor("#eef3f7"))
         painter.setFont(QFont("Helvetica", 14, QFont.Weight.Bold))
-        painter.drawText(QRectF(28, 18, self.width() - 56, 28), Qt.AlignmentFlag.AlignLeft, self.info)
+        painter.drawText(QRectF(28, 18, self._canvas_width() - 56, 28), Qt.AlignmentFlag.AlignLeft, self.info)
         state = self.states[self.stateSlider.value()] if self.states else None
         street = self._button_street_name(getattr(state, "street", None)) or "START"
         painter.setFont(QFont("Helvetica", 10, QFont.Weight.DemiBold))
         painter.setPen(QColor("#9aa5ad"))
         painter.drawText(
-            QRectF(28, 48, self.width() - 56, 24),
+            QRectF(28, 48, self._canvas_width() - 56, 24),
             Qt.AlignmentFlag.AlignLeft,
             f"{street}  ·  action {self.stateSlider.value() + 1}/{max(1, len(self.states))}",
         )
@@ -2298,7 +2288,7 @@ class GuiReplayer(QWidget):
         street: str | None,
         is_final_frame: bool,
     ) -> None:
-        table_area_height = max(300, self.height() - CONTROL_RESERVED_HEIGHT - HEADER_HEIGHT - TABLE_MARGIN)
+        table_area_height = max(300, self._canvas_height() - self._reserved_bottom() - HEADER_HEIGHT - TABLE_MARGIN)
         card_scale = max(MIN_CARD_SCALE, min(1.0, layout.table_rect.width() / 880, table_area_height / 520))
 
         name_font_size = max(8, int(10 * card_scale))
@@ -2407,7 +2397,7 @@ class GuiReplayer(QWidget):
             card_h = getattr(self, "render_card_height", self.cardheight)
             lift = int(card_h * 0.18) + 4
             cards_above_panel = seat.cards_rect.center().y() < seat.panel_rect.center().y()
-            usable_bottom = self.height() - CONTROL_RESERVED_HEIGHT
+            usable_bottom = self._canvas_height() - self._reserved_bottom()
             if cards_above_panel:
                 outer_top = seat.panel_rect.bottom() + 6
                 inner_top = seat.cards_rect.top() - lift - pill_h - 6
@@ -2453,57 +2443,68 @@ class GuiReplayer(QWidget):
             )
 
     def _timeline_entries(self, max_entries: int = 10) -> list[str]:
-        entries = []
+        """The last lines of the timeline: each action so far, then the showdown at the end."""
+        return [text for _index, text, _verb in GuiReplayer._timeline_items(self)][-max_entries:]
+
+    def _timeline_items(self) -> list[tuple[int, str, str]]:
+        """Each action up to the step shown, then the showdown: (step, text, verb or "result")."""
+        entries: list[tuple[int, str, str]] = []
         states_shown = self.states[: self.stateSlider.value() + 1]
-        for state in states_shown:
+        for index, state in enumerate(states_shown):
             for player in state.players.values():
                 if player.justacted and player.action:
                     allin_suffix = " (all-in)" if player.allin and player.action != "collected" else ""
                     if player.action == "collected" and player.chips:
-                        entries.append(f"{player.name}: collected {self._amount(player.chips)}")
+                        text = f"{player.name}: collected {self._amount(player.chips)}"
                     elif player.chips and player.action not in {"folds", "checks"}:
                         amount = self._amount(player.chips)
-                        entries.append(f"{player.name}: {player.action} {amount}{allin_suffix}")
+                        text = f"{player.name}: {player.action} {amount}{allin_suffix}"
                     else:
-                        entries.append(f"{player.name}: {player.action}{allin_suffix}")
-        # At the showdown frame, append each revealed combination and any cashout.
-        if states_shown and getattr(states_shown[-1], "ended", False):
-            hand = self.replay_model.hand
-            showdown_strings = getattr(hand, "showdownStrings", {}) or {}
-            collectees = getattr(hand, "collectees", {}) or {}
-            combinations = dict(showdown_strings)
-            evaluated_players = {}
-            if hand.gametype.get("category", "").lower() == "studhilo":
-                frame = self._frame_from_state(states_shown[-1])
-                evaluated_players = {player.name: player for player in frame.players}
-                for player in frame.players:
-                    if player.hi_winner or player.lo_winner:
-                        combinations.setdefault(player.name, "")
-            for name, combo in combinations.items():
-                suffix = " (wins)" if name in collectees else ""
-                player = evaluated_players.get(name)
-                if player is not None and (player.hi_winner or player.lo_winner):
-                    result = " / ".join(
-                        part
-                        for part, won in (("HI winner", player.hi_winner), ("LO winner", player.lo_winner))
-                        if won
-                    )
-                    if combo:
-                        suffix = f" ({result})"
-                    else:
-                        combo, suffix = result, ""
+                        text = f"{player.name}: {player.action}{allin_suffix}"
+                    entries.append((index, text, str(player.action).split(" ", 1)[0]))
+        entries.extend(self._showdown_result_items(states_shown))
+        return entries
+
+    def _showdown_result_items(self, states_shown) -> list[tuple[int, str, str]]:
+        """At the showdown frame: each revealed combination, any cashout and splash, as result lines."""
+        entries: list[tuple[int, str, str]] = []
+        if not states_shown or not getattr(states_shown[-1], "ended", False):
+            return entries
+        last = len(states_shown) - 1
+        hand = self.replay_model.hand
+        showdown_strings = getattr(hand, "showdownStrings", {}) or {}
+        collectees = getattr(hand, "collectees", {}) or {}
+        combinations = dict(showdown_strings)
+        evaluated_players = {}
+        if hand.gametype.get("category", "").lower() == "studhilo":
+            frame = self._frame_from_state(states_shown[-1])
+            evaluated_players = {player.name: player for player in frame.players}
+            for player in frame.players:
+                if player.hi_winner or player.lo_winner:
+                    combinations.setdefault(player.name, "")
+        for name, combo in combinations.items():
+            suffix = " (wins)" if name in collectees else ""
+            shown = evaluated_players.get(name)
+            if shown is not None and (shown.hi_winner or shown.lo_winner):
+                result = " / ".join(
+                    part for part, won in (("HI winner", shown.hi_winner), ("LO winner", shown.lo_winner)) if won
+                )
                 if combo:
-                    entries.append(f"{name}: {combo}{suffix}")
-            for name, amount in (getattr(hand, "cashOutAmounts", {}) or {}).items():
-                entries.append(f"{name}: cashout {self._amount(amount)}")
-            # The splash is added by the room, not won from the other players,
-            # so it is its own line rather than part of what was collected --
-            # the collected figure balances against the bets and would stop
-            # balancing if this were folded into it.
-            for name, amount in (getattr(hand, "splashWinnings", {}) or {}).items():
-                if amount:
-                    entries.append(f"{name}: splash +{self._amount(amount)}")
-        return entries[-max_entries:]
+                    suffix = f" ({result})"
+                else:
+                    combo, suffix = result, ""
+            if combo:
+                entries.append((last, f"{name}: {combo}{suffix}", "result"))
+        for name, amount in (getattr(hand, "cashOutAmounts", {}) or {}).items():
+            entries.append((last, f"{name}: cashout {self._amount(amount)}", "result"))
+        # The splash is added by the room, not won from the other players,
+        # so it is its own line rather than part of what was collected --
+        # the collected figure balances against the bets and would stop
+        # balancing if this were folded into it.
+        for name, amount in (getattr(hand, "splashWinnings", {}) or {}).items():
+            if amount:
+                entries.append((last, f"{name}: splash +{self._amount(amount)}", "result"))
+        return entries
 
     def _current_action_summary(self, frame: ReplayFrame) -> str:
         acted = [player for player in frame.players if player.justacted and player.action]
@@ -2692,8 +2693,9 @@ class GuiReplayer(QWidget):
         actor, decision = action_decision(self.states, current_index, hero)
         if not actor or not (self._show_all_decisions() or actor == hero):
             # Someone else acts: the hero's street SPR stays in view while live.
-            spr = format_spr(hero_decision(self.states, current_index, hero).spr) if shows_spr else ""
-            return spr_section(hero, spr)
+            hero_spr = hero_decision(self.states, current_index, hero).spr
+            spr = format_spr(hero_spr) if shows_spr else ""
+            return spr_section(hero, spr, spr_values=hero_spr)
         spr = format_spr(decision.spr) if shows_spr else ""
         tournament = self._is_tournament()
         metrics = self._hero_decision_metrics(frame, current_index) if actor == hero else {}
@@ -2701,8 +2703,14 @@ class GuiReplayer(QWidget):
         exhaustive = metrics.get("equity_exhaustive")
         if decision.mode != "call":
             return actor_section(
-                actor, amount=self._amount, equity_pct=equity_pct, equity_exhaustive=exhaustive, spr=spr
+                actor,
+                amount=self._amount,
+                equity_pct=equity_pct,
+                equity_exhaustive=exhaustive,
+                spr=spr,
+                spr_values=decision.spr,
             )
+        opponents = len(decision.effective)
         if metrics.get("facing_call"):
             # The hero's call as the summary always priced it, capped when all-in.
             call = CallFigures(
@@ -2713,6 +2721,7 @@ class GuiReplayer(QWidget):
                 facing_pct=decision.bet_pct,
                 equity_pct=equity_pct,
                 equity_exhaustive=exhaustive,
+                opponents=opponents,
             )
         else:
             call = CallFigures(
@@ -2723,8 +2732,11 @@ class GuiReplayer(QWidget):
                 facing_pct=decision.bet_pct,
                 equity_pct=equity_pct,
                 equity_exhaustive=exhaustive,
+                opponents=opponents,
             )
-        return actor_section(actor, amount=self._amount, call=call, spr=spr, tournament=tournament)
+        return actor_section(
+            actor, amount=self._amount, call=call, spr=spr, spr_values=decision.spr, tournament=tournament
+        )
 
     def _hand_tourney_id(self, hand) -> int | None:
         """The stored tournament of the hand, whose payouts the dialog edits; None otherwise."""
@@ -2751,6 +2763,7 @@ class GuiReplayer(QWidget):
         """Price the hand again with the structure just stored or cleared."""
         if changed and self.shared_hand is not None:
             self.hand_icm = self._price_hand_icm(self.shared_hand)
+            self._refresh_inspector()
             self.update()
 
     def _price_hand_icm(self, hand):
@@ -2773,6 +2786,99 @@ class GuiReplayer(QWidget):
             log.exception("Bounty pricing failed for hand %s", self.shared_hand_id)
             return None
 
+    def _price_cash_allin(self, hand) -> tuple[Any, str]:
+        """A cash hand's all-in priced in chips -- the multiway case ICM leaves to tournaments (#872)."""
+        if hand.gametype.get("type") == "tour":
+            return None, "not a tournament hand"
+        try:
+            from fpdb_3_legacy.hand_icm import allin_confrontation
+
+            return allin_confrontation(hand)
+        except Exception:  # intentional broad catch: a pricing failure must not stop the replay
+            log.exception("Cash all-in pricing failed for hand %s", self.shared_hand_id)
+            return None, "pricing failed"
+
+    def _decision_options_changed(self, _checked: bool = False) -> None:
+        """ "Odds for all players" or "Detailed analysis" changed: show the decision again."""
+        self._refresh_inspector()
+        self.update()
+
+    def _hidden_cards_changed(self, _checked: bool = False) -> None:
+        """The history hides or shows the villains' cards with the table."""
+        self._refresh_inspector()
+        self._refresh_history(rebuild=True)
+        self.update()
+
+    def inspector_collapsed(self, collapsed: bool) -> None:
+        """Give the table the room the inspector frees, or take back the width it had.
+
+        The splitter keeps a child's share when only its width limits change, which left the
+        folded strip where the panel's left edge was, mid-window, with an empty band beside it.
+        """
+        total = sum(self.main_splitter.sizes())
+        width = INSPECTOR_COLLAPSED_WIDTH if collapsed else self._inspector_open_width
+        self.main_splitter.setSizes([max(total - width, 0), width])
+
+    def _inspector_resized(self, *_args) -> None:
+        # The width the user dragged the open inspector to, given back when it opens again.
+        if not self.inspector.collapsed:
+            self._inspector_open_width = max(self.main_splitter.sizes()[1], INSPECTOR_MIN_WIDTH)
+
+    def inspector_action(self, action: str) -> None:
+        """A step the inspector offers: entering the payouts ICM waits on."""
+        if action == "payouts":
+            self.payouts_clicked()
+
+    def inspector_seek(self, index: int) -> None:
+        """Go to the step of an action clicked in the inspector's history."""
+        if getattr(self, "states", None) and 0 <= index < len(self.states):
+            self.stateSlider.setValue(index)
+
+    def _step_label(self) -> str:
+        state = self.states[self.stateSlider.value()] if self.states else None
+        street = self._button_street_name(getattr(state, "street", None)) or "START"
+        return _("%(street)s · action %(step)s/%(total)s") % {
+            "street": street.capitalize(),
+            "step": self.stateSlider.value() + 1,
+            "total": max(1, len(self.states)),
+        }
+
+    def _refresh_inspector(self) -> None:
+        """Show the step's decision and the actions so far in the inspector (#872)."""
+        inspector = getattr(self, "inspector", None)
+        if inspector is None:
+            return
+        hand_replay = getattr(self, "replay_mode", "hand") == "hand" and bool(getattr(self, "states", None))
+        # An OFC replay has no betting decision to inspect: its own timeline is painted.
+        inspector.setVisible(hand_replay)
+        if not hand_replay:
+            return
+        index = self.stateSlider.value()
+        frame = self._frame_from_state(self.states[index])
+        inspector.set_panel(self._decision_panel(frame, index), self._step_label(), detailed=self._show_detailed())
+        inspector.set_timeline(self._inspector_timeline(), index)
+
+    def _inspector_timeline(self) -> list[TimelineRow]:
+        """The history entries up to the step shown, as timeline rows (#825, #872).
+
+        The entries carry the action verb, so each line is coloured and given its
+        glyph from the action itself, never parsed back out of its text.
+        """
+        current = self.stateSlider.value()
+        rows: list[TimelineRow] = []
+        for entry in self._history_entries():
+            if entry.index > current:
+                break
+            if entry.kind == PHASE:
+                rows.append(TimelineRow(entry.index, "street", entry.text))
+            elif entry.kind == ACTION:
+                rows.append(TimelineRow(entry.index, "action", entry.text, entry.action or ""))
+            else:  # the end of the hand, and what each winner collected
+                rows.append(TimelineRow(entry.index, "result", entry.text, entry.action or ""))
+        for index, text, _verb in self._showdown_result_items(self.states[: current + 1]):
+            rows.append(TimelineRow(index, "result", text))
+        return rows
+
     def _hero_in_all_in(self, frame: ReplayFrame) -> bool:
         """Whether the money is in with the hero still in the hand: ICM and bounty are priced then."""
         if not any(player.allin for player in frame.players if player.action != "folds"):
@@ -2792,139 +2898,53 @@ class GuiReplayer(QWidget):
             return None
         return icm_section(getattr(self, "hand_icm", None), self.Heroes)
 
+    def _cash_allin_section(self, frame: ReplayFrame) -> PanelSection | None:
+        """The all-in of a cash hand in chips, once the hero is in it: the cash twin of the ICM section."""
+        if self._is_tournament() or not self._hero_in_all_in(frame):
+            return None
+        return cash_allin_section(
+            getattr(self, "cash_allin", None),
+            self.Heroes,
+            lambda value: self._amount(value, show_plus=True),
+            reason=getattr(self, "cash_allin_reason", ""),
+        )
+
     def _decision_panel(self, frame: ReplayFrame, current_index: int) -> DecisionPanel:
-        """The summary under the action: the decision, then prize equity and the bounty (#872)."""
+        """The summary under the action: the decision, then the all-in priced, then the bounty (#872)."""
         sections = self._decision_sections(frame, current_index)
-        # Last: prize equity (#446), then the bounty a knockout all-in can win (#447),
-        # each in its own section and units: they are never added together.
-        for extra in (self._icm_section(frame), self._bounty_section(frame)):
+        # Last: the cash all-in in chips, prize equity (#446), then the bounty a knockout
+        # all-in can win (#447), each in its own section and units: never added together.
+        for extra in (self._cash_allin_section(frame), self._icm_section(frame), self._bounty_section(frame)):
             if extra is not None:
                 sections.append(extra)
         hint = "" if sections else _("Use the arrows or space to review the decisions")
         return DecisionPanel(self._current_action_summary(frame), tuple(sections), hint)
 
-    def _summary_rect_x_width(self, layout: ReplayLayout) -> tuple[float, float]:
-        """The panel's left edge and width: beside the action timeline, never over it."""
-        width = min(640.0, max(320.0, layout.table_rect.width() * 0.48))
-        right = self.width() - 28 if layout.timeline_rect.isNull() else layout.timeline_rect.x() - 16
-        width = max(200.0, min(width, right - 28))
-        return max(28.0, right - width), width
+    def _canvas_width(self) -> int:
+        canvas = getattr(self, "canvas", None)
+        return canvas.width() if canvas is not None else self.width()
 
-    def _draw_summary(self, painter: QPainter, frame: ReplayFrame, layout: ReplayLayout, current_index: int) -> None:
-        """The decision panel: the action, then its sections as aligned label/value rows (#872)."""
-        panel = self._decision_panel(frame, current_index)
-        x, width = self._summary_rect_x_width(layout)
-        inner = width - 24
-        fonts = _PanelFonts()
-        top = 12.0
-        headline_height = max(
-            20.0, fonts.metrics(fonts.headline).boundingRect(0, 0, int(inner), 400, _WRAP, panel.headline).height() + 4
-        )
-        y_start = top + 6 + headline_height + 2
-        items = _fit_panel_items(
-            _panel_items(panel, panel.visible(self._show_detailed()), inner, fonts),
-            room=max(120.0, self.height() - 150.0) - (y_start - top) - 10,
-        )
-        painter.setPen(QPen(QColor("#46505a"), 1))
-        painter.setBrush(QColor("#171d22"))
-        painter.drawRoundedRect(QRectF(x, top, width, y_start - top + sum(item[1] for item in items) + 10), 8, 8)
-        painter.setFont(fonts.headline)
-        painter.setPen(QColor("#eef3f7"))
-        painter.drawText(QRectF(x + 12, top + 6, inner, headline_height), _WRAP, panel.headline)
+    def _canvas_height(self) -> int:
+        canvas = getattr(self, "canvas", None)
+        return canvas.height() if canvas is not None else self.height()
 
-        tips: list[tuple[QRectF, str]] = []
-        y = y_start
-        for kind, height, payload in items:
-            area = QRectF(x + 12, y, inner, height)
-            if kind in {"row", "row2"}:
-                self._draw_panel_row(painter, area, payload, two_lines=kind == "row2", fonts=(fonts.label, fonts.value))
-                if payload.tooltip:
-                    tips.append((area, payload.tooltip))
-            else:
-                tip_area = _draw_panel_text(painter, kind, area, payload, fonts)
-                if tip_area is not None and payload.tooltip:
-                    tips.append((tip_area, payload.tooltip))
-            y += height
-        self._panel_tips = tips
+    def _canvas_rect(self):
+        canvas = getattr(self, "canvas", None)
+        return canvas.rect() if canvas is not None else self.rect()
 
-    @staticmethod
-    def _draw_panel_row(
-        painter: QPainter, area: QRectF, row: PanelRow, *, two_lines: bool, fonts: tuple[QFont, QFont]
-    ) -> None:
-        """A label on the left and its value right-aligned; the label is elided rather than overlapped."""
-        label_font, value_font = fonts
-        label_fm, value_fm = QFontMetrics(label_font), QFontMetrics(value_font)
-        label_color = QColor(_PANEL_MUTED if row.muted else _PANEL_LABEL)
-        value_color = QColor(_PANEL_MUTED if row.muted else _PANEL_VALUE)
-        if two_lines:
-            label_rect = QRectF(area.x(), area.y(), area.width(), 18)
-            value_rect = QRectF(area.x(), area.y() + 17, area.width(), 18)
-            value = value_fm.elidedText(row.value, Qt.TextElideMode.ElideLeft, int(area.width()))
-            label = label_fm.elidedText(row.label, Qt.TextElideMode.ElideRight, int(area.width()))
-        else:
-            value = row.value
-            value_width = value_fm.horizontalAdvance(value)
-            label_room = max(0, int(area.width() - value_width - 12))
-            label = label_fm.elidedText(row.label, Qt.TextElideMode.ElideRight, label_room)
-            label_rect = value_rect = area
-        align = Qt.AlignmentFlag.AlignVCenter
-        painter.setFont(label_font)
-        painter.setPen(label_color)
-        painter.drawText(label_rect, align | Qt.AlignmentFlag.AlignLeft, label)
-        painter.setFont(value_font)
-        painter.setPen(value_color)
-        painter.drawText(value_rect, align | Qt.AlignmentFlag.AlignRight, value)
+    def _reserved_bottom(self) -> int:
+        """The room the controls take under the table: none once the table has a canvas of its own."""
+        return CANVAS_BOTTOM_MARGIN if getattr(self, "canvas", None) is not None else CONTROL_RESERVED_HEIGHT
 
-    def event(self, event) -> bool:  # noqa: N802 - Qt API
-        """Explain the painted panel's figures on hover (#872)."""
-        if event.type() == QEvent.Type.ToolTip:
-            point = QPointF(event.pos())
-            text = next((tip for area, tip in getattr(self, "_panel_tips", []) if area.contains(point)), "")
-            if text:
-                QToolTip.showText(event.globalPos(), text, self)
-            else:
-                QToolTip.hideText()
-                event.ignore()
-            return True
-        return super().event(event)
-
-    def _draw_timeline(self, painter: QPainter, layout: ReplayLayout) -> None:
-        if layout.timeline_rect.isNull():
-            return
-        painter.setPen(QPen(QColor("#46505a"), 1))
-        painter.setBrush(QColor("#171d22"))
-        painter.drawRoundedRect(layout.timeline_rect, 7, 7)
-        painter.setFont(QFont("Helvetica", 12, QFont.Weight.Bold))
-        painter.setPen(QColor("#eef3f7"))
-        painter.drawText(layout.timeline_rect.adjusted(14, 12, -14, -12), Qt.AlignmentFlag.AlignTop, "Action timeline")
-
-        row_height = 32
-        max_entries = max(4, int((layout.timeline_rect.height() - 54) // row_height))
-        painter.setFont(QFont("Helvetica", 10, QFont.Weight.Medium))
-        y = layout.timeline_rect.y() + 44
-        for index, entry in enumerate(self._timeline_entries(max_entries=max_entries)):
-            entry_rect = QRectF(layout.timeline_rect.x() + 10, y, layout.timeline_rect.width() - 20, row_height - 4)
-            action = entry.split(": ", 1)[1] if ": " in entry else entry
-            if index % 2 == 0:
-                painter.setPen(Qt.PenStyle.NoPen)
-                painter.setBrush(QColor("#20272d"))
-                painter.drawRoundedRect(entry_rect, 4, 4)
-            painter.setPen(action_colors(action.split(" ", 1)[0])[2])
-            painter.drawText(
-                entry_rect.adjusted(8, 0, -8, 0),
-                Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft,
-                entry,
-            )
-            y += row_height
-
-    def paintEvent(self, event) -> None:  # noqa: F811
+    def paint_canvas(self, widget: QWidget) -> None:
+        """Paint the table in the canvas: header, felt, board, seats (#872: no overlay over them)."""
         if not getattr(self, "states", None):
             return
         if not getattr(self, "replay_model", None):
             return
         self._ensure_replayer_assets()
 
-        painter = QPainter(self)
+        painter = QPainter(widget)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
         if getattr(self, "replay_mode", "hand") == "ofc":
             self._paint_ofc_replay(painter)
@@ -2934,7 +2954,15 @@ class GuiReplayer(QWidget):
         frame.players = order_players_clockwise(frame.players, self.Heroes)
         player_names = [player.name for player in frame.players]
         category = self.replay_model.hand.gametype.get("category", "")
-        layout = build_replay_layout(self.width(), self.height(), player_names, self.Heroes, category)
+        layout = build_replay_layout(
+            self._canvas_width(),
+            self._canvas_height(),
+            player_names,
+            self.Heroes,
+            category,
+            timeline=False,
+            reserved_bottom=self._reserved_bottom(),
+        )
         self.render_card_width = layout.card_width
         self.render_card_height = layout.card_height
         self.render_card_spacing = layout.card_spacing
@@ -2947,9 +2975,6 @@ class GuiReplayer(QWidget):
             seat = layout.seats.get(player.name)
             if seat is not None:
                 self._draw_player(painter, player, seat, layout, frame.street, is_final_frame)
-        # Over the seats: the decision panel can be taller than a seat's margin (#872).
-        self._draw_summary(painter, frame, layout, self.stateSlider.value())
-        self._draw_timeline(painter, layout)
 
     def play_hand(self, handidx) -> None:  # noqa: F811
         if handidx < 0 or handidx >= len(self.handlist):
@@ -2964,6 +2989,8 @@ class GuiReplayer(QWidget):
         self.shared_hand_id = None
         self.hand_icm = None
         self.hand_bounty = None
+        self.cash_allin = None
+        self.cash_allin_reason = ""
         self.shared_tourney_id = None
         self.replay_blind = None
         self._sync_bb_amounts_toggle()
@@ -2992,6 +3019,7 @@ class GuiReplayer(QWidget):
             self.replay_model = self._build_replay_model(hand)
             self.hand_icm = self._price_hand_icm(hand)
             self.hand_bounty = self._price_hand_bounty(hand)
+            self.cash_allin, self.cash_allin_reason = self._price_cash_allin(hand)
             self.shared_tourney_id = self._hand_tourney_id(hand)
             # Legacy hands without a hero seat: share them from the same point
             # of view the replayer shows, without writing it into the hand.
@@ -3104,7 +3132,14 @@ class GuiReplayer(QWidget):
     def _history_entries(self) -> list:
         if getattr(self, "replay_mode", "hand") != "hand" or not getattr(self, "states", None):
             return []
-        return replay_history_entries(self.states, self.currency_code, blind=self._history_blind())
+        return replay_history_entries(
+            self.states, self.currency_code, blind=self._history_blind(), shows_cards=self._history_shows_cards
+        )
+
+    def _history_shows_cards(self, name: str) -> bool:
+        """Whether the history may show *name*'s cards: the hero's always, the others' unless the table hides them."""
+        toggle = getattr(self, "showCards", None)
+        return name == self.Heroes or toggle is None or not toggle.isChecked()
 
     def _refresh_history(self, rebuild: bool = False) -> None:
         """Keep an open history on the state shown, rebuilt for a new hand or amount unit."""

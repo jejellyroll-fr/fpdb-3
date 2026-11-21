@@ -65,6 +65,16 @@ def test_a_field_paid_down_to_the_last_place_is_settled_by_its_size() -> None:
     assert from_results([(1, 600), (2, 400)], entries=2) == (600, 400)
 
 
+def test_a_winner_taking_the_whole_known_prize_pool_settles_winner_take_all() -> None:
+    # A lottery SNG's summary often lists the winner alone: the pool being
+    # exhausted proves the places after it pay nothing.
+    assert from_results([(1, 300)], entries=3, prize_pool=300) == (300,)
+    assert from_results([(1, 200), (2, 100)], entries=3, prize_pool=300) == (200, 100)
+    # Without the pool, or with part of it still unaccounted for, nothing settles.
+    assert from_results([(1, 300)], entries=3) is None
+    assert from_results([(1, 200)], entries=3, prize_pool=300) is None
+
+
 @pytest.mark.parametrize(
     "results",
     [
@@ -100,8 +110,8 @@ def test_unknown_winnings_neither_pay_nor_prove_a_place_unpaid(results) -> None:
 # here the question is what fpdb makes of a tournament's rows.
 
 INSERT_TYPE = (
-    "INSERT INTO TourneyTypes (siteId, currency, buyIn, fee, category, limitType, knockout, koBounty)"
-    " VALUES (?, ?, ?, ?, 'holdem', 'nl', ?, ?)"
+    "INSERT INTO TourneyTypes (siteId, currency, buyIn, fee, category, limitType, knockout, koBounty, lottery)"
+    " VALUES (?, ?, ?, ?, 'holdem', 'nl', ?, ?, ?)"
 )
 INSERT_TOURNEY = "INSERT INTO Tourneys (tourneyTypeId, siteTourneyNo, entries, prizepool) VALUES (?, ?, ?, ?)"
 INSERT_PLAYER = "INSERT INTO Players (name, siteId) VALUES (?, ?)"
@@ -111,11 +121,11 @@ INSERT_RESULT = (
 
 
 def add_tourney(
-    db, number, results, *, entries, prize_pool, buy_in=1000, currency="USD", knockout=False, bounty=None
+    db, number, results, *, entries, prize_pool, buy_in=1000, currency="USD", knockout=False, bounty=None, lottery=False
 ) -> int:
     """A tournament with ``results`` as (place, winnings in hundredths); returns its id."""
     cursor = db.get_cursor()
-    cursor.execute(INSERT_TYPE, (2, currency, buy_in, buy_in // 10, knockout, bounty))
+    cursor.execute(INSERT_TYPE, (2, currency, buy_in, buy_in // 10, knockout, bounty, lottery))
     cursor.execute(INSERT_TOURNEY, (cursor.lastrowid, number, entries, prize_pool))
     tourney = cursor.lastrowid
     for place, won in results:
@@ -147,6 +157,29 @@ def test_results_of_the_hero_alone_settle_nothing_and_say_why(fresh_db) -> None:
 
     assert found.payouts is None
     assert "no payout structure known" in found.reason
+    # Only the user can supply it: the replayer asks for it during the review.
+    assert found.missing
+
+
+def test_a_lottery_sng_whose_winner_took_the_whole_pool_is_winner_take_all(fresh_db) -> None:
+    # An Expresso-style summary lists the winner alone; the prize pool proves the rest unpaid.
+    tourney = add_tourney(fresh_db, 1004, [(1, 300)], entries=3, prize_pool=300, lottery=True)
+
+    found = payouts.payouts_for_tourney(fresh_db, tourney)
+
+    assert found.payouts is not None
+    assert found.payouts.amounts == (300,)
+    assert found.payouts.source == "summary"
+
+
+def test_a_lottery_sng_without_a_known_pool_says_the_draw_needs_its_summary(fresh_db) -> None:
+    tourney = add_tourney(fresh_db, 1005, [(8, 0)], entries=3, prize_pool=None, lottery=True)
+
+    found = payouts.payouts_for_tourney(fresh_db, tourney)
+
+    assert found.payouts is None
+    assert "lottery tournament" in found.reason
+    assert found.missing
 
 
 def test_knockout_winnings_are_never_read_as_a_structure(fresh_db) -> None:

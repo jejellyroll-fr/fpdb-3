@@ -95,6 +95,10 @@
     "hand_count": 1,
     "sha256": "e5dbecf34603a770d82d28925f88d449ea0931c56e8cf22d7d0205d52ddef06d"
   },
+  "pokerstars/holdem/cash_nl_3way_allin.txt": {
+    "hand_count": 1,
+    "sha256": "41dc0a226ba50167e35356b4517e47fce0107ae417261f807931bbe90f9c1638"
+  },
   "pokerstars/holdem/cash_nl_6max.txt": {
     "hand_count": 1,
     "sha256": "5d73f628d2032770f5e27c43281d45db1425e4451d830ea38704a7497f5c2f22"

@@ -43,7 +43,7 @@ _QUERIES = {
     "selectTourneyResults": """SELECT tp.rank, tp.winnings FROM TourneysPlayers tp
                         WHERE tp.tourneyId = %s AND tp.rank IS NOT NULL ORDER BY tp.rank""",
     "selectTourneyFacts": """SELECT t.entries, t.prizepool, tt.buyIn, tt.currency, tt.knockout, tt.koBounty,
-                        t.siteTourneyNo
+                        t.siteTourneyNo, tt.lottery
                         FROM Tourneys t JOIN TourneyTypes tt ON tt.id = t.tourneyTypeId
                         WHERE t.id = %s""",
     "selectHandTourneyId": "SELECT tourneyId FROM Hands WHERE id = %s",

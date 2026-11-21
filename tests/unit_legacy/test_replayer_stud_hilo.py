@@ -42,6 +42,7 @@ def stud_replayer():
         Heroes="Hero",
         showCards=SimpleNamespace(isChecked=lambda: True),
         currency_code="USD",
+        width=lambda: 1600,
         height=lambda: 900,
         cardwidth=70,
         cardheight=100,
@@ -53,6 +54,10 @@ def stud_replayer():
         "_draw_cards",
         "_amount",
         "_active_big_blind",
+        "_showdown_result_items",
+        "_canvas_width",
+        "_canvas_height",
+        "_reserved_bottom",
     ):
         setattr(replayer, method, MethodType(getattr(GuiReplayer, method), replayer))
     return replayer
@@ -83,12 +88,9 @@ def test_no_winning_highlights_before_showdown(stud_replayer):
 
 
 def test_stud_hilo_winners_are_evaluated_for_each_eligible_pot():
-    short = ReplayPlayer("Short", 1, Decimal(0), Decimal(0), "calls", False,
-                         ["Ks", "Kh", "Kc", "2d", "4h", "7s", "9c"])
-    hero = ReplayPlayer("Hero", 2, Decimal(0), Decimal(0), "calls", False,
-                        ["As", "Ah", "Qc", "Jd", "9h", "7c", "4s"])
-    deep = ReplayPlayer("Deep", 3, Decimal(0), Decimal(0), "calls", False,
-                        ["5s", "6d", "7h", "8c", "4d", "2s", "3c"])
+    short = ReplayPlayer("Short", 1, Decimal(0), Decimal(0), "calls", False, ["Ks", "Kh", "Kc", "2d", "4h", "7s", "9c"])
+    hero = ReplayPlayer("Hero", 2, Decimal(0), Decimal(0), "calls", False, ["As", "Ah", "Qc", "Jd", "9h", "7c", "4s"])
+    deep = ReplayPlayer("Deep", 3, Decimal(0), Decimal(0), "calls", False, ["5s", "6d", "7h", "8c", "4d", "2s", "3c"])
 
     high, low, cards = stud_hilo_winners(
         [short, hero, deep],
@@ -103,7 +105,12 @@ def test_stud_hilo_winners_are_evaluated_for_each_eligible_pot():
 
 def test_stud_hilo_skips_uncontested_singleton_pots():
     survivor = ReplayPlayer(
-        "Survivor", 1, Decimal(0), Decimal(0), "collected", True,
+        "Survivor",
+        1,
+        Decimal(0),
+        Decimal(0),
+        "collected",
+        True,
         ["As", "Ah", "Ad", "2c", "3d", "4h", "6s"],
     )
 

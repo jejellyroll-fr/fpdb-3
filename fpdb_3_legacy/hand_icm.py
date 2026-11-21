@@ -14,15 +14,19 @@ confrontation, and gives each of the two players:
 
 Limits, said rather than guessed at:
 
-- heads-up only: a multiway all-in, or a side pot one of the two cannot win
-  (a short stack all-in, then a deeper player folding), has more outcomes
-  than this prices yet;
+- a single pot only: a side pot one contender cannot win (a short stack all-in,
+  then a deeper player folding) is refused;
+- split pots are modelled as an even split among all the contenders -- the equity
+  engine counts ties per player, not per tie set;
 - flop games with one winner per pot: stud and draw are outside the equity
   engine, and a hi/lo split is not a scoop each half of the time;
-- both hands shown;
+- every hand shown;
 - every remaining player's stack: the players at the table must be the whole
   field. A single-table tournament is; a field larger than the table is
   refused; an unknown field is computed and flagged ``table_only``.
+
+The bounty pricing of :mod:`fpdb_3_legacy.hand_bounty` stays heads-up only, via
+:func:`heads_up_allin`.
 """
 
 from __future__ import annotations
@@ -36,9 +40,11 @@ from fpdb_3_legacy import icm
 from fpdb_3_legacy.icm import AllInOutcome, ICMError
 
 __all__ = [
+    "AllInConfrontation",
     "AllInIcm",
     "HandIcm",
     "HeadsUpAllIn",
+    "allin_confrontation",
     "hand_allin_icm",
     "heads_up_allin",
     "icm_for_replay",
@@ -54,7 +60,7 @@ class AllInIcm:
     """The two players of a hand's all-in, their equity, chip EV and ICM $EV."""
 
     street: str
-    players: tuple[str, str]
+    players: tuple[str, ...]  # the all-in's contenders, two or more
     equity: Mapping[str, float]
     chip_ev: Mapping[str, Decimal]  # chips
     icm_ev: Mapping[str, float]  # in the payout's unit
@@ -69,6 +75,7 @@ class HandIcm:
     allin: AllInIcm | None
     reason: str = ""
     notes: tuple[str, ...] = field(default_factory=tuple)
+    needs_payouts: bool = False  # priced once the user enters the tournament's payouts
 
 
 def _known(cards: Sequence[str]) -> bool:
@@ -132,7 +139,7 @@ def _side_pot(contenders: Sequence[str], committed: Mapping[str, Decimal]) -> bo
 
 
 def _contenders(hand: Any) -> tuple[list[str], str]:
-    """The two players still in, sharing a single pot; or none, with why."""
+    """The players still in, sharing a single pot; or none, with why."""
     folded = {
         action[0]
         for actions in hand.actions.values()
@@ -141,32 +148,34 @@ def _contenders(hand: Any) -> tuple[list[str], str]:
     }
     seated = [player[1] for player in hand.players]
     contenders = [name for name in seated if name not in folded]
-    if len(contenders) != 2:
-        return [], "multiway all-in: ICM $EV is priced heads-up only"
+    if len(contenders) < 2:
+        return [], "no all-in confrontation in this hand"
     if _side_pot(contenders, {name: Decimal(hand.pot.committed.get(name, 0)) for name in seated}):
-        return [], "side pot: ICM $EV is priced for a single pot only"
+        return [], "side pot: the all-in is priced for a single pot only"
     return contenders, ""
 
 
 @dataclass(frozen=True)
-class HeadsUpAllIn:
-    """A hand's heads-up all-in: who, on which street, and how often each one wins.
+class AllInConfrontation:
+    """A hand's all-in: who is in it, on which street, and how often each one wins.
 
     Shared by the ICM pricing here and the bounty pricing of :mod:`fpdb_3_legacy.hand_bounty`.
+    Two or more contenders on a single pot; a split pot is modelled as an even split
+    among all of them (the equity engine counts ties per player, not per tie set).
     """
 
     street: str
-    players: tuple[str, str]
-    win: tuple[float, float]  # each player's probability of winning the whole pot
-    tie: float  # the probability of a split pot
+    players: tuple[str, ...]
+    win: tuple[float, ...]  # each player's probability of winning the whole pot outright
+    tie: float  # the probability of a split pot, split evenly among all contenders
     pot: Decimal  # chips
     start: Mapping[str, Decimal]  # every seated player's stack at the start of the hand
     committed: Mapping[str, Decimal]  # what each seated player put in the pot
 
     @property
     def equity(self) -> dict[str, float]:
-        a, b = self.players
-        return {a: self.win[0] + self.tie / 2, b: self.win[1] + self.tie / 2}
+        share = self.tie / len(self.players)
+        return {name: win + share for name, win in zip(self.players, self.win, strict=True)}
 
     @property
     def chip_ev(self) -> dict[str, Decimal]:
@@ -174,8 +183,14 @@ class HeadsUpAllIn:
         return {name: Decimal(str(share)) * self.pot - self.committed[name] for name, share in self.equity.items()}
 
 
-def heads_up_allin(hand: Any, equity_fn: Callable[..., Any] | None = None) -> tuple[HeadsUpAllIn | None, str]:
-    """``hand``'s heads-up all-in priced in equity, or None with why it cannot be."""
+# Kept for callers that name the heads-up case.
+HeadsUpAllIn = AllInConfrontation
+
+
+def allin_confrontation(
+    hand: Any, equity_fn: Callable[..., Any] | None = None
+) -> tuple[AllInConfrontation | None, str]:
+    """``hand``'s all-in priced in equity -- two or more contenders on one pot -- or None with why."""
     game, unpriced = _game(hand)
     if game is None:
         return None, unpriced
@@ -191,7 +206,7 @@ def heads_up_allin(hand: Any, equity_fn: Callable[..., Any] | None = None) -> tu
     }
     pockets = [_hole_cards(hand, name) for name in contenders]
     if not all(_known(cards) for cards in pockets):
-        return None, "both hands must be shown to price the all-in"
+        return None, "every hand must be shown to price the all-in"
 
     if equity_fn is None:
         from fpdb_3_legacy.equity import calculate_equity
@@ -203,18 +218,16 @@ def heads_up_allin(hand: Any, equity_fn: Callable[..., Any] | None = None) -> tu
         return None, f"equity unavailable: {exc}"
 
     samples = result.samples or 1
-    win_a, win_b, tie = (
-        result.players[0].wins / samples,
-        result.players[1].wins / samples,
-        result.players[0].ties / samples,
-    )
-    total = win_a + win_b + tie or 1.0
-    a, b = contenders
+    wins = [player.wins / samples for player in result.players]
+    # Each sample has exactly one outright winner or is a split: the tie probability
+    # is whatever the wins leave, and it is split evenly among all contenders.
+    tie = max(0.0, 1.0 - sum(wins))
+    total = sum(wins) + tie or 1.0
     return (
-        HeadsUpAllIn(
+        AllInConfrontation(
             street=street,
-            players=(a, b),
-            win=(win_a / total, win_b / total),
+            players=tuple(contenders),
+            win=tuple(value / total for value in wins),
             tie=tie / total,
             pot=Decimal(hand.totalpot),
             start={player[1]: Decimal(str(player[2])) for player in hand.players},
@@ -224,6 +237,14 @@ def heads_up_allin(hand: Any, equity_fn: Callable[..., Any] | None = None) -> tu
     )
 
 
+def heads_up_allin(hand: Any, equity_fn: Callable[..., Any] | None = None) -> tuple[AllInConfrontation | None, str]:
+    """``hand``'s all-in, only when exactly two players are in it (the bounty pricing's case)."""
+    allin, unpriced = allin_confrontation(hand, equity_fn)
+    if allin is not None and len(allin.players) != 2:
+        return None, "multiway all-in: priced heads-up only"
+    return allin, unpriced
+
+
 def hand_allin_icm(
     hand: Any,
     payouts: Sequence[float],
@@ -231,32 +252,29 @@ def hand_allin_icm(
     table_only: bool = False,
     equity_fn: Callable[..., Any] | None = None,
 ) -> HandIcm:
-    """Price ``hand``'s heads-up all-in under ICM with ``payouts`` (first place first, money)."""
+    """Price ``hand``'s all-in under ICM with ``payouts`` (first place first, money)."""
     if hand.gametype.get("type") != "tour":
         return HandIcm(None, "not a tournament hand")
-    allin, unpriced = heads_up_allin(hand, equity_fn)
+    allin, unpriced = allin_confrontation(hand, equity_fn)
     if allin is None:
         return HandIcm(None, unpriced)
-    a, b = allin.players
-    (win_a, win_b), tie, pot = allin.win, allin.tie, allin.pot
+    contenders = allin.players
+    pot = allin.pot
     start, committed = allin.start, allin.committed
     seated = [player[1] for player in hand.players]
 
-    def after(share_a: Decimal, share_b: Decimal) -> dict[str, float]:
+    def after(shares: Mapping[str, Decimal]) -> dict[str, float]:
         stacks = {name: float(start[name] - committed[name]) for name in seated}
-        stacks[a] += float(share_a)
-        stacks[b] += float(share_b)
+        for name, share in shares.items():
+            stacks[name] += float(share)
         return stacks
 
     outcomes = [
-        outcome
-        for outcome in (
-            AllInOutcome(win_a, after(pot, Decimal(0))),
-            AllInOutcome(win_b, after(Decimal(0), pot)),
-            AllInOutcome(tie, after(pot / 2, pot / 2)),
-        )
-        if outcome.probability > 0
+        AllInOutcome(win, after({name: pot})) for name, win in zip(contenders, allin.win, strict=True) if win > 0
     ]
+    if allin.tie > 0:
+        # A split pot is modelled as an even split among all the contenders.
+        outcomes.append(AllInOutcome(allin.tie, after({name: pot / len(contenders) for name in contenders})))
     before = {name: float(start[name]) for name in seated}
     actual = {name: float(start[name] - committed[name] + Decimal(hand.collectees.get(name, 0))) for name in seated}
     try:
@@ -291,7 +309,7 @@ def icm_for_replay(db: Any, hand: Any, hand_id: int | None) -> HandIcm:
         return HandIcm(None, "the hand is not stored: its tournament's payouts are unknown")
     lookup = tourney_payouts.payouts_for_hand(db, hand_id)
     if lookup.payouts is None:
-        return HandIcm(None, lookup.reason)
+        return HandIcm(None, lookup.reason, needs_payouts=lookup.missing)
     return icm_with_payouts(hand, lookup.payouts.as_money(), tourney_payouts.field_size_for_hand(db, hand_id))
 
 
