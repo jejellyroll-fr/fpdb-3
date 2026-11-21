@@ -1172,6 +1172,8 @@ class _Builder:
         # street ended with that nobody matched, kept when the street is left behind.
         self.raise_size = self.level
         self.uncalled = {seat.name: Decimal(0) for seat in seats}
+        # Whether the antes are part of each player's wager the pots are cut at (#419).
+        self.layered_antes = False
         self.boards = 0
         self.cards: dict[str, list[str]] = {seat.name: [] for seat in seats}
         # Known cards in play, so one card cannot be dealt twice; discards leave it, since a
@@ -1235,19 +1237,21 @@ class _Builder:
             # the button (PokerKit, which defines PHH, does the same).
             antes = [antes[1], antes[0]]
             blinds = [blinds[1], blinds[0]]
-        # Ante trimming (#419): PokerKit then cuts the pots with the antes inside each
-        # player's contribution, so a player who could only ante part of it wins back only
-        # what the others matched of it -- an ante side pot. Untrimmed, the antes are one
-        # lump every player still in can win, as fpdb pools them. The two only differ when a
-        # stack is shorter than its ante, so only such a hand books its antes as
-        # contributions; every other hand keeps them as common money.
-        trimmed = bool(self.data.get("ante_trimming_status"))
-        self.layered_antes = trimmed and any(
-            ante > seat.behind for seat, ante in zip(self.seats, antes, strict=True) if ante > 0
-        )
-        for seat, ante in zip(self.seats, antes, strict=True):
+        # Ante trimming (#419), as PokerKit plays it: the antes are collected like a street's
+        # bets, so the largest is cut to the second largest (an over-bet nobody matched), and
+        # the pots are cut with the antes inside each player's contribution -- a player who
+        # could only ante part of it wins back only what the others matched of it. Untrimmed,
+        # each ante is posted whole (up to the stack) and the antes are one lump every player
+        # still in can win, as fpdb pools them. The two only differ when the posted antes are
+        # not all equal, so only such a hand books its antes as contributions; every other
+        # hand keeps them as common money.
+        posted = [min(ante, seat.behind) for seat, ante in zip(self.seats, antes, strict=True)]
+        if self.data.get("ante_trimming_status") and len(posted) > 1:
+            cutoff = sorted(posted)[-2]
+            posted = [min(ante, cutoff) for ante in posted]
+            self.layered_antes = len(set(posted)) > 1
+        for seat, ante in zip(self.seats, posted, strict=True):
             if ante > 0:
-                ante = min(ante, seat.behind)
                 self.hand.addAnte(seat.name, str(ante), pooled=not self.layered_antes)
                 seat.behind -= ante
                 seat.contributed += ante
@@ -1830,6 +1834,18 @@ class _Builder:
             # What is collected comes out of the pot (less the rake); fpdb would otherwise
             # grow the pot to match and store a win nobody paid for.
             raise self.fail(f"{sum(collected, Decimal(0))} is collected from a pot of {available}")
+        self._check_shares(collected)
+        if self.layered_antes:
+            # With the antes inside the contributions, fpdb can no longer tell an unmatched
+            # bet from the antes it sits on top of: the returns tracked here are applied.
+            for name, amount in self._returned().items():
+                self.hand.addUncalled(self.street, name, str(amount))
+        for seat, amount in zip(self.seats, collected, strict=True):
+            if amount > 0:
+                self.hand.addCollectPot(seat.name, str(amount))
+
+    def _check_shares(self, collected: list[Decimal]) -> None:
+        """Refuse a player collecting more than the pots they are in hold."""
         eligible = self._eligible()
         for seat, amount in zip(self.seats, collected, strict=True):
             if amount > eligible[seat.name]:
@@ -1842,9 +1858,6 @@ class _Builder:
             held = [amount for seat, amount in zip(self.seats, collected, strict=True) if eligible[seat.name] <= cap]
             if sum(held, Decimal(0)) > cap:
                 raise self.fail(f"{sum(held, Decimal(0))} is collected from pots of {cap}")
-        for seat, amount in zip(self.seats, collected, strict=True):
-            if amount > 0:
-                self.hand.addCollectPot(seat.name, str(amount))
 
     def _collected(self, live: list[_Seat]) -> list[Decimal]:
         """What each player collected: from winnings, from finishing stacks, or by a fold-out."""
@@ -1884,7 +1897,7 @@ class _Builder:
         cut at. A folded player, or one who mucked, is eligible for nothing.
         """
         returned = self._returned()
-        layered = getattr(self, "layered_antes", False)
+        layered = self.layered_antes
         net = {
             seat.name: seat.contributed - (Decimal(0) if layered else seat.antes) - returned.get(seat.name, Decimal(0))
             for seat in self.seats

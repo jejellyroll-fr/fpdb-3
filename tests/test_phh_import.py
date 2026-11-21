@@ -3156,7 +3156,10 @@ def test_a_trimmed_short_ante_wins_only_what_was_matched() -> None:
     assert [amount for amount, _players in hand.pot.pots] == [Decimal(15), Decimal(14)]
     # p3's raise nobody called goes back: 10 of ante and the 2 p2 matched.
     assert hand.pot.committed == {"p1": Decimal(5), "p2": Decimal(12), "p3": Decimal(12)}
+    assert hand.pot.returned == {"p3": Decimal(4)}
     assert hand.totalpot == Decimal(29)
+    # Returned before the pots are cut: no part of the raise is booked as rake.
+    assert hand.rake == 0
 
 
 def test_a_trimmed_short_ante_cannot_win_the_side_pot() -> None:
@@ -3171,3 +3174,33 @@ def test_untrimmed_the_short_ante_wins_every_ante() -> None:
     hand = build_hand(document(untrimmed + "winnings = [25, 0, 4]\n"))
     assert hand.collectees == {"p1": Decimal(25), "p3": Decimal(4)}
     assert sum(hand.pot.common.values()) == Decimal(25)
+
+
+UNEVEN_TRIMMED_ANTES = TRIMMED_SHORT_ANTE.replace("antes = [10, 10, 10]", "antes = [10, 20, 10]")
+
+
+def test_a_trimmed_ante_above_every_other_is_cut_to_the_second_largest() -> None:
+    # PokerKit collects the antes like a street's bets: p2's 20 is an over-bet nobody
+    # matched, cut to the 10 p3 posted. The pots are those of even antes.
+    hand = build_hand(document(UNEVEN_TRIMMED_ANTES + "winnings = [15, 0, 14]\n"))
+    assert hand.pot.antes == {"p1": Decimal(5), "p2": Decimal(10), "p3": Decimal(10)}
+    hand.totalPot()
+    assert hand.totalpot == Decimal(29)
+    assert hand.rake == 0
+
+
+def test_a_trimmed_ante_cut_back_cannot_be_won() -> None:
+    error = refusal(UNEVEN_TRIMMED_ANTES + "winnings = [15, 0, 24]\n")
+    assert error.kind == MALFORMED
+    assert "39 is collected from a pot of 29" in str(error)
+
+
+def test_a_lone_big_blind_ante_is_trimmed_away() -> None:
+    # Nobody else antes, so the whole big-blind ante is over the second largest (0) and
+    # goes back: why PokerKit asks for trimming off with big-blind antes.
+    folded = ANTES_HAND.replace("[5, 100, 100]", "[100, 100, 100]").replace('"p2 f"]', '"p1 f", "p2 f"]')
+    big_blind_ante = folded.replace("antes = [10, 10, 10]", "antes = [0, 10, 0]")
+    trimmed = build_hand(document(big_blind_ante + "ante_trimming_status = true\n"))
+    assert sum(trimmed.pot.antes.values()) == 0
+    untrimmed = build_hand(document(big_blind_ante))
+    assert untrimmed.pot.antes["p2"] == Decimal(10)
