@@ -262,3 +262,6 @@ CoinPoker_*_Cash.txt
 /regression-test-files/unsupported-sites/hh_2026_anonymized 2
 /regression-test-files/unsupported-sites/hh-2026-corpus
 /regression-test-files/unsupported-sites/Betclic_new_soft
+
+# Finder launcher written by install_macos.sh
+fpdb.command
