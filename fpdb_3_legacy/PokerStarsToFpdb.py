@@ -21,14 +21,17 @@ from __future__ import annotations
 
 This module provides functionality to parse PokerStars hand history files
 and convert them into FPDB database format. It supports multiple PokerStars
-skins including .COM, .FR, .IT, .ES, .PT, .EU, and .DE variants.
+skins including .COM, .FR, .IT, .ES, .PT, .EU, and .DE variants, and Paddy
+Power's client on PokerStars software (filed by its configured folder, #888).
 
 The converter handles various game types including Hold'em, Omaha, Stud,
 Draw games, and tournaments across different betting structures.
 """
 
 
+import contextlib
 import datetime
+import os
 import re
 from decimal import Decimal
 from pathlib import Path
@@ -51,6 +54,9 @@ SITE_POKERSTARS_ES = 35
 SITE_POKERSTARS_PT = 36
 SITE_POKERSTARS_EU = 37
 SITE_POKERSTARS_DE = 130
+# Paddy Power Poker's client on PokerStars software, opened on 28 October 2026
+# (#888). The older iPoker client keeps its own room, Paddy Power Poker (65).
+SITE_POKERSTARS_PADDY_POWER = 146
 SITE_BOVADA = 19
 SITE_MERGE = 26
 STUD_HOLE_CARDS_COUNT = 3
@@ -64,7 +70,25 @@ POKERSTARS_SKIN_IDS = {
     "PokerStars.PT": SITE_POKERSTARS_PT,
     "PokerStars.EU": SITE_POKERSTARS_EU,
     "PokerStars.DE": SITE_POKERSTARS_DE,
+    "PokerStars on Paddy Power": SITE_POKERSTARS_PADDY_POWER,
 }
+
+# Skins whose client opened after PokerStars' own, with the first day it dealt a
+# hand. A hand dated before it cannot come from that client, whatever its folder
+# or hero mapping says: a Paddy Power player may have played PokerStars under
+# the same screen name before the move (#888).
+POKERSTARS_SKIN_FIRST_DAYS: dict[str, datetime.date] = {
+    "PokerStars on Paddy Power": datetime.date(2026, 10, 28),
+}
+
+# Skins filed by the folder the user configured for them. Nothing in their files
+# names the skin and no default client folder is documented, so fpdb guesses
+# none: the folder the user set as the skin's HH or TS path is the provenance
+# (#888). A copy of the files anywhere else is filed by its content, as
+# PokerStars.COM for GBP stakes, unless its hero is mapped to the skin.
+POKERSTARS_CONFIGURED_PATH_SKINS: tuple[str, ...] = ("PokerStars on Paddy Power",)
+
+_HEADER_DATE = re.compile(r"\b(?P<Y>\d{4})/(?P<M>\d{1,2})/(?P<D>\d{1,2})\b")
 
 # Path patterns for skin detection
 POKERSTARS_PATH_PATTERNS = [
@@ -629,8 +653,16 @@ class PokerStars(HandHistoryConverter):
             tuple[str, int]: The detected skin name and site ID.
         """
         # First, check whether the hero has a mapping configured
-        if hero_result := self._detectSkinByHero(hand_text):
+        if (hero_result := self._detectSkinByHero(hand_text)) and self._skinWasOpen(hero_result[0], hand_text):
             return hero_result
+
+        # Then the folder the user configured for a skin with no known folder
+        if (
+            file_path
+            and (configured := self._detectSkinByConfiguredPath(file_path))
+            and self._skinWasOpen(configured[0], hand_text)
+        ):
+            return configured
 
         # Then try to detect the path
         if file_path and (path_result := self._detectSkinByPath(file_path)):
@@ -638,6 +670,59 @@ class PokerStars(HandHistoryConverter):
 
         # Finally, analyze content
         return self._detectSkinByContent(hand_text)
+
+    def _detectSkinByConfiguredPath(self, file_path: str) -> tuple[str, int] | None:
+        """The skin whose configured HH or TS folder holds ``file_path``, for skins filed that way.
+
+        Only :data:`POKERSTARS_CONFIGURED_PATH_SKINS` are looked up: their client
+        folder is not known, so the user's configuration is the only place it is
+        named. The folder must hold the file, not merely share a prefix with
+        its path. The most specific configured folder wins.
+        """
+        supported = getattr(getattr(self, "config", None), "supported_sites", None) or {}
+        norm_path = os.path.normcase(os.path.abspath(file_path))
+        best: tuple[int, str] | None = None
+        for skin_name in POKERSTARS_CONFIGURED_PATH_SKINS:
+            site = supported.get(skin_name)
+            if site is None:
+                continue
+            for cfg_path in (getattr(site, "HH_path", ""), getattr(site, "TS_path", "")):
+                if not cfg_path or not str(cfg_path).strip():
+                    continue
+                folder = os.path.normcase(os.path.abspath(os.path.expanduser(str(cfg_path))))
+                if norm_path.startswith(folder.rstrip(os.sep) + os.sep) and (best is None or len(folder) > best[0]):
+                    best = (len(folder), skin_name)
+        if best is None:
+            return None
+        return best[1], POKERSTARS_SKIN_IDS[best[1]]
+
+    @staticmethod
+    def _skinWasOpen(skin_name: str, hand_text: str) -> bool:
+        """Whether ``skin_name``'s client could have dealt the hand in ``hand_text``.
+
+        Only a skin with a first day can say no: a hand whose every header date
+        is before that day comes from somewhere else. The latest date counts,
+        so a hand dealt on the first evening, already the next day in one of
+        the header's two zones, is not turned away. A hand with no readable
+        date is given the benefit of the doubt: its folder or hero mapping is
+        all there is to go on.
+        """
+        first_day = POKERSTARS_SKIN_FIRST_DAYS.get(skin_name)
+        if first_day is None:
+            return True
+        dates = []
+        for match in _HEADER_DATE.finditer(hand_text[:2000]):
+            with contextlib.suppress(ValueError):
+                dates.append(datetime.date(int(match["Y"]), int(match["M"]), int(match["D"])))
+        if not dates or max(dates) >= first_day:
+            return True
+        log.warning(
+            "Hand dated %s is before %s opened on %s: not filed under it",
+            max(dates).isoformat(),
+            skin_name,
+            first_day.isoformat(),
+        )
+        return False
 
     def _detectSkinByContent(self, hand_text: str) -> tuple[str, int]:
         """Detects PokerStars skin using hand text content.

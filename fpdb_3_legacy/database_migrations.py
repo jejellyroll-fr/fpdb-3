@@ -61,6 +61,8 @@ SITES_ADDED_LATER: tuple[tuple[int, str, str], ...] = (
     (142, "Betclic", "BC"),  # #730: the 2025+ in-house client
     # 143 is held by PokerStars on Betfair (#733, draft PR #805).
     (144, "BetRivers", "BR"),  # #731: import-only
+    # 145 is held by PokerStars.UK (#889, PR #890).
+    (146, "PokerStars on Paddy Power", "PS"),  # #888: Paddy Power on PokerStars software
 )
 INSERT_SITE_QMARK = "INSERT INTO Sites (id,name,code) VALUES (?,?,?)"
 INSERT_SITE_FORMAT = "INSERT INTO Sites (id,name,code) VALUES (%s,%s,%s)"

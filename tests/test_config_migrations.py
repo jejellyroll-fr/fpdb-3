@@ -9,6 +9,7 @@ import pytest
 from fpdb_3_legacy.config_migrations import reference_errors, upgrade_document, write_upgrade
 from fpdb_3_legacy.Configuration import CONFIG_VERSION
 
+PADDY_POWER = "PokerStars on Paddy Power"
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -283,8 +284,8 @@ def test_v90_adds_the_current_unibet_room():
     updated = upgrade_document(old, template, CONFIG_VERSION)
 
     sites = {node.getAttribute("site_name"): node for node in updated.getElementsByTagName("site")}
-    # v91: Betclic (#730), v94: CoinPoker (#732), v95: BetRivers (#731)
-    assert set(sites) == {"mine", "Unibet", "Betclic", "CoinPoker", "BetRivers"}
+    # v91: Betclic (#730), v94: CoinPoker (#732), v95: BetRivers (#731), v97: Paddy Power (#888)
+    assert set(sites) == {"mine", "Unibet", "Betclic", "CoinPoker", "BetRivers", "PokerStars on Paddy Power"}
     assert sites["Unibet"].getAttribute("network") == "Unibet"
     assert sites["Unibet"].getAttribute("enabled") == "False"
     assert "Unibet_default" in {node.getAttribute("name") for node in updated.getElementsByTagName("ls")}
@@ -308,7 +309,8 @@ def test_v91_adds_the_betclic_2025_room():
     updated = upgrade_document(old, template, CONFIG_VERSION)
 
     sites = {node.getAttribute("site_name"): node for node in updated.getElementsByTagName("site")}
-    assert set(sites) == {"mine", "Betclic", "CoinPoker", "BetRivers"}  # v94 (#732), v95 (#731)
+    # v94 (#732), v95 (#731), v97 (#888)
+    assert set(sites) == {"mine", "Betclic", "CoinPoker", "BetRivers", "PokerStars on Paddy Power"}
     assert sites["Betclic"].getAttribute("network") == "Betclic"
     assert sites["Betclic"].getAttribute("enabled") == "False"
     hhcs = {node.getAttribute("site"): node.getAttribute("converter") for node in updated.getElementsByTagName("hhc")}
@@ -335,7 +337,8 @@ def test_v94_adds_coinpoker_back_as_an_import_only_room():
     updated = upgrade_document(old, template, CONFIG_VERSION)
 
     sites = {node.getAttribute("site_name"): node for node in updated.getElementsByTagName("site")}
-    assert set(sites) == {"mine", "CoinPoker", "BetRivers"}  # v95 adds BetRivers (#731)
+    # v95 adds BetRivers (#731), v97 PokerStars on Paddy Power (#888)
+    assert set(sites) == {"mine", "CoinPoker", "BetRivers", "PokerStars on Paddy Power"}
     assert sites["CoinPoker"].getAttribute("enabled") == "False"
     assert sites["CoinPoker"].getAttribute("aux_enabled") == "False"
     hhcs = {node.getAttribute("site"): node.getAttribute("converter") for node in updated.getElementsByTagName("hhc")}
@@ -374,7 +377,7 @@ def test_v95_adds_betrivers_as_an_import_only_room():
     updated = upgrade_document(old, template, CONFIG_VERSION)
 
     sites = {node.getAttribute("site_name"): node for node in updated.getElementsByTagName("site")}
-    assert set(sites) == {"mine", "BetRivers"}
+    assert set(sites) == {"mine", "BetRivers", "PokerStars on Paddy Power"}  # v97 (#888)
     assert sites["BetRivers"].getAttribute("enabled") == "False"
     assert sites["BetRivers"].getAttribute("aux_enabled") == "False"
     hhcs = {n.getAttribute("site"): n.getAttribute("converter") for n in updated.getElementsByTagName("hhc")}
@@ -396,3 +399,51 @@ def test_v96_gives_ggpoker_its_summary_importer():
 
     assert _importers(updated) == {"GGPoker": "GGPokerSummary", "Winamax": "MySummary"}
     assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()
+
+
+def test_v97_adds_paddy_power_on_pokerstars_as_a_room_of_its_own():
+    # Paddy Power Poker moved to PokerStars software on 28 October 2026 (#888).
+    # The new client gets its own room, off, on PokerStars' network and layouts,
+    # with no folder (none is documented) and no <hhc>: its files go through the
+    # PokerStars entry already there. The iPoker room is left exactly as it was.
+    template = defusedxml.minidom.parse(str(ROOT / "HUD_config.xml.example"))
+    old = parse("""<FreePokerToolsConfig><general version="96"/>
+      <supported_sites>
+      <site site_name="Paddy Power Poker" HH_path="/old/ipoker" network="iPoker"><layout_set ls="custom"/></site>
+      </supported_sites>
+      <layout_sets><ls name="custom"/></layout_sets>
+      <hhcs><hhc site="PokerStars.COM" converter="PokerStarsToFpdb" summaryImporter="PokerStarsSummary"/>
+      <hhc site="Paddy Power Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/></hhcs>
+      </FreePokerToolsConfig>""")
+
+    updated = upgrade_document(old, template, CONFIG_VERSION)
+
+    sites = {node.getAttribute("site_name"): node for node in updated.getElementsByTagName("site")}
+    assert set(sites) == {"Paddy Power Poker", "PokerStars on Paddy Power"}
+    new = sites["PokerStars on Paddy Power"]
+    assert new.getAttribute("enabled") == "False"
+    assert new.getAttribute("network") == "PokerStars"
+    assert new.getAttribute("HH_path") == new.getAttribute("TS_path") == ""
+    assert sites["Paddy Power Poker"].getAttribute("network") == "iPoker"
+    assert sites["Paddy Power Poker"].getAttribute("HH_path") == "/old/ipoker"
+    hhcs = {n.getAttribute("site"): n.getAttribute("converter") for n in updated.getElementsByTagName("hhc")}
+    assert hhcs == {"PokerStars.COM": "PokerStarsToFpdb", "Paddy Power Poker": "iPokerToFpdb"}
+    assert "ps_default" in {node.getAttribute("name") for node in updated.getElementsByTagName("ls")}
+    assert not reference_errors(updated)
+    assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()
+
+
+def test_v97_keeps_a_paddy_power_on_pokerstars_entry_the_user_wrote():
+    template = defusedxml.minidom.parse(str(ROOT / "HUD_config.xml.example"))
+    old = parse("""<FreePokerToolsConfig><general version="96"/>
+      <supported_sites><site site_name="PokerStars on Paddy Power" enabled="True" HH_path="/my/pp">
+      <layout_set ls="custom"/></site></supported_sites>
+      <layout_sets><ls name="custom"/></layout_sets>
+      <hhcs/>
+      </FreePokerToolsConfig>""")
+
+    updated = upgrade_document(old, template, CONFIG_VERSION)
+
+    (site,) = [n for n in updated.getElementsByTagName("site") if n.getAttribute("site_name") == PADDY_POWER]
+    assert site.getAttribute("HH_path") == "/my/pp"
+    assert site.getAttribute("enabled") == "True"
