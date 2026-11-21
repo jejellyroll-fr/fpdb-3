@@ -11,12 +11,15 @@ listed by name rather than left to shift a digest silently.
 
 from __future__ import annotations
 
+import datetime
 import json
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
 from fpdb_3_legacy.FullTiltPokerSummary import FullTiltPokerSummary
+from fpdb_3_legacy.GGPokerSummary import GGPokerSummary
 from fpdb_3_legacy.PacificPokerSummary import PacificPokerSummary
 from fpdb_3_legacy.PokerStarsSummary import PokerStarsSummary
 from fpdb_3_legacy.PokerTrackerSummary import PokerTrackerSummary
@@ -38,6 +41,7 @@ MANIFEST_PATH = ROOT / "tests" / "fixtures" / "summaries" / "summary_snapshots.j
 # Directory -> converter, the site name it reports itself as, and its site id.
 SITES = {
     "FTP": (FullTiltPokerSummary, "Fulltilt", 1),
+    "GGPoker": (GGPokerSummary, "GGPoker", 27),
     "PacificPoker": (PacificPokerSummary, "PacificPoker", 15),
     "PokerTracker": (PokerTrackerSummary, "PokerTracker", 22),
     "Stars": (PokerStarsSummary, "PokerStars", 2),
@@ -94,10 +98,18 @@ def golden_manifest() -> dict:
     return json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
 
 
+def _wall_clock_as_utc(wall_clock, *_zone):
+    return wall_clock.replace(tzinfo=datetime.UTC)
+
+
 def fingerprint_of(site: str, path: Path) -> dict:
     summary_class, sitename, site_id = SITES[site]
     summary = make_summary(summary_class, read_text(path), sitename, site_id, hhtype_for(path))
-    summary.parseSummary()
+    # A GG summary states the player's wall-clock time with no zone, read in
+    # this computer's zone as the hands are; the snapshot reads it as UTC so
+    # its digest is the same on every machine.
+    with patch("fpdb_3_legacy.GGPokerSummary.hand_time_to_utc", _wall_clock_as_utc):
+        summary.parseSummary()
     return summary_fingerprint(summary)
 
 

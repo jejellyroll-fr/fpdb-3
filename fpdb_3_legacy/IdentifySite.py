@@ -60,6 +60,16 @@ re_Head["Fulltilt"] = re.compile(r"^((BEGIN)?\n)?FullTiltPoker.+\n\nSeat", re.MU
 re_XLS["PokerStars"] = re.compile(r"Tournaments\splayed\sby\s\'.+?\'")
 re_XLS["Fulltilt"] = re.compile(r"Player\sTournament\sReport\sfor\s.+?\s\(.*\)")
 re_iPokerNickname = re.compile(r"<nickname>([^<]+)</nickname>")
+# "Poker Hand #ring_623971570:" (#868): a GG-shaped file whose hand number has
+# a lowercase prefix, hexadecimal player ids, seats out of order and bets with
+# no verb ("Hero: $2 to $3"). It is a third-party conversion, not what the GG
+# client writes, and nothing in it can be trusted to parse: name it rather
+# than let it fall through to a bare "siteId Failed".
+re_UnsupportedGGVariant = re.compile(r"\ufeff?\s*Poker\sHand\s\#[a-z]+_\d+:")
+UNSUPPORTED_GG_VARIANT = (
+    "unsupported GG export variant: 'Poker Hand #ring_...' hands come from a third-party "
+    "converter, not the GGPoker client; export the hands from the client instead"
+)
 
 
 class FPDBFile:
@@ -164,6 +174,8 @@ class IdentifySite:
         self.sitelist: dict[int | None, Site] = {}
         self.filelist: dict[str | bytes, FPDBFile] = {}
         self.failed_files = FailureCache()
+        # Why a file was refused, for the files refused for a known reason.
+        self.unsupported: dict[str, str] = {}
         self.re_Identify_PT: re.Pattern[str] | None = None
         self.re_SumIdentify_PT: re.Pattern[str] | None = None
         self.generateSiteList(hhcs)
@@ -351,6 +363,11 @@ class IdentifySite:
     def clear_filelist(self) -> None:
         self.filelist = {}
         self.failed_files = FailureCache()
+        self.unsupported = {}
+
+    def unsupported_reason(self, path) -> str | None:
+        """Why ``path`` was refused, when it is a format fpdb knows and does not import."""
+        return self.unsupported.get(path)
 
     def generateSiteList(self, hhcs) -> None:
         """Generates a ordered dictionary of site, filter and filter name for each site in hhcs."""
@@ -499,6 +516,9 @@ class IdentifySite:
 
         # SwC hands look like "SwCPoker Hand #..." and are currently mis-identified as GGPoker
         first_chunk = whole_file[:5000]
+        if re_UnsupportedGGVariant.match(first_chunk):
+            self.unsupported[path] = UNSUPPORTED_GG_VARIANT
+            return False
         if "SwCPoker Hand #" in first_chunk or "SwCPoker Hand" in first_chunk:
             for _sid, site in list(self.sitelist.items()):
                 if site.name == "SealsWithClubs":

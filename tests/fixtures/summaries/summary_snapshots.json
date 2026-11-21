@@ -167,6 +167,10 @@
     "player_count": 2,
     "sha256": "3cb481e81461b7fed9747e9ec497ca540a8ee585e962ff2b62e51683f4ec18fc"
   },
+  "GGPoker/NLHE-USD-SpinGold-0.25-202512.lottery.txt": {
+    "player_count": 1,
+    "sha256": "a425892a6598ae1b533e890886957717b8a8c76e417004f47128f579b26c4990"
+  },
   "PacificPoker/NLHE-6max-SNG-0.10-201206.summary.txt": {
     "player_count": 1,
     "sha256": "7ee399eeb335b0842dfbc1b7b4ae49ba936b6838b096cc2cfbeca83700201ebc"
