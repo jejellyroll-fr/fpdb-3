@@ -2199,6 +2199,10 @@
     "hand_count": 1,
     "sha256": "4a46ad4a0cde22fe2cac2dcb0264b85fae8e3351b65e9673480379805d56ad7e"
   },
+  "regression/Unibet/Flop/PLO-6max-EUR-0.03-0.05-202611.new.player.and.missed.blinds.txt": {
+    "hand_count": 2,
+    "sha256": "ed019eb88e673b4c8d55b3a78438fe7d0894398a48071301293e3d1e89983c9b"
+  },
   "regression/Winamax/Draw/Triple Draw 2-7-FL-6max-EUR-25-50-201611._8games_.txt": {
     "hand_count": 1,
     "sha256": "f8761e8d1252020226e9af7135a3e636d0cdecd6e35b11d6d5d8a77e55ecab4c"
@@ -2625,7 +2629,7 @@
   },
   "unibet/automatic_plo_cash_2026.txt": {
     "hand_count": 2,
-    "sha256": "5deb580f682ee35286b61639d071ee45d9cabd9e714b2fde94e09a6922bacb89"
+    "sha256": "bb9bc807627710eed0263c10aef8d513121c1561d38809240b90cfb9f5a36430"
   },
   "unibet/banzai.txt": {
     "hand_count": 1,
