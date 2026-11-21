@@ -9,8 +9,9 @@ import sys
 from pathlib import Path
 from typing import Any
 
-# Configuration  logging
-logging.basicConfig(level=logging.INFO)
+# No logging.basicConfig here: a library module must not configure the root
+# logger. Import worker processes (spawn) re-import the entry point, and this
+# call gave them a bare INFO handler before fpdb could silence them (#869).
 log = logging.getLogger("config_initializer")
 
 

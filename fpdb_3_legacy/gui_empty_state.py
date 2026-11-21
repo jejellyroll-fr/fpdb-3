@@ -164,7 +164,9 @@ def show_no_data(
         reason = NoDataReason.EMPTY_DATABASE
 
     headline, hint = _message(reason)
-    log.warning("%s: no data (%s) - %s", context or "GUI", reason.value, headline)
+    # An empty result is a normal UI state (a filter that matches nothing), not
+    # a problem: INFO, so it does not drown the real warnings (#869).
+    log.info("%s: no data (%s) - %s", context or "GUI", reason.value, headline)
 
     if QApplication.instance() is None:  # headless (tests, CLI import)
         return reason

@@ -1778,8 +1778,13 @@ class Winning(HandHistoryConverter):
                 hand.addShownCards(cards=[], player=player, shown=False, mucked=True)
 
     def readSTP(self, hand) -> None:
-        log.debug(f"Starting readSTP for Hand ID: {hand.handid}")
-        log.warning(f"STP functionality not implemented for Hand ID: {hand.handid}")
+        """Read splash-the-pot amounts.
+
+        Winning (ACR) hand histories have no splash-the-pot lines, so there is
+        nothing to read. ``Hand.__init__`` calls this hook for every hand, so it
+        must stay silent (#869).
+        """
+        log.debug("readSTP: no splash-the-pot in Winning hand %s", hand.handid)
 
     def readTourneyResults(self, hand: Hand) -> None:  # noqa: ARG002
         """Read tournament results embedded in the hand text.

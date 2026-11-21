@@ -11,6 +11,7 @@ warning about it reported a parser failure that had not happened.
 
 from __future__ import annotations
 
+import logging
 from decimal import Decimal
 from unittest.mock import MagicMock
 
@@ -72,6 +73,44 @@ def test_an_all_in_blind_followed_by_action_is_not_flagged():
     hand = _hand(_BLIND_ALL_IN, other_actions=[("Benjouille__", "calls", Decimal("40"), False)])
 
     assert _issues(hand) == []
+
+
+def _walk(**overrides):
+    # Full Tilt Matrix hand 31493031208: the small blind folds, but only the
+    # summary says so; the big blind takes the pot (#869).
+    hand = _hand(_BLIND_NORMAL)
+    hand.board = {"FLOP": [], "TURN": [], "RIVER": []}
+    hand.shown = set()
+    hand.collectees = {"kokolantern": Decimal("80")}
+    for name, value in overrides.items():
+        setattr(hand, name, value)
+    return hand
+
+
+def test_a_walk_is_not_a_missing_action():
+    assert _issues(_walk()) == []
+
+
+def test_a_hand_with_board_cards_and_no_action_is_still_flagged():
+    hand = _walk(board={"FLOP": ["2c", "7d", "Kh"], "TURN": [], "RIVER": []})
+
+    assert any("no betting actions" in issue for issue in _issues(hand))
+
+
+def test_a_split_pot_without_action_is_still_flagged():
+    hand = _walk(collectees={"kokolantern": Decimal("40"), "Benjouille__": Decimal("40")})
+
+    assert any("no betting actions" in issue for issue in _issues(hand))
+
+
+def test_the_log_line_does_not_repeat_its_level(caplog):
+    with caplog.at_level(logging.WARNING):
+        issues = _issues(_hand(_BLIND_NORMAL))
+
+    assert issues[-1].startswith("[WARNING] Parsed Winamax hand")
+    messages = [record.getMessage() for record in caplog.records if "expected data is missing" in record.getMessage()]
+    assert messages
+    assert not any(message.startswith("[WARNING]") for message in messages)
 
 
 if __name__ == "__main__":
