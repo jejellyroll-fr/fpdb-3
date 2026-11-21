@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-from __future__ import annotations
-
-# -*- coding: utf-8 -*-
 #
 #    Copyright 2008-2011, Carl Gherardi
 #
@@ -19,15 +16,16 @@ from __future__ import annotations
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ########################################################################
-from fpdb_3_legacy import L10n
+from __future__ import annotations
 
-_ = L10n.get_translation()
-
-import datetime
 import re
 from decimal import Decimal
 
+from fpdb_3_legacy import L10n
+from fpdb_3_legacy.en_datetime import parse_en_datetime
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter, log
+
+_ = L10n.get_translation()
 
 # import TourneySummary
 
@@ -483,7 +481,7 @@ class Fulltilt(HandHistoryConverter):
                 if a.group("PARTIAL"):
                     raise FpdbHandPartial(hid=m.group("HID"))
 
-            hand.startTime = datetime.datetime.strptime(datetimestr, dateformat)
+            hand.startTime = parse_en_datetime(datetimestr, dateformat)
             hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, timezone, "UTC")
 
         if m.group("PARTIAL"):

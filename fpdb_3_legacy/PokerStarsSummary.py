@@ -1,6 +1,4 @@
 # Copyright 2008-2012 Steffen Schaumburg, Carl Gherardi
-from __future__ import annotations
-
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
 # the Free Software Foundation, version 3 of the License.
@@ -16,6 +14,8 @@ from __future__ import annotations
 
 """pokerstars-specific summary parsing code."""
 
+from __future__ import annotations
+
 import datetime
 import quopri
 import re
@@ -23,6 +23,7 @@ from decimal import Decimal
 from typing import Any, ClassVar, NoReturn
 
 from fpdb_3_legacy import PokerStarsStructures
+from fpdb_3_legacy.en_datetime import parse_en_datetime
 from fpdb_3_legacy.HandHistoryConverter import (
     FpdbHandPartial,
     FpdbParseError,
@@ -508,7 +509,7 @@ class PokerStarsSummary(TourneySummary):
                 a.group("S"),
                 a.group("AMPM"),
             )
-            self.endTime = datetime.datetime.strptime(  # noqa: DTZ007
+            self.endTime = parse_en_datetime(
                 datetime_str,
                 "%Y/%m/%d %I:%M:%S %p",
             )  # also timezone at end, e.g. " ET"
