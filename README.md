@@ -184,6 +184,9 @@ release artifacts are Developer ID signed and notarized only when the repository
 credentials are configured; otherwise the workflow publishes an ad-hoc artifact with the limitations
 described there.
 
+Running from source on a Mac instead (an Intel Mac, or to follow `development`)? `./install_macos.sh`
+sets it up in one step: see [docs/macos-install.md](docs/macos-install.md).
+
 ### Update notice
 
 On first start fpdb asks whether it may check for new releases. If you agree, it checks at most once a
@@ -308,6 +311,11 @@ pip install -e .[test]
 uv pip install -e .[test]
 ```
 
+On macOS, `./install_macos.sh` does all of this in one step — Homebrew Python 3.13 and CMake,
+the virtual environment (an existing `.venv`, uv-made included, is reused), the native equity
+engine and a Finder launcher. See [docs/macos-install.md](docs/macos-install.md). The script comes
+from [thegreatgabbsy](https://github.com/thegreatgabbsy)'s fork.
+
 On Windows PowerShell, create and activate the environment with
 `py -3 -m venv .venv` and `.venv\Scripts\Activate.ps1`, then run the same
 `pip install` command.
@@ -318,7 +326,7 @@ Platform/feature extras: `.[linux]`, `.[windows]`, `.[macos]`, `.[postgresql]`, 
 
 Equity calculations (AoF analyses, hand replayer EV) use the
 [pypoker-eval](https://github.com/jejellyroll-fr/poker-eval) C extension. It is a **required**
-dependency, pinned to `v1.2.0`, and pip builds it from source during the install above — which is
+dependency, pinned in `pyproject.toml`, and pip builds it from source during the install above — which is
 why a C compiler and CMake are needed. See [docs/EQUITY_ENGINE.md](docs/EQUITY_ENGINE.md).
 
 ## ▶️ Run
