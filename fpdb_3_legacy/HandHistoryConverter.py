@@ -755,7 +755,12 @@ or None if we fail to get the info """
             # addBlind() sets the fourth element of a blind action when the post
             # leaves the player with an empty stack.
             blind_all_in = any(len(act) > BLIND_ALL_IN_INDEX and act[BLIND_ALL_IN_INDEX] for act in blind_actions)
-            if base in ("hold", "draw", "stud") and non_blind_action_count == 0 and not blind_all_in:
+            if (
+                base in ("hold", "draw", "stud")
+                and non_blind_action_count == 0
+                and not blind_all_in
+                and not self._is_walk(hand)
+            ):
                 issues.append("no betting actions")
 
             hand_text = getattr(hand, "handText", "") or ""
@@ -772,13 +777,32 @@ or None if we fail to get the info """
                 return
 
             msg = (
-                f"[WARNING] Parsed {self.sitename} hand {hand_id} without parser errors, "
+                f"Parsed {self.sitename} hand {hand_id} without parser errors, "
                 f"but expected data is missing: {', '.join(issues)}"
             )
-            self.parsing_issues.append(msg)
+            # The import summary sorts issues by their tag; the log line already
+            # carries its level, so it must not repeat it (#869).
+            self.parsing_issues.append(f"[WARNING] {msg}")
             log.warning(msg)
         except Exception as exc:
             log.warning("Unable to validate parsed hand completeness: %s", exc)
+
+    @staticmethod
+    def _is_walk(hand) -> bool:
+        """Tell whether a hand ended on the blinds with a single winner.
+
+        In a walk everyone folds to the big blind. Some rooms (Full Tilt Matrix,
+        #869) only say so in the summary, so the hand holds no betting action
+        although it is complete. No board card was dealt and one player took the
+        whole pot.
+        """
+        board = getattr(hand, "board", {}) or {}
+        if any(board.values()):
+            return False
+        if getattr(hand, "shown", None):
+            return False
+        collectees = getattr(hand, "collectees", {}) or {}
+        return len(collectees) == 1
 
     def sanityCheck(self):
         """Check we aren't going to do some stupid things."""

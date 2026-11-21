@@ -34,6 +34,8 @@ Configuration.set_logfile("fpdb-log.txt")
 log = get_logger("hand")
 
 HAND_DECIMAL_ERRORS = (InvalidOperation, TypeError, ValueError)
+# A seven-card stud player starts with two down cards and one up card.
+STUD_FIRST_STREET_CARDS = 3
 
 # Rooms whose parser puts room money into the pot with addSTP and records the
 # amount in a Hands column (in cents). HandsActions has no row for that money,
@@ -1482,6 +1484,19 @@ class Hand:
         self.checkPlayerExists(player, "addUncalled")
         self.stacks[player] += amount
         self.pot.removeMoney(player, amount)
+
+    def addUncalledAnte(self, player, amount) -> None:
+        """Give back the part of an ante that no other ante covered.
+
+        Antes are common money, so the returned part comes out of it rather
+        than out of the street bets that addUncalled adjusts.
+        """
+        log.debug(f"BLINDSANTES {player} uncalled ante {amount}")
+        amount = Decimal(str(amount).replace(",", ""))
+        self.checkPlayerExists(player, "addUncalledAnte")
+        self.stacks[player] += amount
+        self.pot.common[player] -= amount
+        self.pot.antes[player] -= amount
 
     def sittingOut(self) -> None:
         dealtIn = set()
@@ -3090,24 +3105,58 @@ class StudHand(Hand):
                     holecards = ["0x", "0x", *holecards]
                 else:
                     return holecards
-            elif len(holecards) == 7:
+            elif len(holecards) == 7 or self._stud_downcards_known(player):
+                # Some rooms (Bovada/Bodog) print every player's down cards, so
+                # a villain who folds on 4th, 5th or 6th street has all their cards
+                # known and nothing to pad (#869).
                 return holecards
             elif len(holecards) <= 4:
                 # Non hero folded before showdown, add first two downcards
                 holecards = ["0x", "0x", *holecards]
             else:
-                log.warning(
-                    f"join_holecards: # of holecards should be either < 4, 4 or 7 - 5 and 6 should be impossible for anyone who is not a hero\njoin_holecards: holecards({player}): {holecards}",
+                self._warn_holecards_once(
+                    player,
+                    "count",
+                    f"join_holecards: hand {self.handid}: {len(holecards)} known cards but no down card "
+                    f"for {player}: {holecards}",
                 )
             if holecards == ["0x", "0x"]:
-                log.warning(
-                    f"join_holecards: Player '{player}' appears not to have been dealt a card",
+                self._warn_holecards_once(
+                    player,
+                    "not_dealt",
+                    f"join_holecards: hand {self.handid}: player '{player}' appears not to have been dealt a card",
                 )
                 # If a player is listed but not dealt a card in a cash game this can occur
                 # Noticed in FTP Razz hand. Return 3 empty cards in this case
                 holecards = ["0x", "0x", "0x"]
             return holecards
         return " ".join(holecards)
+
+    def _stud_downcards_known(self, player) -> bool:
+        """Tell whether the player's first-street down cards were recorded.
+
+        The first street holds two down cards and one up card. When the room
+        shows a villain only their up card, that street holds one card.
+        """
+        first_street = self.holecards.get("THIRD", {}).get(player)
+        if not first_street:
+            return False
+        open_cards, closed_cards = first_street[0], first_street[1]
+        return len(open_cards) + len(closed_cards) >= STUD_FIRST_STREET_CARDS
+
+    def _warn_holecards_once(self, player, kind: str, message: str) -> None:
+        """Log a join_holecards warning once per hand, player and kind.
+
+        join_holecards(asList=True) runs from several import stages (derived
+        stats, starting hands, the stove, the pots, auto-notes), so the same
+        warning used to come out four times for one hand (#869).
+        """
+        warned = self.__dict__.setdefault("_holecard_warnings", set())
+        key = (player, kind)
+        if key in warned:
+            return
+        warned.add(key)
+        log.warning(message)
 
 
 class Pot:

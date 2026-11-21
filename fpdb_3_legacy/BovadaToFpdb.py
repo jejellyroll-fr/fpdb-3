@@ -803,24 +803,24 @@ class Bovada(HandHistoryConverter):
         streetno: int,
         contenders: int,
         bets: int,
-    ) -> tuple[int, int, int, int]:
-        """Process a single action and update street and player state.
+    ) -> tuple[bool, int, int]:
+        """Update the street state for one action.
 
-        This method interprets the action type, updates the number of contenders, bets, and street actions,
-        and returns the updated state for further processing.
+        A bet, a raise or an all-in that opens the betting reopens the street:
+        every remaining contender must act again. A fold only removes the
+        player from the next streets.
 
         Args:
             action: The regex match object representing the action.
             streetno: The current street number.
             contenders: The number of players still in contention.
-            bets: The number of bets made so far.
+            bets: The number of bets made so far on the street.
 
         Returns:
-            tuple[int, int, int, int]: Updated values for streetactions, players, contenders, and bets.
+            tuple[bool, int, int]: Whether the street is reopened, then the
+            updated contenders and bets.
         """
-        streetactions = 0
-        players = contenders
-
+        reopens = False
         atype = action.group("ATYPE")
 
         if atype == " Fold":
@@ -828,18 +828,18 @@ class Bovada(HandHistoryConverter):
         elif atype in (" Raises", " raises"):
             if streetno == 1:
                 bets = 1
-            streetactions, players = 0, contenders
+            reopens = True
         elif atype in (" Bets", " bets", " Double bets"):
-            streetactions, players, bets = 0, contenders, 1
+            reopens, bets = True, 1
         elif atype in (" All-in(raise)", "All-in(raise-timeout)"):
-            streetactions, players = 0, contenders
+            reopens = True
             contenders -= 1
         elif atype == " All-in":
             if bets == 0 and streetno > 1:
-                streetactions, players, bets = 0, contenders, 1
+                reopens, bets = True, 1
             contenders -= 1
 
-        return streetactions, players, contenders, bets
+        return reopens, contenders, bets
 
     def _should_count_action(self, action: "re.Match[str]", hand: "Hand") -> bool:
         """Determine whether an action should be counted for street processing.
@@ -925,28 +925,25 @@ class Bovada(HandHistoryConverter):
         # Process main actions
         m = self.re_action.finditer(self.re_hole_third.split(hand.handText)[-1])
         dealt_in = len(hand.players) - allinblind
-        streetactions, streetno, players, contenders, bets, acts = (
-            0,
-            1,
-            dealt_in,
-            0,
-            dealt_in,
-            None,
-        )
+        # ``players`` is how many actions close the current street, ``contenders``
+        # how many players are still in the hand (#869: they were swapped with
+        # ``bets``, so every dealt card opened a new street).
+        streetactions, streetno, players, contenders, bets, acts = 0, 1, dealt_in, dealt_in, 0, None
 
         for action in m:
             if action.groupdict() != acts or streetactions == 0:
                 acts = action.groupdict()
 
-                # Process the action
-                new_streetactions, new_players, contenders, bets = self._process_street_action(
+                # A bet or a raise reopens the street for the players still in.
+                reopens, new_contenders, bets = self._process_street_action(
                     action,
                     streetno,
                     contenders,
                     bets,
                 )
-                if new_streetactions == 0:  # Action resets street
-                    streetactions, players = new_streetactions, new_players
+                if reopens:
+                    streetactions, players = 0, contenders
+                contenders = new_contenders
 
                 # Count action if applicable
                 if self._should_count_action(action, hand):
@@ -1158,7 +1155,10 @@ class Bovada(HandHistoryConverter):
                         re.MULTILINE,
                     )
                     m = self.re_antes.search(hand.handText)
-                    if re_ante_plyr.search(hand.handText):
+                    # Without antes in the hand, an all-in before the hole cards
+                    # is a blind posted all-in (#869). With antes, it is a blind
+                    # only for a player who also posted an ante chip.
+                    if not m or re_ante_plyr.search(hand.handText):
                         player = self.playerSeatFromPosition(
                             "BovadaToFpdb.readBlinds.postBB",
                             hand.handid,
@@ -1713,10 +1713,15 @@ class Bovada(HandHistoryConverter):
             hand.totalpot = Decimal(pot_amount)
             log.debug("Bovada pot found without rake: pot=%s", hand.totalpot)
         elif self.re_summary.search(hand.handText):
-            log.warning(
-                "Bovada hand %s has Summary section but no pot information - may be incomplete",
-                hand.handid,
-            )
+            # Zone Poker hands always end with an empty *** SUMMARY ***: the pot
+            # comes from the collected amounts (getRake), so this is normal (#869).
+            if hand.isZonePoker:
+                log.debug("Bovada Zone Poker hand %s has an empty Summary section", hand.handid)
+            else:
+                log.warning(
+                    "Bovada hand %s has Summary section but no pot information - may be incomplete",
+                    hand.handid,
+                )
             hand.isZonePoker = True
 
     def getRake(self, hand: "Hand") -> None:

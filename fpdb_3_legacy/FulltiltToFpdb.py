@@ -274,6 +274,12 @@ class Fulltilt(HandHistoryConverter):
             self.re_ReturnsAnte = re.compile(
                 r"^Ante of [{LS}]?[{NUM}]+ returned to {PLAYERS}".format(**substitutions), re.MULTILINE
             )
+            # Before the first street, an uncalled bet can only be the part of an
+            # ante that a short all-in ante does not cover (#869).
+            self.re_UncalledAnte = re.compile(
+                r"^Uncalled bet of [{LS}]?(?P<BET>[{NUM}]+) returned to {PLAYERS}$".format(**substitutions),
+                re.MULTILINE,
+            )
             self.re_BringIn = re.compile(
                 r"^{PLAYERS} brings in for [{LS}]?(?P<BRINGIN>[{NUM}]+)".format(**substitutions), re.MULTILINE
             )
@@ -746,6 +752,11 @@ class Fulltilt(HandHistoryConverter):
             # log.debug("hand.addAnte(%s,%s)" %(player.group('PNAME'), player.group('ANTE')))
             if player.group("PNAME") not in slist:
                 hand.addAnte(player.group("PNAME"), self.clearMoneyString(player.group("ANTE")))
+        # A player whose ante is not covered by an all-in ante gets the
+        # difference back before the cards are dealt (#869).
+        preamble = hand.handText.split("*** ", 1)[0]
+        for uncalled in self.re_UncalledAnte.finditer(preamble):
+            hand.addUncalledAnte(uncalled.group("PNAME"), self.clearMoneyString(uncalled.group("BET")))
 
     def readBringIn(self, hand):
         m = self.re_BringIn.search(hand.handText, re.DOTALL)
