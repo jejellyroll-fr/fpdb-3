@@ -279,7 +279,7 @@ def test_a_disabled_room_can_be_listed_and_turned_on(qtbot) -> None:
 
 @pytest.mark.qt
 def test_a_room_turned_off_stays_listed_while_disabled_rooms_are_shown(qtbot) -> None:
-    cfg, dia = _dialog(qtbot)
+    _cfg, dia = _dialog(qtbot)
     dia.show_disabled_cb.setChecked(True)
     room = next(name for name in sorted(dia.enabled_sites))
 
@@ -292,7 +292,7 @@ def test_a_room_turned_off_stays_listed_while_disabled_rooms_are_shown(qtbot) ->
 
 @pytest.mark.qt
 def test_cards_keep_alphabetical_order_when_hidden_ones_stay_in_the_layout(qtbot) -> None:
-    cfg, dia = _dialog(qtbot)
+    _cfg, dia = _dialog(qtbot)
     # A search hides the enabled cards it does not match; they stay in the layout.
     dia.search_input.setText("pokerstars")
     hidden = set(dia.site_cards) - dia.visible_cards

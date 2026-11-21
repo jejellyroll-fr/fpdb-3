@@ -560,6 +560,11 @@ class ModernSitePreferencesDialog(QDialog):
         self.site_data: dict[str, Any] = {}  # Store data without creating widgets
         self.visible_cards: set[str] = set()  # Keep track of visible cards
         self.enabled_sites: set[str] = set()  # Initialize the set of enabled sites
+        # Built here, not with the Sites tab: filter_sites reads it from the
+        # first load on. A room arrives off (one a config upgrade adds included)
+        # and only rooms that are on are listed: without it nothing here could
+        # turn one on.
+        self.show_disabled_cb = QCheckBox(_("Show disabled sites"))
 
         self._init_profiles_state()
 
@@ -665,10 +670,6 @@ class ModernSitePreferencesDialog(QDialog):
         filter_layout.addWidget(self.search_input)
 
         filter_layout.addSpacing(20)
-        # A room arrives off (a new one added by a config upgrade included), and
-        # only rooms that are on are listed: without this, nothing here could
-        # turn one on.
-        self.show_disabled_cb = QCheckBox(_("Show disabled sites"))
         self.show_disabled_cb.toggled.connect(self.filter_sites)
         filter_layout.addWidget(self.show_disabled_cb)
         filter_layout.addStretch()

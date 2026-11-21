@@ -1,6 +1,6 @@
 """Regressions for stale version-83 HUD files (issue #287)."""
 
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from unittest.mock import patch
 
 import defusedxml.minidom
@@ -532,8 +532,9 @@ def test_v100_adds_the_legacy_pokerstars_uk_room():
     uk = sites["PokerStars.UK"]
     assert uk.getAttribute("enabled") == "False"
     assert uk.getAttribute("network") == "PokerStars"
-    assert "PokerStars.UK" in uk.getAttribute("HH_path")
-    assert "PokerStars.UK" in uk.getAttribute("TS_path")
+    # The UK client's own folders: a path segment, not a substring.
+    assert PureWindowsPath(uk.getAttribute("HH_path")).parts[-2:] == ("PokerStars.UK", "HandHistory")
+    assert PureWindowsPath(uk.getAttribute("TS_path")).parts[-2:] == ("PokerStars.UK", "TournSummary")
     assert {n.getAttribute("ls") for n in uk.getElementsByTagName("layout_set")} == {"ps_default"}
     assert "ps_default" in {node.getAttribute("name") for node in updated.getElementsByTagName("ls")}
     assert [n.getAttribute("site") for n in updated.getElementsByTagName("hhc")] == ["PokerStars"]
