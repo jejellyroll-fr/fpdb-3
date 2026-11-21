@@ -118,14 +118,19 @@ def split_prize_pool(prize_pool: int, shares: Sequence[Fraction]) -> tuple[int, 
     return tuple(amounts)
 
 
-def from_results(results: Sequence[tuple[int, int]], entries: int | None = None) -> tuple[int, ...] | None:
+def from_results(
+    results: Sequence[tuple[int, int]], entries: int | None = None, prize_pool: int | None = None
+) -> tuple[int, ...] | None:
     """The payout structure a tournament's results settle, or None when they do not.
 
     ``results`` are ``(place, winnings)`` pairs. The paid places are 1..k, k the
     last place that won something; the structure is settled when every one of
     them is known and something shows that place k+1 pays nothing -- a known
-    place k+1 that won nothing, or a field of exactly k entries. Results of
-    only some finishers (a summary that lists the hero alone) settle nothing.
+    place k+1 that won nothing, a field of exactly k entries, or a known prize
+    pool the paid places already exhaust (a lottery SNG's summary often lists
+    the winner alone, yet the winner taking the whole pool proves the rest unpaid).
+    Results of only some finishers (a summary that lists the hero alone) settle
+    nothing.
 
     Winnings that are not known -- NULL, or the -1 the importer keeps for a
     prize it could not read -- are no result at all: such a place neither pays
@@ -142,7 +147,8 @@ def from_results(results: Sequence[tuple[int, int]], entries: int | None = None)
     last = max(paid)
     if any(place not in winnings for place in range(1, last + 1)):
         return None
-    if winnings.get(last + 1) != 0 and entries != last:
+    exhausted = prize_pool is not None and sum(winnings.values()) >= prize_pool
+    if winnings.get(last + 1) != 0 and entries != last and not exhausted:
         return None
     return tuple(winnings[place] for place in range(1, last + 1))
 
@@ -197,6 +203,7 @@ class TourneyFacts:
     knockout: bool = False
     bounty: int | None = None
     number: int | None = None  # the room's tournament number
+    lottery: bool = False
 
 
 def tourney_facts(db: Any, tourney_id: int) -> TourneyFacts:
@@ -204,7 +211,7 @@ def tourney_facts(db: Any, tourney_id: int) -> TourneyFacts:
     rows = _query(db, "selectTourneyFacts", (tourney_id,))
     if not rows:
         return TourneyFacts()
-    entries, prize_pool, buy_in, currency, knockout, bounty, number = rows[0]
+    entries, prize_pool, buy_in, currency, knockout, bounty, number, lottery = rows[0]
     return TourneyFacts(
         int(entries) if entries else None,
         int(prize_pool) if prize_pool else None,
@@ -213,6 +220,7 @@ def tourney_facts(db: Any, tourney_id: int) -> TourneyFacts:
         bool(knockout),
         int(bounty) if bounty else None,
         int(number) if number else None,
+        bool(lottery),
     )
 
 
@@ -355,8 +363,14 @@ def payouts_for_tourney(db: Any, tourney_id: int) -> PayoutsLookup:
     if facts.knockout:
         return PayoutsLookup(None, "knockout winnings include bounties: enter the payout structure")
     results = [(place, won) for place, won in _query(db, "selectTourneyResults", (tourney_id,))]
-    settled = from_results(results, facts.entries)
+    settled = from_results(results, facts.entries, facts.prize_pool)
     if settled is None:
+        if facts.lottery:
+            return PayoutsLookup(
+                None,
+                "lottery tournament: its prize pool and split are drawn per tournament "
+                "— import its summary, enter a structure or apply a preset",
+            )
         return PayoutsLookup(None, "no payout structure known: import the summary, enter one or apply a preset")
     return PayoutsLookup(Payouts(settled, SOURCE_SUMMARY, facts.currency))
 

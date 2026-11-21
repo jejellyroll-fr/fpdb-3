@@ -23,10 +23,14 @@ sources, in this order:
    pool is split to the hundredth, so the amounts always add up to it.
 2. **The tournament's results**, when an imported summary settles every paid place:
    the winnings of places 1..k, and proof that place k+1 pays nothing (a known place
-   k+1 that won nothing, or a field of exactly k entries). A summary of the hero alone
-   settles nothing. Knockout tournaments are never read this way, because their
+   k+1 that won nothing, a field of exactly k entries, or a known prize pool the paid
+   places already exhaust — a lottery SNG's summary often lists the winner alone, yet
+   the winner taking the whole pool proves the rest unpaid). A summary of the hero
+   alone settles nothing. Knockout tournaments are never read this way, because their
    winnings include bounties.
-3. **Otherwise, nothing**, and the lookup says why. No structure is ever guessed.
+3. **Otherwise, nothing**, and the lookup says why — for a lottery tournament (Expresso,
+   Power Spin), that its prize pool and split are drawn per tournament and only its
+   summary tells them. No structure is ever guessed.
 
 ### Entering a structure
 
@@ -58,10 +62,10 @@ imported before these fixes need importing again.
 
 `fpdb_3_legacy/hand_icm.py` prices a tournament hand's all-in. The replayer shows the result
 in the **Tournament — ICM** section of its decision panel as soon as the hero is all-in
-(`docs/replayer-decision-panel.md`). For each of the two players, it computes:
+(`docs/replayer-decision-panel.md`). For each contender, it computes:
 
 - **equity** when the money went in, on the board known at that street: wins, losses and
-  ties, with a split pot as its own outcome;
+  ties, with a split pot as its own outcome, split evenly among all the contenders;
 - **chip EV**: that equity's share of the pot, less what the player put in, as the import's
   `allInEV` computes it;
 - **ICM $EV**: the prize equity expected after the hand, less the prize equity the stacks
@@ -71,11 +75,12 @@ in the **Tournament — ICM** section of its decision panel as soon as the hero 
 
 A hand is only priced when its numbers are sound; otherwise the replayer says why:
 
-- **heads-up only**: a multiway all-in has side pots and more outcomes than this prices yet, and so does a side pot
-  one of the two cannot win (a short stack all-in, then a deeper player folding);
+- **a single pot**: a side pot one contender cannot win (a short stack all-in, then a deeper
+  player folding) is refused. A multiway all-in is priced when everyone is in for the same
+  amount; the **bounty** pricing stays heads-up only;
 - **flop games, one winner per pot**: stud and draw are outside the equity engine, and hi/lo
   split pots are not priced yet;
-- **both hands shown**;
+- **every hand shown**;
 - **a payout structure known** for the tournament (see above);
 - **every remaining player's stack**: the players at the table must be the whole field.
   - A single-table tournament is priced as is.

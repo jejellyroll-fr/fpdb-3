@@ -10,9 +10,14 @@ import pytest
 
 from fpdb_3_legacy.replay_history import (
     ACTION,
+    ACTION_ICONS,
+    ACTION_STYLES,
+    DEFAULT_ACTION_STYLE,
     END,
     PHASE,
     RESULT,
+    action_icon,
+    action_style,
     format_history_amount,
     history_row_for_index,
     phase_label,
@@ -82,25 +87,30 @@ def test_holdem_phases_calls_and_raises_to(legacy_config):
         "Player4: folds",
         "Player5: folds",
         "Player6: folds",
-        "Player1: raises to $3.00",
-        # The small blind adds $2.50 to complete the raise, not "$3.00".
-        "Player2: calls $2.50",
+        # A shown hand appears as its cards, not as the amount; the amount stays on the entry.
+        "Player1: raises [Ah Kh]",
+        # The small blind adds $2.50 to complete the raise, not "$3.00" (entry.amount).
+        "Player2: calls [2s 2c]",
         "Player3: folds",
         "Flop dealt: As Ks 2d",
         "Player2: checks",
-        "Player1: bets $4.00",
-        "Player2: calls $4.00",
+        "Player1: bets [Ah Kh]",
+        "Player2: calls [2s 2c]",
         "Turn dealt: Td",
         "Player2: checks",
-        "Player1: bets $10.00",
-        "Player2: raises to $20.00",
-        "Player1: calls $10.00",
+        "Player1: bets [Ah Kh]",
+        "Player2: raises [2s 2c]",
+        "Player1: calls [Ah Kh]",
         "River dealt: Qh",
-        "Player2: bets $20.00",
-        "Player1: calls $20.00",
+        "Player2: bets [2s 2c]",
+        "Player1: calls [Ah Kh]",
         "Hand complete",
         "Player2: collected $95.00",
     ]
+    # The amounts are still on the entries, in order: the raise is to $3.00, the call adds $2.50.
+    by_action = [(entry.player, entry.action, entry.amount) for entry in entries if entry.action in {"raises", "calls"}]
+    assert by_action[0] == ("Player1", "raises", Decimal("3.00"))
+    assert by_action[1] == ("Player2", "calls", Decimal("2.50"))
     # Every entry but the winners seeks to a state of its own, in order.
     assert [entry.index for entry in entries] == [*range(len(states)), len(states) - 1]
     assert entries[-2].kind == END and entries[-1].kind == RESULT
@@ -111,11 +121,15 @@ def test_amounts_in_big_blinds(legacy_config):
 
     entries = replay_history_entries(states, "USD", blind=Decimal(1))
 
-    assert "Player1: raises to 3 BB" in texts(entries)
-    assert "Player2: calls 2.5 BB" in texts(entries)
+    # Shown hands appear as their cards; posts and the collected amount keep the BB figure.
+    assert "Player1: raises [Ah Kh]" in texts(entries)
+    assert "Player2: calls [2s 2c]" in texts(entries)
     assert "Player2: posts small blind 0.5 BB" in texts(entries)
     assert texts(entries)[-1] == "Player2: collected 95 BB"
     assert not any("$" in text for text in texts(entries))
+    # The action amounts are still there, in big blinds' units.
+    amounts = [(entry.action, entry.amount) for entry in entries if entry.action in {"raises", "calls"}]
+    assert amounts[0] == ("raises", Decimal("3.00")) and amounts[1] == ("calls", Decimal("2.50"))
 
 
 def test_all_in_raise_and_call(legacy_config):
@@ -123,8 +137,8 @@ def test_all_in_raise_and_call(legacy_config):
 
     entries = replay_history_entries(states, "USD")
 
-    assert "Player2: raises to $400.00 (all-in)" in texts(entries)
-    assert "Player1: calls $388.00 (all-in)" in texts(entries)
+    assert "Player2: raises to $400.00 (all-in)" in texts(entries)  # Player2's cards are not shown
+    assert "Player1: calls [As Ks Qs Js] (all-in)" in texts(entries)
     allin = [entry for entry in entries if entry.allin]
     assert [(entry.player, entry.action, entry.amount) for entry in allin] == [
         ("Player2", "raises", Decimal(400)),
@@ -160,7 +174,7 @@ def test_stud_streets_antes_and_bring_in(legacy_config):
     ]
     assert "Player1: posts ante $0.10" in texts(entries)
     assert "Player1: brings in $0.25" in texts(entries)
-    assert "Player2: calls $0.25" in texts(entries)
+    assert "Player2: calls [3d]" in texts(entries)  # the up card dealt so far, not the amount
 
 
 def test_run_it_twice_lists_each_run(legacy_config):
@@ -182,7 +196,9 @@ def test_run_it_twice_lists_each_run(legacy_config):
         "Turn dealt (run 2)",
         "River dealt (run 2): 3h",
     ]
-    assert "Hero: bets $3.48 (all-in)" in texts(entries)
+    assert "Hero: bets [As Jc Ts 9d] (all-in)" in texts(entries)
+    # A player whose cards are not shown keeps the amount.
+    assert "a0000001: calls $0.05" in texts(entries)
     # Each street seeks to the state that deals it.
     for entry in phases:
         assert entry.text.startswith(phase_label(states[entry.index].street))
@@ -246,6 +262,47 @@ def test_an_unfinished_list_of_states_has_no_end():
     assert not replay_history_entries([], "USD")
 
 
+def test_a_known_hand_shows_its_cards_instead_of_the_amount():
+    states = [
+        state("PREFLOP", player("A", 100), player("B", 100)),
+        state(
+            "PREFLOP",
+            player("A", 99, chips=1, action="raises", justacted=True, holecards=["Ah", "Kh"]),
+            player("B", 100),
+        ),
+        state("PREFLOP", player("A", 99, chips=1), player("B", 99, chips=1, action="calls", justacted=True)),
+    ]
+
+    entries = replay_history_entries(states, "USD")
+
+    assert texts(entries)[-2] == "A: raises [Ah Kh]"  # the amount stays on the entry
+    assert entries[-2].amount == Decimal(1)
+    assert texts(entries)[-1] == "B: calls $1.00"  # B's cards are not shown: the amount stays
+
+
+def test_cards_the_table_hides_stay_hidden_in_the_history():
+    # "Hide Cards": a villain's hand known from the showdown is not given away by the history.
+    states = [
+        state("PREFLOP", player("Hero", 100), player("Villain", 100)),
+        state(
+            "PREFLOP",
+            player("Hero", 100, holecards=["Qs", "Qd"]),
+            player("Villain", 98, chips=2, action="raises", justacted=True, holecards=["Ah", "Kh"]),
+        ),
+        state(
+            "PREFLOP",
+            player("Hero", 98, chips=2, action="calls", justacted=True, holecards=["Qs", "Qd"]),
+            player("Villain", 98, chips=2, holecards=["Ah", "Kh"]),
+        ),
+    ]
+
+    hidden = replay_history_entries(states, "USD", shows_cards=lambda name: name == "Hero")
+    shown = replay_history_entries(states, "USD", shows_cards=lambda _name: True)
+
+    assert texts(hidden)[-2:] == ["Villain: raises to $2.00", "Hero: calls [Qs Qd]"]
+    assert texts(shown)[-2] == "Villain: raises [Ah Kh]"
+
+
 @pytest.mark.parametrize(
     ("street", "label"),
     [
@@ -291,3 +348,41 @@ def test_the_row_kept_selected_while_stepping():
     assert history_row_for_index([], 3) is None
     # A state without an entry of its own keeps the latest one before it.
     assert history_row_for_index([entries[0], entries[2]], 1) == 0
+
+
+# --- the colour grammar shared by the inspector's timeline and the history window -------------
+
+
+def test_every_action_has_its_own_colour_pair_and_glyph():
+    assert set(ACTION_STYLES) == {"folds", "checks", "calls", "bets", "raises", "collected"}
+    assert set(ACTION_ICONS) == set(ACTION_STYLES)
+    for action in ACTION_STYLES:
+        style = action_style(action)
+        assert style is ACTION_STYLES[action]
+        assert style.foreground.startswith("#") and style.background.startswith("#")
+        assert action_icon(action) == ACTION_ICONS[action]
+    # Bets and raises are distinct, as are calls and checks: the timeline tells them apart.
+    assert action_style("bets") != action_style("raises")
+    assert action_style("calls") != action_style("checks")
+
+
+def test_posts_phases_and_unknown_actions_use_the_default_style():
+    for action in ("small blind", "ante", "bringin", "discards 2", "stands pat", "", None, "mystery"):
+        assert action_style(action) is DEFAULT_ACTION_STYLE
+        assert action_icon(action) == ""
+
+
+def test_the_entries_carry_the_verb_the_colours_come_from():
+    entries = replay_history_entries(
+        [
+            state("PREFLOP", player("A", 100)),
+            state("PREFLOP", player("A", 99, chips=1, action="big blind", justacted=True)),
+            state("PREFLOP", player("A", 97, chips=3, action="raises", justacted=True)),
+            state("PREFLOP", player("B", 98, action="folds", justacted=True), player("A", 97, chips=3)),
+        ],
+        "USD",
+    )
+
+    assert [entry.action for entry in entries] == [None, "big blind", "raises", "folds"]
+    assert action_style(entries[2].action) is ACTION_STYLES["raises"]
+    assert action_style(entries[3].action) is ACTION_STYLES["folds"]

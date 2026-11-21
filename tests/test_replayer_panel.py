@@ -10,7 +10,7 @@ from typing import Any, cast
 
 from fpdb_3_legacy.GuiReplayer import GuiReplayer, ReplayPlayer, TableState
 from fpdb_3_legacy.hand_bounty import AllInBounty, HandBounty
-from fpdb_3_legacy.hand_icm import AllInIcm, HandIcm
+from fpdb_3_legacy.hand_icm import AllInConfrontation, AllInIcm, HandIcm
 from fpdb_3_legacy.replayer_panel import (
     CallFigures,
     DecisionPanel,
@@ -18,7 +18,9 @@ from fpdb_3_legacy.replayer_panel import (
     PanelSection,
     actor_section,
     bounty_section,
+    cash_allin_section,
     icm_section,
+    spr_section,
     tip,
 )
 
@@ -33,6 +35,16 @@ ICM = HandIcm(
         icm_ev={"Hero": -1.29, "Villain": -2.05},
         icm_result={"Hero": -10.52, "Villain": 9.68},
     )
+)
+
+CASH_ALLIN = AllInConfrontation(
+    street="PREFLOP",
+    players=("Hero", "Villain", "Short"),
+    win=(0.407, 0.33, 0.263),
+    tie=0.0,
+    pot=D("300.00"),
+    start={"Hero": D("100.00"), "Villain": D("100.00"), "Short": D("100.00")},
+    committed={"Hero": D("100.00"), "Villain": D("100.00"), "Short": D("100.00")},
 )
 
 PKO = AllInBounty(
@@ -76,7 +88,8 @@ def test_one_hand_equity_and_its_difference_are_shown_once() -> None:
         equity_exhaustive=True,
     )
 
-    compact = rows(actor_section("Hero", amount=money, call=call, spr="1.27"))
+    section = actor_section("Hero", amount=money, call=call, spr="1.27")
+    compact = rows(section)
 
     assert compact == {
         "Call amount": "$29.65",
@@ -84,10 +97,15 @@ def test_one_hand_equity_and_its_difference_are_shown_once() -> None:
         "Required equity": "22.0%",
         "Estimated hand equity": "52.1%",
         "Equity difference": "+30.1 pts",
+        "Against the shown hands only; not an action recommendation.": "",
         "Pot odds": "3.6:1",
         "SPR": "1.27",
     }
     assert not any("Call Eq" in label or "Push" in label for label in compact)
+    # The key figures carry stable semantic ids, so tiles are coloured without reading the labels.
+    keys = [row for row in section.rows if row.key]
+    assert [row.key for row in keys] == ["call_amount", "required_equity", "pot_odds"]
+    assert [row.label for row in keys if row.accent] == ["Required equity"]
 
 
 def test_the_equity_basis_says_how_it_was_computed() -> None:
@@ -97,9 +115,12 @@ def test_the_equity_basis_says_how_it_was_computed() -> None:
 
     assert any("enumerated" in note for note in basis(True))
     assert any("simulated" in note for note in basis(False))
-    # Only in the detailed view.
+    # The basis is detailed-only; the compact view still says the equity is against
+    # the shown hands, never a verdict.
     call = CallFigures(call_amount=D(1), pot_odds_pct=D(25), equity_pct=D(50))
-    assert not notes(actor_section("Hero", amount=money, call=call), detailed=False)
+    compact_notes = notes(actor_section("Hero", amount=money, call=call), detailed=False)
+    assert any("shown hands only" in note and "not an action recommendation" in note for note in compact_notes)
+    assert not any("enumerated" in note or "simulated" in note for note in compact_notes)
 
 
 def test_a_tournament_call_is_chip_equity_never_an_icm_threshold() -> None:
@@ -110,6 +131,9 @@ def test_a_tournament_call_is_chip_equity_never_an_icm_threshold() -> None:
     assert "Required equity" not in rows(section)
     assert "Chip pot odds: not an ICM threshold." in notes(section)
     assert "not an ICM calling threshold" in tip("required_chips")
+    # The tournament's required equity keeps its own semantic id, so its tile says
+    # chip equity with its own precision, not the cash game's.
+    assert [row.key for row in section.rows if row.key] == ["call_amount", "required_chip_equity", "pot_odds"]
 
 
 def test_a_hero_to_act_without_a_call_shows_equity_and_spr_only() -> None:
@@ -118,6 +142,29 @@ def test_a_hero_to_act_without_a_call_shows_equity_and_spr_only() -> None:
     assert section is not None and section.title == "Hero to act"
     assert rows(section) == {"Estimated hand equity": "60.0%", "SPR": "3.5"}
     assert actor_section("Hero", amount=money) is None
+
+
+def test_the_spr_band_is_functional_and_never_a_verdict() -> None:
+    from fpdb_3_legacy.replayer_panel import spr_tone
+
+    assert spr_tone((D("2.5"),)) == "low"
+    assert spr_tone((D("15"),)) == "high"
+    assert spr_tone((D("4.15"), D("5.89"))) == ""  # a mid range stays neutral
+    # The band follows the largest value: the hero's own SPR when an opponent covers it.
+    assert spr_tone((D("2.0"), D("12"))) == "high"
+    assert spr_tone(()) == "" and spr_tone((D(0),)) == ""
+    assert "shallow" in tip("spr") and "not advice" in tip("spr")
+
+    def spr_row(values: tuple) -> PanelRow:
+        section = actor_section("Hero", amount=money, spr="x", spr_values=values)
+        assert section is not None
+        return next(row for row in section.rows if row.label == "SPR")
+
+    assert spr_row((D("2"),)).tone == "low"
+    assert spr_row((D("20"),)).tone == "high"
+    assert spr_row((D("5"),)).tone == ""
+    section = spr_section("Hero", "2.5", spr_values=(D("2.5"),))
+    assert section is not None and section.rows[0].tone == "low"
 
 
 def test_every_figure_is_explained_and_mdf_states_its_model() -> None:
@@ -240,6 +287,7 @@ def test_plo5_short_all_in_call_explains_the_effective_pot() -> None:
     # The three key figures come first, the required equity set apart.
     keys = [row for row in section.rows if row.key]
     assert [row.label for row in keys] == ["Call amount", "Required equity", "Pot odds"]
+    assert [row.key for row in keys] == ["call_amount", "required_equity", "pot_odds"]
     assert [row.label for row in keys if row.accent] == ["Required equity"]
 
 
@@ -277,6 +325,50 @@ def test_icm_that_cannot_be_priced_says_why_and_a_cash_hand_says_nothing() -> No
     assert icm_section(None, "Hero") is None
     # A player outside the priced all-in has nothing to read.
     assert icm_section(ICM, "Short") is None
+
+
+# --- the all-in of a cash hand, in chips ---------------------------------------
+
+
+def test_a_cash_multiway_all_in_is_priced_in_chips_with_its_multiway_note() -> None:
+    amount = lambda value: f"${D(value):.2f}"  # noqa: E731 - the panel's money formatter in the test
+    section = cash_allin_section(CASH_ALLIN, "Hero", amount)
+
+    assert section is not None and section.title == "Cash — all-in"
+    # Equity 40.7% of a $300 pot, less the $100 put in.
+    assert rows(section)["All-in EV"] == "$22.10"
+    assert rows(section, detailed=True)["Equity at the all-in"] == "40.7%"
+    all_notes = notes(section)
+    assert any("priced in chips" in note for note in all_notes)
+    assert any("Multiway all-in on a single pot" in note for note in all_notes)
+
+
+def test_a_cash_heads_up_all_in_says_it_is_heads_up() -> None:
+    heads_up = replace(CASH_ALLIN, players=("Hero", "Villain"), win=(0.407, 0.593), tie=0.0)
+    section = cash_allin_section(heads_up, "Hero", money)
+
+    assert section is not None
+    assert any("Heads-up all-in" in note for note in notes(section))
+    assert not any("Multiway" in note for note in notes(section))
+
+
+def test_a_cash_all_in_says_why_it_cannot_be_priced_and_stays_quiet_without_one() -> None:
+    reason = "side pots are not priced"
+    section = cash_allin_section(None, "Hero", money, reason=reason)
+
+    assert rows(section)["Model status"] == "Unavailable"
+    assert reason in notes(section, detailed=False)
+    assert cash_allin_section(None, "Hero", money, reason="no all-in in this hand") is None
+    # A player outside the all-in has nothing to read.
+    assert cash_allin_section(CASH_ALLIN, "SomeoneElse", money) is None
+
+
+def test_a_multiway_call_says_the_odds_and_equity_are_against_all_opponents() -> None:
+    multiway = actor_section("Hero", amount=money, call=CallFigures(call_amount=D(1), pot_odds_pct=D(25), opponents=2))
+    heads_up = actor_section("Hero", amount=money, call=CallFigures(call_amount=D(1), pot_odds_pct=D(25)))
+
+    assert any("Multiway pot: 2 opponents" in row.label for row in multiway.rows)
+    assert not any("Multiway pot" in row.label for row in heads_up.rows)
 
 
 # --- bounty -------------------------------------------------------------------

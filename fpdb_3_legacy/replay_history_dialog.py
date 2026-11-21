@@ -14,7 +14,7 @@ from PySide6.QtGui import QBrush, QColor, QFont, QKeyEvent
 from PySide6.QtWidgets import QDialog, QLabel, QListWidget, QListWidgetItem, QVBoxLayout, QWidget
 
 from fpdb_3_legacy.i18n import gettext as _
-from fpdb_3_legacy.replay_history import ACTION, ReplayHistoryEntry, history_row_for_index
+from fpdb_3_legacy.replay_history import ACTION, ReplayHistoryEntry, action_style, history_row_for_index
 
 # Keys the replayer handles that keep working while this window has the focus.
 _FORWARDED_KEYS = {
@@ -81,6 +81,10 @@ class ReplayHistoryDialog(QDialog):
                     font.setBold(True)
                     item.setFont(font)
                     item.setForeground(QBrush(QColor("#8fa3b3")))
+                else:
+                    # The same action colours as the inspector's timeline, from the
+                    # entry's action verb rather than its text.
+                    item.setForeground(QBrush(QColor(action_style(entry.action).foreground)))
                 self.list.addItem(item)
         finally:
             self.list.blockSignals(False)

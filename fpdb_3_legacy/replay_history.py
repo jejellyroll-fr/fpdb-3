@@ -5,6 +5,11 @@ seek the replayer to any decision. Nothing here touches Qt widgets: the entries
 are built from the replay states alone (``TableState`` copies, or anything with
 the same attributes), which keeps them testable without a display.
 
+The module also owns the history's colour grammar: :func:`action_style` and
+:func:`action_icon` map an entry's ``action`` to the colours and glyph its line
+is drawn with, so the inspector's timeline and the history window share them
+and neither reads the action back out of a translated string.
+
 After thecrawler1's fork (``personal`` branch, commit af0117a, "add indexed
 action-history navigation"), re-implemented on the current replayer.
 """
@@ -48,6 +53,48 @@ _POSTS = {
     "ante": "posts ante",
     "bringin": "brings in",
 }
+
+
+@dataclass(frozen=True)
+class ActionStyle:
+    """The two colours a history line is drawn with: its text on its own chip."""
+
+    foreground: str
+    background: str
+
+
+# One colour pair per action, the same on every street, in cash games and tournaments:
+# folds red, checks grey-blue, calls cyan, bets yellow, raises orange, winnings green.
+# Posts (blinds, antes, bring-in), discards and phase lines use the default.
+ACTION_STYLES = {
+    "folds": ActionStyle("#FF7186", "#40202D"),
+    "checks": ActionStyle("#A2C5D4", "#263847"),
+    "calls": ActionStyle("#32D5EA", "#103946"),
+    "bets": ActionStyle("#F7D54A", "#43391B"),
+    "raises": ActionStyle("#FFAC57", "#45301E"),
+    "collected": ActionStyle("#53DF9B", "#173B31"),
+}
+DEFAULT_ACTION_STYLE = ActionStyle("#B9C6D1", "#24313E")
+
+# The glyph drawn before an action's text, so its kind is read before its words.
+ACTION_ICONS = {
+    "folds": "✕",
+    "checks": "✓",
+    "calls": "↳",
+    "bets": "●",
+    "raises": "⇈",
+    "collected": "+",
+}
+
+
+def action_style(action: str | None) -> ActionStyle:
+    """The colours of an action line, from the action itself, never from its translated text."""
+    return ACTION_STYLES.get(action or "", DEFAULT_ACTION_STYLE)
+
+
+def action_icon(action: str | None) -> str:
+    """The glyph of an action line; empty for phases, posts and plain results."""
+    return ACTION_ICONS.get(action or "", "")
 
 
 @dataclass(frozen=True)
@@ -155,21 +202,43 @@ def _action_amount(verb: str, previous: Any | None, player: Any) -> Decimal | No
     return None
 
 
-def _action_text(verb: str, action: str, player: Any, amount: str | None) -> str:
+_RANKS = "23456789TJQKA"
+_SUITS = "shdc"
+
+
+def _known_hole_cards(player: Any) -> tuple[str, ...]:
+    """The player's hole cards when the hand shows them (the hero, or a shown hand); else none."""
+    cards = getattr(player, "holecards", None) or []
+    return tuple(card for card in cards if len(card) == 2 and card[0] in _RANKS and card[1] in _SUITS)
+
+
+def _action_text(verb: str, action: str, player: Any, amount: str | None, cards: tuple[str, ...] = ()) -> str:
+    if cards and amount is not None and verb not in _POSTS:
+        # A known hand is shown as its cards in the history, not as the bet's amount (#872);
+        # posts keep their amount: the blind or ante is the point of the line.
+        return f"{player.name}: {verb} [{' '.join(cards)}]"
     if verb == "raises":
         return f"{player.name}: raises to {amount}"
     if amount is not None:
         return f"{player.name}: {_POSTS.get(verb, verb)} {amount}"
-    cards = list(getattr(player, "discardCards", None) or []) if verb == "discards" else []
-    return f"{player.name}: {action}" + (f" [{' '.join(cards)}]" if cards else "")
+    discard_cards = list(getattr(player, "discardCards", None) or []) if verb == "discards" else []
+    return f"{player.name}: {action}" + (f" [{' '.join(discard_cards)}]" if discard_cards else "")
 
 
-def _action_entry(index: int, previous: Any | None, player: Any, money: Callable[[Decimal], str]) -> ReplayHistoryEntry:
+def _action_entry(
+    index: int,
+    previous: Any | None,
+    player: Any,
+    money: Callable[[Decimal], str],
+    shows_cards: Callable[[str], bool] | None = None,
+) -> ReplayHistoryEntry:
     action = str(player.action or "")
     verb = action.split(" ", 1)[0] if action.startswith("discards") else action
     became_allin = bool(getattr(player, "allin", False)) and verb not in {"folds", "checks", "discards", "stands pat"}
     amount = _action_amount(verb, previous, player)
-    text = _action_text(verb, action, player, None if amount is None else money(amount))
+    # Cards the table hides ("Hide Cards") stay hidden here too: no villain hand ahead of its showdown.
+    cards = _known_hole_cards(player) if shows_cards is None or shows_cards(player.name) else ()
+    text = _action_text(verb, action, player, None if amount is None else money(amount), cards)
     return ReplayHistoryEntry(
         index=index,
         kind=ACTION,
@@ -201,7 +270,11 @@ def _end_entries(index: int, state: Any, money: Callable[[Decimal], str]) -> lis
 
 
 def _state_entries(
-    index: int, state: Any, previous: Any | None, money: Callable[[Decimal], str]
+    index: int,
+    state: Any,
+    previous: Any | None,
+    money: Callable[[Decimal], str],
+    shows_cards: Callable[[str], bool] | None = None,
 ) -> list[ReplayHistoryEntry]:
     """The entries one replay state gives: the end of the hand, a new street, or an action."""
     if getattr(state, "ended", False):
@@ -211,13 +284,14 @@ def _state_entries(
     player = _actor(state)
     if player is None or not player.action:
         return []
-    return [_action_entry(index, previous, player, money)]
+    return [_action_entry(index, previous, player, money, shows_cards)]
 
 
 def replay_history_entries(
     states: Sequence[Any],
     currency: str,
     blind: Decimal | None = None,
+    shows_cards: Callable[[str], bool] | None = None,
 ) -> list[ReplayHistoryEntry]:
     """The hand's history, in order, each entry pointing at the replay state to seek.
 
@@ -225,7 +299,8 @@ def replay_history_entries(
     starts a street; every other state is one player's action. The last state
     of a finished hand gives ``Hand complete`` followed by what each winner
     collected, all seeking to that state. Amounts are in *currency*, or in big
-    blinds when *blind* is given.
+    blinds when *blind* is given. With *shows_cards*, a player's known cards
+    appear only when it accepts the player's name, as the table hides them.
     """
 
     def money(value: Decimal) -> str:
@@ -233,15 +308,16 @@ def replay_history_entries(
 
     entries: list[ReplayHistoryEntry] = []
     for index, state in enumerate(states):
-        entries.extend(_state_entries(index, state, states[index - 1] if index else None, money))
+        entries.extend(_state_entries(index, state, states[index - 1] if index else None, money, shows_cards))
     return entries
 
 
-def history_row_for_index(entries: Sequence[ReplayHistoryEntry], index: int) -> int | None:
+def history_row_for_index(entries: Sequence[Any], index: int) -> int | None:
     """The row to highlight while the replayer shows state *index*.
 
     That is the entry of the latest state shown so far; when several entries
-    share it (``Hand complete`` and the winners), the first of them.
+    share it (``Hand complete`` and the winners), the first of them. Any sequence
+    of rows with an ``index`` works, the history entries or the inspector's.
     """
     best: int | None = None
     for row, entry in enumerate(entries):

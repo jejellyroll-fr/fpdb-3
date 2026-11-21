@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 20:02+0100\n"
+"POT-Creation-Date: 2026-11-21 01:06+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1939,6 +1939,11 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
 msgid "This hand has no big blind to count amounts in"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(street)s · action %(step)s/%(total)s"
 msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
@@ -6197,12 +6202,32 @@ msgstr ""
 msgid "Import Successful"
 msgstr ""
 
-#: fpdb_3_legacy/replay_history_dialog.py
+#: fpdb_3_legacy/replay_history_dialog.py fpdb_3_legacy/replay_inspector.py
 msgid "Action history"
 msgstr ""
 
 #: fpdb_3_legacy/replay_history_dialog.py
 msgid "Click an action, or select it and press Enter, to jump to it."
+msgstr ""
+
+#: fpdb_3_legacy/replay_inspector.py
+msgid "Action inspector"
+msgstr ""
+
+#: fpdb_3_legacy/replay_inspector.py
+msgid "Hide or show the inspector"
+msgstr ""
+
+#: fpdb_3_legacy/replay_inspector.py
+msgid "Click an action to go back to it"
+msgstr ""
+
+#: fpdb_3_legacy/replay_inspector.py
+msgid "Hide the advanced calculations"
+msgstr ""
+
+#: fpdb_3_legacy/replay_inspector.py
+msgid "Show the advanced calculations"
 msgstr ""
 
 #: fpdb_3_legacy/replayer_panel.py
@@ -6278,7 +6303,9 @@ msgstr ""
 #: fpdb_3_legacy/replayer_panel.py
 msgid ""
 "Stack-to-pot ratio: the effective stack at the start of the street divided "
-"by the pot then. A range when the opponents' stacks differ."
+"by the pot then. A range when the opponents' stacks differ. Below 3 the "
+"stack is shallow against the pot, above 10 it is deep: descriptive bands, "
+"not advice."
 msgstr ""
 
 #: fpdb_3_legacy/replayer_panel.py
@@ -6414,6 +6441,10 @@ msgid "Equity difference"
 msgstr ""
 
 #: fpdb_3_legacy/replayer_panel.py
+msgid "Against the shown hands only; not an action recommendation."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
 #, python-format
 msgid "%(ratio)s:1"
 msgstr ""
@@ -6428,6 +6459,13 @@ msgstr ""
 
 #: fpdb_3_legacy/replayer_panel.py
 msgid "Chip pot odds: not an ICM threshold."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+#, python-format
+msgid ""
+"Multiway pot: %(n)s opponents live; the odds and equity are against all of "
+"them."
 msgstr ""
 
 #: fpdb_3_legacy/replayer_panel.py
@@ -6507,7 +6545,29 @@ msgid "Equity at the all-in"
 msgstr ""
 
 #: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"Multiway all-in on a single pot: split pots are split evenly among the "
+"players left."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
 msgid "Heads-up all-in, priced with the stored payouts."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Cash — all-in"
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py fpdb_3_legacy/results_calendar.py
+msgid "All-in EV"
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Cash game: priced in chips, no ICM."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Heads-up all-in, priced in chips."
 msgstr ""
 
 #: fpdb_3_legacy/replayer_panel.py
@@ -7427,10 +7487,6 @@ msgstr ""
 
 #: fpdb_3_legacy/results_calendar.py
 msgid "Week"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "All-in EV"
 msgstr ""
 
 #: fpdb_3_legacy/results_calendar.py

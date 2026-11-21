@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 20:02+0100\n"
+"POT-Creation-Date: 2026-11-21 01:06+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -1926,6 +1926,11 @@ msgstr "Valeur (double clic pour changer)"
 #: fpdb_3_legacy/GuiPrefs.py
 msgid "Window"
 msgstr "Fenetre"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(street)s · action %(step)s/%(total)s"
+msgstr "%(street)s · action %(step)s/%(total)s"
 
 #: fpdb_3_legacy/GuiReplayer.py
 msgid ""
@@ -6614,7 +6619,7 @@ msgstr ""
 "Ce paquet a été converti depuis PokerTracker 4 : %d de ses stats n'ont pas "
 "d'équivalent fpdb et n'y figurent pas :"
 
-#: fpdb_3_legacy/replay_history_dialog.py
+#: fpdb_3_legacy/replay_history_dialog.py fpdb_3_legacy/replay_inspector.py
 msgid "Action history"
 msgstr "Historique des actions"
 
@@ -6623,6 +6628,26 @@ msgid "Click an action, or select it and press Enter, to jump to it."
 msgstr ""
 "Cliquez sur une action, ou sélectionnez-la et appuyez sur Entrée, pour y "
 "aller."
+
+#: fpdb_3_legacy/replay_inspector.py
+msgid "Action inspector"
+msgstr "Inspecteur d'action"
+
+#: fpdb_3_legacy/replay_inspector.py
+msgid "Click an action to go back to it"
+msgstr "Cliquez sur une action pour y revenir"
+
+#: fpdb_3_legacy/replay_inspector.py
+msgid "Hide or show the inspector"
+msgstr "Masquer ou afficher l'inspecteur"
+
+#: fpdb_3_legacy/replay_inspector.py
+msgid "Hide the advanced calculations"
+msgstr "Masquer les calculs avancés"
+
+#: fpdb_3_legacy/replay_inspector.py
+msgid "Show the advanced calculations"
+msgstr "Afficher les calculs avancés"
 
 #: fpdb_3_legacy/replayer_panel.py
 #, python-format
@@ -6669,6 +6694,15 @@ msgid "Added to own bounty"
 msgstr "Ajouté à sa propre prime"
 
 #: fpdb_3_legacy/replayer_panel.py
+msgid "Against the shown hands only; not an action recommendation."
+msgstr ""
+"Contre les mains montrées uniquement ; pas une recommandation d'action."
+
+#: fpdb_3_legacy/replayer_panel.py fpdb_3_legacy/results_calendar.py
+msgid "All-in EV"
+msgstr "EV all-in"
+
+#: fpdb_3_legacy/replayer_panel.py
 msgid "Available"
 msgstr "Disponible"
 
@@ -6687,6 +6721,14 @@ msgstr "EV en jetons ajustée de la prime"
 #: fpdb_3_legacy/replayer_panel.py
 msgid "Call amount"
 msgstr "Montant à payer"
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Cash game: priced in chips, no ICM."
+msgstr "Partie cash : évalué en jetons, sans ICM."
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Cash — all-in"
+msgstr "Cash — all-in"
 
 #: fpdb_3_legacy/replayer_panel.py
 msgid "Chip EV"
@@ -6762,6 +6804,10 @@ msgstr "Face à"
 #: fpdb_3_legacy/replayer_panel.py
 msgid "Fold equity needed (heads-up)"
 msgstr "Fold equity nécessaire (heads-up)"
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Heads-up all-in, priced in chips."
+msgstr "All-in heads-up, évalué en jetons."
 
 #: fpdb_3_legacy/replayer_panel.py
 msgid "Heads-up all-in, priced with the stored payouts."
@@ -6840,6 +6886,23 @@ msgstr ""
 "entre d'autres joueurs."
 
 #: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"Multiway all-in on a single pot: split pots are split evenly among the "
+"players left."
+msgstr ""
+"All-in multiway sur un seul pot : les pots partagés sont répartis à parts "
+"égales entre les joueurs restants."
+
+#: fpdb_3_legacy/replayer_panel.py
+#, python-format
+msgid ""
+"Multiway pot: %(n)s opponents live; the odds and equity are against all of "
+"them."
+msgstr ""
+"Pot multiway : %(n)s adversaires encore en jeu ; les cotes et l'équité sont "
+"calculées contre tous."
+
+#: fpdb_3_legacy/replayer_panel.py
 msgid "Not added to ICM $EV: this is not a complete PKO model."
 msgstr "Non ajoutée à la $EV ICM : ce n'est pas un modèle PKO complet."
 
@@ -6916,10 +6979,14 @@ msgstr ""
 #: fpdb_3_legacy/replayer_panel.py
 msgid ""
 "Stack-to-pot ratio: the effective stack at the start of the street divided "
-"by the pot then. A range when the opponents' stacks differ."
+"by the pot then. A range when the opponents' stacks differ. Below 3 the "
+"stack is shallow against the pot, above 10 it is deep: descriptive bands, "
+"not advice."
 msgstr ""
 "Ratio tapis/pot : le tapis effectif au début du tour divisé par le pot à ce "
-"moment. Une fourchette quand les tapis des adversaires diffèrent."
+"moment. Une fourchette quand les tapis des adversaires diffèrent. En dessous "
+"de 3 le tapis est court face au pot, au-dessus de 10 il est profond : des "
+"repères descriptifs, pas des conseils."
 
 #: fpdb_3_legacy/replayer_panel.py
 msgid "The bet faced, in percent of the pot before it."
@@ -7892,10 +7959,6 @@ msgstr "Pot-Limit Omaha 5 cartes"
 #: fpdb_3_legacy/results_calendar.py
 msgid "All hands of the filtered dates"
 msgstr "Toutes les mains des dates filtrées"
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "All-in EV"
-msgstr "EV all-in"
 
 #: fpdb_3_legacy/results_calendar.py
 msgid "All-in EV (BB)"

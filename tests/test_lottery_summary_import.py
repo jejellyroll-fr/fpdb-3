@@ -80,6 +80,21 @@ def test_expresso_is_one_lottery_tournament(tmp_path: Path, files: tuple[Path, P
     assert _rows(db, RESULTS) == [("Hero", 1, 300)]
 
 
+def test_the_expresso_winner_alone_settles_winner_take_all_from_the_pool(tmp_path: Path) -> None:
+    # The summary lists only the winner, but his 300 are the whole prize pool:
+    # the places after him pay nothing, so the structure is settled (#872).
+    from fpdb_3_legacy import tourney_payouts
+
+    db = _import(tmp_path, EXPRESSO_HANDS, EXPRESSO_SUMMARY)
+    (hand_id,) = _rows(db, "SELECT h.id FROM Hands h WHERE h.tourneyId IS NOT NULL LIMIT 1")[0]
+
+    found = tourney_payouts.payouts_for_hand(db, hand_id)
+
+    assert found.payouts is not None
+    assert found.payouts.amounts == (300,)
+    assert found.payouts.source == "summary"
+
+
 def test_power_spin_result_goes_to_the_hands_player(tmp_path: Path) -> None:
     db = _import(tmp_path, POWER_SPIN_HANDS, POWER_SPIN_SUMMARY)
 

@@ -50,8 +50,10 @@ def test_a_opens_the_history_on_the_current_step(qtbot, replayer) -> None:
     assert dialog is not None and dialog.isVisible()
     texts = rows(dialog)
     assert texts[0] == "Blinds and antes"
-    assert "Player1: raises to $3.00" in texts
+    assert "Player1: raises [Ah Kh]" in texts
+    # "Hide Cards" is on by default: the villain's hand stays hidden in the history too.
     assert "Player2: calls $2.50" in texts
+    assert not any("[2s 2c]" in text for text in texts)
     assert texts[-2:] == ["Hand complete", "Player2: collected $95.00"]
     assert dialog.list.currentRow() == 0
 
@@ -67,6 +69,13 @@ def test_clicking_an_entry_seeks_to_it(qtbot, replayer) -> None:
     assert replayer.stateSlider.value() == dialog.entries[row].index
     assert replayer.states[replayer.stateSlider.value()].street == "FLOP"
     assert dialog.list.currentRow() == row
+
+
+def test_unhiding_the_cards_shows_the_villain_s_hand_in_the_history(qtbot, replayer) -> None:
+    replayer.history_clicked()
+    replayer.showCards.setChecked(False)
+
+    assert "Player2: calls [2s 2c]" in rows(replayer.history_dialog)
 
 
 def test_enter_seeks_to_the_selected_entry(qtbot, replayer) -> None:
@@ -172,11 +181,11 @@ def test_amounts_follow_the_big_blind_toggle(replayer) -> None:
 
     replayer.history_clicked()
     dialog = replayer.history_dialog
-    assert "Player1: raises to $3.00" in rows(dialog)
+    assert "Player1: raises [Ah Kh]" in rows(dialog)
 
     toggle.setChecked(True)
-    assert "Player1: raises to 3 BB" in rows(dialog)
+    assert "Player1: raises [Ah Kh]" in rows(dialog)  # amount kept on the entry
     assert rows(dialog)[-1] == "Player2: collected 95 BB"
 
     toggle.setChecked(False)
-    assert "Player1: raises to $3.00" in rows(dialog)
+    assert "Player1: raises [Ah Kh]" in rows(dialog)

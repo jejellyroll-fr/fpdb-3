@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 20:02+0100\n"
+"POT-Creation-Date: 2026-11-21 01:06+0100\n"
 "PO-Revision-Date: 2011-12-03 21:57+0000\n"
 "Last-Translator: LimburgCwboy <hdps.een@gmail.com>\n"
 "Language-Team: Dutch (Netherlands) (http://www.transifex.net/projects/p/fpdb/"
@@ -2205,6 +2205,11 @@ msgstr "Waarde (dubbelklik om te wijzigen)"
 #, fuzzy
 msgid "Window"
 msgstr "Venster"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(street)s · action %(step)s/%(total)s"
+msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
 msgid ""
@@ -7336,13 +7341,35 @@ msgid ""
 "equivalent and are not in it:"
 msgstr ""
 
-#: fpdb_3_legacy/replay_history_dialog.py
+#: fpdb_3_legacy/replay_history_dialog.py fpdb_3_legacy/replay_inspector.py
 msgid "Action history"
 msgstr ""
 
 #: fpdb_3_legacy/replay_history_dialog.py
 msgid "Click an action, or select it and press Enter, to jump to it."
 msgstr ""
+
+#: fpdb_3_legacy/replay_inspector.py
+#, fuzzy
+msgid "Action inspector"
+msgstr "Acties"
+
+#: fpdb_3_legacy/replay_inspector.py
+msgid "Click an action to go back to it"
+msgstr ""
+
+#: fpdb_3_legacy/replay_inspector.py
+msgid "Hide or show the inspector"
+msgstr ""
+
+#: fpdb_3_legacy/replay_inspector.py
+msgid "Hide the advanced calculations"
+msgstr ""
+
+#: fpdb_3_legacy/replay_inspector.py
+#, fuzzy
+msgid "Show the advanced calculations"
+msgstr "aantal acties"
 
 #: fpdb_3_legacy/replayer_panel.py
 #, python-format
@@ -7389,6 +7416,15 @@ msgid "Added to own bounty"
 msgstr ""
 
 #: fpdb_3_legacy/replayer_panel.py
+msgid "Against the shown hands only; not an action recommendation."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py fpdb_3_legacy/results_calendar.py
+#, fuzzy
+msgid "All-in EV"
+msgstr "All-in"
+
+#: fpdb_3_legacy/replayer_panel.py
 #, fuzzy
 msgid "Available"
 msgstr "Cash-spelersstatistieken"
@@ -7410,6 +7446,14 @@ msgstr ""
 #, fuzzy
 msgid "Call amount"
 msgstr "Open gecalld"
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Cash game: priced in chips, no ICM."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Cash — all-in"
+msgstr ""
 
 #: fpdb_3_legacy/replayer_panel.py
 msgid "Chip EV"
@@ -7482,6 +7526,10 @@ msgid "Fold equity needed (heads-up)"
 msgstr ""
 
 #: fpdb_3_legacy/replayer_panel.py
+msgid "Heads-up all-in, priced in chips."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
 msgid "Heads-up all-in, priced with the stored payouts."
 msgstr ""
 
@@ -7543,6 +7591,19 @@ msgid ""
 "Money on the table the call cannot win: the part of a bet larger than the "
 "caller's stack, which goes back uncalled, or a side pot between other "
 "players."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"Multiway all-in on a single pot: split pots are split evenly among the "
+"players left."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+#, python-format
+msgid ""
+"Multiway pot: %(n)s opponents live; the odds and equity are against all of "
+"them."
 msgstr ""
 
 #: fpdb_3_legacy/replayer_panel.py
@@ -7611,7 +7672,9 @@ msgstr ""
 #: fpdb_3_legacy/replayer_panel.py
 msgid ""
 "Stack-to-pot ratio: the effective stack at the start of the street divided "
-"by the pot then. A range when the opponents' stacks differ."
+"by the pot then. A range when the opponents' stacks differ. Below 3 the "
+"stack is shallow against the pot, above 10 it is deep: descriptive bands, "
+"not advice."
 msgstr ""
 
 #: fpdb_3_legacy/replayer_panel.py
@@ -8786,11 +8849,6 @@ msgstr "Pot-Limit Omaha 5 kaarten"
 #, fuzzy
 msgid "All hands of the filtered dates"
 msgstr "Alle handen van de populatie"
-
-#: fpdb_3_legacy/results_calendar.py
-#, fuzzy
-msgid "All-in EV"
-msgstr "All-in"
 
 #: fpdb_3_legacy/results_calendar.py
 #, fuzzy

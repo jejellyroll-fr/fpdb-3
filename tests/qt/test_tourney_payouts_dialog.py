@@ -85,6 +85,7 @@ def test_the_replayer_prices_the_hand_again_only_when_the_structure_changed(qtbo
         shared_hand="hand",
         hand_icm=None,
         _price_hand_icm=lambda hand: priced.append(hand) or "priced",
+        _refresh_inspector=lambda: None,
         update=lambda: None,
     )
 

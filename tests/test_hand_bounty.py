@@ -114,9 +114,11 @@ def test_a_regular_knockout_without_its_bounty_says_so(tmp_path) -> None:
 
 
 def test_what_the_all_in_cannot_price_is_said(tmp_path) -> None:
+    # Short calls for 800 out of 1000: 2000 of Hero's 4000 is a side pot, said as such.
+    # A clean three-way shove on one pot is refused as multiway (test_hand_icm covers it).
     hand, _ = parse(tmp_path, PKO.replace("Short: folds", "Short: calls 800 and is all-in"))
 
-    assert "multiway" in hand_allin_bounty(hand, BountyRules(), equity_fn=EQUITY).reason
+    assert "side pot" in hand_allin_bounty(hand, BountyRules(), equity_fn=EQUITY).reason
 
 
 # --- what the replayer gets --------------------------------------------------------------

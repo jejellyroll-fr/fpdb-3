@@ -9,6 +9,7 @@ a fixed result otherwise, so the arithmetic is checked either way.
 from __future__ import annotations
 
 from decimal import Decimal
+from types import SimpleNamespace
 
 import pytest
 
@@ -96,12 +97,92 @@ def test_the_equity_engine_gives_aks_against_queens_its_known_share(tmp_path) ->
 # --- what is not priced, and why -------------------------------------------------------
 
 
-def test_a_multiway_all_in_is_not_priced(tmp_path) -> None:
+def test_a_multiway_all_in_with_a_side_pot_is_not_priced(tmp_path) -> None:
+    # Short calls for 800 out of a 1000 stack: 2000 of Hero's 4000 is a side pot Short
+    # cannot win, so the confrontation is refused even though three players are all-in.
     hand, _ = parse(tmp_path, SNG_ALLIN.replace("Short: folds", "Short: calls 800 and is all-in"))
 
     priced = hand_allin_icm(hand, PAYOUTS, equity_fn=fixed_equity(1, 1))
 
-    assert priced.allin is None and "multiway" in priced.reason
+    assert priced.allin is None and "side pot" in priced.reason
+
+
+# Three equal stacks shove preflop: a multiway all-in on a single pot, which is priced.
+THREE_WAY = (
+    SNG_ALLIN.replace("Seat 3: Villain (3000 in chips)", "Seat 3: Villain (4000 in chips)")
+    .replace("Seat 5: Short (1000 in chips)", "Seat 5: Short (4000 in chips)")
+    .replace(
+        "Hero: raises 3800 to 4000 and is all-in\nVillain: calls 2900 and is all-in\nShort: folds\nUncalled bet (1000) returned to Hero",
+        "Hero: raises 3800 to 4000 and is all-in\nVillain: calls 3900 and is all-in\nShort: calls 3800 and is all-in",
+    )
+    .replace(
+        "Hero: shows [As Ks] (high card Ace)\nVillain: shows [Qh Qd] (a pair of Queens)\nVillain collected 6200 from pot",
+        "Hero: shows [As Ks] (high card Ace)\nVillain: shows [Qh Qd] (a pair of Queens)\nShort: shows [Jc Jd] (a pair of Jacks)\nVillain collected 12000 from pot",
+    )
+    .replace("Total pot 6200 | Rake 0", "Total pot 12000 | Rake 0")
+    .replace(
+        "Seat 5: Short (big blind) folded before Flop",
+        "Seat 5: Short (big blind) showed [Jc Jd] and lost with a pair of Jacks",
+    )
+)
+
+
+def fixed_equity3(wins_a: int, wins_b: int, wins_c: int, ties: int = 0):
+    """A three-player equity answer: sole wins out of the total, ties split evenly."""
+
+    def engine(_game, _pockets, _board, **_kwargs):
+        samples = wins_a + wins_b + wins_c + ties
+        return SimpleNamespace(
+            samples=samples,
+            players=(
+                SimpleNamespace(wins=wins_a, ties=ties),
+                SimpleNamespace(wins=wins_b, ties=ties),
+                SimpleNamespace(wins=wins_c, ties=ties),
+            ),
+        )
+
+    return engine
+
+
+def test_a_three_way_all_in_on_a_single_pot_is_priced(tmp_path) -> None:
+    hand, _ = parse(tmp_path, THREE_WAY)
+
+    allin = hand_allin_icm(hand, PAYOUTS, equity_fn=fixed_equity3(40, 35, 25)).allin
+
+    assert allin is not None and allin.players == ("Hero", "Villain", "Short")
+    assert allin.equity == pytest.approx({"Hero": 0.40, "Villain": 0.35, "Short": 0.25})
+    assert allin.chip_ev["Hero"] == pytest.approx(Decimal("0.40") * 12000 - 4000)
+    # Every contender's ICM $EV is computed against the same before-stacks.
+    before = {"Hero": 4000.0, "Villain": 4000.0, "Short": 4000.0}
+    outcomes = [
+        icm.AllInOutcome(0.40, {"Hero": 12000.0, "Villain": 0.0, "Short": 0.0}),
+        icm.AllInOutcome(0.35, {"Hero": 0.0, "Villain": 12000.0, "Short": 0.0}),
+        icm.AllInOutcome(0.25, {"Hero": 0.0, "Villain": 0.0, "Short": 12000.0}),
+    ]
+    assert allin.icm_ev["Hero"] == pytest.approx(icm.allin_icm_ev(before, outcomes, PAYOUTS, "Hero"))
+    assert allin.icm_ev["Short"] == pytest.approx(icm.allin_icm_ev(before, outcomes, PAYOUTS, "Short"))
+
+
+def test_a_three_way_split_pot_is_split_evenly(tmp_path) -> None:
+    hand, _ = parse(tmp_path, THREE_WAY)
+
+    allin = hand_allin_icm(hand, PAYOUTS, equity_fn=fixed_equity3(0, 0, 0, ties=10)).allin
+
+    assert allin is not None and allin.equity == pytest.approx(
+        {"Hero": 1 / 3, "Villain": 1 / 3, "Short": 1 / 3}, abs=1e-9
+    )
+    # A certain three-way split: each gets 4000 of the 12000 pot back, i.e. no one moves.
+    assert allin.icm_ev["Hero"] == pytest.approx(0.0, abs=1e-9)
+
+
+def test_the_bounty_pricing_stays_heads_up(tmp_path) -> None:
+    from fpdb_3_legacy.hand_bounty import BountyRules, hand_allin_bounty
+
+    hand, _ = parse(tmp_path, THREE_WAY)
+
+    refused = hand_allin_bounty(hand, BountyRules(), equity_fn=fixed_equity3(40, 35, 25))
+
+    assert refused.allin is None and "multiway" in refused.reason
 
 
 def test_an_unshown_hand_is_not_priced(tmp_path) -> None:
