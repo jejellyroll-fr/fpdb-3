@@ -2886,10 +2886,11 @@ class StudHand(Hand):
                     last_card = seventh[0][0]
                 elif len(seventh[1]) == 1:
                     last_card = seventh[1][0]
-            if last_card is None and len(up_cards) == 4:
-                # Six cards are placed and the player reached showdown, so a
-                # seventh was dealt face down: record it as unknown and keep a
-                # seven-card hand.
+            if last_card is None and len(up_cards) == 4 and self.streets.get("SEVENTH"):
+                # Six cards are placed and 7th street was dealt, so a seventh
+                # card went to the player face down: record it as unknown and
+                # keep a seven-card hand. A hand won on 6th street (the player
+                # shows six cards, nobody is dealt a seventh) gets no such card.
                 last_card = "0x"
         self.addHoleCards(
             "SEVENTH",
@@ -3090,7 +3091,14 @@ class StudHand(Hand):
                 if len(holecards) < 2:
                     holecards = ["0x", *holecards]
                 return holecards
-            if player == self.hero:
+            # A non-hero whose down cards were shown -- at showdown, or when he
+            # reveals after winning before 7th street ("shows [3d 3s 5h 4h]" on
+            # 4th) -- already has them at the head of the list, like the hero.
+            # Padding with two more unknown down cards would push his real ones
+            # into the up-card positions and invent cards he was never dealt.
+            third = self.holecards["THIRD"].get(player)
+            downs_known = bool(third) and len(third[1]) == 2 and "0x" not in third[1]
+            if player == self.hero or downs_known:
                 if len(holecards) < 3:
                     holecards = ["0x", "0x", *holecards]
                 else:

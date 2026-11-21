@@ -14,6 +14,7 @@ from pathlib import Path
 import pytest
 
 from fpdb_3_legacy.Configuration import Config
+from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 from fpdb_3_legacy.WinningToFpdb import Winning
 
 # The hand, anonymised, from an Americas Cardroom session; the hero is rivercat42.
@@ -149,3 +150,44 @@ def test_an_unknown_seventh_card_is_kept_as_unknown(five_card_hands) -> None:
     hand.addShownCards(["Ac", "6s", "5c", "Kd", "2c", "4s"], "Villain3")
 
     assert hand.join_holecards("Villain3", asList=True) == ["Ac", "6s", "5c", "Kd", "2c", "4s", "0x"]
+
+
+def test_a_hand_won_on_sixth_street_gets_no_seventh_card(five_card_hands) -> None:
+    """The unknown seventh card is only for a hand that reached 7th street."""
+    hand = five_card_hands["2780605023"]
+    hand.streets["SEVENTH"] = ""
+    hand.holecards["SEVENTH"].pop("Villain3", None)
+    hand.addShownCards(["Ac", "6s", "5c", "Kd", "2c", "4s"], "Villain3")
+
+    assert hand.join_holecards("Villain3", asList=True) == ["Ac", "6s", "5c", "Kd", "2c", "4s"]
+
+
+# ---------------------------------------------------------------------------
+# A player who wins before 5th street and shows his cards.
+#
+# "HIWAII2: shows [3d 3s 5h 4h]" on 4th street: two down cards and two up
+# cards. join_holecards padded any non-hero holding of four cards or fewer with
+# two unknown down cards, even when the down cards were shown, returning
+# ['0x', '0x', '3d', '3s', '5h', '4h'] -- six cards, the real down cards pushed
+# into the up-card positions.
+# ---------------------------------------------------------------------------
+
+RAZZ_FILE = Path(__file__).resolve().parents[1] / "regression-test-files/cash/Stars/Stud/Razz-USD-0.04-0.08-200911.txt"
+
+
+@pytest.fixture(scope="module")
+def early_reveal_hand():
+    hands = PokerStars(config=Config(), in_path=str(RAZZ_FILE), autostart=True).getProcessedHands()
+    return next(h for h in hands if str(h.handid) == "35874664176")
+
+
+def test_an_early_reveal_keeps_its_own_down_cards(early_reveal_hand) -> None:
+    cards = early_reveal_hand.join_holecards("HIWAII2", asList=True)
+
+    assert cards == ["3d", "3s", "5h", "4h"]
+
+
+def test_an_unshown_player_still_gets_unknown_down_cards(early_reveal_hand) -> None:
+    cards = early_reveal_hand.join_holecards("kobreli", asList=True)
+
+    assert cards == ["0x", "0x", "Kd", "4s"]
