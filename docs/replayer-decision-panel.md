@@ -36,8 +36,8 @@ glyph, and gets a bright frame (`#41E6FF`) plus a marker on its left edge. The s
 single source of truth: clicking a line only moves the slider, and every slider change rebuilds
 the panel and re-selects the row of the step shown.
 
-Folded, the inspector retracts to a thin strip on the **right edge**, where the panel lives;
-opened again it sits beside the table.
+Folded, the inspector retracts to a thin strip on the **right edge**, where the panel lives,
+and the table takes the width it frees. Opened again, it gets back the width it had.
 
 A row can carry a functional *tone* — the SPR's band: below 3 the stack is shallow against the
 pot (the whole row turns amber), above 10 it is deep (cyan). Descriptive bands, not advice, and
@@ -100,8 +100,15 @@ Each section appears only when it applies.
   never added to ICM $EV: together they are not a complete PKO model.
 
 When an all-in cannot be priced, the cash, ICM or bounty section shows **Unavailable**
-and the reason: missing payouts, a field larger than the table, a side pot, unknown
-cards. A cash hand or a freezeout shows no ICM or bounty section.
+and the reason: a field larger than the table, a side pot, unknown cards. A cash hand or
+a freezeout shows no ICM or bounty section.
+
+Missing payouts get their own state, **Payouts needed**: the hand history never carries the
+payout structure and a summary often lists only your own result, so nothing out of the
+money settles it (`docs/icm.md`). The section says so and offers an **Enter the payouts…**
+button. A `PanelRow` with an `action` is drawn as that button, and the inspector emits
+`action_requested("payouts")`, which opens the replayer's payouts dialog. Once a structure
+is stored, the hand is priced again.
 
 ## Compact and detailed
 

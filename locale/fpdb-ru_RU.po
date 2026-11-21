@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-21 01:06+0100\n"
+"POT-Creation-Date: 2026-11-21 08:24+0100\n"
 "PO-Revision-Date: 2011-06-16 13:21+0000\n"
 "Last-Translator: Lexej <alexej@glyvin.com>\n"
 "Language-Team: Russian (Russia) (http://www.transifex.net/projects/p/fpdb/"
@@ -7377,6 +7377,13 @@ msgid "%(value)s%%"
 msgstr ""
 
 #: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"A hand history never carries the payout structure, and a tournament summary "
+"often lists only your own result: out of the money, it settles nothing. "
+"Enter the lobby's payouts, or apply a preset, while you review the hand."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
 msgid "Added to own bounty"
 msgstr ""
 
@@ -7443,6 +7450,10 @@ msgstr "Эффективный стек"
 #, fuzzy
 msgid "Effective pot before call"
 msgstr "Действующий профиль для этих селекторов"
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Enter the payouts…"
+msgstr ""
 
 #: fpdb_3_legacy/replayer_panel.py
 msgid "Equity against the hands shown, estimated from simulated boards."
@@ -7574,6 +7585,10 @@ msgstr ""
 
 #: fpdb_3_legacy/replayer_panel.py
 msgid "Not added to ICM $EV: this is not a complete PKO model."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Payouts needed"
 msgstr ""
 
 #: fpdb_3_legacy/replayer_panel.py fpdb_3_legacy/research_labels.py
@@ -9685,6 +9700,19 @@ msgstr ""
 "%s\n"
 "Заменить его?"
 
+#: fpdb_3_legacy/tourney_payouts.py
+msgid ""
+"knockout winnings include bounties, so the results do not give the payouts"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts.py
+msgid "lottery tournament: its prize pool and split are drawn per tournament"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts.py
+msgid "no payout structure known: the hand history does not carry it"
+msgstr ""
+
 #: fpdb_3_legacy/tourney_payouts_dialog.py
 #, python-format
 msgid "%(title)s · %(entries)s entries · prize pool %(pool)s"
@@ -9704,6 +9732,14 @@ msgstr ""
 
 #: fpdb_3_legacy/tourney_payouts_dialog.py
 msgid "9-max sit-and-go: 50 / 30 / 20"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid ""
+"A hand history never carries the payout structure, and a tournament summary "
+"often lists only your own result: out of the money, it settles nothing. "
+"Enter the lobby's payouts, or apply a preset, while you review: ICM prices "
+"this tournament's hands with them."
 msgstr ""
 
 #: fpdb_3_legacy/tourney_payouts_dialog.py

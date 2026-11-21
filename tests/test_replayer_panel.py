@@ -327,6 +327,20 @@ def test_icm_that_cannot_be_priced_says_why_and_a_cash_hand_says_nothing() -> No
     assert icm_section(ICM, "Short") is None
 
 
+def test_icm_waiting_on_payouts_explains_why_and_offers_the_entry() -> None:
+    reason = "no payout structure known: the hand history does not carry it"
+    section = icm_section(HandIcm(None, reason, needs_payouts=True), "Hero")
+
+    assert rows(section)["Model status"] == "Payouts needed"
+    compact = notes(section, detailed=False)
+    assert reason in compact
+    # Why the hand history cannot say, and when to enter it: shown, not folded away.
+    assert any("never carries the payout structure" in note and "while you review" in note for note in compact)
+    actions = [row for row in section.rows if row.action]
+    assert [row.action for row in actions] == ["payouts"]
+    assert not actions[0].is_note and not actions[0].detail
+
+
 # --- the all-in of a cash hand, in chips ---------------------------------------
 
 

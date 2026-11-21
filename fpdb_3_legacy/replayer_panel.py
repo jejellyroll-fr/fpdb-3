@@ -95,10 +95,11 @@ class PanelRow:
     key: str = ""  # semantic id of a key figure ("call_amount", "pot_odds"), shown first and as a tile
     accent: bool = False  # the key figure the section is about, set apart without implying a verdict
     tone: str = ""  # functional band ("low", "high"), drawn in its own colour; never a verdict
+    action: str = ""  # a step the user can take from the panel ("payouts"), drawn as a button
 
     @property
     def is_note(self) -> bool:
-        return not self.value
+        return not self.value and not self.action
 
 
 @dataclass(frozen=True)
@@ -391,6 +392,27 @@ def _unavailable(title: str, reason: str, tooltip: str) -> PanelSection:
     )
 
 
+def _payouts_needed(title: str, reason: str) -> PanelSection:
+    """ICM waiting on the payouts the user has to enter: why, and the button that opens the entry."""
+    return PanelSection(
+        title,
+        (
+            PanelRow(_("Model status"), _("Payouts needed"), tip("model"), muted=True),
+            PanelRow(reason, muted=True),
+            PanelRow(
+                _(
+                    "A hand history never carries the payout structure, and a tournament summary "
+                    "often lists only your own result: out of the money, it settles nothing. "
+                    "Enter the lobby's payouts, or apply a preset, while you review the hand."
+                ),
+                muted=True,
+            ),
+            PanelRow(_("Enter the payouts…"), action="payouts"),
+        ),
+        tip("icm_section"),
+    )
+
+
 def icm_section(priced: Any, hero: str) -> PanelSection | None:
     """The hero's all-in in prize equity (#446), or why it is not priced; None when there is nothing to say.
 
@@ -403,6 +425,8 @@ def icm_section(priced: Any, hero: str) -> PanelSection | None:
     if allin is None:
         if priced.reason in _QUIET_ICM:
             return None
+        if getattr(priced, "needs_payouts", False):
+            return _payouts_needed(title, priced.reason)
         return _unavailable(title, priced.reason, tip("icm_section"))
     if hero not in allin.players:
         return None

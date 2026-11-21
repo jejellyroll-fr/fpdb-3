@@ -35,6 +35,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QListWidget,
     QListWidgetItem,
+    QPushButton,
     QScrollArea,
     QSizePolicy,
     QSplitter,
@@ -199,6 +200,7 @@ class ReplayInspector(QFrame):  # pylint: disable=too-many-instance-attributes  
     seek_requested = Signal(int)
     detailed_toggled = Signal(bool)
     collapsed_changed = Signal(bool)
+    action_requested = Signal(str)  # a panel row's step, such as "payouts"
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -414,7 +416,7 @@ class ReplayInspector(QFrame):  # pylint: disable=too-many-instance-attributes  
         for row in section.rows:
             if row.key and not row.detail:
                 continue
-            widget = self._row(row)
+            widget = self._action(row) if row.action else self._row(row)
             if row.detail:
                 self._detail_widgets.append(widget)
             layout.addWidget(widget)
@@ -447,6 +449,17 @@ class ReplayInspector(QFrame):  # pylint: disable=too-many-instance-attributes  
             )
             value.setStyleSheet(f"color: {foreground}; font-weight: 700; font-size: 17px;")
         return tile
+
+    def _action(self, row: PanelRow) -> QPushButton:
+        """A step the panel offers, such as entering the payouts ICM waits on."""
+        button = QPushButton(row.label)
+        button.setObjectName("inspectorAction")
+        button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        button.setCursor(Qt.CursorShape.PointingHandCursor)
+        if row.tooltip:
+            button.setToolTip(row.tooltip)
+        button.clicked.connect(lambda: self.action_requested.emit(row.action))
+        return button
 
     @staticmethod
     def _row(row: PanelRow) -> QWidget:

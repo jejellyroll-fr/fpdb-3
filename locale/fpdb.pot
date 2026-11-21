@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-21 01:06+0100\n"
+"POT-Creation-Date: 2026-11-21 08:24+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -6516,6 +6516,21 @@ msgid "Unavailable"
 msgstr ""
 
 #: fpdb_3_legacy/replayer_panel.py
+msgid "Payouts needed"
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"A hand history never carries the payout structure, and a tournament summary "
+"often lists only your own result: out of the money, it settles nothing. "
+"Enter the lobby's payouts, or apply a preset, while you review the hand."
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Enter the payouts…"
+msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py
 msgid "Tournament — ICM"
 msgstr ""
 
@@ -8198,6 +8213,19 @@ msgstr ""
 msgid "Export displayed values as %s…"
 msgstr ""
 
+#: fpdb_3_legacy/tourney_payouts.py
+msgid ""
+"knockout winnings include bounties, so the results do not give the payouts"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts.py
+msgid "lottery tournament: its prize pool and split are drawn per tournament"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts.py
+msgid "no payout structure known: the hand history does not carry it"
+msgstr ""
+
 #: fpdb_3_legacy/tourney_payouts_dialog.py
 msgid "Winner takes all (heads-up, Spin & Go)"
 msgstr ""
@@ -8236,6 +8264,14 @@ msgstr ""
 
 #: fpdb_3_legacy/tourney_payouts_dialog.py
 msgid "Tournament payouts"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid ""
+"A hand history never carries the payout structure, and a tournament summary "
+"often lists only your own result: out of the money, it settles nothing. "
+"Enter the lobby's payouts, or apply a preset, while you review: ICM prices "
+"this tournament's hands with them."
 msgstr ""
 
 #: fpdb_3_legacy/tourney_payouts_dialog.py

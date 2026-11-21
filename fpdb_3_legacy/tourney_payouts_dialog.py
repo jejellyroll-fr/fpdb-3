@@ -60,6 +60,18 @@ class TourneyPayoutsDialog(QDialog):
         self.setMinimumWidth(460)
 
         layout = QVBoxLayout(self)
+        # Why this is asked: no hand history carries the payouts, and a summary that lists
+        # only the hero's own result settles nothing -- least of all out of the money.
+        self.whyLabel = QLabel(
+            _(
+                "A hand history never carries the payout structure, and a tournament summary often "
+                "lists only your own result: out of the money, it settles nothing. Enter the lobby's "
+                "payouts, or apply a preset, while you review: ICM prices this tournament's hands with them."
+            )
+        )
+        self.whyLabel.setWordWrap(True)
+        self.whyLabel.setStyleSheet("color: #9aa7b4; font-style: italic;")
+        layout.addWidget(self.whyLabel)
         self.factsLabel = QLabel()
         self.factsLabel.setWordWrap(True)
         layout.addWidget(self.factsLabel)

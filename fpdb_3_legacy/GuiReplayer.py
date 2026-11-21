@@ -53,7 +53,12 @@ from fpdb_3_legacy.localized_formats import format_currency, format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.replay_history import ACTION, PHASE, replay_history_entries
 from fpdb_3_legacy.replay_history_dialog import ReplayHistoryDialog
-from fpdb_3_legacy.replay_inspector import ReplayInspector, TimelineRow
+from fpdb_3_legacy.replay_inspector import (
+    INSPECTOR_COLLAPSED_WIDTH,
+    INSPECTOR_MIN_WIDTH,
+    ReplayInspector,
+    TimelineRow,
+)
 from fpdb_3_legacy.replayer_decision import HeroDecision, action_decision, hero_decision
 from fpdb_3_legacy.replayer_panel import (
     CallFigures,
@@ -964,6 +969,8 @@ class GuiReplayer(QWidget):
         self.inspector = ReplayInspector()
         self.inspector.seek_requested.connect(self.inspector_seek)
         self.inspector.detailed_toggled.connect(self.detailed_analysis.setChecked)
+        self.inspector.collapsed_changed.connect(self.inspector_collapsed)
+        self.inspector.action_requested.connect(self.inspector_action)
         self.main_splitter = QSplitter(Qt.Orientation.Horizontal)
         self.main_splitter.setObjectName("replayerSplitter")
         self.main_splitter.setChildrenCollapsible(False)
@@ -973,6 +980,8 @@ class GuiReplayer(QWidget):
         self.main_splitter.setStretchFactor(0, 1)
         self.main_splitter.setStretchFactor(1, 0)
         self.main_splitter.setSizes([900, INSPECTOR_DEFAULT_WIDTH])
+        self._inspector_open_width = INSPECTOR_DEFAULT_WIDTH
+        self.main_splitter.splitterMoved.connect(self._inspector_resized)
         self.replayBox.addWidget(self.main_splitter, 1)
         self.replayBox.addWidget(self.stateSlider, False)
         self.replayBox.addLayout(self.playbackBox)
@@ -2694,7 +2703,11 @@ class GuiReplayer(QWidget):
         exhaustive = metrics.get("equity_exhaustive")
         if decision.mode != "call":
             return actor_section(
-                actor, amount=self._amount, equity_pct=equity_pct, equity_exhaustive=exhaustive, spr=spr,
+                actor,
+                amount=self._amount,
+                equity_pct=equity_pct,
+                equity_exhaustive=exhaustive,
+                spr=spr,
                 spr_values=decision.spr,
             )
         opponents = len(decision.effective)
@@ -2786,7 +2799,7 @@ class GuiReplayer(QWidget):
             return None, "pricing failed"
 
     def _decision_options_changed(self, _checked: bool = False) -> None:
-        """"Odds for all players" or "Detailed analysis" changed: show the decision again."""
+        """ "Odds for all players" or "Detailed analysis" changed: show the decision again."""
         self._refresh_inspector()
         self.update()
 
@@ -2795,6 +2808,26 @@ class GuiReplayer(QWidget):
         self._refresh_inspector()
         self._refresh_history(rebuild=True)
         self.update()
+
+    def inspector_collapsed(self, collapsed: bool) -> None:
+        """Give the table the room the inspector frees, or take back the width it had.
+
+        The splitter keeps a child's share when only its width limits change, which left the
+        folded strip where the panel's left edge was, mid-window, with an empty band beside it.
+        """
+        total = sum(self.main_splitter.sizes())
+        width = INSPECTOR_COLLAPSED_WIDTH if collapsed else self._inspector_open_width
+        self.main_splitter.setSizes([max(total - width, 0), width])
+
+    def _inspector_resized(self, *_args) -> None:
+        # The width the user dragged the open inspector to, given back when it opens again.
+        if not self.inspector.collapsed:
+            self._inspector_open_width = max(self.main_splitter.sizes()[1], INSPECTOR_MIN_WIDTH)
+
+    def inspector_action(self, action: str) -> None:
+        """A step the inspector offers: entering the payouts ICM waits on."""
+        if action == "payouts":
+            self.payouts_clicked()
 
     def inspector_seek(self, index: int) -> None:
         """Go to the step of an action clicked in the inspector's history."""

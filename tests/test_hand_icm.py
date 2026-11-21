@@ -244,6 +244,7 @@ def test_a_stored_hand_without_a_payout_structure_says_so(stored_hand) -> None:
     priced = icm_for_replay(db, hand, hand_id)
 
     assert priced.allin is None and "no payout structure known" in priced.reason
+    assert priced.needs_payouts
 
 
 def test_a_stored_hand_is_priced_with_its_tournament_s_structure(stored_hand) -> None:

@@ -23,6 +23,8 @@ from decimal import Decimal, InvalidOperation
 from fractions import Fraction
 from typing import Any
 
+from fpdb_3_legacy.i18n import gettext as _
+
 __all__ = [
     "PRESETS",
     "EnteredStructure",
@@ -69,6 +71,9 @@ class PayoutsLookup:
 
     payouts: Payouts | None
     reason: str = ""
+    # No structure until the user enters one: the hand history never carries it, and the
+    # results imported so far do not settle it (a summary naming only the hero's own prize).
+    missing: bool = False
 
 
 def _fixed(*shares: str) -> Callable[[int], tuple[Fraction, ...]]:
@@ -361,17 +366,15 @@ def payouts_for_tourney(db: Any, tourney_id: int) -> PayoutsLookup:
         return PayoutsLookup(stored)
     facts = tourney_facts(db, tourney_id)
     if facts.knockout:
-        return PayoutsLookup(None, "knockout winnings include bounties: enter the payout structure")
+        return PayoutsLookup(
+            None, _("knockout winnings include bounties, so the results do not give the payouts"), True
+        )
     results = [(place, won) for place, won in _query(db, "selectTourneyResults", (tourney_id,))]
     settled = from_results(results, facts.entries, facts.prize_pool)
     if settled is None:
         if facts.lottery:
-            return PayoutsLookup(
-                None,
-                "lottery tournament: its prize pool and split are drawn per tournament "
-                "— import its summary, enter a structure or apply a preset",
-            )
-        return PayoutsLookup(None, "no payout structure known: import the summary, enter one or apply a preset")
+            return PayoutsLookup(None, _("lottery tournament: its prize pool and split are drawn per tournament"), True)
+        return PayoutsLookup(None, _("no payout structure known: the hand history does not carry it"), True)
     return PayoutsLookup(Payouts(settled, SOURCE_SUMMARY, facts.currency))
 
 

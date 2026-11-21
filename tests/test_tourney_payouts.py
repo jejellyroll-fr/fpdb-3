@@ -157,6 +157,8 @@ def test_results_of_the_hero_alone_settle_nothing_and_say_why(fresh_db) -> None:
 
     assert found.payouts is None
     assert "no payout structure known" in found.reason
+    # Only the user can supply it: the replayer asks for it during the review.
+    assert found.missing
 
 
 def test_a_lottery_sng_whose_winner_took_the_whole_pool_is_winner_take_all(fresh_db) -> None:
@@ -177,6 +179,7 @@ def test_a_lottery_sng_without_a_known_pool_says_the_draw_needs_its_summary(fres
 
     assert found.payouts is None
     assert "lottery tournament" in found.reason
+    assert found.missing
 
 
 def test_knockout_winnings_are_never_read_as_a_structure(fresh_db) -> None:

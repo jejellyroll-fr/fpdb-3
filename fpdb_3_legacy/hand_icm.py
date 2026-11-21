@@ -75,6 +75,7 @@ class HandIcm:
     allin: AllInIcm | None
     reason: str = ""
     notes: tuple[str, ...] = field(default_factory=tuple)
+    needs_payouts: bool = False  # priced once the user enters the tournament's payouts
 
 
 def _known(cards: Sequence[str]) -> bool:
@@ -308,7 +309,7 @@ def icm_for_replay(db: Any, hand: Any, hand_id: int | None) -> HandIcm:
         return HandIcm(None, "the hand is not stored: its tournament's payouts are unknown")
     lookup = tourney_payouts.payouts_for_hand(db, hand_id)
     if lookup.payouts is None:
-        return HandIcm(None, lookup.reason)
+        return HandIcm(None, lookup.reason, needs_payouts=lookup.missing)
     return icm_with_payouts(hand, lookup.payouts.as_money(), tourney_payouts.field_size_for_hand(db, hand_id))
 
 

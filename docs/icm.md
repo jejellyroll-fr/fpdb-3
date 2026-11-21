@@ -30,7 +30,22 @@ sources, in this order:
    winnings include bounties.
 3. **Otherwise, nothing**, and the lookup says why — for a lottery tournament (Expresso,
    Power Spin), that its prize pool and split are drawn per tournament and only its
-   summary tells them. No structure is ever guessed.
+   summary tells them. No structure is ever guessed. Such a lookup is marked `missing`:
+   only the user can supply the structure.
+
+### Why the payouts have to be entered during the review
+
+A hand history never carries the payout structure. The tournament summary is the only
+imported source, and many rooms write only your own result in it: when you finish out of
+the money, it says you won nothing and settles no place at all. So the hands of a
+tournament you did not cash in usually have no structure until you enter one.
+
+The replayer says so where ICM would be: the *Tournament — ICM* section reads **Payouts
+needed**, tells why, and carries an **Enter the payouts…** button that opens the
+tournament's payouts dialog (the same as **Payouts...** below the table). The dialog
+repeats the explanation. Enter the lobby's payouts, or apply a preset, while you review the
+hand: the structure is stored for the tournament, and every hand of it is priced from then
+on.
 
 ### Entering a structure
 

@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-21 01:06+0100\n"
+"POT-Creation-Date: 2026-11-21 08:24+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -6690,6 +6690,17 @@ msgid "%(value)s%%"
 msgstr "%(value)s %%"
 
 #: fpdb_3_legacy/replayer_panel.py
+msgid ""
+"A hand history never carries the payout structure, and a tournament summary "
+"often lists only your own result: out of the money, it settles nothing. "
+"Enter the lobby's payouts, or apply a preset, while you review the hand."
+msgstr ""
+"Un historique de main ne contient jamais la structure des gains, et le "
+"résumé d'un tournoi ne donne souvent que votre propre résultat : hors des "
+"places payées, il ne permet rien d'établir. Saisissez les gains du lobby, ou "
+"appliquez un préréglage, pendant la revue de la main."
+
+#: fpdb_3_legacy/replayer_panel.py
 msgid "Added to own bounty"
 msgstr "Ajouté à sa propre prime"
 
@@ -6752,6 +6763,10 @@ msgstr "Pot effectif après le call"
 #: fpdb_3_legacy/replayer_panel.py
 msgid "Effective pot before call"
 msgstr "Pot effectif avant le call"
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Enter the payouts…"
+msgstr "Saisir les gains…"
 
 #: fpdb_3_legacy/replayer_panel.py
 msgid "Equity against the hands shown, estimated from simulated boards."
@@ -6905,6 +6920,10 @@ msgstr ""
 #: fpdb_3_legacy/replayer_panel.py
 msgid "Not added to ICM $EV: this is not a complete PKO model."
 msgstr "Non ajoutée à la $EV ICM : ce n'est pas un modèle PKO complet."
+
+#: fpdb_3_legacy/replayer_panel.py
+msgid "Payouts needed"
+msgstr "Gains à saisir"
 
 #: fpdb_3_legacy/replayer_panel.py fpdb_3_legacy/research_labels.py
 msgid "Pot odds"
@@ -8727,6 +8746,24 @@ msgstr ""
 "%s\n"
 "Voulez-vous le remplacer ?"
 
+#: fpdb_3_legacy/tourney_payouts.py
+msgid ""
+"knockout winnings include bounties, so the results do not give the payouts"
+msgstr ""
+"les gains d'un tournoi knockout incluent les primes : les résultats ne "
+"donnent donc pas la structure des gains"
+
+#: fpdb_3_legacy/tourney_payouts.py
+msgid "lottery tournament: its prize pool and split are drawn per tournament"
+msgstr ""
+"tournoi à loterie : la dotation et sa répartition sont tirées au sort à "
+"chaque tournoi"
+
+#: fpdb_3_legacy/tourney_payouts.py
+msgid "no payout structure known: the hand history does not carry it"
+msgstr ""
+"aucune structure de gains connue : l'historique de main ne la contient pas"
+
 #: fpdb_3_legacy/tourney_payouts_dialog.py
 #, python-format
 msgid "%(title)s · %(entries)s entries · prize pool %(pool)s"
@@ -8747,6 +8784,19 @@ msgstr "Sit-and-go 6 joueurs : 65 / 35"
 #: fpdb_3_legacy/tourney_payouts_dialog.py
 msgid "9-max sit-and-go: 50 / 30 / 20"
 msgstr "Sit-and-go 9 joueurs : 50 / 30 / 20"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid ""
+"A hand history never carries the payout structure, and a tournament summary "
+"often lists only your own result: out of the money, it settles nothing. "
+"Enter the lobby's payouts, or apply a preset, while you review: ICM prices "
+"this tournament's hands with them."
+msgstr ""
+"Un historique de main ne contient jamais la structure des gains, et le "
+"résumé d'un tournoi ne donne souvent que votre propre résultat : hors des "
+"places payées, il ne permet rien d'établir. Saisissez les gains du lobby, ou "
+"appliquez un préréglage, pendant la revue : l'ICM évalue les mains de ce "
+"tournoi avec eux."
 
 #: fpdb_3_legacy/tourney_payouts_dialog.py
 msgid "Apply to the prize pool"

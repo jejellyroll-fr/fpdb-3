@@ -174,12 +174,24 @@ def test_the_advanced_toggle_and_the_checkbox_stay_in_step(qtbot, config, import
 
 def test_the_inspector_folds_to_a_strip(qtbot, config, importer, fresh_db, tmp_path) -> None:
     replayer = replay(qtbot, config, importer, fresh_db, tmp_path, "holdem/cash_nl_6max.txt")
+    replayer.resize(1400, 860)
+    replayer.show()
+    qtbot.waitExposed(replayer)
     # Open, the panel sits beside the table, on the right of the splitter.
     assert replayer.main_splitter.widget(1) is replayer.inspector
     assert replayer.inspector.collapse_button.text() == "⟩"
+    replayer.main_splitter.moveSplitter(1400 - 450, 1)  # the user widens it
+    open_width = replayer.main_splitter.sizes()[1]
 
     replayer.inspector.set_collapsed(True)
+    qtbot.wait(20)
     assert replayer.inspector.maximumWidth() <= 40
+    # The table takes the room: the strip sits against the window's right edge, not mid-window.
+    table, strip = replayer.main_splitter.sizes()
+    assert strip <= 40
+    splitter = replayer.main_splitter
+    assert table + strip + splitter.handleWidth() >= splitter.width() - 1
+    assert replayer.inspector.geometry().right() >= splitter.width() - 2
     # Collapsed, the strip stays on the right edge, where the panel lives.
     assert replayer.main_splitter.widget(1) is replayer.inspector
     assert replayer.inspector.collapse_button.text() == "⟨"
@@ -187,5 +199,31 @@ def test_the_inspector_folds_to_a_strip(qtbot, config, importer, fresh_db, tmp_p
 
     replayer.inspector.set_collapsed(False)
     assert replayer.inspector.minimumWidth() >= 300
+    # Opened again, it takes back the width it had.
+    assert abs(replayer.main_splitter.sizes()[1] - open_width) <= 2
     assert replayer.main_splitter.widget(1) is replayer.inspector
     replayer.grab()
+
+
+def test_the_inspector_s_payouts_button_opens_the_payouts_entry(qtbot) -> None:
+    from PySide6.QtWidgets import QPushButton
+
+    from fpdb_3_legacy.hand_icm import HandIcm
+    from fpdb_3_legacy.replay_inspector import ReplayInspector
+    from fpdb_3_legacy.replayer_panel import DecisionPanel, icm_section
+
+    inspector = ReplayInspector()
+    qtbot.addWidget(inspector)
+    section = icm_section(HandIcm(None, "no payout structure known", needs_payouts=True), "Hero")
+    inspector.set_panel(DecisionPanel("Hero raises", (section,)), "Preflop", detailed=False)
+
+    buttons = [button for button in inspector.findChildren(QPushButton) if button.objectName() == "inspectorAction"]
+    assert len(buttons) == 1
+    with qtbot.waitSignal(inspector.action_requested) as signal:
+        buttons[0].click()
+    assert signal.args == ["payouts"]
+
+    # The replayer opens its payouts dialog for it.
+    replayer = MagicMock()
+    GuiReplayer.inspector_action(replayer, "payouts")
+    replayer.payouts_clicked.assert_called_once_with()
