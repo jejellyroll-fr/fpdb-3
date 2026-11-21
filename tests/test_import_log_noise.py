@@ -60,7 +60,7 @@ def test_winning_read_stp_is_silent(caplog: pytest.LogCaptureFixture) -> None:
     with caplog.at_level(logging.DEBUG):
         converter.readSTP(SimpleNamespace(handid=2780587577))
 
-    assert _warnings(caplog) == []
+    assert not _warnings(caplog)
 
 
 # 2. Bovada Zone Poker: every hand ends with an empty summary.
@@ -100,8 +100,8 @@ def test_bovada_stud_actions_land_on_their_street(bovada_stud) -> None:
         ("Seat 5", "folds"),
         ("Seat 1", "folds"),
     ]
-    assert hand.actions["SIXTH"] == []
-    assert hand.actions["SEVENTH"] == []
+    assert not hand.actions["SIXTH"]
+    assert not hand.actions["SEVENTH"]
 
 
 def test_bovada_stud_cards_land_on_their_street(bovada_stud) -> None:
@@ -123,7 +123,7 @@ def test_a_villain_with_known_down_cards_folding_on_fifth_is_not_padded(
         cards = hand.join_holecards("Seat 1", asList=True)
 
     assert cards == ["7h", "8c", "Jc", "9c", "4d"]
-    assert _warnings(caplog) == []
+    assert not _warnings(caplog)
 
 
 def test_a_villain_with_known_down_cards_folding_on_fourth_keeps_their_slots(bovada_stud) -> None:
@@ -168,7 +168,7 @@ def test_bovada_stud_imports_without_warnings(config: Config, caplog: pytest.Log
         for hand in parser.getProcessedHands():
             DerivedStats().getStats(hand)
 
-    assert _warnings(caplog) == []
+    assert not _warnings(caplog)
 
 
 # 4. Hands that really hold no betting action.
@@ -180,7 +180,7 @@ def test_bovada_all_in_big_blind_is_recorded(config: Config) -> None:
 
     # "Big Blind : All-in $15" was dropped: a blind posted all-in in a hand without antes.
     assert hand.actions["BLINDSANTES"][1] == ("Seat 6", "big blind", Decimal("15"), True)
-    assert parser.parsing_issues == []
+    assert not parser.parsing_issues
 
 
 def test_full_tilt_walk_is_not_missing_betting_actions(config: Config) -> None:
@@ -231,4 +231,4 @@ def test_no_library_module_configures_the_root_logger_on_import() -> None:
             call = node.value if isinstance(node, ast.Expr) else None
             if isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute) and call.func.attr == "basicConfig":
                 offenders.append(path.name)
-    assert offenders == []
+    assert not offenders

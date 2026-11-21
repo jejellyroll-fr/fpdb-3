@@ -88,7 +88,7 @@ def _walk(**overrides):
 
 
 def test_a_walk_is_not_a_missing_action():
-    assert _issues(_walk()) == []
+    assert not _issues(_walk())
 
 
 def test_a_hand_with_board_cards_and_no_action_is_still_flagged():
