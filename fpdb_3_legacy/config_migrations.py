@@ -252,6 +252,16 @@ def _add_sites_94_to_95(doc, template) -> None:
     _add_sites(doc, template, SITES_ADDED_IN_95)
 
 
+def _add_summary_importers_95_to_96(doc, template) -> None:
+    """Advance to v96, giving GGPoker its tournament-summary importer (#868).
+
+    GG summaries were never recognised: the room declared no summary importer.
+    The v89 rule is applied again, so a room whose <hhc> names none gains the
+    template's; one the user set is kept.
+    """
+    _add_summary_importers_88_to_89(doc, template)
+
+
 def _repair_renamed_references(doc) -> None:
     aux_names = {cx.attr(n, "name") for n in cx.find_all(doc, "aw")}
     if "Classic_HUD" not in aux_names and "ClassicHud" in aux_names:
@@ -279,6 +289,7 @@ MIGRATIONS = (
     (92, 93, _zero_padding_92_to_93),
     (93, 94, _add_sites_93_to_94),
     (94, 95, _add_sites_94_to_95),
+    (95, 96, _add_summary_importers_95_to_96),
 )
 
 

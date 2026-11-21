@@ -803,7 +803,11 @@ class Importer:
         if self.idsite.get_fobj(filename):
             fpdbfile = self.idsite.filelist[filename]
         else:
-            log.warning(f"siteId Failed for: '{filename}'")
+            reason = self.idsite.unsupported_reason(filename)
+            if reason:
+                log.warning(f"Not imported: '{filename}': {reason}")
+            else:
+                log.warning(f"siteId Failed for: '{filename}'")
             self.failed_files.remember(filename)
             return False
 

@@ -381,3 +381,18 @@ def test_v95_adds_betrivers_as_an_import_only_room():
     assert hhcs == {"mine": "PokerStarsToFpdb", "BetRivers": "BetRiversToFpdb"}
     assert not reference_errors(updated)
     assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()
+
+
+def test_v96_gives_ggpoker_its_summary_importer():
+    # GG declared no summary importer, so its tournament summaries were never
+    # recognised (#868). One the user named is kept.
+    template = defusedxml.minidom.parse(str(ROOT / "HUD_config.xml.example"))
+    old = parse("""<FreePokerToolsConfig><general version="95"/>
+      <hhcs><hhc site="GGPoker" converter="GGPokerToFpdb"/>
+      <hhc site="Winamax" converter="WinamaxToFpdb" summaryImporter="MySummary"/></hhcs>
+      </FreePokerToolsConfig>""")
+
+    updated = upgrade_document(old, template, CONFIG_VERSION)
+
+    assert _importers(updated) == {"GGPoker": "GGPokerSummary", "Winamax": "MySummary"}
+    assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()
