@@ -356,9 +356,9 @@ def test_the_row_kept_selected_while_stepping():
 def test_every_action_has_its_own_colour_pair_and_glyph():
     assert set(ACTION_STYLES) == {"folds", "checks", "calls", "bets", "raises", "collected"}
     assert set(ACTION_ICONS) == set(ACTION_STYLES)
-    for action in ACTION_STYLES:
+    for action, expected in ACTION_STYLES.items():
         style = action_style(action)
-        assert style is ACTION_STYLES[action]
+        assert style is expected
         assert style.foreground.startswith("#") and style.background.startswith("#")
         assert action_icon(action) == ACTION_ICONS[action]
     # Bets and raises are distinct, as are calls and checks: the timeline tells them apart.

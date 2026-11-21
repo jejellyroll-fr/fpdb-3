@@ -331,7 +331,9 @@ def test_icm_that_cannot_be_priced_says_why_and_a_cash_hand_says_nothing() -> No
 
 
 def test_a_cash_multiway_all_in_is_priced_in_chips_with_its_multiway_note() -> None:
-    amount = lambda value: f"${D(value):.2f}"  # noqa: E731 - the panel's money formatter in the test
+    def amount(value) -> str:
+        return f"${D(value):.2f}"
+
     section = cash_allin_section(CASH_ALLIN, "Hero", amount)
 
     assert section is not None and section.title == "Cash — all-in"

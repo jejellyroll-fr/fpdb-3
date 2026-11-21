@@ -177,7 +177,7 @@ class TimelineDelegate(QStyledItemDelegate):
         painter.drawText(x, base_y, glyph)
         return x + painter.fontMetrics().horizontalAdvance(glyph) + gap
 
-    def sizeHint(self, option, index) -> QSize:  # noqa: N802 - Qt API
+    def sizeHint(self, option, index) -> QSize:  # noqa: N802  # pylint: disable=invalid-name  # Qt API
         hint = super().sizeHint(option, index)
         return QSize(hint.width(), max(hint.height(), 26))
 
@@ -193,7 +193,7 @@ def _clear(layout) -> None:
             _clear(item.layout())
 
 
-class ReplayInspector(QFrame):
+class ReplayInspector(QFrame):  # pylint: disable=too-many-instance-attributes  # the panel's widgets
     """The panel beside the table: the decision at the step shown, then the actions so far."""
 
     seek_requested = Signal(int)
@@ -513,11 +513,11 @@ class ReplayInspector(QFrame):
         if item is not None:
             self.timeline.scrollToItem(item, QListWidget.ScrollHint.EnsureVisible)
 
-    def resizeEvent(self, event) -> None:  # noqa: N802 - Qt API
+    def resizeEvent(self, event) -> None:  # noqa: N802  # pylint: disable=invalid-name  # Qt API
         super().resizeEvent(event)
         self._keep_current_in_view()
 
-    def showEvent(self, event) -> None:  # noqa: N802 - Qt API
+    def showEvent(self, event) -> None:  # noqa: N802  # pylint: disable=invalid-name  # Qt API
         super().showEvent(event)
         self._keep_current_in_view()
 

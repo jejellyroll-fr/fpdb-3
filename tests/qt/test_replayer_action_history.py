@@ -71,7 +71,7 @@ def test_clicking_an_entry_seeks_to_it(qtbot, replayer) -> None:
     assert dialog.list.currentRow() == row
 
 
-def test_unhiding_the_cards_shows_the_villain_s_hand_in_the_history(qtbot, replayer) -> None:
+def test_unhiding_the_cards_shows_the_villain_s_hand_in_the_history(replayer) -> None:
     replayer.history_clicked()
     replayer.showCards.setChecked(False)
 

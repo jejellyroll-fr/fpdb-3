@@ -793,7 +793,7 @@ class ReplayCanvas(QWidget):
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.setMinimumSize(560, 420)
 
-    def paintEvent(self, event) -> None:  # noqa: N802 - Qt API
+    def paintEvent(self, event) -> None:  # noqa: N802  # pylint: disable=invalid-name  # Qt API
         self._replayer.paint_canvas(self)
 
 
