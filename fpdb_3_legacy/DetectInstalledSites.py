@@ -20,7 +20,8 @@ hand history directories. Supports multiple platforms (Windows, Linux, macOS)
 and handles multiple hero names per site.
 
 Features:
-- Support for PokerStars (all regions: .com, .fr, .it, .es, .pt, .de)
+- Support for PokerStars (all regions: .com, .fr, .it, .es, .pt, .de, and the
+  retired .uk client's folders on Windows and Wine)
 - Winamax detection with account-specific paths
 - iPoker network (all major skins including French FDJ, PMU, Italian, etc.)
 - Americas Cardroom (ACR) and WPN network
@@ -166,6 +167,10 @@ class PokerStarsDetector(SiteDetector):
                 "PokerStars.PT",
                 "PokerStars.EU",
                 "PokerStars.DE",
+                # The retired UK client (#889): its folder may still hold
+                # histories to import. No macOS spelling is known, so none
+                # is guessed above.
+                "PokerStars.UK",
             ]
 
         # Detecting all installed variants
