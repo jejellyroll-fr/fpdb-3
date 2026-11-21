@@ -128,6 +128,10 @@ jobs:
 
   test:
     runs-on: ${{ matrix.os }}
+    # A green run takes 18 to 40 minutes (Windows is the slowest). The bound is
+    # a backstop for a hang outside the Qt steps, which carry their own limits:
+    # without it a stuck runner sits until GitHub's 6-hour default.
+    timeout-minutes: 75
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
@@ -181,18 +185,29 @@ jobs:
           # trailing "\" makes it read the next line as a unary operator.
           python -m pytest -p no:pytest-qt -m "not qt and not perf" --tb=short --cov=fpdb_3_legacy.fast_fold_engine --cov=fpdb_3_legacy.winamax_ax_seats --cov=fpdb_3_legacy.winamax_live_log_reader --cov=fpdb_3_legacy.winamax_pool_games --cov=fpdb_3_legacy.hud_window_registry --cov=fpdb_3_legacy.hud_diagnostics --cov=fpdb_3_legacy.OSXTables --cov=fpdb_3_legacy.interlocks --cov=tools.find_hud_windows --cov-branch --cov-report=term-missing --cov-fail-under=100
 
+      # Offscreen Qt can block forever (a modal .exec(), a wait on a thread that
+      # never finishes): on 2026-11-21 the FastHUD step sat on macos-latest for
+      # over four hours until it was cancelled by hand. Two limits bound that.
+      # pytest-timeout fails a single test after 120 s -- the slowest one takes
+      # about 10 s -- and its "thread" method dumps every thread's stack and
+      # names the test even when the hang is inside Qt's C++ event loop, where
+      # a signal handler would never run. The step limit is the backstop.
       - name: Run FastHUD Qt regression tests (offscreen)
         if: runner.os != 'Windows'
+        # Under 10 seconds on a green run.
+        timeout-minutes: 10
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
-          python -m pytest -q -m qt tests/test_HUD_main.py
+          python -m pytest -q -m qt --timeout=120 --timeout-method=thread tests/test_HUD_main.py
       - name: Run Qt regression tests (offscreen)
         if: runner.os == 'Linux'
+        # 4 to 8 minutes on a green run.
+        timeout-minutes: 25
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
-          python -m pytest -m "qt and not perf" --tb=short --durations=25
+          python -m pytest -m "qt and not perf" --tb=short --durations=25 --timeout=120 --timeout-method=thread
       # The perf tests assert wall-clock budgets, some as tight as 5 ms for a
       # loop of pure-Python work. Hosted runners are shared and noisy -- the
       # Windows ones especially -- so as a required check on all three they
