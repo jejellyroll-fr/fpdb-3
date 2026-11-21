@@ -890,6 +890,9 @@ class _Builder:
         # The PHH players the database already holds, keyed by the name it compares them under
         # (``_storage_key``): a name that meets one of them there is that player's row.
         self.taken: Mapping[str, str] = taken if taken is not None else {}
+        # Whether the antes are part of each player's wager the pots are cut at (#419): set
+        # when they are posted.
+        self.layered_antes = False
 
     def fail(self, message: str, kind: str = MALFORMED) -> PHHImportError:
         return PHHImportError(kind, message, source=self.document.where, hand=self.document.label)
@@ -1172,8 +1175,6 @@ class _Builder:
         # street ended with that nobody matched, kept when the street is left behind.
         self.raise_size = self.level
         self.uncalled = {seat.name: Decimal(0) for seat in seats}
-        # Whether the antes are part of each player's wager the pots are cut at (#419).
-        self.layered_antes = False
         self.boards = 0
         self.cards: dict[str, list[str]] = {seat.name: [] for seat in seats}
         # Known cards in play, so one card cannot be dealt twice; discards leave it, since a
