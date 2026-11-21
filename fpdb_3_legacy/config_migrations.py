@@ -262,6 +262,18 @@ def _add_summary_importers_95_to_96(doc, template) -> None:
     _add_summary_importers_88_to_89(doc, template)
 
 
+def _preserve_96_to_97(doc, template) -> None:
+    """Advance to v97, the shipped config declaring the legacy PokerStars.UK room (#889).
+
+    Like the other regional PokerStars sites, it is in the shipped
+    HUD_config.xml only, not in the example templates an upgrade copies sites
+    from. An existing configuration needs nothing: its hands reach the room
+    through the PokerStars converter's own entry, and its site id has a fallback
+    in code. No document rewrite is needed for this version.
+    """
+    del doc, template
+
+
 def _repair_renamed_references(doc) -> None:
     aux_names = {cx.attr(n, "name") for n in cx.find_all(doc, "aw")}
     if "Classic_HUD" not in aux_names and "ClassicHud" in aux_names:
@@ -290,6 +302,7 @@ MIGRATIONS = (
     (93, 94, _add_sites_93_to_94),
     (94, 95, _add_sites_94_to_95),
     (95, 96, _add_summary_importers_95_to_96),
+    (96, 97, _preserve_96_to_97),
 )
 
 

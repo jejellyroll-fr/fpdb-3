@@ -396,3 +396,17 @@ def test_v96_gives_ggpoker_its_summary_importer():
 
     assert _importers(updated) == {"GGPoker": "GGPokerSummary", "Winamax": "MySummary"}
     assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()
+
+
+def test_v97_leaves_a_configuration_as_it_was():
+    # v97 only adds the legacy PokerStars.UK room to the shipped HUD_config.xml
+    # (#889); an existing configuration gains nothing but its version.
+    template = defusedxml.minidom.parse(str(ROOT / "HUD_config.xml.example"))
+    body = """<supported_sites><site site_name="PokerStars" screen_name="alice"/></supported_sites>
+      <hhcs><hhc site="PokerStars" converter="PokerStarsToFpdb" summaryImporter="PokerStarsSummary"/></hhcs>
+      </FreePokerToolsConfig>"""
+    old = parse('<FreePokerToolsConfig><general version="96"/>' + body)
+
+    updated = upgrade_document(old, template, CONFIG_VERSION)
+
+    assert updated.toxml() == parse('<FreePokerToolsConfig><general version="97"/>' + body).toxml()
