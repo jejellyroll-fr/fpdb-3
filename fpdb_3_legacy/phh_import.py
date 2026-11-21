@@ -1235,18 +1235,20 @@ class _Builder:
             # the button (PokerKit, which defines PHH, does the same).
             antes = [antes[1], antes[0]]
             blinds = [blinds[1], blinds[0]]
+        # Ante trimming (#419): PokerKit then cuts the pots with the antes inside each
+        # player's contribution, so a player who could only ante part of it wins back only
+        # what the others matched of it -- an ante side pot. Untrimmed, the antes are one
+        # lump every player still in can win, as fpdb pools them. The two only differ when a
+        # stack is shorter than its ante, so only such a hand books its antes as
+        # contributions; every other hand keeps them as common money.
         trimmed = bool(self.data.get("ante_trimming_status"))
+        self.layered_antes = trimmed and any(
+            ante > seat.behind for seat, ante in zip(self.seats, antes, strict=True) if ante > 0
+        )
         for seat, ante in zip(self.seats, antes, strict=True):
             if ante > 0:
-                if trimmed and ante > seat.behind:
-                    # Trimming limits a short ante's player to what everyone matched of it (an
-                    # ante side pot); fpdb pools antes as common money anyone can win. Untrimmed,
-                    # the short player may win every ante (PHH, PokerKit): that fpdb can say.
-                    raise self.fail(
-                        f"{seat.name}'s ante is trimmed to a short stack, which fpdb cannot represent", UNSUPPORTED
-                    )
                 ante = min(ante, seat.behind)
-                self.hand.addAnte(seat.name, str(ante))
+                self.hand.addAnte(seat.name, str(ante), pooled=not self.layered_antes)
                 seat.behind -= ante
                 seat.contributed += ante
                 seat.antes += ante
@@ -1877,12 +1879,17 @@ class _Builder:
 
         Pots are cut at each player's net wager (antes aside, uncalled bets returned); a layer
         is won only by a player still in the hand who wagered at least that much. Antes are
-        common money, as fpdb books them, which every player still in can win. A folded
-        player, or one who mucked, is eligible for nothing.
+        common money, as fpdb books them, which every player still in can win -- except in a
+        trimmed hand with a short ante (#419), where they are part of the wager the pots are
+        cut at. A folded player, or one who mucked, is eligible for nothing.
         """
         returned = self._returned()
-        net = {seat.name: seat.contributed - seat.antes - returned.get(seat.name, Decimal(0)) for seat in self.seats}
-        antes = sum((seat.antes for seat in self.seats), Decimal(0))
+        layered = getattr(self, "layered_antes", False)
+        net = {
+            seat.name: seat.contributed - (Decimal(0) if layered else seat.antes) - returned.get(seat.name, Decimal(0))
+            for seat in self.seats
+        }
+        antes = Decimal(0) if layered else sum((seat.antes for seat in self.seats), Decimal(0))
         eligible = {seat.name: Decimal(0) if seat.folded or seat.mucked else antes for seat in self.seats}
         previous = Decimal(0)
         for level in sorted({amount for amount in net.values() if amount > 0}):

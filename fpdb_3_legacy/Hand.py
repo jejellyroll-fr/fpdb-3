@@ -1197,7 +1197,15 @@ class Hand:
         amount = Decimal(amount)
         self.pot.setSTP(amount)
 
-    def addAnte(self, player, ante) -> None:
+    def addAnte(self, player, ante, *, pooled: bool = True) -> None:
+        """Post an ante.
+
+        ``pooled`` antes are common money: every player still in can win all of
+        them. An ante that is not pooled counts as the player's own contribution,
+        so the side pots cut it like any bet: a player who could only ante part
+        of it wins back only what the others matched of it -- PokerKit's ante
+        trimming, which a PHH hand asks for with ``ante_trimming_status`` (#419).
+        """
         log.debug(f"BLINDSANTES {player} antes {ante}")
         if player is not None:
             ante = ante.replace(",", "")  # some sites have commas
@@ -1207,7 +1215,10 @@ class Hand:
             self.stacks[player] -= ante
             act = (player, "ante", ante, self.stacks[player] == 0)
             self.actions["BLINDSANTES"].append(act)
-            self.pot.addCommonMoney(player, ante)
+            if pooled:
+                self.pot.addCommonMoney(player, ante)
+            else:
+                self.pot.addMoney(player, ante)
             self.pot.addAntes(player, ante)
             if "ante" not in list(self.gametype.keys()) or self.gametype["ante"] < ante:
                 self.gametype["ante"] = ante
