@@ -139,7 +139,7 @@ class PokerStarsSummary(TourneySummary):
                          (Buy-In:\\s(?P<TARGCURRENCY>[{LS}]?)(?P<TARGBUYIN>[,.0-9]+)(\\/[{LS}]?(?P<TARGFEE>[,.0-9]+))?(\\/[{LS}]?(?P<TARGBOUNTY>[,.0-9]+))?(?P<TARGCUR>\\s({LEGAL_ISO}))?\\s+)?)?
                         ([0-9]+\\stickets?\\sto\\sthe\\starget\\stournament\\s+)?
                         Tournament\\sstarted\\s+(-\\s)?
-                        (?P<DATETIME>.*$)
+                        (?P<DATETIME>[^\\n]*)$
                         """.format(**substitutions),
         re.VERBOSE | re.MULTILINE | re.DOTALL,
     )
@@ -246,6 +246,13 @@ class PokerStarsSummary(TourneySummary):
         r"\[(Deep\s)?((?P<MAX>\d+)-Max,\s?)?((\dx\-)?(?P<SPEED>Turbo|Hyper\-Turbo))?(, )?(?P<REBUYADDON1>\dR\dA)?",
     )
     re_xls_date_time = re.compile("^[.0-9]+$")
+    # "Tournament finished 2018/12/13 6:53:40 ET", read for endTime. The start
+    # line's DATETIME stops at its own line end, so this one is never mistaken
+    # for the start (#894).
+    re_tourney_finished = re.compile(
+        r"^Tournament\sfinished\s+(-\s)?(?P<DATETIME>[^\n]*)$",
+        re.MULTILINE,
+    )
     re_rank = re.compile(
         r"^You\sfinished\s(the\stournament\s)?in\s(?P<RANK>[0-9]+)(st|nd|rd|th)\splace\.",
         re.MULTILINE,
@@ -692,6 +699,33 @@ class PokerStarsSummary(TourneySummary):
 
         return None
 
+    def _readEtDateTime(self, text: str) -> datetime.datetime | None:
+        """Read the ET date of a "Tournament started/finished" line, as UTC.
+
+        The last date wins: a line such as "2019/07/31 21:07:43 WET
+        [2019/07/31 16:07:43 ET]" states the local time first and ET last.
+        """
+        last = None
+        for last in self.re_date_time.finditer(text):  # noqa: B007 - only the last match is kept
+            pass
+        if last is None:
+            return None
+        return self._etToUtc(
+            datetime.datetime(  # noqa: DTZ001 - ET wall clock, converted to UTC
+                int(last.group("Y")),
+                int(last.group("M")),
+                int(last.group("D")),
+                int(last.group("H")),
+                int(last.group("MIN")),
+                int(last.group("S")),
+            ),
+        )
+
+    @staticmethod
+    def _etToUtc(wall_clock: datetime.datetime) -> datetime.datetime:
+        """Convert a PokerStars ET wall-clock time to UTC."""
+        return HandHistoryConverter.changeTimezone(wall_clock, "ET", "UTC")
+
     def parseSummaryFile(self) -> None:  # noqa: C901, PLR0912, PLR0915
         """Parse tournament summary from standard text format."""
         m = self.re_tourney_info.search(self.summaryText)
@@ -721,28 +755,14 @@ class PokerStarsSummary(TourneySummary):
                 error_msg = f"Could not parse tournament info from summary text. Preview: {preview}"
                 raise FpdbParseError(error_msg)
         mg = m.groupdict()
-        if "DATETIME" in mg:
-            m1 = self.re_date_time.finditer(mg["DATETIME"])
-        datetime_str = "2000/01/01 00:00:00"  # default used if time not found
-        for a in m1:
-            datetime_str = "{}/{}/{} {}:{}:{}".format(
-                a.group("Y"),
-                a.group("M"),
-                a.group("D"),
-                a.group("H"),
-                a.group("MIN"),
-                a.group("S"),
-            )
-
-        self.startTime = datetime.datetime.strptime(  # noqa: DTZ007
-            datetime_str,
-            "%Y/%m/%d %H:%M:%S",
-        )  # also timezone at end, e.g. " ET"
-        self.startTime = HandHistoryConverter.changeTimezone(
-            self.startTime,
-            "ET",
-            "UTC",
-        )
+        start = self._readEtDateTime(mg.get("DATETIME") or "")
+        if start is None:  # default used if time not found
+            start = self._etToUtc(datetime.datetime(2000, 1, 1))  # noqa: DTZ001 - ET wall clock
+        self.startTime = start
+        # Looked for after the start line, so a later tournament's never answers for this one.
+        finished = self.re_tourney_finished.search(self.summaryText, m.end())
+        if finished is not None:
+            self.endTime = self._readEtDateTime(finished.group("DATETIME"))
 
         if "DESC1" in mg and mg["DESC1"] is not None and mg["DESC1"] != "":
             self.siteName = "Run It Once Poker"
