@@ -33,6 +33,89 @@ if TYPE_CHECKING:
 # SealsWithClubs HH Format
 log = get_logger("seals_with_clubs_parser")
 
+#: Matches a player name of any shape when the seat names are not known yet.
+#: SwC names may hold hyphens, dots and spaces, so ``\w+`` is not enough: it
+#: stopped at the first such character and every line of that player was lost.
+#: The pattern is lazy and every regex built from it is bounded by what
+#: follows the name (``:``, a space and a keyword, or the end of the line).
+ANY_PLAYER = r"(?P<PNAME>.+?)"
+
+#: The seat-position tags of a summary line.
+BRKTS = r"(\(button\) |\(small blind\) |\(big blind\) |\(button\) \(small blind\) |\(button\) \(big blind\) )?"
+
+
+def player_name_pattern(names) -> str:
+    """Return a ``PNAME`` group that matches exactly the given seat names.
+
+    Names are escaped, so a ``.`` or a ``+`` in a name is literal, and the
+    longest come first so that ``Bob`` never claims the start of ``Bob-2``.
+    """
+    ordered = sorted(set(names), key=lambda name: (-len(name), name))
+    return "(?P<PNAME>" + "|".join(map(re.escape, ordered)) + ")"
+
+
+def compile_player_regexes(plyr: str) -> dict[str, re.Pattern[str]]:
+    """Compile every SwC regex that names a player, with ``plyr`` as the name.
+
+    The class compiles them once with :data:`ANY_PLAYER`; ``compilePlayerRegexs``
+    compiles them again per table with the escaped seat names.
+    """
+    subst = {"PLYR": plyr, "BRKTS": BRKTS, "CUR": "(\\$|\xe2\x82\xac|\u20ac||\\£|)"}
+    return {
+        "re_PostSB": re.compile(
+            rf"^{plyr}: posts small blind (?P<SB>[.0-9]+)",
+            re.MULTILINE,
+        ),
+        "re_PostBB": re.compile(
+            rf"^{plyr}: posts big blind (?P<BB>[.0-9]+)",
+            re.MULTILINE,
+        ),
+        "re_Antes": re.compile(
+            rf"^{plyr}: posts the ante (?P<ANTE>[.0-9]+)",
+            re.MULTILINE,
+        ),
+        "re_PostBoth": re.compile(
+            rf"^{plyr}: posts small \& big blind (?P<SBBB>[.0-9]+)",
+            re.MULTILINE,
+        ),
+        "re_HeroCards": re.compile(
+            rf"^Dealt to {plyr}(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])",
+            re.MULTILINE,
+        ),
+        "re_Action": re.compile(
+            r"""^{PLYR}:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat)(?:\s(?P<BET>\d{{1,3}}(,\d{{3}})*(\.\d+)?))?(?:\sto\s(?P<POT>\d{{1,3}}(,\d{{3}})*(\.\d+)?))?(?:\sand\sis\sall-in)?.*?$""".format(
+                **subst
+            ),
+            re.MULTILINE | re.VERBOSE,
+        ),
+        "re_ShowdownAction": re.compile(
+            rf"^{plyr}: (shows \[(?P<CARDS>.*)\]\s\((?P<FHAND>.*?)\)|doesn't show hand|mucks hand)",
+            re.MULTILINE,
+        ),
+        "re_CollectPot": re.compile(
+            r"^Seat (?P<SEAT>[0-9]+): {PLYR} (({BRKTS}(((((?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \((?P<POT>[.,\d]+)\)) with (?P<STRING>.+?)(\s\sand\s(won\s\([.,\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$)|collected\s\((?P<POT2>[.,\d]+)\)))|folded ((on the (Flop|Turn|River))|before Flop)))|folded before Flop \(didn't bet\))".format(
+                **subst
+            ),
+            re.MULTILINE,
+        ),
+        # Anchored at the end of the line: unanchored, "returned to A-b-c-d"
+        # used to match the name "A" and abort the hand on an unknown player.
+        "re_Uncalled": re.compile(
+            rf"Uncalled bet \((?P<BET>[,.\d]+)\) returned to {plyr}\s*$",
+            re.MULTILINE,
+        ),
+        "re_Mucked": re.compile(rf"^{plyr}: mucks hand", re.MULTILINE),
+        "re_ShownCards": re.compile(
+            r"^Seat (?P<SEAT>[0-9]+): {PLYR} {BRKTS}(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \({CUR}(?P<POT>[,\.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\({CUR}[\.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$".format(
+                **subst
+            ),
+            re.MULTILINE,
+        ),
+    }
+
+
+_DEFAULT_PLAYER_REGEXES = compile_player_regexes(ANY_PLAYER)
+
 
 class SealsWithClubs(HandHistoryConverter):
     # Class Variables
@@ -43,8 +126,8 @@ class SealsWithClubs(HandHistoryConverter):
     siteId = 23  # Needs to match id entry in Sites database
     compiledPlayers: set[str] = set()
     substitutions = {
-        "PLYR": r"(?P<PNAME>\w+)",
-        "BRKTS": r"(\(button\) |\(small blind\) |\(big blind\) |\(button\) \(small blind\) |\(button\) \(big blind\) )?",
+        "PLYR": ANY_PLAYER,
+        "BRKTS": BRKTS,
     }
 
     limits = {
@@ -70,7 +153,7 @@ class SealsWithClubs(HandHistoryConverter):
     )
 
     re_PlayerInfo = re.compile(
-        r"""^Seat\s+(?P<SEAT>\d+):\s+(?P<PNAME>\w+)\s+\((?P<CASH>\d{1,3}(,\d{3})*(\.\d+)?)\sin\schips\)""",
+        r"""^Seat\s+(?P<SEAT>\d+):\s+(?P<PNAME>.+?)\s+\((?P<CASH>\d{1,3}(,\d{3})*(\.\d+)?)\sin\schips\)""",
         re.MULTILINE | re.VERBOSE,
     )
 
@@ -95,50 +178,20 @@ class SealsWithClubs(HandHistoryConverter):
         re.MULTILINE,
     )
 
-    # These used to be compiled per player, but regression tests say
-    # we don't have to, and it makes life faster.
-    re_PostSB = re.compile(
-        r"^{PLYR}: posts small blind (?P<SB>[.0-9]+)".format(**substitutions),
-        re.MULTILINE,
-    )
-    re_PostBB = re.compile(
-        r"^{PLYR}: posts big blind (?P<BB>[.0-9]+)".format(**substitutions),
-        re.MULTILINE,
-    )
-    re_Antes = re.compile(
-        r"^{PLYR}: posts the ante (?P<ANTE>[.0-9]+)".format(**substitutions),
-        re.MULTILINE,
-    )
-    re_PostBoth = re.compile(
-        r"^{PLYR}: posts small \& big blind (?P<SBBB>[.0-9]+)".format(**substitutions),
-        re.MULTILINE,
-    )
-    re_HeroCards = re.compile(
-        r"^Dealt to {PLYR}(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])".format(**substitutions),
-        re.MULTILINE,
-    )
-    re_Action = re.compile(
-        r"""^{PLYR}:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat)(?:\s(?P<BET>\d{{1,3}}(,\d{{3}})*(\.\d+)?))?(?:\sto\s(?P<POT>\d{{1,3}}(,\d{{3}})*(\.\d+)?))?(?:\sand\sis\sall-in)?.*?$""".format(
-            **substitutions
-        ),
-        re.MULTILINE | re.VERBOSE,
-    )
-
-    re_ShowdownAction = re.compile(
-        r"^(?P<PNAME>\w+): (shows \[(?P<CARDS>.*)\]\s\((?P<FHAND>.*?)\)|doesn't show hand|mucks hand)",
-        re.MULTILINE,
-    )
-    re_CollectPot = re.compile(
-        r"^Seat (?P<SEAT>[0-9]+): {PLYR} (({BRKTS}(((((?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \((?P<POT>[.,\d]+)\)) with (?P<STRING>.+?)(\s\sand\s(won\s\([.,\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$)|collected\s\((?P<POT2>[.,\d]+)\)))|folded ((on the (Flop|Turn|River))|before Flop)))|folded before Flop \(didn't bet\))".format(
-            **substitutions
-        ),
-        re.MULTILINE,
-    )
+    # Player-dependent regexes. These defaults match a name of any shape;
+    # compilePlayerRegexs swaps in versions built from the escaped seat names.
+    re_PostSB = _DEFAULT_PLAYER_REGEXES["re_PostSB"]
+    re_PostBB = _DEFAULT_PLAYER_REGEXES["re_PostBB"]
+    re_Antes = _DEFAULT_PLAYER_REGEXES["re_Antes"]
+    re_PostBoth = _DEFAULT_PLAYER_REGEXES["re_PostBoth"]
+    re_HeroCards = _DEFAULT_PLAYER_REGEXES["re_HeroCards"]
+    re_Action = _DEFAULT_PLAYER_REGEXES["re_Action"]
+    re_ShowdownAction = _DEFAULT_PLAYER_REGEXES["re_ShowdownAction"]
+    re_CollectPot = _DEFAULT_PLAYER_REGEXES["re_CollectPot"]
+    re_Uncalled = _DEFAULT_PLAYER_REGEXES["re_Uncalled"]
+    re_Mucked = _DEFAULT_PLAYER_REGEXES["re_Mucked"]
+    re_ShownCards = _DEFAULT_PLAYER_REGEXES["re_ShownCards"]
     re_Cancelled = re.compile(r"Hand\scancelled", re.MULTILINE)
-    re_Uncalled = re.compile(
-        r"Uncalled bet \((?P<BET>[,.\d]+)\) returned to {PLYR}".format(**substitutions),
-        re.MULTILINE,
-    )
     re_Flop = re.compile(r"\*\*\* FLOP \*\*\*")
     re_Turn = re.compile(r"\*\*\* TURN \*\*\*")
     re_River = re.compile(r"\*\*\* RIVER \*\*\*")
@@ -158,7 +211,6 @@ class SealsWithClubs(HandHistoryConverter):
         "Total pot (?P<TOTALPOT>\\d{1,3}(,\\d{3})*(\\.\\d+)?)\\s\\|\\sRake\\s(?P<RAKE>\\d{1,3}(,\\d{3})*(\\.\\d+)?)",
         re.MULTILINE,
     )
-    re_Mucked = re.compile("^{PLYR}: mucks hand".format(**substitutions), re.MULTILINE)
 
     # ------------------------------------------------------------------
     # Legacy "Seals With Clubs" 2013 text format (pre-SwCPoker rewrite).
@@ -230,32 +282,10 @@ class SealsWithClubs(HandHistoryConverter):
             # If not, update compiledPlayers
             self.compiledPlayers = players
 
-            # Compile a regular expression to match the player's name
-            # The regular expression is of the form "(?P<PNAME>player1|player2|player3)"
-            player_re = "(?P<PNAME>" + "|".join(map(re.escape, players)) + ")"
-
-            # Define substitutions for the regular expressions
-            subst = {
-                "PLYR": player_re,
-                "BRKTS": r"(\(button\) |\(small blind\) |\(big blind\) |\(button\) \(small blind\) |\(button\) \(big blind\) )?",
-                "CUR": "(\\$|\xe2\x82\xac|\u20ac||\\£|)",
-            }
-
-            # Compile a regular expression to match the cards dealt to the player
-            # The regular expression is of the form "^Dealt to %(PLYR)s(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])"
-            self.re_HeroCards = re.compile(
-                r"^Dealt to {PLYR}(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])".format(**subst),
-                re.MULTILINE,
-            )
-
-            # Compile a regular expression to match the cards shown by the player
-            # The regular expression is of the form "^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[,\.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[\.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$"
-            self.re_ShownCards = re.compile(
-                r"^Seat (?P<SEAT>[0-9]+): {PLYR} {BRKTS}(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \({CUR}(?P<POT>[,\.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\({CUR}[\.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$".format(
-                    **subst
-                ),
-                re.MULTILINE,
-            )
+            # Every regex that names a player is rebuilt from the escaped seat
+            # names, so a hyphen, dot or space in a name is matched literally.
+            for attr, regex in compile_player_regexes(player_name_pattern(players)).items():
+                setattr(self, attr, regex)
 
     def readSupportedGames(self):
         log.info("Reading supported games")
