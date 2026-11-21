@@ -50,9 +50,9 @@ def _run(
         if found:
             (bin_dir / tool).symlink_to(found)
     env = {"PATH": str(bin_dir), "HOME": str(tmp_path)}
-    return subprocess.run(
-        [shutil.which("bash") or "bash", str(script), *args], capture_output=True, text=True, env=env, check=False
-    )
+    # The script under test, never user input: only the stubs above are on PATH.
+    command = [shutil.which("bash") or "bash", str(script), *args]
+    return subprocess.run(command, capture_output=True, text=True, env=env, check=False)  # nosemgrep
 
 
 def test_script_is_valid_bash() -> None:
