@@ -98,7 +98,7 @@ def golden_manifest() -> dict:
     return json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
 
 
-def _wall_clock_as_utc(wall_clock, offset, not_before=None):
+def _wall_clock_as_utc(wall_clock, *_zone):
     return wall_clock.replace(tzinfo=datetime.UTC)
 
 

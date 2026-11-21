@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# The module and its camelCase API follow the *Summary convention of every
+# tournament-summary parser (the importer loads it by this name).
+# pylint: disable=invalid-name
 """GGPoker tournament-summary parser (#868).
 
 The client writes one summary per tournament, next to the hand histories:
@@ -68,7 +71,7 @@ def split_buyin(parts: list[int]) -> tuple[int, int, int]:
     return prize + bounty, fee, bounty
 
 
-class GGPokerSummary(TourneySummary):
+class GGPokerSummary(TourneySummary):  # pylint: disable=too-many-instance-attributes  # the base class's tourney fields
     """GGPoker tournament summary parser."""
 
     sitename = "GGPoker"
