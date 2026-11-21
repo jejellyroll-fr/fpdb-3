@@ -272,6 +272,17 @@ class Unibet(HandHistoryConverter):
         r"{PLYR}:?\sposts\sstraddle\s{CUR}(?P<STRADDLE>[,.0-9]+)".format(**substitutions),
         re.MULTILINE,
     )
+    # A player who joins, or comes back after missing blinds, posts a big blind
+    # out of position. It is live: they check preflop when nobody raises (#866).
+    re_PostNewPlayer = re.compile(
+        r"{PLYR}:?\sposts\snew\splayer['’]s\sblind\s{CUR}(?P<BB>[,.0-9]+)".format(**substitutions),
+        re.MULTILINE,
+    )
+    # The small blind they missed is posted alongside it, dead (#866).
+    re_PostMissedSB = re.compile(
+        r"{PLYR}:?\sposts\smissed\ssmall\sblind\s{CUR}(?P<SB>[,.0-9]+)".format(**substitutions),
+        re.MULTILINE,
+    )
     re_Action = re.compile(
         r"""
                         {PLYR}:?(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat)
@@ -893,6 +904,24 @@ class Unibet(HandHistoryConverter):
             )
             log.info(
                 f"readBlinds: '{a.group('PNAME')}' for '{self.clearMoneyString(a.group('SBBB'))}'",
+            )
+        for a in self.re_PostMissedSB.finditer(hand.handText):
+            hand.addBlind(
+                a.group("PNAME"),
+                "secondsb",
+                self.clearMoneyString(a.group("SB")),
+            )
+            log.info(
+                f"readBlinds: '{a.group('PNAME')}' missed small blind '{self.clearMoneyString(a.group('SB'))}'",
+            )
+        for a in self.re_PostNewPlayer.finditer(hand.handText):
+            hand.addBlind(
+                a.group("PNAME"),
+                "big blind",
+                self.clearMoneyString(a.group("BB")),
+            )
+            log.info(
+                f"readBlinds: '{a.group('PNAME')}' new player's blind '{self.clearMoneyString(a.group('BB'))}'",
             )
 
         for a in self.re_PostStraddle.finditer(hand.handText):

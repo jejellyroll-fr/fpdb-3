@@ -20,8 +20,9 @@ hand history directories. Supports multiple platforms (Windows, Linux, macOS)
 and handles multiple hero names per site.
 
 Features:
-- Support for PokerStars (all regions: .com, .fr, .it, .es, .pt, .de) and the
-  PokerStars on Betfair skin
+- Support for PokerStars (all regions: .com, .fr, .it, .es, .pt, .de, and the
+  retired .uk client's folders on Windows and Wine) and the PokerStars on
+  Betfair skin
 - Winamax detection with account-specific paths
 - iPoker network (all major skins including French FDJ, PMU, Italian, etc.)
 - Americas Cardroom (ACR) and WPN network
@@ -174,6 +175,10 @@ class PokerStarsDetector(SiteDetector):
                 "PokerStars.EU",
                 "PokerStars.DE",
                 "PokerStars on Betfair",
+                # The retired UK client (#889): its folder may still hold
+                # histories to import. No macOS spelling is known, so none
+                # is guessed above.
+                "PokerStars.UK",
             ]
 
         # Detecting all installed variants
@@ -215,9 +220,9 @@ class PokerStarsDetector(SiteDetector):
 
         elif self.platform == "Linux":
             paths = get_linux_paths()
-            # Wine installation
-            # A client that keeps its histories in the user's AppData, as
-            # Betfair's does, has them under the Wine user's profile.
+            # Wine installation. A client that keeps its histories in the user's
+            # AppData, as Betfair's does and the UK one did (#889), has them under
+            # the Wine user's profile.
             wine_local = sorted(Path(paths["wine_users"]).glob(f"*/AppData/Local/{folder}"))
             hhpath = self._check_path_exists(
                 str(Path(paths["wine_program_files"]) / folder / "HandHistory"),

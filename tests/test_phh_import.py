@@ -12,6 +12,7 @@ import datetime
 import json
 import shutil
 import sqlite3
+from decimal import Decimal
 from io import StringIO
 from pathlib import Path
 from typing import Any
@@ -578,10 +579,10 @@ actions = ["d dh p1 ????", "d dh p2 ????", "d dh p3 ????", "p3 cbr 6", "p2 f"]
 """
 
 
-def test_a_trimmed_short_ante_is_unsupported() -> None:
-    error = refusal(ANTES_HAND + "ante_trimming_status = true\n")
-    assert error.kind == UNSUPPORTED
-    assert "trimmed" in str(error)
+def test_a_trimmed_short_ante_is_accepted() -> None:
+    # #419: the antes become contributions the side pots cut. The history stops
+    # before the board, so the hand is refused as partial, not as unsupported.
+    assert refusal(ANTES_HAND + "ante_trimming_status = true\n").kind == PARTIAL
 
 
 def test_full_antes_with_trimming_on_are_imported() -> None:
@@ -1283,14 +1284,12 @@ def test_no_street_is_dealt_after_a_fold_out() -> None:
 # -- seventeenth review ---------------------------------------------------------------
 
 
-def test_a_short_stack_ante_is_unsupported_only_when_trimmed() -> None:
+def test_a_short_stack_ante_is_accepted_trimmed_or_not() -> None:
     """PokerKit 0.7.6: untrimmed, one pot of 25 all three can win; trimmed, 15 and a side pot of 10."""
     short = NT_HAND.replace("antes = [0, 0, 0]", "antes = [10, 10, 10]").replace("[100, 100, 100]", "[5, 100, 100]")
     short = short.replace('  "p1 f",\n', "")  # p1 is all in from the ante
     assert refusal(short).kind == PARTIAL  # accepted: the history stops before the board
-    error = refusal(short + "ante_trimming_status = true\n")
-    assert error.kind == UNSUPPORTED
-    assert "p1's ante is trimmed to a short stack" in str(error)
+    assert refusal(short + "ante_trimming_status = true\n").kind == PARTIAL  # #419
 
 
 def test_every_date_field_given_is_kept() -> None:
@@ -1892,7 +1891,7 @@ def test_an_ante_marked_untrimmed_is_not_read_as_a_truthy_string() -> None:
     """``bool("no")`` is true: the hand would have been refused as trimmed, or read as trimmed."""
     assert refusal(ANTES_HAND + 'ante_trimming_status = "no"\n').kind == MALFORMED
     assert refusal(ANTES_HAND + "ante_trimming_status = false\n").kind == PARTIAL
-    assert refusal(ANTES_HAND + "ante_trimming_status = true\n").kind == UNSUPPORTED
+    assert refusal(ANTES_HAND + "ante_trimming_status = true\n").kind == PARTIAL
 
 
 # -- thirty-ninth review --------------------------------------------------------------
@@ -3117,3 +3116,91 @@ def test_a_card_the_reshuffle_returned_is_still_dealt(drawn: str) -> None:
     PokerKit plays, which is what the discard pile is tracked for in the first place.
     """
     assert build_hand(document(six_player_triple_draw(drawn))) is not None
+
+
+# -- #419: a trimmed ante's side pot ----------------------------------------------------
+
+# PokerKit's example: antes of 10, p1 can ante only 5 and is all in from it. p2's
+# big blind folds to p3's raise to 6, whose 4 nobody called is returned. Trimmed,
+# the antes sit inside each contribution (p1 5, p2 12, p3 12): a main pot of 15
+# p1 and p3 can win, and a side pot of 14 only p3 can.
+TRIMMED_SHORT_ANTE = """
+variant = "NT"
+antes = [10, 10, 10]
+blinds_or_straddles = [1, 2, 0]
+min_bet = 2
+starting_stacks = [5, 100, 100]
+ante_trimming_status = true
+actions = [
+  "d dh p1 AsAh",
+  "d dh p2 2c3d",
+  "d dh p3 KsKh",
+  "p3 cbr 6",
+  "p2 f",
+  "d db 7c4d2s",
+  "d db Jh",
+  "d db 9c",
+  "p1 sm AsAh",
+  "p3 sm KsKh",
+]
+"""
+
+
+def test_a_trimmed_short_ante_wins_only_what_was_matched() -> None:
+    hand = build_hand(document(TRIMMED_SHORT_ANTE + "winnings = [15, 0, 14]\n"))
+
+    assert hand.collectees == {"p1": Decimal(15), "p3": Decimal(14)}
+    # The antes are the players' own contributions, not common money.
+    assert sum(hand.pot.common.values()) == 0
+    hand.totalPot()
+    assert [amount for amount, _players in hand.pot.pots] == [Decimal(15), Decimal(14)]
+    # p3's raise nobody called goes back: 10 of ante and the 2 p2 matched.
+    assert hand.pot.committed == {"p1": Decimal(5), "p2": Decimal(12), "p3": Decimal(12)}
+    assert hand.pot.returned == {"p3": Decimal(4)}
+    assert hand.totalpot == Decimal(29)
+    # Returned before the pots are cut: no part of the raise is booked as rake.
+    assert hand.rake == 0
+
+
+def test_a_trimmed_short_ante_cannot_win_the_side_pot() -> None:
+    error = refusal(TRIMMED_SHORT_ANTE + "winnings = [29, 0, 0]\n")
+    assert error.kind == MALFORMED
+    assert "p1 collects 29, more than the pots they are in can win (15)" in str(error)
+
+
+def test_untrimmed_the_short_ante_wins_every_ante() -> None:
+    # Untrimmed, the 25 of antes are one pot p1 can win whole (fpdb's common money).
+    untrimmed = TRIMMED_SHORT_ANTE.replace("ante_trimming_status = true\n", "")
+    hand = build_hand(document(untrimmed + "winnings = [25, 0, 4]\n"))
+    assert hand.collectees == {"p1": Decimal(25), "p3": Decimal(4)}
+    assert sum(hand.pot.common.values()) == Decimal(25)
+
+
+UNEVEN_TRIMMED_ANTES = TRIMMED_SHORT_ANTE.replace("antes = [10, 10, 10]", "antes = [10, 20, 10]")
+
+
+def test_a_trimmed_ante_above_every_other_is_cut_to_the_second_largest() -> None:
+    # PokerKit collects the antes like a street's bets: p2's 20 is an over-bet nobody
+    # matched, cut to the 10 p3 posted. The pots are those of even antes.
+    hand = build_hand(document(UNEVEN_TRIMMED_ANTES + "winnings = [15, 0, 14]\n"))
+    assert hand.pot.antes == {"p1": Decimal(5), "p2": Decimal(10), "p3": Decimal(10)}
+    hand.totalPot()
+    assert hand.totalpot == Decimal(29)
+    assert hand.rake == 0
+
+
+def test_a_trimmed_ante_cut_back_cannot_be_won() -> None:
+    error = refusal(UNEVEN_TRIMMED_ANTES + "winnings = [15, 0, 24]\n")
+    assert error.kind == MALFORMED
+    assert "39 is collected from a pot of 29" in str(error)
+
+
+def test_a_lone_big_blind_ante_is_trimmed_away() -> None:
+    # Nobody else antes, so the whole big-blind ante is over the second largest (0) and
+    # goes back: why PokerKit asks for trimming off with big-blind antes.
+    folded = ANTES_HAND.replace("[5, 100, 100]", "[100, 100, 100]").replace('"p2 f"]', '"p1 f", "p2 f"]')
+    big_blind_ante = folded.replace("antes = [10, 10, 10]", "antes = [0, 10, 0]")
+    trimmed = build_hand(document(big_blind_ante + "ante_trimming_status = true\n"))
+    assert sum(trimmed.pot.antes.values()) == 0
+    untrimmed = build_hand(document(big_blind_ante))
+    assert untrimmed.pot.antes["p2"] == Decimal(10)

@@ -21,6 +21,7 @@ import datetime
 import re
 from typing import Any
 
+from fpdb_3_legacy.en_datetime import parse_en_datetime
 from fpdb_3_legacy.HandHistoryConverter import FpdbParseError, HandHistoryConverter
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -160,7 +161,7 @@ class Betfair(HandHistoryConverter):
         log.debug("HID %s, Table %s", m.group("HID"), m.group("TABLE"))
         hand.handid = m.group("HID")
         hand.tablename = m.group("TABLE")
-        hand.startTime = datetime.datetime.strptime(
+        hand.startTime = parse_en_datetime(
             m.group("DATETIME"),
             "%A, %B %d, %H:%M:%S GMT %Y",
         ).replace(tzinfo=datetime.UTC)

@@ -14,6 +14,7 @@ from pathlib import Path
 import pytest
 
 from fpdb_3_legacy.Configuration import Config
+from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 from fpdb_3_legacy.WinningToFpdb import Winning
 
 # The hand, anonymised, from an Americas Cardroom session; the hero is rivercat42.
@@ -74,3 +75,119 @@ def test_a_boardless_game_still_builds_its_pots(stud_hand) -> None:
     assert players["Villain3"]["rake"] == 6  # the rake survives, in cents
     total = sum(v["totalProfit"] for v in players.values()) + sum(v["rake"] for v in players.values())
     assert total == 0, "money in must equal money out"
+
+
+# ---------------------------------------------------------------------------
+# A player all-in on 5th street is shown with only five cards (#867).
+#
+# ACR prints his two down cards and the up cards known when he went all-in:
+# "Villain2 shows [6s Qd Qs Ad 4d]". The 6th-street up card (Td) and the
+# 7th-street card (6c) are only in the deal lines. A five-card showdown went to
+# no branch at all, so nothing was recorded and join_holecards returned his up
+# cards twice -- ['Qs', 'Ad', '4d', 'Td', 'Qs', 'Ad', '4d', 'Td'].
+# ---------------------------------------------------------------------------
+
+FIVE_CARD_FILE = HAND_FILE.with_name(
+    "7StudHL-8max-USD-0.10-0.20-202607.five.card.showdown.CASHID-TN-Braselton GAMETYPE.txt"
+)
+
+
+@pytest.fixture(scope="module")
+def five_card_hands():
+    hands = Winning(config=Config(), in_path=str(FIVE_CARD_FILE), autostart=True).getProcessedHands()
+    return {str(h.handid): h for h in hands}
+
+
+def test_a_five_card_showdown_is_recorded(five_card_hands) -> None:
+    hand = five_card_hands["2780606831"]
+    open_cards, closed_cards = hand.holecards["THIRD"]["Villain2"]
+
+    assert "Villain2" in hand.shown
+    assert closed_cards == ["6s", "Qd"]  # was [] -- never recorded
+    assert open_cards == ["Qs"]
+
+
+@pytest.mark.parametrize(
+    ("handid", "player", "expected"),
+    [
+        ("2780606831", "Villain2", ["6s", "Qd", "Qs", "Ad", "4d", "Td", "6c"]),
+        ("2780605023", "Villain3", ["Ac", "6s", "5c", "Kd", "2c", "4s", "5s"]),
+    ],
+)
+def test_a_five_card_showdown_is_seven_distinct_cards(five_card_hands, handid, player, expected) -> None:
+    cards = five_card_hands[handid].join_holecards(player, asList=True)
+
+    assert cards == expected  # the later streets come from the deal lines
+    assert len(cards) == len(set(cards))  # was 8 entries, each duplicated
+
+
+def test_a_five_card_showdown_leaves_the_hero_alone(five_card_hands) -> None:
+    # The hero is shown with five cards too; his own deal lines stand.
+    cards = five_card_hands["2780606831"].join_holecards(HERO, asList=True)
+
+    assert cards == ["6d", "Ac", "9c", "5c", "3s", "Th", "Jd"]
+
+
+@pytest.mark.parametrize("handid", ["2780606831", "2780605023"])
+def test_a_five_card_showdown_builds_its_pots(five_card_hands, handid, caplog) -> None:
+    hand = five_card_hands[handid]
+    hand.totalPot()
+    hand.playerIds = {p[1]: i + 1 for i, p in enumerate(hand.players)}
+    with caplog.at_level("WARNING"):
+        hand.stats.getStats(hand)
+    players = hand.stats.getHandsPlayers()
+
+    assert not [r for r in caplog.records if "join_holecards" in r.getMessage()]
+    assert hand.stats.getHandsPots(), "a hi/lo pot row must be written"
+    total = sum(v["totalProfit"] for v in players.values()) + sum(v["rake"] for v in players.values())
+    assert total == 0, "money in must equal money out"
+
+
+def test_an_unknown_seventh_card_is_kept_as_unknown(five_card_hands) -> None:
+    """With no seventh-street deal line, the down card is unknown -- not lost."""
+    hand = five_card_hands["2780605023"]
+    hand.holecards["SEVENTH"].pop("Villain3")
+    hand.addShownCards(["Ac", "6s", "5c", "Kd", "2c", "4s"], "Villain3")
+
+    assert hand.join_holecards("Villain3", asList=True) == ["Ac", "6s", "5c", "Kd", "2c", "4s", "0x"]
+
+
+def test_a_hand_won_on_sixth_street_gets_no_seventh_card(five_card_hands) -> None:
+    """The unknown seventh card is only for a hand that reached 7th street."""
+    hand = five_card_hands["2780605023"]
+    hand.streets["SEVENTH"] = ""
+    hand.holecards["SEVENTH"].pop("Villain3", None)
+    hand.addShownCards(["Ac", "6s", "5c", "Kd", "2c", "4s"], "Villain3")
+
+    assert hand.join_holecards("Villain3", asList=True) == ["Ac", "6s", "5c", "Kd", "2c", "4s"]
+
+
+# ---------------------------------------------------------------------------
+# A player who wins before 5th street and shows his cards.
+#
+# "HIWAII2: shows [3d 3s 5h 4h]" on 4th street: two down cards and two up
+# cards. join_holecards padded any non-hero holding of four cards or fewer with
+# two unknown down cards, even when the down cards were shown, returning
+# ['0x', '0x', '3d', '3s', '5h', '4h'] -- six cards, the real down cards pushed
+# into the up-card positions.
+# ---------------------------------------------------------------------------
+
+RAZZ_FILE = Path(__file__).resolve().parents[1] / "regression-test-files/cash/Stars/Stud/Razz-USD-0.04-0.08-200911.txt"
+
+
+@pytest.fixture(scope="module")
+def early_reveal_hand():
+    hands = PokerStars(config=Config(), in_path=str(RAZZ_FILE), autostart=True).getProcessedHands()
+    return next(h for h in hands if str(h.handid) == "35874664176")
+
+
+def test_an_early_reveal_keeps_its_own_down_cards(early_reveal_hand) -> None:
+    cards = early_reveal_hand.join_holecards("HIWAII2", asList=True)
+
+    assert cards == ["3d", "3s", "5h", "4h"]
+
+
+def test_an_unshown_player_still_gets_unknown_down_cards(early_reveal_hand) -> None:
+    cards = early_reveal_hand.join_holecards("kobreli", asList=True)
+
+    assert cards == ["0x", "0x", "Kd", "4s"]

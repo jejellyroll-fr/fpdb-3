@@ -1,4 +1,4 @@
-.PHONY: test test-all test-gui test-main install-deps lint format help
+.PHONY: test test-all test-gui test-main install-deps install-macos lint format help
 
 help: ## Show this help message
 	@echo "Available commands:"
@@ -6,6 +6,9 @@ help: ## Show this help message
 
 install-deps: ## Install all dependencies including test dependencies
 	uv pip install .[test]
+
+install-macos: ## Install fpdb from source on macOS (Homebrew Python, venv, equity engine, launcher)
+	./install_macos.sh
 
 test: ## Run main test suite (excludes GUI tests)
 	uv run pytest

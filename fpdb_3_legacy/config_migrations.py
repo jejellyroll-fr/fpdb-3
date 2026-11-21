@@ -116,7 +116,7 @@ SITES_ADDED_IN_90 = ("Unibet",)  # #729: the 2026 Relax Gaming client
 SITES_ADDED_IN_91 = ("Betclic",)  # #730: the 2025+ in-house client, apart from the iPoker skin
 SITES_ADDED_IN_94 = ("CoinPoker",)  # #732: text hand-history import, nothing live
 SITES_ADDED_IN_95 = ("BetRivers",)  # #731: text hand-history import, nothing live
-SITES_ADDED_IN_97 = ("PokerStars on Betfair",)  # #733: a PokerStars skin with its own folders
+SITES_ADDED_IN_98 = ("PokerStars on Betfair",)  # #733: a PokerStars skin with its own folders
 
 
 def _child_section(doc, section: str):
@@ -284,8 +284,20 @@ def _add_summary_importers_95_to_96(doc, template) -> None:
     _add_summary_importers_88_to_89(doc, template)
 
 
-def _add_sites_96_to_97(doc, template) -> None:
-    """Advance to v97, adding the PokerStars on Betfair skin (#733).
+def _preserve_96_to_97(doc, template) -> None:
+    """Advance to v97, the shipped config declaring the legacy PokerStars.UK room (#889).
+
+    Like the other regional PokerStars sites, it is in the shipped
+    HUD_config.xml only, not in the example templates an upgrade copies sites
+    from. An existing configuration needs nothing: its hands reach the room
+    through the PokerStars converter's own entry, and its site id has a fallback
+    in code. No document rewrite is needed for this version.
+    """
+    del doc, template
+
+
+def _add_sites_97_to_98(doc, template) -> None:
+    """Advance to v98, adding the PokerStars on Betfair skin (#733).
 
     The room is new, so every configuration lacks it: its <site> (off, with
     Betfair's client folders) and its <hhc> on the PokerStars converters come
@@ -294,7 +306,7 @@ def _add_sites_96_to_97(doc, template) -> None:
     keeps PokerStars' entry (an Excel summary is filed under that entry as it
     is).
     """
-    _add_sites(doc, template, SITES_ADDED_IN_97, before_same_converter=True)
+    _add_sites(doc, template, SITES_ADDED_IN_98, before_same_converter=True)
 
 
 def _repair_renamed_references(doc) -> None:
@@ -325,7 +337,8 @@ MIGRATIONS = (
     (93, 94, _add_sites_93_to_94),
     (94, 95, _add_sites_94_to_95),
     (95, 96, _add_summary_importers_95_to_96),
-    (96, 97, _add_sites_96_to_97),
+    (96, 97, _preserve_96_to_97),
+    (97, 98, _add_sites_97_to_98),
 )
 
 

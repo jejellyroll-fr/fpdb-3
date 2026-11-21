@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-from __future__ import annotations
-
-# -*- coding: utf-8 -*-
 #    Copyright 2008-2011, Carl Gherardi
 #
 #    This program is free software; you can redistribute it and/or modify
@@ -18,17 +15,18 @@ from __future__ import annotations
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ########################################################################
-from fpdb_3_legacy import L10n
+from __future__ import annotations
 
-_ = L10n.get_translation()
-
-import datetime
 import re
 import sys
 from decimal import Decimal
 from typing import Any
 
+from fpdb_3_legacy import L10n
+from fpdb_3_legacy.en_datetime import parse_en_datetime
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter, log
+
+_ = L10n.get_translation()
 
 # OnGame HH Format
 
@@ -323,7 +321,7 @@ class OnGame(HandHistoryConverter):
                     # print (_("DEBUG:") + " readHandInfo: " + _("DATETIME not matched: '%s'") % info[key])
                 # changeTimezone handles both named zones (CET/CEST/EEST) and
                 # explicit OnGame offsets such as GMT+0100.
-                hand.startTime = datetime.datetime.strptime(
+                hand.startTime = parse_en_datetime(
                     datetimestr, "%Y/%b/%d %H:%M:%S"
                 )  # also timezone at end, e.g. " ET"
                 hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, tzoffset, "UTC")

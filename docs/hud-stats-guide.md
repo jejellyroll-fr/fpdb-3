@@ -34,7 +34,7 @@ So a "flop" stat is a 4th-street stat in stud and an after-the-first-draw stat i
 
 Whether a stat has data in a family is measured, not assumed: every regression hand history of the
 project is parsed and run through DerivedStats, and a stat applies to a family when all the columns
-it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring stud, 1 tour draw, 476 tour hold hands. "No data" for a family means those columns stayed empty on every test hand of it.
+it reads get a value there. The corpus: 178 ring draw, 2680 ring hold, 168 ring stud, 1 tour draw, 476 tour hold hands. "No data" for a family means those columns stayed empty on every test hand of it.
 
 ## Player
 
@@ -137,7 +137,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: Hands seen at this table
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: Hold'em only (the query is limited to holdem)
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: Meant for popups: it reads one history file, not the cache, so it ignores the HUD's aggregation settings.
 
@@ -153,7 +153,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % calling facing a preflop 3-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, preflop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 
@@ -167,7 +167,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % calling facing a preflop 4-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, preflop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Call vs Preflop Squeeze — `call_vs_preflop_squeeze`
@@ -180,7 +180,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % calling facing a preflop squeeze
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, preflop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Called a Raise Preflop — `car0`
@@ -238,7 +238,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `call3B`
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, preflop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 
 ### Fold to Preflop 3-Bet — `f_3bet`
@@ -252,7 +252,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `F3B_pf`
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, preflop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 equivalent**: Fold to PF 3Bet — `(street0_FoldTo3BDone / street0_FoldTo3BChance) * 100` (same formula)
 - **XML titles**: `PFF3`
@@ -339,7 +339,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % fold to squeeze
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, preflop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_squeeze_defense.py`
 
@@ -367,7 +367,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % folding facing a preflop 3-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, preflop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
@@ -382,7 +382,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % folding facing a preflop 4-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, preflop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
@@ -396,7 +396,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % folding facing a preflop squeeze
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, preflop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
@@ -436,7 +436,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % 4B BB preflop
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, preflop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 
 ### 4-Bet from Button — `four_bet_btn`
@@ -553,7 +553,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % open-shove (>=40% stack)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: yes
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 
 ### Isolation Raise (deprecated) — `iso`
@@ -606,7 +606,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg 2bet faced (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, preflop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_preflop_raise_facing.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
@@ -621,7 +621,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg 3bet faced (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, preflop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_preflop_raise_facing.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
@@ -636,7 +636,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg 4bet faced (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, preflop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -650,7 +650,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg 5bet faced (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, preflop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_bet_sizing_extra.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
@@ -665,7 +665,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg preflop raise faced (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, preflop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_bet_sizing_extra.py`, `test_calc_preflop_raise_facing.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
@@ -680,7 +680,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg preflop raise made (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, preflop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_bet_sizing_extra.py`, `test_calc_raise_made.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
@@ -695,7 +695,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg 2nd preflop raise made (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, preflop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_bet_sizing_extra.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
@@ -741,7 +741,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % raising facing a preflop 3-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, preflop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 
@@ -755,7 +755,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % raising facing a preflop 4-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, preflop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Raise vs Preflop Squeeze — `raise_vs_preflop_squeeze`
@@ -768,7 +768,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % raising facing a preflop squeeze
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, preflop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Raise first in (open raise). — `rfi`
@@ -864,7 +864,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % SQZ BB preflop
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, preflop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 derivation tests**: `test_player_situations.py`
 
@@ -962,7 +962,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % straddle
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_special_blinds.py`
 - **Note**: The HUD abbreviation `Str` is shared with: `aof_straight`.
@@ -1006,7 +1006,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % 3B BB preflop
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, preflop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 
@@ -1169,7 +1169,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `fBB_s`
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 
 ### Fold Small Blind to Steal — `f_SB_steal`
@@ -1197,7 +1197,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `fB_s`
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **PT4 equivalent**: Fold to Steal — `((foldedSbToSteal + foldedBbToSteal) / (foldSbToStealChance + foldBbToStealChance)) * 100` (same formula)
 
@@ -1344,7 +1344,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % calling facing a flop 3-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the flop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Call vs Flop 4-Bet — `call_vs_flop_4bet`
@@ -1357,7 +1357,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % calling facing a flop 4-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the flop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Call vs Flop C-Bet — `call_vs_flop_cbet`
@@ -1370,7 +1370,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % calling facing a flop c-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the flop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 
@@ -1384,7 +1384,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % calling facing a flop donk bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the flop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Flop Continuation Bet — `cb1`
@@ -1486,7 +1486,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg flop 2bet faced (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the flop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_bet_sizing_extra.py`, `test_calc_postflop_raise_facing.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
@@ -1501,7 +1501,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg flop 3bet faced (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the flop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_postflop_raise_facing.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
@@ -1516,7 +1516,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg flop 4bet faced (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the flop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -1530,7 +1530,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg flop bet faced (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the flop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_flop_bet_facing.py`, `test_calc_postflop_raise_facing.py`, `test_calc_turn_river_bet_facing.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
@@ -1545,7 +1545,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg flop bet made (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the flop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_bet_made.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
@@ -1589,7 +1589,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg flop raise faced (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the flop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_bet_sizing_extra.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
@@ -1604,7 +1604,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg flop raise made (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the flop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_raise_made.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
@@ -1619,7 +1619,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg 2nd flop raise made (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the flop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -1633,7 +1633,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg flop SPR
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the flop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Faced a Raise on the Flop — `face_raise_flop`
@@ -1741,7 +1741,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % fold to flop 3bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the flop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_3bet_postflop.py`
 
@@ -1755,7 +1755,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % folding facing a flop 3-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the flop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
@@ -1769,7 +1769,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % folding facing a flop 4-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the flop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
@@ -1783,7 +1783,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % folding facing a flop c-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the flop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
@@ -1798,7 +1798,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % folding facing a flop donk bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the flop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
@@ -1870,7 +1870,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % raising facing a flop 3-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the flop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Raise vs Flop 4-Bet — `raise_vs_flop_4bet`
@@ -1883,7 +1883,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % raising facing a flop 4-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the flop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Raise vs Flop C-Bet — `raise_vs_flop_cbet`
@@ -1896,7 +1896,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % raising facing a flop c-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the flop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 
@@ -1910,7 +1910,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % raising facing a flop donk bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the flop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Flop 3-Bet — `three_B_flop`
@@ -1982,7 +1982,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % calling facing the turn barrel, having called the flop c-bet in position
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 
@@ -1996,7 +1996,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % calling facing a turn 3-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Call vs Turn 4-Bet — `call_vs_turn_4bet`
@@ -2009,7 +2009,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % calling facing a turn 4-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Call vs Turn C-Bet — `call_vs_turn_cbet`
@@ -2022,7 +2022,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % calling facing a turn c-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Call vs Turn Donk Bet — `call_vs_turn_donk`
@@ -2035,7 +2035,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % calling facing a turn donk bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 
@@ -2197,7 +2197,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % float turn
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Fold vs Turn Barrel after Float — `fold_float_turn`
@@ -2210,7 +2210,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % folding facing the turn barrel, having called the flop c-bet in position
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
@@ -2240,7 +2240,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % fold to turn 3bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Turn Fold — `fold_turn`
@@ -2253,7 +2253,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % fold turn
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Fold vs Turn 3-Bet — `fold_vs_turn_3bet`
@@ -2266,7 +2266,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % folding facing a turn 3-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
@@ -2280,7 +2280,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % folding facing a turn 4-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
@@ -2294,7 +2294,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % folding facing a turn c-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
@@ -2308,7 +2308,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % folding facing a turn donk bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
@@ -2376,7 +2376,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % raising facing the turn barrel, having called the flop c-bet in position
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 
@@ -2405,7 +2405,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % raising facing a turn 3-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Raise vs Turn 4-Bet — `raise_vs_turn_4bet`
@@ -2418,7 +2418,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % raising facing a turn 4-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Raise vs Turn C-Bet — `raise_vs_turn_cbet`
@@ -2431,7 +2431,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % raising facing a turn c-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Raise vs Turn Donk Bet — `raise_vs_turn_donk`
@@ -2444,7 +2444,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % raising facing a turn donk bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 
@@ -2458,7 +2458,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg turn 2bet faced (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_postflop_raise_facing.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
@@ -2473,7 +2473,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg turn 3bet faced (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -2487,7 +2487,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg turn 4bet faced (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -2501,7 +2501,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg turn bet faced (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_turn_river_bet_facing.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
@@ -2516,7 +2516,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg turn bet made (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_bet_made.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
@@ -2531,7 +2531,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg turn raise faced (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -2545,7 +2545,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg turn raise made (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -2559,7 +2559,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg 2nd turn raise made (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -2573,7 +2573,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg turn SPR
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Turn 3-Bet — `three_B_turn`
@@ -2630,7 +2630,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % calling facing the river barrel, having called the turn bet in position
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 
@@ -2644,7 +2644,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % calling facing a river 3-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Call vs River 4-Bet — `call_vs_river_4bet`
@@ -2657,7 +2657,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % calling facing a river 4-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Call vs River C-Bet — `call_vs_river_cbet`
@@ -2670,7 +2670,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % calling facing a river c-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Call vs River Donk Bet — `call_vs_river_donk`
@@ -2683,7 +2683,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % calling facing a river donk bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### River Continuation Bet — `cb3`
@@ -2711,7 +2711,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `cr_3`
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### River Bet/Raise when not the C-Bettor — `dbr3`
@@ -2818,7 +2818,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % folding facing the river barrel, having called the turn bet in position
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
@@ -2861,7 +2861,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % fold to river 3bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Fold vs River 3-Bet — `fold_vs_river_3bet`
@@ -2874,7 +2874,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % folding facing a river 3-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
@@ -2887,8 +2887,8 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **SQL database field / logic**: cnt_r_face_4bet = SUM(HudCache.cnt_r_face_4bet); cnt_r_call_4bet = SUM(HudCache.cnt_r_call_4bet); cnt_r_raise_4bet = SUM(HudCache.cnt_r_raise_4bet)
 - **Tooltip**: % folding facing a river 4-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
-- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3154 Hold'em / Omaha test hands)
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3156 Hold'em / Omaha test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
@@ -2902,7 +2902,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % folding facing a river c-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
@@ -2916,7 +2916,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % folding facing a river donk bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
@@ -2930,7 +2930,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % 4 bet river
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### River Open (first bet) — `open_river`
@@ -2971,7 +2971,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg river 2bet faced (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -2985,7 +2985,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg river 3bet faced (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -2999,7 +2999,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg river 4bet faced (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -3013,7 +3013,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg river bet faced (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_turn_river_bet_facing.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
@@ -3028,7 +3028,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg river bet made (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_bet_made.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
@@ -3043,7 +3043,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg river raise faced (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -3057,7 +3057,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg river raise made (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -3071,7 +3071,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg 2nd river raise made (% pot)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -3085,7 +3085,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg river SPR
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Raise vs River Barrel after Float — `raise_float_river`
@@ -3098,7 +3098,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % raising facing the river barrel, having called the turn bet in position
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 
@@ -3112,7 +3112,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % raising facing a river 3-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Raise vs River 4-Bet — `raise_vs_river_4bet`
@@ -3124,8 +3124,8 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **SQL database field / logic**: cnt_r_face_4bet = SUM(HudCache.cnt_r_face_4bet); cnt_r_raise_4bet = SUM(HudCache.cnt_r_raise_4bet)
 - **Tooltip**: % raising facing a river 4-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
-- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3154 Hold'em / Omaha test hands)
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3156 Hold'em / Omaha test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Raise vs River C-Bet — `raise_vs_river_cbet`
@@ -3138,7 +3138,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % raising facing a river c-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Raise vs River Donk Bet — `raise_vs_river_donk`
@@ -3151,7 +3151,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % raising facing a river donk bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### River Call Efficiency — `river_call_efficiency`
@@ -3194,7 +3194,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: Aggression frequency 7th street
 - **Detailed HUD text**: `a_fq_4`
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
-- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3154 Hold'em / Omaha test hands)
+- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3156 Hold'em / Omaha test hands)
 - **Stud / Razz**: yes, on 7th street
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
@@ -3208,7 +3208,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % continuation bet 7th street
 - **Detailed HUD text**: `cb_4`
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
-- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3154 Hold'em / Omaha test hands)
+- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3156 Hold'em / Omaha test hands)
 - **Stud / Razz**: yes, on 7th street
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
@@ -3222,8 +3222,8 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % check-raise 7th street
 - **Detailed HUD text**: `cr_4`
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
-- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3154 Hold'em / Omaha test hands)
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3156 Hold'em / Omaha test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Fold to 7Th Street Continuation Bet — `f_cb4`
@@ -3236,7 +3236,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % fold to continuation bet 7th street
 - **Detailed HUD text**: `f_cb_4`
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
-- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3154 Hold'em / Omaha test hands)
+- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3156 Hold'em / Omaha test hands)
 - **Stud / Razz**: yes, on 7th street
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
@@ -3250,7 +3250,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: % fold frequency 7th street
 - **Detailed HUD text**: `ff_4`
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
-- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3154 Hold'em / Omaha test hands)
+- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3156 Hold'em / Omaha test hands)
 - **Stud / Razz**: yes, on 7th street
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
@@ -3333,7 +3333,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `CheckRaiseFreq`
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Fold to All-In — `fold_to_allin`
@@ -3393,7 +3393,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg flop invested
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both); amounts are tournament chips there, not money
 - **Hold'em / Omaha (flop games)**: yes, on the flop
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_bet_sizing_extra.py`
 
@@ -3421,7 +3421,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg river invested
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both); amounts are tournament chips there, not money
 - **Hold'em / Omaha (flop games)**: yes, on the river
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_bet_sizing_extra.py`
 
@@ -3435,7 +3435,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Tooltip**: avg turn invested
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both); amounts are tournament chips there, not money
 - **Hold'em / Omaha (flop games)**: yes, on the turn
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_bet_sizing_extra.py`
 
@@ -3817,7 +3817,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `all-in`
 - **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 - **Note**: Gives the same value as `vpip` (same counters, same formula).
@@ -3833,7 +3833,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `big wrap 13+ 1/1 100.0%`
 - **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Decision EV (bb) — `aof_decision_ev`
@@ -3847,7 +3847,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `Decision EV`
 - **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### All-ins with a flush — `aof_flush`
@@ -3861,7 +3861,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `flush 1/1 100.0%`
 - **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Fold (AoF) — `aof_fold`
@@ -3875,7 +3875,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `fold`
 - **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 
@@ -3890,7 +3890,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `full house 1/1 100.0%`
 - **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Equity vs Callers — `aof_known_equity`
@@ -3904,7 +3904,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `known-card equity`
 - **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### EV vs Callers (bb) — `aof_known_ev`
@@ -3918,7 +3918,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `EV vs actual callers`
 - **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### All-ins with a made hand — `aof_made`
@@ -3932,7 +3932,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `made hand 1/1 100.0%`
 - **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### All-ins with the nut flush draw — `aof_nfd`
@@ -3946,7 +3946,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `nut flush draw 1/1 100.0%`
 - **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### All-ins with no made hand — `aof_no_made`
@@ -3960,7 +3960,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `no made hand 1/1 100.0%`
 - **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### All-ins with a non-nut flush draw — `aof_non_nfd`
@@ -3974,7 +3974,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `non-nut flush draw 1/1 100.0%`
 - **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Observed All-ins — `aof_observed`
@@ -3988,7 +3988,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `observed all-ins`
 - **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### All-ins with one pair — `aof_pair`
@@ -4002,7 +4002,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `pair 1/1 100.0%`
 - **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### All-ins with quads — `aof_quads`
@@ -4016,7 +4016,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `quads 1/1 100.0%`
 - **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Equity vs Range — `aof_range_equity`
@@ -4030,7 +4030,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `population-range equity`
 - **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Showdowns (AoF) — `aof_showdowns`
@@ -4059,7 +4059,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `splash taken`
 - **Games**: Cash tables of rooms that add splash pots
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Splash Collected — `aof_splash_won`
@@ -4073,7 +4073,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `splash collected`
 - **Games**: Cash tables of rooms that add splash pots
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: Money the room adds to the pot from outside; read it together with profit.
 
@@ -4088,7 +4088,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `straight 1/1 100.0%`
 - **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The HUD abbreviation `Str` is shared with: `straddle`.
 
@@ -4103,7 +4103,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `straight flush 1/1 100.0%`
 - **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### All-in Profile — `aof_summary`
@@ -4116,7 +4116,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `NFD×1 W13×1 W9×1 fd×1 3k×1 2p×1 1p×1 air×1 over 1 observed all-ins`
 - **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### All-ins with trips — `aof_trips`
@@ -4130,7 +4130,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `trips 1/1 100.0%`
 - **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### All-ins with two pair — `aof_two_pair`
@@ -4144,7 +4144,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `two pair 1/1 100.0%`
 - **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Weak All-ins — `aof_weak`
@@ -4158,7 +4158,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `Weak AI`
 - **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### All-ins with at least nine straight outs — `aof_wrap9`
@@ -4172,7 +4172,7 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Detailed HUD text**: `wrap 9+ 1/1 100.0%`
 - **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ## Other
@@ -4184,8 +4184,8 @@ it reads get a value there. The corpus: 178 ring draw, 2678 ring hold, 166 ring 
 - **Formula (code)**: `metric opportunities over the decisions matching the filters`
 - **SQL database field / logic**: analytics engine over the action events (analytics_query): filters {'game_base': ['draw'], 'action_taken': ['discards', 'stands pat']}; grouped by draw_number, cards_drawn
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
-- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3154 Hold'em / Omaha test hands)
-- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3156 Hold'em / Omaha test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 168 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Analytics definition (metric opportunities): a HUD cell shows it only with the data_* attributes the editor writes.
 

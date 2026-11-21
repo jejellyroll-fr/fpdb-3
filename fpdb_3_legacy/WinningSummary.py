@@ -20,6 +20,7 @@ import re
 from decimal import Decimal
 from typing import Any, ClassVar
 
+from fpdb_3_legacy.en_datetime import parse_en_datetime
 from fpdb_3_legacy.HandHistoryConverter import (
     FpdbParseError,
     FpdbSummaryNotFound,
@@ -218,7 +219,7 @@ class WinningSummary(TourneySummary):
                     a.group("S"),
                     a.group("AMPM"),
                 )
-                self.startTime = datetime.datetime.strptime(
+                self.startTime = parse_en_datetime(
                     datetimestr,
                     "%Y/%m/%d %I:%M:%S %p",
                 ).replace(tzinfo=datetime.UTC)  # also timezone at end, e.g. " ET"
@@ -241,7 +242,7 @@ class WinningSummary(TourneySummary):
                     a.group("S"),
                     a.group("AMPM"),
                 )
-                self.endTime = datetime.datetime.strptime(
+                self.endTime = parse_en_datetime(
                     datetimestr,
                     "%Y/%m/%d %I:%M:%S %p",
                 ).replace(tzinfo=datetime.UTC)  # also timezone at end, e.g. " ET"
