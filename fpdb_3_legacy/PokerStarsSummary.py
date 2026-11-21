@@ -699,7 +699,7 @@ class PokerStarsSummary(TourneySummary):
 
         return None
 
-    def _readEtDateTime(self, text: str) -> datetime.datetime | None:
+    def _read_et_datetime(self, text: str) -> datetime.datetime | None:
         """Read the ET date of a "Tournament started/finished" line, as UTC.
 
         The last date wins: a line such as "2019/07/31 21:07:43 WET
@@ -710,7 +710,7 @@ class PokerStarsSummary(TourneySummary):
             pass
         if last is None:
             return None
-        return self._etToUtc(
+        return self._et_to_utc(
             datetime.datetime(  # noqa: DTZ001 - ET wall clock, converted to UTC
                 int(last.group("Y")),
                 int(last.group("M")),
@@ -722,7 +722,7 @@ class PokerStarsSummary(TourneySummary):
         )
 
     @staticmethod
-    def _etToUtc(wall_clock: datetime.datetime) -> datetime.datetime:
+    def _et_to_utc(wall_clock: datetime.datetime) -> datetime.datetime:
         """Convert a PokerStars ET wall-clock time to UTC."""
         return HandHistoryConverter.changeTimezone(wall_clock, "ET", "UTC")
 
@@ -755,14 +755,14 @@ class PokerStarsSummary(TourneySummary):
                 error_msg = f"Could not parse tournament info from summary text. Preview: {preview}"
                 raise FpdbParseError(error_msg)
         mg = m.groupdict()
-        start = self._readEtDateTime(mg.get("DATETIME") or "")
+        start = self._read_et_datetime(mg.get("DATETIME") or "")
         if start is None:  # default used if time not found
-            start = self._etToUtc(datetime.datetime(2000, 1, 1))  # noqa: DTZ001 - ET wall clock
+            start = self._et_to_utc(datetime.datetime(2000, 1, 1))  # noqa: DTZ001 - ET wall clock
         self.startTime = start
         # Looked for after the start line, so a later tournament's never answers for this one.
         finished = self.re_tourney_finished.search(self.summaryText, m.end())
         if finished is not None:
-            self.endTime = self._readEtDateTime(finished.group("DATETIME"))
+            self.endTime = self._read_et_datetime(finished.group("DATETIME"))
 
         if "DESC1" in mg and mg["DESC1"] is not None and mg["DESC1"] != "":
             self.siteName = "Run It Once Poker"
