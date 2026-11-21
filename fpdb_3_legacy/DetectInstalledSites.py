@@ -40,6 +40,7 @@ Usage:
 
 from __future__ import annotations
 
+import codecs
 import fnmatch
 import ntpath
 import os
@@ -89,6 +90,27 @@ def get_mac_paths() -> dict[str, str]:
         "app_support": str(home / "Library" / "Application Support"),
         "documents": str(home / "Documents"),
     }
+
+
+#: The encodings the text converters try, in their order (PokerStars, Unibet and
+#: Betclic's ``codepage``); ISO-8859-1, their last, decodes any byte.
+HISTORY_ENCODINGS = ("utf-8", "cp1252")
+
+
+def _decode_history(data: bytes) -> str:
+    """The start of a history file, decoded as its converter would read it.
+
+    A hero name must reach the configuration as the importer will store it: a
+    CP1252 "André" decoded as UTF-8 with replacement characters became "Andr�"
+    and matched no player (#854). The read stops at a byte count, so a UTF-8
+    character cut there is held back instead of failing the whole decode.
+    """
+    for encoding in HISTORY_ENCODINGS:
+        try:
+            return codecs.getincrementaldecoder(encoding)().decode(data, final=False)
+        except UnicodeDecodeError:
+            continue
+    return data.decode("iso-8859-1")
 
 
 class SiteDetector:
@@ -167,7 +189,7 @@ class SiteDetector:
                 with path.open("rb") as handle:
                     # Windows files carry CRLF; normalise before matching, as the
                     # converters do when reading.
-                    head = handle.read(self.HERO_BYTES).decode("utf-8", errors="replace").replace("\r\n", "\n")
+                    head = _decode_history(handle.read(self.HERO_BYTES)).replace("\r\n", "\n")
             except OSError as e:
                 log.debug("Cannot read %s: %s", path, e)
                 continue

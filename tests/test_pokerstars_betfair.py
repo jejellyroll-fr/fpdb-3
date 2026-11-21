@@ -377,6 +377,30 @@ def test_a_stud_opponents_upcards_do_not_name_the_hero(detector, tmp_path) -> No
     assert _detect_flat(detector, tmp_path, local)["heroname"] == "Hero"
 
 
+def _detect_bytes(detector, tmp_path: Path, data: bytes) -> str:
+    local = tmp_path / "AppData" / "Local"
+    history = local / "Betfair.UK" / "HandHistory"
+    history.mkdir(parents=True)
+    (history / "HH20261019 T1.txt").write_bytes(data)
+    return _detect_flat(detector, tmp_path, local)["heroname"]
+
+
+@pytest.mark.parametrize("encoding", ["utf-8", "cp1252"])
+def test_a_non_ascii_hero_is_read_as_the_converter_reads_it(detector, tmp_path, encoding) -> None:
+    # PokerStars histories come in UTF-8 or CP1252 (the converter's codepage):
+    # the configured name must be the one the importer stores.
+    data = "Betfair Hand #1: ...\r\nDealt to André [Ah Kh]\r\n".encode(encoding)
+
+    assert _detect_bytes(detector, tmp_path, data) == "André"
+
+
+def test_a_utf8_character_cut_by_the_read_limit_keeps_the_file_utf8(detector, tmp_path) -> None:
+    head = "Betfair Hand #1: ...\nDealt to André [Ah Kh]\n".encode()
+    detector.HERO_BYTES = len(head) + 1  # stops inside the two-byte "é" below
+
+    assert _detect_bytes(detector, tmp_path, head + "éé".encode()) == "André"
+
+
 def test_the_betfair_client_folder_is_found_under_wine(detector, tmp_path) -> None:
     users = tmp_path / ".wine" / "drive_c" / "users"
     (users / "alice" / "AppData" / "Local" / "Betfair.UK" / "HandHistory" / "alice").mkdir(parents=True)
