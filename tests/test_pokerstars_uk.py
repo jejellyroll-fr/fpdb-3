@@ -64,7 +64,8 @@ def test_the_skin_has_its_own_site_id() -> None:
     # Not PokerStars on Betfair (143), nor the legacy Betfair (7) or iPoker (66) rooms.
     assert POKERSTARS_SKIN_IDS[SKIN] == SITE_POKERSTARS_UK == 145
     assert list(POKERSTARS_SKIN_IDS.values()).count(145) == 1
-    assert {7, 66, 143}.isdisjoint(POKERSTARS_SKIN_IDS.values())
+    assert POKERSTARS_SKIN_IDS["PokerStars on Betfair"] == 143
+    assert {7, 66}.isdisjoint(POKERSTARS_SKIN_IDS.values())
 
 
 def test_the_client_closed_on_7_october_2026() -> None:

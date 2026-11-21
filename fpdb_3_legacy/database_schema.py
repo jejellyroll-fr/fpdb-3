@@ -229,6 +229,7 @@ class DatabaseSchemaMixin(DatabaseMigrationsMixin, DatabaseIndexesMixin):
         c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('130', 'PokerStars.DE', 'PS')",
         )
+        c.execute("INSERT INTO Sites (id,name,code) VALUES ('143', 'PokerStars on Betfair', 'PS')")
         # The retired PokerStars UK client, for historical imports (#889)
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('145', 'PokerStars.UK', 'PS')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('3', 'Everleaf', 'EV')")
@@ -332,6 +333,8 @@ class DatabaseSchemaMixin(DatabaseMigrationsMixin, DatabaseIndexesMixin):
         # The 2025+ in-house client, separate from the iPoker skin 'Betclic Poker' (131) (#730)
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('142', 'Betclic', 'BC')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('144', 'BetRivers', 'BR')")
+        # Paddy Power on PokerStars software (#888), apart from the iPoker skin 'Paddy Power Poker' (65)
+        c.execute("INSERT INTO Sites (id,name,code) VALUES ('146', 'PokerStars on Paddy Power', 'PS')")
         c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('59', 'NetBet Poker', 'IP')",
         )

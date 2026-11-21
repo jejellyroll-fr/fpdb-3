@@ -21,7 +21,8 @@ and handles multiple hero names per site.
 
 Features:
 - Support for PokerStars (all regions: .com, .fr, .it, .es, .pt, .de, and the
-  retired .uk client's folders on Windows and Wine)
+  retired .uk client's folders on Windows and Wine) and the PokerStars on
+  Betfair skin
 - Winamax detection with account-specific paths
 - iPoker network (all major skins including French FDJ, PMU, Italian, etc.)
 - Americas Cardroom (ACR) and WPN network
@@ -142,8 +143,14 @@ class SiteDetector:
         return None
 
 
+#: PokerStars skins whose client folder is not named after the skin. PokerStars
+#: on Betfair (#733) keeps its histories under %LOCALAPPDATA%\Betfair.UK, per
+#: PokerTracker 4's documentation for its 4.19 support of the skin.
+POKERSTARS_VARIANT_FOLDERS: dict[str, str] = {"PokerStars on Betfair": "Betfair.UK"}
+
+
 class PokerStarsDetector(SiteDetector):
-    """PokerStars detector supporting all regions (.com, .fr, .it, .es, .pt, .de)."""
+    """PokerStars detector supporting all regions (.com, .fr, .it, .es, .pt, .de) and Betfair."""
 
     def detect(self) -> dict[str, Any]:
         """Detect PokerStars installation and heroes."""
@@ -167,6 +174,7 @@ class PokerStarsDetector(SiteDetector):
                 "PokerStars.PT",
                 "PokerStars.EU",
                 "PokerStars.DE",
+                "PokerStars on Betfair",
                 # The retired UK client (#889): its folder may still hold
                 # histories to import. No macOS spelling is known, so none
                 # is guessed above.
@@ -188,40 +196,42 @@ class PokerStarsDetector(SiteDetector):
 
         return {"detected": False, "hhpath": "", "heroname": "", "tspath": ""}
 
-    def _detect_variant(self, variant: str) -> dict[str, Any]:
+    def _detect_variant(self, variant: str) -> dict[str, Any]:  # noqa: C901
         """Detect a specific PokerStars variant."""
         hhpath = None
         tspath = None
+        folder = POKERSTARS_VARIANT_FOLDERS.get(variant, variant)
 
         if self.platform == "Windows":
             paths = get_windows_paths()
             # Modern Windows (Vista+)
             hhpath = self._check_path_exists(
-                str(Path(paths["local_appdata"]) / variant / "HandHistory"),
-                str(Path(paths["appdata"]) / variant / "HandHistory"),
-                str(Path(paths["program_files"]) / variant / "HandHistory"),
-                str(Path(paths["program_files_x86"]) / variant / "HandHistory"),
+                str(Path(paths["local_appdata"]) / folder / "HandHistory"),
+                str(Path(paths["appdata"]) / folder / "HandHistory"),
+                str(Path(paths["program_files"]) / folder / "HandHistory"),
+                str(Path(paths["program_files_x86"]) / folder / "HandHistory"),
             )
             tspath = self._check_path_exists(
-                str(Path(paths["local_appdata"]) / variant / "TournSummary"),
-                str(Path(paths["appdata"]) / variant / "TournSummary"),
-                str(Path(paths["program_files"]) / variant / "TournSummary"),
-                str(Path(paths["program_files_x86"]) / variant / "TournSummary"),
+                str(Path(paths["local_appdata"]) / folder / "TournSummary"),
+                str(Path(paths["appdata"]) / folder / "TournSummary"),
+                str(Path(paths["program_files"]) / folder / "TournSummary"),
+                str(Path(paths["program_files_x86"]) / folder / "TournSummary"),
             )
 
         elif self.platform == "Linux":
             paths = get_linux_paths()
             # Wine installation. A client that keeps its histories in the user's
-            # AppData, as the UK one did (#889), has them under the Wine user's profile.
-            wine_local = sorted(Path(paths["wine_users"]).glob(f"*/AppData/Local/{variant}"))
+            # AppData, as Betfair's does and the UK one did (#889), has them under
+            # the Wine user's profile.
+            wine_local = sorted(Path(paths["wine_users"]).glob(f"*/AppData/Local/{folder}"))
             hhpath = self._check_path_exists(
-                str(Path(paths["wine_program_files"]) / variant / "HandHistory"),
-                str(Path(paths["wine_program_files_x86"]) / variant / "HandHistory"),
+                str(Path(paths["wine_program_files"]) / folder / "HandHistory"),
+                str(Path(paths["wine_program_files_x86"]) / folder / "HandHistory"),
                 *(str(local / "HandHistory") for local in wine_local),
             )
             tspath = self._check_path_exists(
-                str(Path(paths["wine_program_files"]) / variant / "TournSummary"),
-                str(Path(paths["wine_program_files_x86"]) / variant / "TournSummary"),
+                str(Path(paths["wine_program_files"]) / folder / "TournSummary"),
+                str(Path(paths["wine_program_files_x86"]) / folder / "TournSummary"),
                 *(str(local / "TournSummary") for local in wine_local),
             )
 
@@ -257,6 +267,11 @@ class PokerStarsDetector(SiteDetector):
                     "tspath": final_tspath,
                     "variant": variant,
                 }
+            if any(Path(hhpath).glob("*.txt")):
+                # Histories written straight into HandHistory, with no folder
+                # per player: the folder itself is the one to import, and the
+                # hero is left for the user to type.
+                return {"detected": True, "hhpath": hhpath, "heroname": "", "tspath": tspath or "", "variant": variant}
 
         return {"detected": False, "hhpath": "", "heroname": "", "tspath": ""}
 

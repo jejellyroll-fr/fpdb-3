@@ -41,6 +41,9 @@ except ImportError:
 # PPokerstatars HH Format
 log = get_logger("pokerstars_summary_parser")
 
+# A summary's own header. PokerStars on Betfair writes "Betfair Tournament #N" (#854).
+re_stars_tournament = re.compile(r"(?:PokerStars(?:\sKick-Off)?|Betfair) Tournament #\d+")
+
 
 class PokerStarsSummary(TourneySummary):
     """PokerStars tournament summary parser.
@@ -54,6 +57,37 @@ class PokerStarsSummary(TourneySummary):
     """
 
     hhtype = "summary"
+
+    @staticmethod
+    def room_of_summary(config: Any, site_name: str, summary_text: Any, in_path: str) -> str:
+        """The room of this one summary, when the file's room may not hold it.
+
+        A file is given one room, from its whole text. A skin with a first or
+        a last day (PokerStars on Paddy Power #888, PokerStars.UK #889) cannot
+        hold a tournament played outside them, and an export of several
+        summaries can span that day. When the file was given such a skin, or
+        its folder names one, each summary is filed as its own text and folder
+        say: the export's older tournaments are not the new client's, and its
+        newer ones are, whichever came first in the file.
+        """
+        from fpdb_3_legacy.PokerStarsToFpdb import (
+            POKERSTARS_RETIRED_SKINS,
+            POKERSTARS_SKIN_FIRST_DAYS,
+            POKERSTARS_SKIN_IDS,
+            PokerStars,
+        )
+
+        if site_name not in POKERSTARS_SKIN_IDS or not isinstance(summary_text, str):
+            return site_name
+        dated = POKERSTARS_SKIN_FIRST_DAYS.keys() | POKERSTARS_RETIRED_SKINS.keys()
+        path = in_path if in_path and in_path != "-" else None
+        parser = PokerStars(config, in_path=path or "-", autostart=False)
+        folder_skin = path and (parser._detectSkinByConfiguredPath(path) or parser._detectSkinByPath(path))
+        if site_name not in dated and not (folder_skin and folder_skin[0] in dated):
+            return site_name
+        room, _site_id = parser.detectPokerStarsSkin(summary_text, path)
+        return room
+
     limits: ClassVar[dict[str, str]] = {
         "No Limit": "nl",
         "NO LIMIT": "nl",
@@ -117,7 +151,7 @@ class PokerStarsSummary(TourneySummary):
     }
 
     re_identify = re.compile(
-        r"((?P<SITE>PokerStars|Full\sTilt|Run\sIt\sOnce\sPoker)(\sKick-Off)?\sTournament\s\#\d+|<title>TOURNEYS:)",
+        r"((?P<SITE>PokerStars|Betfair|Full\sTilt|Run\sIt\sOnce\sPoker)(\sKick-Off)?\sTournament\s\#\d+|<title>TOURNEYS:)",
     )
 
     re_tour_no = re.compile(r"\#(?P<TOURNO>[0-9]+),")
@@ -303,7 +337,7 @@ class PokerStarsSummary(TourneySummary):
     def getSplitRe(self, head: str) -> re.Pattern[str]:
         """Get regex pattern for splitting multiple tournament summaries."""
         re_split_tourneys = re.compile(
-            r"(?:PokerStars(?:\sKick-Off)?|Full\sTilt|Run\sIt\sOnce\sPoker) Tournament ",
+            r"(?:PokerStars(?:\sKick-Off)?|Betfair|Full\sTilt|Run\sIt\sOnce\sPoker) Tournament ",
         )
         re_html_split_tourneys = re.compile(r'tr id="row_\d+')
         m = re.search("<title>TOURNEYS:", head)
@@ -339,7 +373,7 @@ class PokerStarsSummary(TourneySummary):
 
             # Skip email headers until we find tournament content
             for i, line in enumerate(lines):
-                if "PokerStars Tournament #" in line:
+                if re_stars_tournament.search(line):
                     content_start = i
                     break
 
@@ -348,7 +382,7 @@ class PokerStarsSummary(TourneySummary):
                 tournament_content = "\n".join(lines[content_start:])
 
                 # Check if we have multiple tournaments in the email
-                tournament_matches = list(re.finditer(r"PokerStars Tournament #\d+", tournament_content))
+                tournament_matches = list(re_stars_tournament.finditer(tournament_content))
                 if len(tournament_matches) > 1:
                     log.info("Found %d tournaments in email", len(tournament_matches))
                     # For now, just return the first tournament
@@ -738,7 +772,7 @@ class PokerStarsSummary(TourneySummary):
                 raise FpdbSummaryNotFound(error_msg)
 
             # Check if this contains multiple summaries (email format)
-            tournament_count = len(re.findall(r"PokerStars(?:\sKick-Off)? Tournament #\d+", self.summaryText))
+            tournament_count = len(re_stars_tournament.findall(self.summaryText))
             if tournament_count > 1:
                 log.warning("Found %d tournaments in text, this should be split", tournament_count)
                 error_msg = f"Multiple tournaments found ({tournament_count})"
