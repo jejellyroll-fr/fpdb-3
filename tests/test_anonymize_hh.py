@@ -16,6 +16,7 @@ HANDS = UNIBET / "manual_export_power_spin_025_2026.txt"
 SUMMARIES = ROOT / "tests" / "fixtures" / "summaries" / "unibet" / "manual_export_power_spin_025_2026.txt"
 CASH = UNIBET / "automatic_plo_cash_2026.txt"
 WINAMAX_SUMMARY = ROOT / "regression-test-files" / "summaries" / "Winamax" / "NLHE-EUR-Expresso-1-202604.lottery.txt"
+POKERSTARS_SUMMARY = ROOT / "regression-test-files" / "summaries" / "Stars" / "6+Holdem-3max-STT-USD-1.00-201907.txt"
 # The fixtures are anonymised already; a token of their own makes them "real".
 REAL_TOKEN = "deadbeefdeadbeef"
 FAKE_TOKEN = "0000000000000001"
@@ -151,6 +152,22 @@ def test_a_summary_only_file_is_accepted(tmp_path: Path) -> None:
     results = anonymize_hh.run("Unibet", [folder], tmp_path / "out", tmp_path / "map.json")
 
     assert [(result.target.name, result.hands) for result in results] == [("summaries.txt", 0)]
+
+
+def test_a_pokerstars_summary_s_ranking_is_renamed(tmp_path: Path) -> None:
+    # "  1: name (Country), $3.00 (100%)": the hand converter reads no one there (#854).
+    folder = tmp_path / "in"
+    folder.mkdir()
+    shutil.copyfile(POKERSTARS_SUMMARY, folder / "sng.txt")
+
+    anonymize_hh.run("PokerStars", [folder], tmp_path / "out", tmp_path / "map.json")
+
+    ranking = [line for line in (tmp_path / "out" / "sng.txt").read_text(encoding="utf-8").splitlines() if ": " in line]
+    assert ranking[-3:] == [
+        "  1: alice (United Kingdom), $3.00 (100%)",
+        "  2: bob (Belgium),",
+        "  3: carol (Germany),",
+    ]
 
 
 def test_a_summary_the_converter_misclassifies_is_still_accepted(tmp_path: Path) -> None:

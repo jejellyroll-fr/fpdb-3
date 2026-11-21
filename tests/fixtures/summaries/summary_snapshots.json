@@ -267,6 +267,10 @@
     "player_count": 1804,
     "sha256": "f884f138919464d6c8ca73c26b433072aca5bfd62b96d86505de40d921ebbd3e"
   },
+  "Stars/NLHE-3max-STT-USD-0.46-0.04-202610.Betfair.txt": {
+    "player_count": 3,
+    "sha256": "c16c597ef0a9d08045bceeafbc8b0eba0404cc22ea2c27c3d0d577adc184993a"
+  },
   "Stars/NLHE-4max-MTT-USD-2-201305.shootout.txt": {
     "player_count": 348,
     "sha256": "500cfd808c926bf8a109db43f7524c0bdab0bbd8151db8bf21ad4f6250a277ba"

@@ -54,6 +54,8 @@ SITE_POKERSTARS_ES = 35
 SITE_POKERSTARS_PT = 36
 SITE_POKERSTARS_EU = 37
 SITE_POKERSTARS_DE = 130
+# PokerStars on Betfair (2026): PokerStars histories headed "Betfair" (#733, #854).
+SITE_POKERSTARS_BETFAIR = 143
 # The standalone PokerStars UK client, retired on 7 October 2026 when its players
 # moved to PokerStars on Betfair (143, #733). Historical imports only (#889).
 SITE_POKERSTARS_UK = 145
@@ -73,6 +75,7 @@ POKERSTARS_SKIN_IDS = {
     "PokerStars.PT": SITE_POKERSTARS_PT,
     "PokerStars.EU": SITE_POKERSTARS_EU,
     "PokerStars.DE": SITE_POKERSTARS_DE,
+    "PokerStars on Betfair": SITE_POKERSTARS_BETFAIR,
     "PokerStars.UK": SITE_POKERSTARS_UK,
     "PokerStars on Paddy Power": SITE_POKERSTARS_PADDY_POWER,
 }
@@ -101,9 +104,19 @@ POKERSTARS_SKIN_FIRST_DAYS: dict[str, datetime.date] = {
 POKERSTARS_CONFIGURED_PATH_SKINS: tuple[str, ...] = ("PokerStars on Paddy Power",)
 
 _HEADER_DATE = re.compile(r"\b(?P<Y>\d{4})/(?P<M>\d{1,2})/(?P<D>\d{1,2})\b")
+# PokerStars on Betfair writes PokerStars histories under its own name:
+# "Betfair Hand #N: ..." and "Betfair Tournament #N, ..." (#733, #854). The
+# 2010s Betfair Poker client's "***** Betfair Poker Hand History" is BetfairToFpdb's.
+_BETFAIR_HEADER = re.compile(r"^\ufeff?Betfair\s(?:Hand|Tournament)\s\#\d+", re.MULTILINE)
 
 # Path patterns for skin detection
 POKERSTARS_PATH_PATTERNS = [
+    # Betfair's client writes under %LOCALAPPDATA%\Betfair.UK\HandHistory and
+    # \TournSummary. Its own headers name it (_BETFAIR_HEADER, #854); the
+    # folder files the PokerStars-headed files kept there (#733). Matched as a
+    # whole folder name: a screen name or Windows user containing "Betfair" is
+    # not the client.
+    ("/betfair.uk/", "PokerStars on Betfair"),
     # The UK client wrote under %LOCALAPPDATA%\PokerStars.UK\HandHistory and
     # \TournSummary. Its histories name no skin, so only that folder tells them
     # from PokerStars.COM's (#889). Matched as a whole folder name, and never
@@ -377,7 +390,7 @@ class PokerStars(HandHistoryConverter):
     # Static regexes
     re_game_info = re.compile(
         """
-          (?P<SITE>PokerStars|POKERSTARS|888Poker|Hive\\sPoker|Full\\sTilt|PokerMaster|Run\\sIt\\sOnce\\sPoker|BetOnline|PokerBros|MPLPoker|SupremaPoker)(?P<TITLE>\\sGame|\\sHand|\\sHome\\sGame|\\sHome\\sGame\\sHand|Game|\\s(Zoom|Rush)\\sHand|\\sGAME|\\s\\#\\sVersion:)\\s\\#?(?P<HID>[0-9]+):?\\s+
+          (?P<SITE>PokerStars|POKERSTARS|Betfair|888Poker|Hive\\sPoker|Full\\sTilt|PokerMaster|Run\\sIt\\sOnce\\sPoker|BetOnline|PokerBros|MPLPoker|SupremaPoker)(?P<TITLE>\\sGame|\\sHand|\\sHome\\sGame|\\sHome\\sGame\\sHand|Game|\\s(Zoom|Rush)\\sHand|\\sGAME|\\s\\#\\sVersion:)\\s\\#?(?P<HID>[0-9]+):?\\s+
           (\\{{.*\\}}\\s+)?((?P<TOUR>((Zoom|Rush)\\s)?(Tournament|TOURNAMENT))\\s\\#                # tournament info
           (?P<TOURNO>\\d+),\\s(Table\\s\\#(?P<HIVETABLE>\\d+),\\s)?
           # here's how I plan to use LS
@@ -428,7 +441,7 @@ class PokerStars(HandHistoryConverter):
     )
 
     re_identify = re.compile(
-        r"(PokerStars|POKERSTARS|Hive\sPoker|Full\sTilt|PokerMaster|Run\sIt\sOnce\sPoker|BetOnline|PokerBros|MPLPoker|SupremaPoker)(\sGame|\sHand|\sHome\sGame|\sHome\sGame\sHand|Game|\s(Zoom|Rush)\sHand|\sGAME)\s\#\d+:",
+        r"(PokerStars|POKERSTARS|Betfair|Hive\sPoker|Full\sTilt|PokerMaster|Run\sIt\sOnce\sPoker|BetOnline|PokerBros|MPLPoker|SupremaPoker)(\sGame|\sHand|\sHome\sGame|\sHome\sGame\sHand|Game|\s(Zoom|Rush)\sHand|\sGAME)\s\#\d+:",
     )
     re_split_hands = re.compile("(?:\\s?\n){2,}")
     re_tail_split_hands = re.compile("(\n\n\n+)")
@@ -669,7 +682,11 @@ class PokerStars(HandHistoryConverter):
         Returns:
             tuple[str, int]: The detected skin name and site ID.
         """
-        # First, check whether the hero has a mapping configured
+        # Betfair's client names itself in every header: nothing can override that.
+        if _BETFAIR_HEADER.search(hand_text[:2000]):
+            return "PokerStars on Betfair", SITE_POKERSTARS_BETFAIR
+
+        # Then, check whether the hero has a mapping configured
         if (hero_result := self._detectSkinByHero(hand_text)) and self._skinWasOpen(hero_result[0], hand_text):
             return hero_result
 
@@ -1071,8 +1088,8 @@ class PokerStars(HandHistoryConverter):
         elif mg["SITE"] == "PokerBros":
             self.sitename = "PokerBros"
             self.site_id = 29
-        elif mg["SITE"] in ("PokerStars", "POKERSTARS"):
-            # Detection of specific PokerStars skin
+        elif mg["SITE"] in ("PokerStars", "POKERSTARS", "Betfair"):
+            # Detection of specific PokerStars skin (a "Betfair Hand #" header names its own)
             self.sitename, self.site_id = self.detectPokerStarsSkin(
                 hand_text,
                 self.in_path if hasattr(self, "in_path") else None,

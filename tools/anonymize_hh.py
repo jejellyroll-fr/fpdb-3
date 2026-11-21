@@ -93,6 +93,8 @@ ROOMS: dict[str, RoomExtras] = {
     ),
     "Winamax": RoomExtras(summary_names=(re.compile(r"^Player\s:\s(?P<NAME>.+?)\s*$", re.MULTILINE),)),
     "PokerStars": RoomExtras(
+        # "  1: name (Country), $1.00" and "  2: name [entry] (Country), ".
+        summary_names=(re.compile(r"^\s*[0-9]+:\s(?P<NAME>.+?)\s(?:\[\d+\]\s)?\([^()\n]*\),", re.MULTILINE),),
         event_names=(re.compile(r"^(?P<NAME>.+?) joins the table at seat #\d+\s*$", re.MULTILINE),),
     ),
 }

@@ -117,6 +117,7 @@ SITES_ADDED_IN_91 = ("Betclic",)  # #730: the 2025+ in-house client, apart from 
 SITES_ADDED_IN_94 = ("CoinPoker",)  # #732: text hand-history import, nothing live
 SITES_ADDED_IN_95 = ("BetRivers",)  # #731: text hand-history import, nothing live
 SITES_ADDED_IN_98 = ("PokerStars on Paddy Power",)  # #888: Paddy Power on PokerStars software
+SITES_ADDED_IN_99 = ("PokerStars on Betfair",)  # #733: a PokerStars skin with its own folders
 
 
 def _child_section(doc, section: str):
@@ -124,12 +125,17 @@ def _child_section(doc, section: str):
     return found[0] if found else None
 
 
-def _add_sites(doc, template, names) -> None:
+def _add_sites(doc, template, names, *, before_same_converter: bool = False) -> None:
     """Give ``doc`` the template's <site> and <hhc> of each room in ``names`` it lacks.
 
     A room the configuration already declares keeps its entry as it is. The
     layout sets the new entry uses come along when the configuration lacks
     them, so the upgrade's reference check still passes.
+
+    ``before_same_converter`` puts a new <hhc> before the first one already
+    naming its converter instead of at the end. IdentifySite keeps one entry
+    per converter class, the last, so a new skin of a converter must not
+    displace the room the configuration already files that converter under.
     """
     for section, tag, key in (("supported_sites", "site", "site_name"), ("hhcs", "hhc", "site")):
         target = _child_section(doc, section)
@@ -139,7 +145,23 @@ def _add_sites(doc, template, names) -> None:
         existing = {cx.attr(node, key) for node in cx.find_all(target, tag)}
         for node in cx.find_all(source, tag):
             if cx.attr(node, key) in names and cx.attr(node, key) not in existing:
-                cx.append(doc, target, cx.import_node(doc, node))
+                imported = cx.import_node(doc, node)
+                anchor = (
+                    next(
+                        (
+                            other
+                            for other in cx.find_all(target, tag)
+                            if cx.attr(other, "converter") == cx.attr(node, "converter")
+                        ),
+                        None,
+                    )
+                    if before_same_converter and tag == "hhc"
+                    else None
+                )
+                if anchor is not None:
+                    cx.insert_before(doc, target, imported, anchor)
+                else:
+                    cx.append(doc, target, imported)
                 existing.add(cx.attr(node, key))
                 _add_missing_layout_sets(doc, template, node)
 
@@ -289,6 +311,19 @@ def _add_sites_97_to_98(doc, template) -> None:
     _add_sites(doc, template, SITES_ADDED_IN_98)
 
 
+def _add_sites_98_to_99(doc, template) -> None:
+    """Advance to v99, adding the PokerStars on Betfair skin (#733).
+
+    The room is new, so every configuration lacks it: its <site> (off, with
+    Betfair's client folders) and its <hhc> on the PokerStars converters come
+    from the template. A configuration that already declares it keeps it. Its
+    <hhc> goes before PokerStars' own, as in the templates, so IdentifySite
+    keeps PokerStars' entry (an Excel summary is filed under that entry as it
+    is).
+    """
+    _add_sites(doc, template, SITES_ADDED_IN_99, before_same_converter=True)
+
+
 def _repair_renamed_references(doc) -> None:
     aux_names = {cx.attr(n, "name") for n in cx.find_all(doc, "aw")}
     if "Classic_HUD" not in aux_names and "ClassicHud" in aux_names:
@@ -319,6 +354,7 @@ MIGRATIONS = (
     (95, 96, _add_summary_importers_95_to_96),
     (96, 97, _preserve_96_to_97),
     (97, 98, _add_sites_97_to_98),
+    (98, 99, _add_sites_98_to_99),
 )
 
 
