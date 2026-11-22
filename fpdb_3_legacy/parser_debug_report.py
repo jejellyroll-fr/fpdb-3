@@ -384,7 +384,10 @@ def bug_report(report: ParseDebugReport, hand: int | None = None) -> str:
         names += [str(player["name"]) for player in result.extracted.get("players", [])]
         hero = result.extracted.get("header", {}).get("hero") or hero
     texts = "\n\n".join(result.text for result in selected) if selected else ""
-    anonymized = bool(names)
+    player_names_unavailable = [
+        result.index for result in selected if not result.extracted.get("players")
+    ]
+    anonymized = bool(names) and not player_names_unavailable
     hand_text = texts
     detection = report.detection
     lines = [
@@ -415,11 +418,21 @@ def bug_report(report: ParseDebugReport, hand: int | None = None) -> str:
         lines += ["", "#### Failed steps", "", *failed_steps]
     lines += ["", "#### Hand history", ""]
     if not anonymized:
-        lines.append("> **Not anonymized**: no player name could be read. Replace the names before posting.")
+        if player_names_unavailable:
+            indices = ", ".join(str(index) for index in player_names_unavailable)
+            lines.append(
+                f"> **Manual privacy review required**: player names could not be extracted for hand(s) {indices}. "
+                "Review the complete report and replace any real names before posting."
+            )
+        else:
+            lines.append("> **Not anonymized**: no player name could be read. Replace the names before posting.")
         lines.append("")
     lines += ["```text", hand_text or anonymize(first_line(texts), [], None), "```"]
     rendered = "\n".join(lines)
-    return anonymize(rendered, names, hero) if anonymized else rendered
+    # Redact every name we did extract even when another hand in the report
+    # failed before its players could be identified.  The warning above asks
+    # the reporter to review the names that could not be found automatically.
+    return anonymize(rendered, names, hero) if names else rendered
 
 
 def diff_reports(previous: Mapping[str, Any], current: Mapping[str, Any]) -> list[str]:

@@ -608,6 +608,58 @@ def _write_regression_sidecars(filename: str, importer, *, overwrite: bool) -> l
     return write_hand_sidecars(path, hands, overwrite=overwrite)
 
 
+def _validate_cli_args(args, parser) -> int | None:
+    """Validate headless-import options before touching the database."""
+    if not args.xtables:
+        # Interactive GUI mode is launched by fpdb.pyw; there is nothing to do
+        # when this module is run directly without the CLI flag.
+        parser.print_help()
+        return 0
+    if not args.filename:
+        log.error("CLI bulk import (-x) requires -f <file|dir>")
+        return 2
+    if not os.path.exists(args.filename):
+        log.error("Import path does not exist: %s", args.filename)
+        return 2
+    requirements = (
+        (args.overwrite_regression_sidecars and not args.write_regression_sidecars,
+         "--overwrite-regression-sidecars requires --write-regression-sidecars"),
+        (args.write_regression_sidecars and not args.accept_current_output_as_expected,
+         "--write-regression-sidecars requires --accept-current-output-as-expected"),
+        (args.accept_current_output_as_expected and not args.write_regression_sidecars,
+         "--accept-current-output-as-expected requires --write-regression-sidecars"),
+        (args.write_regression_sidecars and not Path(args.filename).is_file(),
+         "--write-regression-sidecars requires one hand-history file, not a directory"),
+    )
+    for invalid, message in requirements:
+        if invalid:
+            log.error(message)
+            return 2
+    return None
+
+
+def _write_sidecars_after_import(args, importer, *, errs: int, partial: int, skipped: int) -> int:
+    """Write reviewed expected values only after a clean import."""
+    if not args.write_regression_sidecars:
+        return 0
+    if errs or partial or skipped:
+        reason = f"import did not complete cleanly (partial={partial}, skipped={skipped}, errors={errs})"
+        log.warning("Regression sidecars %s: %s", args.filename, reason)
+        print(f"Regression sidecars {args.filename}: could not write: {reason}")
+        return 1
+    try:
+        paths = _write_regression_sidecars(
+            args.filename, importer, overwrite=args.overwrite_regression_sidecars
+        )
+    except (OSError, ValueError, AttributeError) as exc:
+        log.warning("Regression sidecars %s: could not write expected values: %s", args.filename, exc)
+        print(f"Regression sidecars {args.filename}: could not write: {exc}")
+        return 1
+    if not args.quiet:
+        print("Regression sidecars written: " + ", ".join(str(path) for path in paths))
+    return 0
+
+
 def main(argv=None) -> int:
     """CLI entry point for headless bulk import.
 
@@ -660,30 +712,9 @@ def main(argv=None) -> int:
     Configuration.set_logfile("fpdb-log.txt")
     config = Configuration.Config(file=args.config) if args.config else Configuration.Config()
 
-    if not args.xtables:
-        # Interactive GUI mode is launched by fpdb.pyw; there is nothing to do
-        # when this module is run directly without the CLI flag.
-        parser.print_help()
-        return 0
-
-    if not args.filename:
-        log.error("CLI bulk import (-x) requires -f <file|dir>")
-        return 2
-    if not os.path.exists(args.filename):
-        log.error("Import path does not exist: %s", args.filename)
-        return 2
-    if args.overwrite_regression_sidecars and not args.write_regression_sidecars:
-        log.error("--overwrite-regression-sidecars requires --write-regression-sidecars")
-        return 2
-    if args.write_regression_sidecars and not args.accept_current_output_as_expected:
-        log.error("--write-regression-sidecars requires --accept-current-output-as-expected")
-        return 2
-    if args.accept_current_output_as_expected and not args.write_regression_sidecars:
-        log.error("--accept-current-output-as-expected requires --write-regression-sidecars")
-        return 2
-    if args.write_regression_sidecars and not Path(args.filename).is_file():
-        log.error("--write-regression-sidecars requires one hand-history file, not a directory")
-        return 2
+    validation_error = _validate_cli_args(args, parser)
+    if validation_error is not None:
+        return validation_error
 
     settings = {"os": "windows" if os.name == "nt" else "linuxmac"}
     settings.update(config.get_db_parameters())
@@ -713,21 +744,9 @@ def main(argv=None) -> int:
     phh = importer.phh_summary()
     comparison_errors = 0
     sidecar_write_errors = 0
-    if args.write_regression_sidecars:
-        if errs or partial or skipped:
-            sidecar_write_errors = 1
-            reason = f"import did not complete cleanly (partial={partial}, skipped={skipped}, errors={errs})"
-            log.warning("Regression sidecars %s: %s", args.filename, reason)
-            print(f"Regression sidecars {args.filename}: could not write: {reason}")
-        else:
-            try:
-                paths = _write_regression_sidecars(args.filename, importer, overwrite=args.overwrite_regression_sidecars)
-                if not args.quiet:
-                    print("Regression sidecars written: " + ", ".join(str(path) for path in paths))
-            except (OSError, ValueError, AttributeError) as exc:
-                sidecar_write_errors = 1
-                log.warning("Regression sidecars %s: could not write expected values: %s", args.filename, exc)
-                print(f"Regression sidecars {args.filename}: could not write: {exc}")
+    sidecar_write_errors = _write_sidecars_after_import(
+        args, importer, errs=errs, partial=partial, skipped=skipped
+    )
     if args.compare_regression:
         comparison_errors = _compare_regression_sidecars(args.filename, importer, quiet=args.quiet)
 

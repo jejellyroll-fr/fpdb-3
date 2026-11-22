@@ -123,11 +123,7 @@ _REPAIR_RECORD: Final = re.compile(
 )
 
 
-# ---------------------------------------------------------------------------
 # Detection
-# ---------------------------------------------------------------------------
-
-
 def available_sites(config: Any) -> list[str]:
     """The sites the importer has a converter for, by name."""
     return sorted(getattr(config, "hhcs", {}) or {})

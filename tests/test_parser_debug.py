@@ -6,6 +6,7 @@ import json
 import logging
 import re
 import shutil
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
@@ -19,7 +20,7 @@ from fpdb_3_legacy.parser_debug import (
     diff_reports,
     render_text,
 )
-from fpdb_3_legacy.parser_debug_report import Diagnostic, StepTrace
+from fpdb_3_legacy.parser_debug_report import Diagnostic, HandResult, StepTrace
 
 ROOT = Path(__file__).resolve().parents[1]
 SOKO = ROOT / "regression-test-files" / "unsupported-sites" / "soko"
@@ -367,11 +368,34 @@ def test_the_bug_report_replaces_player_names(stars) -> None:
     assert "Not anonymized" not in report
 
 
-def test_a_bug_report_without_names_says_it_is_not_anonymized(config) -> None:
+def test_a_bug_report_without_extracted_players_requests_privacy_review(config) -> None:
     report = bug_report(debug_parse_file(SOKO_COMPLETE, config))
 
-    assert "Not anonymized" in report
+    assert "Manual privacy review required" in report
     assert "UnsupportedGame" in report
+
+
+def test_bug_report_warns_when_a_failed_hand_has_no_extracted_players(stars) -> None:
+    report_data = deepcopy(stars)
+    report_data.hands.append(
+        HandResult(
+            index=1,
+            status="error",
+            start_line=1,
+            text="Seat 1: PrivatePlayer (20)\nPrivatePlayer: invalid seat",
+            error="PrivatePlayer has an invalid seat",
+        )
+    )
+    report_data.diagnostics.append(
+        Diagnostic("warning", "SeatWarning", "PrivatePlayer has an invalid seat", hand_index=1)
+    )
+
+    report = bug_report(report_data)
+
+    assert "Manual privacy review required" in report
+    assert "hand(s) 1" in report
+    assert "Blåveis" not in report
+    assert "PrivatePlayer" in report
 
 
 def test_anonymize_replaces_whole_names_only() -> None:

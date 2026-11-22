@@ -95,10 +95,10 @@ class _LineNumberArea(QWidget):
         super().__init__(editor)
         self.editor = editor
 
-    def sizeHint(self):  # noqa: N802 - Qt API
+    def sizeHint(self):  # noqa: N802 - Qt API, pylint: disable=invalid-name
         return self.editor.line_number_area_width(), 0
 
-    def paintEvent(self, event):  # noqa: N802 - Qt API
+    def paintEvent(self, event):  # noqa: N802 - Qt API, pylint: disable=invalid-name
         self.editor.paint_line_number_area(event)
 
 
@@ -128,7 +128,7 @@ class _TraceTextEdit(QPlainTextEdit):
         if rect.contains(self.viewport().rect()):
             self._update_line_number_area_width(0)
 
-    def resizeEvent(self, event):  # noqa: N802 - Qt API
+    def resizeEvent(self, event):  # noqa: N802 - Qt API, pylint: disable=invalid-name
         super().resizeEvent(event)
         contents = self.contentsRect()
         self.line_number_area.setGeometry(
@@ -269,6 +269,9 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.report: ParseDebugReport | None = None
         self.loaded_path: Path | None = None
         self.loaded_text = ""
+        self.fixture_button: QPushButton | None = None
+        self.parser_label: QLabel | None = None
+        self.detection_tree: QTreeWidget | None = None
         self.setWindowTitle(_("Parser Debugger"))
         self.resize(1320, 820)
         self.setWindowFlag(Qt.WindowType.WindowMaximizeButtonHint, True)
@@ -514,7 +517,7 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
             return
         hero = hand.extracted.get("header", {}).get("hero")
         room = self.report.detection.converter if self.report is not None else ""
-        from tools.anonymize_hh import anonymize_text
+        from fpdb_3_legacy.anonymize_hh import anonymize_text
 
         anonymized, leftovers = anonymize_text(hand.text, room or "", names, hero if hero in names else None)
         if leftovers:

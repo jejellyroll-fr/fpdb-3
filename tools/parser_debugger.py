@@ -53,19 +53,24 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _argument_error(args: argparse.Namespace) -> str | None:
+    """Explain invalid manifest options before loading configuration or a file."""
+    if args.update_snapshot_manifest and not args.accept_current_output_as_expected:
+        return "--update-snapshot-manifest requires --accept-current-output-as-expected"
+    if args.accept_current_output_as_expected and not args.update_snapshot_manifest:
+        return "--accept-current-output-as-expected requires --update-snapshot-manifest"
+    if args.update_snapshot_manifest and (args.json or args.bug_report or args.compare):
+        return "--update-snapshot-manifest cannot be combined with a report output option"
+    if not args.path.is_file():
+        return f"No such file: {args.path}"
+    return None
+
+
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    if args.update_snapshot_manifest and not args.accept_current_output_as_expected:
-        print("--update-snapshot-manifest requires --accept-current-output-as-expected", file=sys.stderr)
-        return 2
-    if args.accept_current_output_as_expected and not args.update_snapshot_manifest:
-        print("--accept-current-output-as-expected requires --update-snapshot-manifest", file=sys.stderr)
-        return 2
-    if args.update_snapshot_manifest and (args.json or args.bug_report or args.compare):
-        print("--update-snapshot-manifest cannot be combined with a report output option", file=sys.stderr)
-        return 2
-    if not args.path.is_file():
-        print(f"No such file: {args.path}", file=sys.stderr)
+    argument_error = _argument_error(args)
+    if argument_error:
+        print(argument_error, file=sys.stderr)
         return 2
     config = Configuration.Config(file=str(args.config)) if args.config else Configuration.Config()
     report = debug_parse_file(args.path, config, args.site, trace_lines=not args.no_trace, derived=args.derived)

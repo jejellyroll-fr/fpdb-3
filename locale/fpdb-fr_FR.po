@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 19:42+0100\n"
+"POT-Creation-Date: 2026-11-22 22:24+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -6577,12 +6577,22 @@ msgstr ""
 "Ajoute ce que fpdb enregistrerait pour chaque main (Hands, HandsPlayers)"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Anonymization incomplete"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Anonymize fixture"
 msgstr "Anonymiser la fixture"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
-msgid "Anonymized fixture saved"
-msgstr "Fixture anonymisée enregistrée"
+#| msgid "Anonymized fixture saved"
+msgid "Anonymized fixture saved; review privacy before commit"
+msgstr "Fixture anonymisée enregistrée ; vérifiez sa confidentialité avant de la valider"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "Archive: {archive}; head: {head}; divider: {divider}"
+msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Auto-detect"
@@ -6653,12 +6663,33 @@ msgid "Expected"
 msgstr "Attendu"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "File encoding: {encoding}"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#| msgid "Anonymized fixture saved"
+msgid "Fixture saved"
+msgstr "Fixture enregistrée"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid ""
+"Fixture saved to {path}. Review the anonymized text before committing it. If "
+"it changes generated statistics, regenerate the stats guide."
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Found"
 msgstr "Trouvé"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py fpdb_3_legacy/research_labels.py
 msgid "Hand"
 msgstr "Main"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Hand fingerprint"
+msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "JSON"
@@ -6675,6 +6706,10 @@ msgstr "Lignes"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Lines read"
 msgstr "Lignes lues"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Live parser snapshot"
+msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Markdown for a GitHub issue, player names replaced"
@@ -6771,6 +6806,10 @@ msgid "Recognised on line {line} by"
 msgstr "Reconnu à la ligne {line} par"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Regex match spans"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Regexes"
 msgstr "Regex"
 
@@ -6823,6 +6862,13 @@ msgid "The Python class instantiated to parse the selected file."
 msgstr "Classe Python instanciée pour analyser le fichier sélectionné."
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid ""
+"These real names or account tokens are still present: {values}. Add them to "
+"the list or review the text."
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "This file has no regression sidecar (.hands, .hp, .gt)"
 msgstr "Ce fichier n'a pas de fichier attendu de régression (.hands, .hp, .gt)"
 
@@ -6847,6 +6893,10 @@ msgid "contract"
 msgstr "contrat"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "differs"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "disabled"
 msgstr "désactivé"
 
@@ -6861,6 +6911,10 @@ msgstr "toutes les valeurs concordent"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "go to line"
 msgstr "aller à la ligne"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "matches"
+msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "met"
@@ -6885,6 +6939,22 @@ msgstr "sans id"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "not recognised"
 msgstr "non reconnu"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#| msgid "unknown"
+msgid "unknown encoding"
+msgstr "encodage inconnu"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "{name} · {encoding}"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+#| msgid "disabled"
+msgid "{site} (disabled)"
+msgstr "{site} (désactivé)"
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
 #, python-format
