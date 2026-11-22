@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 18:05+0100\n"
+"POT-Creation-Date: 2026-11-22 18:28+0100\n"
 "PO-Revision-Date: 2011-12-04 06:20+0200\n"
 "Last-Translator: Steffen Schaumburg <steffen@schaumburger.info>\n"
 "Language-Team: Fpdb\n"
@@ -7357,6 +7357,10 @@ msgstr ""
 #, fuzzy
 msgid "No change."
 msgstr "Unterer Bereich:"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "No warnings or logs were emitted during this parse."
+msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy

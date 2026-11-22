@@ -28,8 +28,8 @@ from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QColor, QFont, QFontDatabase, QGuiApplication, QTextCursor, QTextFormat
+from PySide6.QtCore import QModelIndex, Qt
+from PySide6.QtGui import QColor, QFont, QFontDatabase, QGuiApplication, QPainter, QTextCursor, QTextFormat
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -41,6 +41,8 @@ from PySide6.QtWidgets import (
     QPlainTextEdit,
     QPushButton,
     QSplitter,
+    QStyledItemDelegate,
+    QStyleOptionViewItem,
     QTabWidget,
     QTextBrowser,
     QTextEdit,
@@ -57,9 +59,9 @@ from fpdb_3_legacy.parser_debug import Diagnostic, HandResult, ParseDebugReport
 # Keep the status colours subtle enough for the dark theme while giving every
 # status table the same meaning. A text label remains beside every colour.
 _STATUS_BACKGROUNDS = {
-    "ok": QColor(34, 145, 88, 72),
-    "warning": QColor(230, 150, 25, 74),
-    "error": QColor(210, 55, 60, 88),
+    "ok": QColor("#164b38"),
+    "warning": QColor("#503914"),
+    "error": QColor("#542b30"),
 }
 _STATUS_FOREGROUNDS = {
     "ok": QColor("#78e2a1"),
@@ -71,6 +73,7 @@ _STATUS_WORDS = {
     "warning": {"warning", "unread", "not reached", "not called", "missing", "skipped"},
     "error": {"error", "failed", "fail", "raised", "mismatch", "bug"},
 }
+_STATUS_ROLE = Qt.ItemDataRole.UserRole + 1
 # Background of a line in the input, by what the report says of it.
 _LINE_COLOURS = {
     "read": _STATUS_BACKGROUNDS["ok"],
@@ -93,7 +96,31 @@ def _tree(headers: Iterable[str]) -> QTreeWidget:
     tree.setHeaderLabels(labels)
     tree.setAlternatingRowColors(True)
     tree.setUniformRowHeights(True)
+    tree.setItemDelegate(_StatusColorDelegate(tree))
     return tree
+
+
+class _StatusColorDelegate(QStyledItemDelegate):
+    """Paint status rows above qt_material's item stylesheet."""
+
+    def paint(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex) -> None:
+        kind = index.siblingAtColumn(0).data(_STATUS_ROLE)
+        if kind not in _STATUS_BACKGROUNDS:
+            super().paint(painter, option, index)
+            return
+        text_option = QStyleOptionViewItem(option)
+        text_option.text = ""
+        super().paint(painter, text_option, index)
+        painter.save()
+        painter.fillRect(option.rect, _STATUS_BACKGROUNDS[kind])
+        value = index.data(Qt.ItemDataRole.DisplayRole)
+        if value is not None and str(value):
+            text_rect = option.rect.adjusted(8, 0, -8, 0)
+            text = option.fontMetrics.elidedText(str(value), option.textElideMode, text_rect.width())
+            painter.setFont(option.font)
+            painter.setPen(_STATUS_FOREGROUNDS[kind])
+            painter.drawText(text_rect, int(option.displayAlignment), text)
+        painter.restore()
 
 
 def _status_kind(status: str) -> str | None:
@@ -107,6 +134,7 @@ def _colour_status_row(item: QTreeWidgetItem, status: str) -> None:
     kind = _status_kind(status)
     if kind is None:
         return
+    item.setData(0, _STATUS_ROLE, kind)
     for column in range(item.columnCount()):
         item.setBackground(column, _STATUS_BACKGROUNDS[kind])
         item.setForeground(column, _STATUS_FOREGROUNDS[kind])
@@ -464,8 +492,18 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self._fill_lines(hand)
         self._fill_expected(hand)
         log = [f"{record.level:<8} {record.logger}: {record.message}" for record in hand.logs]
+        if self.report is not None:
+            log.extend(
+                f"{diagnostic.severity.upper():<8} parser_debugger: {diagnostic.message}"
+                for diagnostic in self.report.diagnostics
+                if diagnostic.hand_index == hand.index
+                and diagnostic.severity in ("warning", "error")
+                and diagnostic.kind in ("ContractViolation", "CheckFailed")
+            )
         if hand.traceback:
             log += ["", hand.traceback]
+        if not log:
+            log.append(_("No warnings or logs were emitted during this parse."))
         self.log_view.setPlainText("\n".join(log))
 
     def _fill_steps(self, hand: HandResult) -> None:
@@ -518,14 +556,7 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
             line = hand.start_line + mark.number - 1
             item = QTreeWidgetItem(self.lines_tree, [str(line), mark.status, mark.text, ", ".join(mark.regexes)])
             item.setData(0, _LINE_ROLE, line)
-            colour = _LINE_COLOURS.get(mark.status)
-            if colour is not None:
-                for column in range(4):
-                    item.setBackground(column, colour)
-                kind = _status_kind(mark.status)
-                if kind is not None:
-                    for column in range(4):
-                        item.setForeground(column, _STATUS_FOREGROUNDS[kind])
+            _colour_status_row(item, mark.status)
         for column in range(3):
             self.lines_tree.resizeColumnToContents(column)
         self.lines_tree.setColumnWidth(2, min(self.lines_tree.columnWidth(2), 460))

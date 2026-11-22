@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 18:05+0100\n"
+"POT-Creation-Date: 2026-11-22 18:28+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -6368,6 +6368,10 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "no"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "No warnings or logs were emitted during this parse."
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py

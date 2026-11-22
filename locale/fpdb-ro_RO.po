@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 18:05+0100\n"
+"POT-Creation-Date: 2026-11-22 18:28+0100\n"
 "PO-Revision-Date: 2011-05-13 08:55+0000\n"
 "Last-Translator: jax <jax@netmagnet.ro>\n"
 "Language-Team: Romanian (Romania) (http://www.transifex.net/projects/p/fpdb/"
@@ -7361,6 +7361,10 @@ msgstr ""
 #, fuzzy
 msgid "No change."
 msgstr "Interval jos:"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "No warnings or logs were emitted during this parse."
+msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy

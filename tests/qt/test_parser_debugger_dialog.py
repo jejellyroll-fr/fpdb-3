@@ -14,6 +14,7 @@ from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import QFileDialog, QLabel
 
 from fpdb_3_legacy.Configuration import Config
+from fpdb_3_legacy.parser_debug_report import Diagnostic
 from fpdb_3_legacy.parser_debugger_dialog import ParserDebuggerDialog, show_parser_debugger
 
 pytestmark = pytest.mark.qt
@@ -107,6 +108,21 @@ def test_an_opened_file_fills_every_tab(dialog, monkeypatch) -> None:
     assert any("re_player_info" in row[3] for row in _rows(dialog.lines_tree))
     assert dialog.expected_tree.topLevelItemCount() > 0
     assert json.loads(dialog.json_view.toPlainText())["verdict"] == "ok"
+    assert dialog.log_view.toPlainText()
+
+
+def test_contract_warnings_are_in_the_log_tab(dialog) -> None:
+    dialog.input.setPlainText(STARS.read_text(encoding="utf-8"))
+    dialog.trace_check.setChecked(False)
+    dialog.run()
+
+    assert dialog.report is not None
+    dialog.report.diagnostics.append(
+        Diagnostic("warning", "ContractViolation", "Seat 5 is above the table size", hand_index=0)
+    )
+    dialog._show_hand()
+
+    assert "WARNING  parser_debugger: Seat 5 is above the table size" in dialog.log_view.toPlainText()
 
 
 def test_editing_an_opened_file_debugs_the_text(dialog, monkeypatch) -> None:
