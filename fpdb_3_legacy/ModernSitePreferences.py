@@ -563,6 +563,11 @@ class ModernSitePreferencesDialog(QDialog):
         self.site_data: dict[str, Any] = {}  # Store data without creating widgets
         self.visible_cards: set[str] = set()  # Keep track of visible cards
         self.enabled_sites: set[str] = set()  # Initialize the set of enabled sites
+        # Built here, not with the Sites tab: filter_sites reads it from the
+        # first load on. A room arrives off (one a config upgrade adds included)
+        # and only rooms that are on are listed: without it nothing here could
+        # turn one on.
+        self.show_disabled_cb = QCheckBox(_("Show disabled sites"))
 
         self._init_profiles_state()
 
@@ -668,9 +673,8 @@ class ModernSitePreferencesDialog(QDialog):
         filter_layout.addWidget(self.search_input)
 
         filter_layout.addSpacing(20)
-        search_note = QLabel(_("(search in enabled sites only)"))
-        search_note.setProperty("class", "caption")
-        filter_layout.addWidget(search_note)
+        self.show_disabled_cb.toggled.connect(self.filter_sites)
+        filter_layout.addWidget(self.show_disabled_cb)
         filter_layout.addStretch()
         tab_layout.addLayout(filter_layout)
 
@@ -997,15 +1001,15 @@ class ModernSitePreferencesDialog(QDialog):
         self.filter_sites()
 
     def filter_sites(self) -> None:
-        """Filter sites - search only among enabled sites."""
+        """Filter sites: the enabled ones, or every room when disabled ones are shown."""
         search_text = self.search_input.text().lower()
 
-        # Determine which sites should be visible
-        # Use the pre-calculated set of enabled sites for optimization
+        # Cards are built lazily, so only the rooms listed cost a widget.
+        candidates = set(self.site_data) if self.show_disabled_cb.isChecked() else self.enabled_sites
         if search_text:
-            sites_to_show = {site for site in self.enabled_sites if search_text in site.lower()}
+            sites_to_show = {site for site in candidates if search_text in site.lower()}
         else:
-            sites_to_show = self.enabled_sites.copy()
+            sites_to_show = set(candidates)
 
         # Hide cards that should no longer be visible
         for site_name in list(self.visible_cards):
@@ -1021,8 +1025,9 @@ class ModernSitePreferencesDialog(QDialog):
                     # Create the card only if it doesn't exist
                     data = self.site_data[site_name]
                     card = ModernSiteCard(site_name, data["config"], data["id"], self)
-                    # Insert at the correct position (alphabetical order)
-                    index = sorted(self.visible_cards | {site_name}).index(site_name)
+                    # Insert in alphabetical order. Hidden cards stay in the
+                    # layout, so count every card built, not just the visible ones.
+                    index = sum(1 for name in self.site_cards if name < site_name)
                     self.sites_layout.insertWidget(index, card)
                     self.site_cards[site_name] = card
                 else:
@@ -1033,7 +1038,8 @@ class ModernSitePreferencesDialog(QDialog):
     def detect_all_sites(self) -> None:
         """Detect all possible sites."""
         detected_count = 0
-        for site_name in self.visible_cards:
+        # Only rooms that are on: listing the disabled ones must not sweep for them all.
+        for site_name in self.visible_cards & self.enabled_sites:
             if site_name in self.site_cards:
                 card = self.site_cards[site_name]
                 if card.is_site_detectable():

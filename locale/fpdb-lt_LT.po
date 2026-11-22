@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-21 08:24+0100\n"
+"POT-Creation-Date: 2026-11-22 00:13+0100\n"
 "PO-Revision-Date: 2011-07-09 14:23+0000\n"
 "Last-Translator: OvidijusSv <OvidijusSv@gmail.com>\n"
 "Language-Team: Lithuanian (Lithuania) (http://www.transifex.net/projects/p/"
@@ -3751,11 +3751,6 @@ msgstr "%s herojaus slapyvardžiai:"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
-msgid "(search in enabled sites only)"
-msgstr "Nerasti limitai"
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-#, fuzzy
 msgid ""
 "A data source such as PHH is not a poker room: it has no screen name. Name "
 "the players that are you in its hands, and the reports read them as one "
@@ -3845,6 +3840,12 @@ msgstr "Pašalinti saitą"
 #, fuzzy
 msgid "Screen Name:"
 msgstr "Slapyvardis:"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+#| msgid "Show Limits"
+msgid "Show disabled sites"
+msgstr "Rodyti Limitus"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
@@ -10092,6 +10093,10 @@ msgstr ""
 
 #~ msgid "%s was toggled %s"
 #~ msgstr "%s buvo pažymėta %s"
+
+#, fuzzy
+#~ msgid "(search in enabled sites only)"
+#~ msgstr "Nerasti limitai"
 
 #~ msgid "*** WARNING UNKNOWN MYSQL ERROR:"
 #~ msgstr "*** ĮSPĖJIMAS. NEŽINOMA MYSQL KLAIDA:"
