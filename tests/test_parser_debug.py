@@ -18,6 +18,7 @@ from fpdb_3_legacy.parser_debug import (
     diff_reports,
     render_text,
 )
+from fpdb_3_legacy.parser_debug_report import Diagnostic, StepTrace
 
 ROOT = Path(__file__).resolve().parents[1]
 SOKO = ROOT / "regression-test-files" / "unsupported-sites" / "soko"
@@ -231,7 +232,8 @@ def test_an_unknown_forced_site_lists_the_known_ones(config) -> None:
 
     assert report.detection.site is None
     assert "Known sites:" in report.detection.message
-    assert "PokerStars.COM" in report.detection.message
+    known_sites = report.detection.message.partition("Known sites: ")[2].split(", ")
+    assert any(site == "PokerStars.COM" for site in known_sites)
 
 
 def test_a_converter_crash_is_reported_as_one(config, monkeypatch) -> None:
@@ -312,12 +314,18 @@ def test_the_json_report_round_trips(stars) -> None:
 
 
 def test_the_bug_report_replaces_player_names(stars) -> None:
+    stars.diagnostics.append(Diagnostic("warning", "SeatWarning", "AAALISAAAA has a seat warning", hand_index=0))
+    stars.hands[0].steps.append(
+        StepTrace("readPlayers", "raised", error_type="ParseError", error="AAALISAAAA has an invalid seat")
+    )
     report = bug_report(stars)
 
     assert "Blåveis" not in report
     assert "AAALISAAAA" not in report
     assert "Seat 5: Hero ($29.85 in chips)" in report
     assert "alice" in report
+    assert "has a seat warning" in report
+    assert "has an invalid seat" in report
     assert "Not anonymized" not in report
 
 

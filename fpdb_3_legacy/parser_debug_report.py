@@ -341,12 +341,12 @@ def bug_report(report: ParseDebugReport, hand: int | None = None) -> str:
     selected = [result for result in report.hands if hand is None or result.index == hand] or report.hands
     names: list[str] = []
     hero = report.detection.hero
-    for result in selected:
+    for result in report.hands:
         names += [str(player["name"]) for player in result.extracted.get("players", [])]
         hero = result.extracted.get("header", {}).get("hero") or hero
     texts = "\n\n".join(result.text for result in selected) if selected else ""
     anonymized = bool(names)
-    hand_text = anonymize(texts, names, hero) if anonymized else texts
+    hand_text = texts
     detection = report.detection
     lines = [
         "### Parser Debugger report",
@@ -379,7 +379,8 @@ def bug_report(report: ParseDebugReport, hand: int | None = None) -> str:
         lines.append("> **Not anonymized**: no player name could be read. Replace the names before posting.")
         lines.append("")
     lines += ["```text", hand_text or anonymize(first_line(texts), [], None), "```"]
-    return "\n".join(lines)
+    rendered = "\n".join(lines)
+    return anonymize(rendered, names, hero) if anonymized else rendered
 
 
 def diff_reports(previous: Mapping[str, Any], current: Mapping[str, Any]) -> list[str]:

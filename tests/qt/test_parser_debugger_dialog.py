@@ -47,7 +47,7 @@ def _rows(tree) -> list[list[str]]:
 
 def test_the_site_list_offers_auto_detect_then_every_site(dialog) -> None:
     assert dialog.site_combo.itemData(0) is None
-    assert "PokerStars.COM" in [dialog.site_combo.itemText(index) for index in range(dialog.site_combo.count())]
+    assert any(dialog.site_combo.itemText(index) == "PokerStars.COM" for index in range(dialog.site_combo.count()))
 
 
 def test_nothing_to_parse_says_so(dialog) -> None:
@@ -109,6 +109,39 @@ def test_an_opened_file_fills_every_tab(dialog, monkeypatch) -> None:
     assert dialog.expected_tree.topLevelItemCount() > 0
     assert json.loads(dialog.json_view.toPlainText())["verdict"] == "ok"
     assert dialog.log_view.toPlainText()
+
+
+def test_opened_crlf_history_keeps_its_file_context(dialog, monkeypatch, tmp_path) -> None:
+    path = tmp_path / "stars-crlf.txt"
+    path.write_bytes(STARS.read_bytes().replace(b"\n", b"\r\n"))
+    monkeypatch.setattr(QFileDialog, "getOpenFileName", staticmethod(lambda *args, **kwargs: (str(path), "")))
+
+    dialog.open_file()
+    assert dialog.loaded_text == dialog.input.toPlainText()
+    dialog.run()
+
+    assert dialog.report is not None
+    assert dialog.report.source == str(path)
+
+
+def test_file_decoder_requires_a_bom_for_utf16(dialog, tmp_path) -> None:
+    history = STARS.read_text(encoding="utf-8")
+    cp1252 = history.encode("cp1252")
+    if len(cp1252) % 2:
+        cp1252 += b"\n"
+        history += "\n"
+    cp1252_path = tmp_path / "stars-cp1252.txt"
+    cp1252_path.write_bytes(cp1252)
+
+    dialog.load_file(cp1252_path)
+
+    assert dialog.input.toPlainText() == history
+
+    utf16_path = tmp_path / "stars-utf16.txt"
+    utf16_path.write_bytes(history.encode("utf-16"))
+    dialog.load_file(utf16_path)
+
+    assert dialog.input.toPlainText() == history
 
 
 def test_contract_warnings_are_in_the_log_tab(dialog) -> None:

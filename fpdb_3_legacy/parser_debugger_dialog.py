@@ -318,9 +318,12 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
     def load_file(self, path: Path) -> None:
         """Show ``path`` and debug it as a file, so its name and encoding count as at import."""
         raw = path.read_bytes()
-        text = next((raw.decode(codec) for codec in ("utf-8", "utf-16", "cp1252") if _decodes(raw, codec)), "")
+        if raw[:2] in (b"\xff\xfe", b"\xfe\xff"):
+            text = raw.decode("utf-16", errors="ignore").replace("\r\n", "\n")
+        else:
+            text = next((raw.decode(codec) for codec in ("utf-8-sig", "cp1252") if _decodes(raw, codec)), "")
         self.input.setPlainText(text)
-        self.loaded_path, self.loaded_text = path, text
+        self.loaded_path, self.loaded_text = path, self.input.toPlainText()
         self.status_label.setText(path.name)
 
     def run(self) -> None:
