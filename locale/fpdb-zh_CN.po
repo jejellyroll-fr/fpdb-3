@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 00:13+0100\n"
+"POT-Creation-Date: 2026-11-22 17:23+0100\n"
 "PO-Revision-Date: 2011-04-07 08:53+0000\n"
 "Last-Translator: steffen123 <steffen@schaumburger.info>\n"
 "Language-Team: Chinese (China) <>\n"
@@ -811,7 +811,7 @@ msgstr "导入周期耗时比平常长..."
 msgid "Importing SwC files still works."
 msgstr ""
 
-#: fpdb_3_legacy/GuiAutoImport.py
+#: fpdb_3_legacy/GuiAutoImport.py fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Log"
 msgstr "日志"
@@ -951,7 +951,7 @@ msgstr "笔记: 0"
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py fpdb_3_legacy/hud_options_panel.py
 #: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
-#: fpdb_3_legacy/research_labels.py
+#: fpdb_3_legacy/parser_debugger_dialog.py fpdb_3_legacy/research_labels.py
 #, fuzzy
 msgid "Player"
 msgstr "文件名：%s"
@@ -994,6 +994,7 @@ msgstr "搜索"
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/GuiBulkImport.py
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py fpdb_3_legacy/hand_share_dialog.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Site"
 msgstr "站点"
@@ -2486,7 +2487,7 @@ msgstr "问题适用的所有决策: 样本量。"
 msgid "FPDB Replayer"
 msgstr "FPDB 回放器"
 
-#: fpdb_3_legacy/GuiResearchBrowser.py
+#: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Field"
 msgstr "对手池"
@@ -4677,6 +4678,7 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/live_capture_consent.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "yes"
 msgstr "是"
@@ -4807,6 +4809,10 @@ msgid "Edit your preferences"
 msgstr "编辑你的偏好设置"
 
 #: fpdb_3_legacy/menu_layout.py
+msgid "Everything a converter reads from a hand history, and where it fails"
+msgstr ""
+
+#: fpdb_3_legacy/menu_layout.py
 #, fuzzy
 msgid "Export the whole database to a text file (slow)"
 msgstr "将整个数据库导出到文本文件（较慢）"
@@ -4918,6 +4924,10 @@ msgstr "日志开发工具"
 #, fuzzy
 msgid "Opponents Report"
 msgstr "对手报告"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Parser Debugger…"
+msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "PokerTracker 4 Notes…"
@@ -6514,6 +6524,7 @@ msgid "Success"
 msgstr "% 偷盲成功"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Text"
 msgstr "文本"
@@ -7056,7 +7067,8 @@ msgstr "统计包"
 msgid "Stats:"
 msgstr "统计:"
 
-#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/parser_debugger_dialog.py
+#: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
 msgid "Status"
 msgstr "状态"
@@ -7180,6 +7192,298 @@ msgid ""
 "repository (%(repository)s), add the entry in %(entry)s to index.json, and "
 "open a pull request."
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "(empty)"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Actual"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Add what fpdb would store for each hand (Hands, HandsPlayers)"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Auto-detect"
+msgstr "🔍 自动检测路径"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Bug report copied"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Changes"
+msgstr "保存更改"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Closest"
+msgstr "关闭"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Compare with a saved report"
+msgstr "与对手池比较"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Compare with…"
+msgstr "与对手池比较"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Contract"
+msgstr "场景"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Converter"
+msgstr "反选"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Copy bug report"
+msgstr "复制报告"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Debug parse"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Derived stats"
+msgstr "搜索站点..."
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Detection"
+msgstr "行动"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Diagnostics"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Every step produced what it must"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Expected"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Found"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hand"
+msgstr "手牌"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "JSON"
+msgstr "复制 JSON"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Line"
+msgstr "添加线条"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Lines"
+msgstr "添加线条"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Lines read"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Markdown for a GitHub issue, player names replaced"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Message"
+msgstr "日志消息"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "No change."
+msgstr "低值范围:"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Note"
+msgstr "笔记: 0"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Nothing to parse: paste a hand history or open a file."
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Nothing to report."
+msgstr "正在停止自动导入..."
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Open a hand history"
+msgstr "处理输入历史记录"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Open file…"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Parse a second time to tell which regex read each line"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Parser Debugger"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Paste a hand history and press Debug parse."
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Paste a hand history here, or open a file"
+msgstr "处理输入历史记录"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Read by"
+msgstr "就绪"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "Read by the {converter} converter as {site}."
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Recognised"
+msgstr "加注"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "Recognised on line {line} by"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Regexes"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Report saved"
+msgstr "报告问题"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Save report…"
+msgstr "保存预设"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Save the report"
+msgstr "保存预设"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Sidecar"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Step"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Step / check"
+msgstr "步骤 0 / 0"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Steps"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Summary"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "This file has no regression sidecar (.hands, .hp, .gt)"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Trace lines"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Value"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "What changed since a report saved earlier on the same text"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "What it did"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "contract"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "disabled"
+msgstr "已禁用"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "error"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "every value matches"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "go to line"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "met"
+msgstr "下注"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "ms"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "no"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "no hand"
+msgstr "来源手牌"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "no id"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "not recognised"
+msgstr "文件%s无法找到"
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
 #, python-format
@@ -7984,11 +8288,6 @@ msgstr "游戏与级别"
 #, fuzzy
 msgid "Game family"
 msgstr "游戏类别"
-
-#: fpdb_3_legacy/research_labels.py
-#, fuzzy
-msgid "Hand"
-msgstr "手牌"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -9973,10 +10272,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "Add Label"
 #~ msgstr "添加标签"
-
-#, fuzzy
-#~ msgid "Add Line"
-#~ msgstr "添加线条"
 
 #, fuzzy
 #~ msgid "Add Stat"

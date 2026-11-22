@@ -1605,6 +1605,21 @@ class fpdb(QMainWindow):
             action.triggered.connect(callback)
         return action
 
+    def show_parser_debugger(self, widget=None, data=None) -> None:
+        """Open the Parser Debugger (#903): what a converter reads from a hand history."""
+        from fpdb_3_legacy.parser_debugger_dialog import show_parser_debugger
+
+        dialog = getattr(self, "parser_debugger", None)
+        try:
+            if dialog is not None and dialog.isVisible():
+                dialog.raise_()
+                dialog.activateWindow()
+                return
+        except RuntimeError:  # the window was closed and deleted
+            pass
+        # Kept so the modeless window is not garbage-collected while open.
+        self.parser_debugger = show_parser_debugger(self.config, self)
+
     def show_logger_dev_tool(self) -> None:
         """Open the advanced logger development tool."""
         try:

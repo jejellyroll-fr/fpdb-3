@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 00:13+0100\n"
+"POT-Creation-Date: 2026-11-22 17:23+0100\n"
 "PO-Revision-Date: 2011-11-13 01:00+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Spanish (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -774,7 +774,7 @@ msgstr "El ciclo de importación tarda más de lo habitual..."
 msgid "Importing SwC files still works."
 msgstr ""
 
-#: fpdb_3_legacy/GuiAutoImport.py
+#: fpdb_3_legacy/GuiAutoImport.py fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Log"
 msgstr "Registro"
@@ -913,7 +913,7 @@ msgstr "Notas: 0"
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py fpdb_3_legacy/hud_options_panel.py
 #: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
-#: fpdb_3_legacy/research_labels.py
+#: fpdb_3_legacy/parser_debugger_dialog.py fpdb_3_legacy/research_labels.py
 #, fuzzy
 msgid "Player"
 msgstr "Jugador"
@@ -956,6 +956,7 @@ msgstr "Buscar"
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/GuiBulkImport.py
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py fpdb_3_legacy/hand_share_dialog.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Site"
 msgstr "Sitio"
 
@@ -2439,7 +2440,7 @@ msgstr "Cada decisión a la que se aplica la pregunta: el tamaño de la muestra.
 msgid "FPDB Replayer"
 msgstr "Reproductor FPDB"
 
-#: fpdb_3_legacy/GuiResearchBrowser.py
+#: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Field"
 msgstr "Field"
@@ -4655,6 +4656,7 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/live_capture_consent.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 #| msgid "Yes"
 msgid "yes"
@@ -4788,6 +4790,10 @@ msgid "Edit your preferences"
 msgstr "Editar sus preferencias"
 
 #: fpdb_3_legacy/menu_layout.py
+msgid "Everything a converter reads from a hand history, and where it fails"
+msgstr ""
+
+#: fpdb_3_legacy/menu_layout.py
 #, fuzzy
 msgid "Export the whole database to a text file (slow)"
 msgstr "Exportar toda la base de datos a un archivo de texto (lento)"
@@ -4901,6 +4907,10 @@ msgstr "Herramienta de desarrollo de registros"
 #, fuzzy
 msgid "Opponents Report"
 msgstr "Informe de rivales"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Parser Debugger…"
+msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "PokerTracker 4 Notes…"
@@ -6535,6 +6545,7 @@ msgid "Success"
 msgstr "% éxito de robo"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Text"
 msgstr "Texto"
 
@@ -7095,7 +7106,8 @@ msgstr "Paquete de estadísticas"
 msgid "Stats:"
 msgstr "Estadísticas:"
 
-#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/parser_debugger_dialog.py
+#: fpdb_3_legacy/stat_packs_dialog.py
 msgid "Status"
 msgstr "Estado"
 
@@ -7218,6 +7230,301 @@ msgid ""
 "repository (%(repository)s), add the entry in %(entry)s to index.json, and "
 "open a pull request."
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "(empty)"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Actual"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Add what fpdb would store for each hand (Hands, HandsPlayers)"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Auto-detect"
+msgstr "🔍 Detectar rutas automáticamente"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Bug report copied"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Changes"
+msgstr "Guardar cambios"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Closest"
+msgstr "Cerrar"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Compare with a saved report"
+msgstr "Comparar con el field"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Compare with…"
+msgstr "Comparar con el field"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Contract"
+msgstr "Contexto"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Converter"
+msgstr "Invertir"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Copy bug report"
+msgstr "Copiar informe"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Debug parse"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Derived stats"
+msgstr "Buscar salas..."
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+#| msgid "Detect"
+msgid "Detection"
+msgstr "Detectar"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Diagnostics"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Every step produced what it must"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Expected"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Found"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hand"
+msgstr "Mano"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "JSON"
+msgstr "Copiar JSON"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Line"
+msgstr "Añadir línea"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Lines"
+msgstr "Añadir línea"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Lines read"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Markdown for a GitHub issue, player names replaced"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+#| msgid "Log Messages"
+msgid "Message"
+msgstr "Mensajes de log"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "No change."
+msgstr "Rango bajo:"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Note"
+msgstr "Notas: 0"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Nothing to parse: paste a hand history or open a file."
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Nothing to report."
+msgstr "Deteniendo la importación automática..."
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Open a hand history"
+msgstr "Copiar historial de la mano"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Open file…"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Parse a second time to tell which regex read each line"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Parser Debugger"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Paste a hand history and press Debug parse."
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Paste a hand history here, or open a file"
+msgstr "Ruta a los historiales de manos"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Read by"
+msgstr "Listo"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "Read by the {converter} converter as {site}."
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Recognised"
+msgstr "Subió"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "Recognised on line {line} by"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Regexes"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Report saved"
+msgstr "Informar de un problema"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Save report…"
+msgstr "Guardar ajuste"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Save the report"
+msgstr "Guardar ajuste"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Sidecar"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Step"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Step / check"
+msgstr "Paso 0 / 0"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Steps"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Summary"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "This file has no regression sidecar (.hands, .hp, .gt)"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Trace lines"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Value"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "What changed since a report saved earlier on the same text"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "What it did"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "contract"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "disabled"
+msgstr "Desactivado"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "error"
+msgstr "error"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "every value matches"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "go to line"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "met"
+msgstr "Apuesta"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "ms"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "no"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "no hand"
+msgstr "Manos de origen"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "no id"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+#| msgid "not found"
+msgid "not recognised"
+msgstr "no encontrado"
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
 #, python-format
@@ -8027,11 +8334,6 @@ msgstr "Juego y stake"
 #, fuzzy
 msgid "Game family"
 msgstr "Familia de juego"
-
-#: fpdb_3_legacy/research_labels.py
-#, fuzzy
-msgid "Hand"
-msgstr "Mano"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -10202,10 +10504,6 @@ msgstr ""
 #~ msgstr "Añadir etiqueta"
 
 #, fuzzy
-#~ msgid "Add Line"
-#~ msgstr "Añadir línea"
-
-#, fuzzy
 #~ msgid "Add Stat"
 #~ msgstr "Añadir estadística"
 
@@ -10495,9 +10793,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "Default game:"
 #~ msgstr "Juego por defecto:"
-
-#~ msgid "Detect"
-#~ msgstr "Detectar"
 
 #~ msgid "Detect Directories"
 #~ msgstr "Detectar directorios"
@@ -11866,9 +12161,6 @@ msgstr ""
 
 #~ msgid "enter table name to find: "
 #~ msgstr "Inserte el nombre de la tabla a buscar:"
-
-#~ msgid "error"
-#~ msgstr "error"
 
 #~ msgid "exception calculating %s"
 #~ msgstr "calculando la execpción %s"

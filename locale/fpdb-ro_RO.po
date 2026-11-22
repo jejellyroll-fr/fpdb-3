@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 00:13+0100\n"
+"POT-Creation-Date: 2026-11-22 17:23+0100\n"
 "PO-Revision-Date: 2011-05-13 08:55+0000\n"
 "Last-Translator: jax <jax@netmagnet.ro>\n"
 "Language-Team: Romanian (Romania) (http://www.transifex.net/projects/p/fpdb/"
@@ -789,7 +789,7 @@ msgstr "Ciclul de import durează mai mult decât de obicei..."
 msgid "Importing SwC files still works."
 msgstr ""
 
-#: fpdb_3_legacy/GuiAutoImport.py
+#: fpdb_3_legacy/GuiAutoImport.py fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Log"
 msgstr "Jurnal"
@@ -928,7 +928,7 @@ msgstr "Note: 0"
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py fpdb_3_legacy/hud_options_panel.py
 #: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
-#: fpdb_3_legacy/research_labels.py
+#: fpdb_3_legacy/parser_debugger_dialog.py fpdb_3_legacy/research_labels.py
 #, fuzzy
 msgid "Player"
 msgstr "Jucător"
@@ -971,6 +971,7 @@ msgstr "Caută"
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/GuiBulkImport.py
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py fpdb_3_legacy/hand_share_dialog.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Site"
 msgstr "Site"
 
@@ -2452,7 +2453,7 @@ msgstr "Fiecare decizie la care se aplică întrebarea: mărimea eșantionului."
 msgid "FPDB Replayer"
 msgstr "Player FPDB"
 
-#: fpdb_3_legacy/GuiResearchBrowser.py
+#: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Field"
 msgstr "Field"
@@ -4671,6 +4672,7 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/live_capture_consent.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 #| msgid "Yes"
 msgid "yes"
@@ -4804,6 +4806,10 @@ msgid "Edit your preferences"
 msgstr "Editați preferințele"
 
 #: fpdb_3_legacy/menu_layout.py
+msgid "Everything a converter reads from a hand history, and where it fails"
+msgstr ""
+
+#: fpdb_3_legacy/menu_layout.py
 #, fuzzy
 msgid "Export the whole database to a text file (slow)"
 msgstr "Exportă întreaga bază de date într-un fișier text (lent)"
@@ -4916,6 +4922,10 @@ msgstr "Instrument de dezvoltare pentru jurnal"
 #, fuzzy
 msgid "Opponents Report"
 msgstr "Arata statisticile oponentilor"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Parser Debugger…"
+msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "PokerTracker 4 Notes…"
@@ -6533,6 +6543,7 @@ msgid "Success"
 msgstr "% furt reușit"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Text"
 msgstr "Text"
 
@@ -7094,7 +7105,8 @@ msgstr "Pachet de statistici"
 msgid "Stats:"
 msgstr "Statistici:"
 
-#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/parser_debugger_dialog.py
+#: fpdb_3_legacy/stat_packs_dialog.py
 msgid "Status"
 msgstr "Stare"
 
@@ -7217,6 +7229,301 @@ msgid ""
 "repository (%(repository)s), add the entry in %(entry)s to index.json, and "
 "open a pull request."
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "(empty)"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Actual"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Add what fpdb would store for each hand (Hands, HandsPlayers)"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Auto-detect"
+msgstr "🔍 Detectează automat căile"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Bug report copied"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Changes"
+msgstr "hud_main: Joc schimbat."
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Closest"
+msgstr "Închide"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Compare with a saved report"
+msgstr "Compară cu field-ul"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Compare with…"
+msgstr "Compară cu field-ul"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Contract"
+msgstr "Context"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Converter"
+msgstr "Inversează"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Copy bug report"
+msgstr "Copiază raportul"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Debug parse"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Derived stats"
+msgstr "Caută site-uri..."
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+#| msgid "Detect"
+msgid "Detection"
+msgstr "Detectare"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Diagnostics"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Every step produced what it must"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Expected"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Found"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hand"
+msgstr "Mână"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "JSON"
+msgstr "Copiază JSON"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Line"
+msgstr "Adaugă linie"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Lines"
+msgstr "Adaugă linie"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Lines read"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Markdown for a GitHub issue, player names replaced"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+#| msgid "Log Messages"
+msgid "Message"
+msgstr "Jurnalizare Mesaje"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "No change."
+msgstr "Interval jos:"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Note"
+msgstr "Note: 0"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Nothing to parse: paste a hand history or open a file."
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Nothing to report."
+msgstr "Opreste Auto Import"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Open a hand history"
+msgstr "Copiază istoricul mâinii"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Open file…"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Parse a second time to tell which regex read each line"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Parser Debugger"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Paste a hand history and press Debug parse."
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Paste a hand history here, or open a file"
+msgstr "Calea către istoricele de mâini"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Read by"
+msgstr "Pregătit"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "Read by the {converter} converter as {site}."
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Recognised"
+msgstr "A dat raise"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "Recognised on line {line} by"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Regexes"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Report saved"
+msgstr "Raportează o problemă"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Save report…"
+msgstr "Salvează presetarea"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Save the report"
+msgstr "Salvează presetarea"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Sidecar"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Step"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Step / check"
+msgstr "Pasul 0 / 0"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Steps"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Summary"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "This file has no regression sidecar (.hands, .hp, .gt)"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Trace lines"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Value"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "What changed since a report saved earlier on the same text"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "What it did"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "contract"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "disabled"
+msgstr "Dezactivat"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "error"
+msgstr "Eroare:"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "every value matches"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "go to line"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "met"
+msgstr "Pariu"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "ms"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "no"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "no hand"
+msgstr "Mâini sursă"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "no id"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "not recognised"
+msgstr "Fisierul nu a fost gasit"
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
 #, python-format
@@ -8028,11 +8335,6 @@ msgstr "Joc și miză"
 #, fuzzy
 msgid "Game family"
 msgstr "Familie de joc"
-
-#: fpdb_3_legacy/research_labels.py
-#, fuzzy
-msgid "Hand"
-msgstr "Mână"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -10433,10 +10735,6 @@ msgstr ""
 #~ msgstr "Adaugă etichetă"
 
 #, fuzzy
-#~ msgid "Add Line"
-#~ msgstr "Adaugă linie"
-
-#, fuzzy
 #~ msgid "Add Stat"
 #~ msgstr "Adaugă statistică"
 
@@ -10820,9 +11118,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "Default game:"
 #~ msgstr "Joc implicit:"
-
-#~ msgid "Detect"
-#~ msgstr "Detectare"
 
 #~ msgid "Detect Directories"
 #~ msgstr "Detecteaza directoare"
@@ -12684,10 +12979,6 @@ msgstr ""
 
 #~ msgid "enter table name to find: "
 #~ msgstr "introdu numele mesei pentru cautare:"
-
-#, fuzzy
-#~ msgid "error"
-#~ msgstr "Eroare:"
 
 #, fuzzy
 #~ msgid "exception calculating %s"

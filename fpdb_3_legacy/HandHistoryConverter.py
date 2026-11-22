@@ -34,7 +34,7 @@ import pytz
 from defusedxml.common import DefusedXmlException
 from pytz import timezone
 
-from fpdb_3_legacy import Hand
+from fpdb_3_legacy import Hand, parser_contract
 from fpdb_3_legacy.Exceptions import (
     FpdbHandPartial,
     FpdbHandSkipped,
@@ -56,10 +56,6 @@ HHC_SITE_ID_ERRORS = (AttributeError, KeyError, TypeError, ValueError)
 # least trusted input fpdb reads. DefusedXmlException covers the files
 # defusedxml refuses outright; it is a ValueError, not an ExpatError.
 HHC_XML_PARSE_ERRORS = (OSError, TypeError, xml.parsers.expat.ExpatError, DefusedXmlException)
-
-# Position of the all-in flag in a blind action, as built by Hand.addBlind():
-# (player, blindtype, amount, stack_is_now_empty).
-BLIND_ALL_IN_INDEX = 3
 
 SQLITE_MAGIC = b"SQLite format 3\x00"
 # The Microgaming text export separates its hands with this line, so rebuilding
@@ -719,63 +715,17 @@ or None if we fail to get the info """
             raise FpdbParseError
 
     def _warn_if_hand_missing_expected_data(self, hand) -> None:
-        """Log non-fatal completeness warnings for hands that parsed cleanly."""
+        """Log non-fatal completeness warnings for hands that parsed cleanly.
+
+        The rules are the generic parser contract's (:mod:`parser_contract`),
+        shared with the Parser Debugger and the contract test (#903).
+        """
         try:
-            issues = []
-            hand_id = getattr(hand, "handid", "unknown")
-            gametype = getattr(hand, "gametype", {}) or {}
-            base = gametype.get("base")
-            sb = Decimal(str(gametype.get("sb", "0") or "0"))
-            bb = Decimal(str(gametype.get("bb", "0") or "0"))
-            actions = getattr(hand, "actions", {}) or {}
-            action_streets = getattr(hand, "actionStreets", []) or []
-
-            for field in ("handid", "startTime", "tablename"):
-                if not getattr(hand, field, None):
-                    issues.append(f"missing required {field}")
-            if gametype.get("type") == "tour" and not getattr(hand, "tourNo", None):
-                issues.append("missing required tourNo")
-
-            if len(getattr(hand, "players", []) or []) < 2:
-                issues.append("fewer than two players")
-
-            blind_actions = actions.get("BLINDSANTES", [])
-            if base in ("hold", "draw") and (sb > 0 or bb > 0) and not blind_actions:
-                issues.append("no blind/ante actions")
-
-            non_blind_action_count = sum(
-                len(actions.get(street, []))
-                for street in action_streets
-                if street != "BLINDSANTES"
-            )
-            # A blind posted all-in ends the betting there: with the short stack
-            # already covered, nobody has anything left to act on and the board
-            # simply runs out. Such a hand really does hold no betting action, so
-            # flagging it reports a parser failure that did not happen.
-            # addBlind() sets the fourth element of a blind action when the post
-            # leaves the player with an empty stack.
-            blind_all_in = any(len(act) > BLIND_ALL_IN_INDEX and act[BLIND_ALL_IN_INDEX] for act in blind_actions)
-            if (
-                base in ("hold", "draw", "stud")
-                and non_blind_action_count == 0
-                and not blind_all_in
-                and not self._is_walk(hand)
-            ):
-                issues.append("no betting actions")
-
-            hand_text = getattr(hand, "handText", "") or ""
-            board = getattr(hand, "board", {}) or {}
-            for marker, street in (
-                ("*** Flop ***", "FLOP"),
-                ("*** Turn ***", "TURN"),
-                ("*** River ***", "RIVER"),
-            ):
-                if marker in hand_text and street in board and not board.get(street):
-                    issues.append(f"{street.lower()} marker present but board cards missing")
-
+            issues = parser_contract.completeness_issues(hand)
             if not issues:
                 return
 
+            hand_id = getattr(hand, "handid", "unknown")
             msg = (
                 f"Parsed {self.sitename} hand {hand_id} without parser errors, "
                 f"but expected data is missing: {', '.join(issues)}"
@@ -789,20 +739,8 @@ or None if we fail to get the info """
 
     @staticmethod
     def _is_walk(hand) -> bool:
-        """Tell whether a hand ended on the blinds with a single winner.
-
-        In a walk everyone folds to the big blind. Some rooms (Full Tilt Matrix,
-        #869) only say so in the summary, so the hand holds no betting action
-        although it is complete. No board card was dealt and one player took the
-        whole pot.
-        """
-        board = getattr(hand, "board", {}) or {}
-        if any(board.values()):
-            return False
-        if getattr(hand, "shown", None):
-            return False
-        collectees = getattr(hand, "collectees", {}) or {}
-        return len(collectees) == 1
+        """Tell whether a hand ended on the blinds with a single winner (see :func:`parser_contract.is_walk`)."""
+        return parser_contract.is_walk(hand)
 
     def sanityCheck(self):
         """Check we aren't going to do some stupid things."""

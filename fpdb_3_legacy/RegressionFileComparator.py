@@ -149,8 +149,24 @@ def compare_importer_sidecars(filename: str | Path, importer: Any) -> Comparison
     """Compare ``.hands``, ``.hp`` and ``.gt`` sidecars for an importer result."""
 
     path = Path(filename)
+    return compare_hand_sidecars(path, _processed_hands(importer, path))
+
+
+def has_sidecars(filename: str | Path) -> bool:
+    """Whether ``filename`` has a ``.hands``, ``.hp`` or ``.gt`` regression sidecar."""
+    path = Path(filename)
+    return any(path.with_name(path.name + suffix).is_file() for suffix in (".hands", ".hp", ".gt"))
+
+
+def compare_hand_sidecars(filename: str | Path, hands: list[Any]) -> ComparisonReport:
+    """Compare the sidecars of ``filename`` with ``hands`` parsed from it.
+
+    The hands must have been assembled (:meth:`Hand.assembleHand`) and carry
+    their ``gametyperow``; no database is needed for that, which is what lets
+    the Parser Debugger compare a file it parsed on its own (#903).
+    """
+    path = Path(filename)
     report = ComparisonReport(filename=path)
-    hands = _processed_hands(importer, path)
 
     if not hands:
         report.issues.append(ComparisonIssue("import", "processedHands", "at least one hand", []))
