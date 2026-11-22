@@ -3,6 +3,8 @@
 
 from fpdb_3_legacy import anonymize_hh as _implementation
 
+anonymize_text = _implementation.anonymize_text
+
 
 def __getattr__(name: str):
     """Keep the historical ``tools.anonymize_hh`` Python API available."""

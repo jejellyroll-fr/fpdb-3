@@ -369,7 +369,7 @@ def anonymize_text(text: str, room: str, names: Iterable[str], hero: str | None 
     """
     mapping = Mapping()
     for name in dict.fromkeys(str(name).strip() for name in names if name and str(name).strip()):
-        mapping.add_name(name, hero=(name == hero))
+        mapping.add_name(name, hero=name == hero)
 
     extras = ROOMS.get(room, RoomExtras())
     for pattern in extras.summary_names + extras.event_names:
