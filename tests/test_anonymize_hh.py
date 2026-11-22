@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -36,6 +39,22 @@ def _sitting_out_names(text: str) -> set[str]:
         for line in text.splitlines()
         if line.startswith("Seat ") and "(sitting out)" in line
     }
+
+
+def test_direct_script_runs_without_pythonpath(tmp_path: Path) -> None:
+    env = os.environ.copy()
+    env.pop("PYTHONPATH", None)
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "anonymize_hh.py"), "--help"],
+        cwd=tmp_path,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "--map MAP" in result.stdout
 
 
 @pytest.fixture

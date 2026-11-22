@@ -47,7 +47,8 @@ def _rows(tree) -> list[list[str]]:
 
 def test_the_site_list_offers_auto_detect_then_every_site(dialog) -> None:
     assert dialog.site_combo.itemData(0) is None
-    assert any(dialog.site_combo.itemText(index) == "PokerStars.COM" for index in range(dialog.site_combo.count()))
+    listed_sites = {dialog.site_combo.itemData(index) for index in range(1, dialog.site_combo.count())}
+    assert listed_sites == set(dialog.config.hhcs)
 
 
 def test_nothing_to_parse_says_so(dialog) -> None:

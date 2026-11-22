@@ -29,7 +29,7 @@ from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtCore import QModelIndex, QPersistentModelIndex, Qt
+from PySide6.QtCore import QModelIndex, QPersistentModelIndex, QSize, Qt
 from PySide6.QtGui import QColor, QFont, QFontDatabase, QGuiApplication, QPainter, QTextCursor, QTextFormat
 from PySide6.QtWidgets import (
     QApplication,
@@ -95,8 +95,8 @@ class _LineNumberArea(QWidget):
         super().__init__(editor)
         self.editor = editor
 
-    def sizeHint(self):  # noqa: N802 - Qt API, pylint: disable=invalid-name
-        return self.editor.line_number_area_width(), 0
+    def sizeHint(self) -> QSize:  # noqa: N802 - Qt API, pylint: disable=invalid-name
+        return QSize(self.editor.line_number_area_width(), 0)
 
     def paintEvent(self, event):  # noqa: N802 - Qt API, pylint: disable=invalid-name
         self.editor.paint_line_number_area(event)

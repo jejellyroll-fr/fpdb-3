@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -65,3 +68,19 @@ def test_bug_report_output(config_file, capsys) -> None:
 
     assert out.startswith("### Parser Debugger report")
     assert "AAALISAAAA" not in out
+
+
+def test_direct_script_runs_without_pythonpath(tmp_path) -> None:
+    env = os.environ.copy()
+    env.pop("PYTHONPATH", None)
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "parser_debugger.py"), "--help"],
+        cwd=tmp_path,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "--config CONFIG" in result.stdout
