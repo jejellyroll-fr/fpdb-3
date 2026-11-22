@@ -433,11 +433,7 @@ class PokerStarsSummary(TourneySummary):
 
     def parseSummaryXLS(self) -> None:
         """Parse tournament summary from Excel/XLS format."""
-        if (
-            not isinstance(self.summaryText, list)
-            or not self.summaryText
-            or not isinstance(self.summaryText[0], dict)
-        ):
+        if not isinstance(self.summaryText, list) or not self.summaryText or not isinstance(self.summaryText[0], dict):
             msg = "PokerStars XLS summary must contain at least one row"
             raise FpdbParseError(msg)
 
