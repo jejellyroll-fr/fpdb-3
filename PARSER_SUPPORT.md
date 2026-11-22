@@ -18,7 +18,10 @@ These converters have file-by-file semantic snapshots in
 - GGPoker (hand histories and the client's tournament summaries, Spin&Gold
   included; `Poker Hand #ring_...` files from third-party converters are
   refused as an unsupported export variant)
-- iPoker
+- iPoker (every skin under its own room; win2day's iPoker client is filed
+  under `Win2day Poker` while its Boss Media era files stay with Boss, and
+  Sökö sessions are refused, see [docs/ipoker-win2day.md](docs/ipoker-win2day.md);
+  no real win2day export is in the corpus yet)
 - KingsClub
 - PacificPoker/888
 - PartyPoker
@@ -48,7 +51,8 @@ These converters have file-by-file semantic snapshots in
 
 Kept for importing historical archives, without a current-format support claim:
 
-- Absolute, Betfair, Boss, Enet, Entraction, Everest, Everleaf
+- Absolute, Betfair, Boss (win2day's 2008 client included), Enet, Entraction
+  (hold'em and Omaha only: a Sökö hand is refused), Everest, Everleaf
 - Full Tilt, Merge, Microgaming, OnGame, PKR
 
 Moving a converter out of this tier requires a representative fixture and a

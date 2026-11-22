@@ -1,0 +1,48 @@
+Players:
+Hero (EUR 87,85 in seat 1)
+Villain1 (EUR 228,28 in seat 3)
+Villain2 (EUR 122,23 in seat 4)
+Villain3 (EUR 72,60 in seat 5)
+Villain4 (EUR 85,60 in seat 7)
+
+Hero Ante (0,25)
+Villain1 Ante (0,25)
+Villain2 Ante (0,25)
+Villain3 Ante (0,25)
+Villain4 Ante (0,25)
+
+Hero was dealt: Ks - Kd
+Villain1 was dealt: ?? - 4s
+Villain2 was dealt: ?? - 5c
+Villain3 was dealt: ?? - 8c
+Villain4 was dealt: ?? - 4h
+
+Hero Bet (1,00)
+Villain1 Call (1,00)
+Villain2 Fold
+Villain3 Fold
+Villain4 Call (1,00)
+
+Hero was dealt: Ks - Kd - Jh
+Villain1 was dealt: ?? - 4s - Kh
+Villain4 was dealt: ?? - 4h - Qh
+
+Hero Bet (2,50)
+Villain1 Raise (11,75)
+Villain4 Call (11,75)
+Hero Raise (25,00)
+Villain1 Raise (86,75)
+Villain4 Fold
+Hero All-In (59,10)
+Villain1 Payback (11,90)
+
+Hero was dealt: Ks - Kd - Jh - 3s
+Villain1 was dealt: ?? - 4s - Kh - 9s
+Hero was dealt: Ks - Kd - Jh - 3s - 7s
+Villain1 was dealt: ?? - 4s - Kh - 9s - 4d
+
+Hero shows: Ks - Kd - Jh - 3s - 7s (a pair of kings)
+Villain1 shows: Kc - 4s - Kh - 9s - 4d (two pairs, kings and fours)
+
+Villain1 wins: EUR 187,20 (with two pairs, kings and fours)
+Rake: EUR 2,00

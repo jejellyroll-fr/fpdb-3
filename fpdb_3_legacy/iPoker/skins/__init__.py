@@ -48,6 +48,7 @@ from fpdb_3_legacy.iPoker.skins.sportium import SportiumIPoker
 from fpdb_3_legacy.iPoker.skins.titan import TitanIPoker
 from fpdb_3_legacy.iPoker.skins.unibet import UnibetIPoker
 from fpdb_3_legacy.iPoker.skins.william_hill import WilliamHillIPoker
+from fpdb_3_legacy.iPoker.skins.win2day import Win2dayIPoker
 from fpdb_3_legacy.iPoker.skins.winner import WinnerIPoker
 
 __all__ = [
@@ -97,5 +98,6 @@ __all__ = [
     "TitanIPoker",
     "UnibetIPoker",
     "WilliamHillIPoker",
+    "Win2dayIPoker",
     "WinnerIPoker",
 ]

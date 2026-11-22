@@ -59,6 +59,29 @@ _RE_GAMETYPE_VALUE: Final = re.compile(rf"\s*{GAMETYPE_VALUE}\s*$", re.VERBOSE)
 #: 5 card Omaha is the only game iPoker leaves unnamed, and it is pot limit only.
 _NAMELESS_LIMITS: Final = frozenset({"PL", "LP", "Pot limit"})
 
+#: The value of a session's ``<gametype>``, wherever it stands in a file.
+_GAMETYPE_ELEMENT: Final = re.compile(r"<gametype>([^<]*)</gametype>")
+
+#: Sökö, the Finnish five-card stud win2day deals as "Pot Limit Sökö" (#891).
+#: No iPoker file of it has been seen yet, so every spelling a value could
+#: carry is taken: the umlauts, their ASCII and Scandinavian forms, and the
+#: UTF-8 bytes read as cp1252. A name, never a part of one.
+_SOKO: Final = re.compile(r"(?<!\w)s(?:ö|o|oe|ø|Ã¶)k(?:ö|o|oe|ø|Ã¶)(?!\w)", re.IGNORECASE)
+
+
+def soko_gametype(text: str) -> str | None:
+    """The ``<gametype>`` value of ``text`` when it names Sökö, else ``None``.
+
+    Sökö ranks a four-card flush and a four-card straight between two pair
+    and one pair. fpdb has no evaluator for that order: read as five-card stud,
+    its winners, hand names and results would be wrong without a warning; as
+    an unknown name it was read with no game at all. Such a hand must be refused.
+    """
+    for value in _GAMETYPE_ELEMENT.findall(text):
+        if _SOKO.search(value):
+            return value.strip()
+    return None
+
 
 def read_gametype(text: str) -> dict[str, str | None] | None:
     """Read a ``<gametype>`` value into ``base``, ``category``, ``limitType``, ``SB`` and ``BB``.
