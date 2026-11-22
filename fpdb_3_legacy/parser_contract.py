@@ -898,16 +898,19 @@ def _check_one_betting_action(street: str, action: Sequence[Any], state: _Bettin
 
 
 def _betting_order_check(hand: Any) -> Check:
-    starting_stacks = {
-        str(player[1]): to_decimal(player[2])
-        for player in getattr(hand, "players", []) or []
-        if len(player) > 2 and to_decimal(player[2]) is not None
-    }
+    starting_stacks: dict[str, Decimal] = {}
+    for player in getattr(hand, "players", []) or []:
+        if len(player) <= 2:
+            continue
+        stack = to_decimal(player[2])
+        if stack is not None:
+            starting_stacks[str(player[1])] = stack
     streets = getattr(hand, "actionStreets", None) or list(_actions(hand))
     state = _BettingState(remaining=dict(starting_stacks))
     for street in dict.fromkeys(["BLINDSANTES", *streets]):
         state.committed = {}
-        state.current_bet = to_decimal(_gametype(hand).get("bb")) if street == "PREFLOP" else Decimal(0)
+        big_blind = to_decimal(_gametype(hand).get("bb"))
+        state.current_bet = (big_blind or Decimal(0)) if street == "PREFLOP" else Decimal(0)
         state.last_raise = state.current_bet
         for action in _actions(hand).get(street, []):
             _check_one_betting_action(street, action, state)

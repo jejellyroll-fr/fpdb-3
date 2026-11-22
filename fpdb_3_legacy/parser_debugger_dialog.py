@@ -269,9 +269,9 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.report: ParseDebugReport | None = None
         self.loaded_path: Path | None = None
         self.loaded_text = ""
-        self.fixture_button: QPushButton | None = None
-        self.parser_label: QLabel | None = None
-        self.detection_tree: QTreeWidget | None = None
+        self.fixture_button: QPushButton
+        self.parser_label: QLabel
+        self.detection_tree: QTreeWidget
         self.setWindowTitle(_("Parser Debugger"))
         self.resize(1320, 820)
         self.setWindowFlag(Qt.WindowType.WindowMaximizeButtonHint, True)
