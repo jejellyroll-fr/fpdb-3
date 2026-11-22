@@ -60,7 +60,7 @@ from zoneinfo import ZoneInfo
 from fpdb_3_legacy import Database, ipoker_rooms
 from fpdb_3_legacy.HandHistoryConverter import FpdbParseError, HandHistoryConverter
 from fpdb_3_legacy.iPoker.dispatcher import detect_skin, resolve_site_id
-from fpdb_3_legacy.iPoker.gametype_text import GAMES, GAMETYPE_VALUE, LIMITS, SUBSTITUTIONS
+from fpdb_3_legacy.iPoker.gametype_text import GAMES, GAMETYPE_VALUE, LIMITS, SUBSTITUTIONS, soko_gametype
 from fpdb_3_legacy.iPoker.hand_info import IPokerHandInfoMixin
 from fpdb_3_legacy.iPoker.streets_actions import IPokerStreetsActionsMixin
 from fpdb_3_legacy.iPoker.tournament_results import IPokerTournamentResultsMixin
@@ -1099,6 +1099,7 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
 
         # Detect skin from path and set sitename and site_id
         self._apply_skin_from_input_path()
+        self._refuse_unsupported_game(hand_text)
 
         # First try to parse using the standard regex
         m, m2, m3 = self._parse_game_info_regexes(hand_text)
@@ -1164,6 +1165,23 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
 
         log.debug("Final info: %s", self.info)
         return self.info
+
+    def _refuse_unsupported_game(self, hand_text: str) -> None:
+        """Refuse a hand of a game fpdb cannot rank, rather than file it as another.
+
+        A later hand of a session is a bare ``<game>`` block: its game is the
+        one the session header names, in the whole file.
+
+        Raises:
+            FpdbParseError: If the session is a Sökö game (#891).
+        """
+        session = hand_text if "<gametype>" in hand_text else getattr(self, "whole_file", "") or ""
+        game = soko_gametype(session)
+        if game is None:
+            return
+        msg = f"Unsupported game '{game}': fpdb cannot rank Soko hands yet (#891)"
+        log.error(msg)
+        raise FpdbParseError(msg)
 
     def _handle_ring_game_logic(self, mg: dict, hand_text: str) -> None:
         """Handle ring game specific logic."""

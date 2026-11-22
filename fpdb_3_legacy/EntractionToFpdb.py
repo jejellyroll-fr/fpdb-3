@@ -137,6 +137,8 @@ class Entraction(HandHistoryConverter):
     )
 
     re_Identify = re.compile("Game\\s\\#\\s\\d+\\s\\-\\s")
+    # The game and limit of a header, whatever the game: "Game # 1 - Soko Pot Limit EUR 0,25 - Table".
+    re_GameName = re.compile(r"Game\s\#\s\d+\s-\s(?P<GAME>[^\n]+?)\s-\sTable\s")
     re_SplitHands = re.compile(r"\n\n(?=Game\s#)")
     re_Button = re.compile(r"^Dealer:\s+(?P<PNAME>.*)$", re.MULTILINE)
     re_Board = re.compile(r"^(?P<CARDS>.+)$", re.MULTILINE)
@@ -196,6 +198,12 @@ class Entraction(HandHistoryConverter):
         if not m:
             tmp = handText[0:200]
             log.error(_("EntractionToFpdb.determineGameType: '%s'") % tmp)
+            # Name the game when the header does, as for Soko (#891): the hand
+            # is refused, never read as one of the games this parser knows.
+            named = self.re_GameName.search(handText)
+            if named:
+                msg = f"Unsupported game '{named.group('GAME')}'"
+                raise FpdbParseError(msg)
             raise FpdbParseError
 
         mg = m.groupdict()

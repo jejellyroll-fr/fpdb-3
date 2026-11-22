@@ -109,6 +109,10 @@ IPOKER_SKINS: tuple[IPokerSkin, ...] = (
     IPokerSkin(("maria",), "Maria Casino Poker", "maria", 88),
     IPokerSkin(("leovegas",), "LeoVegas Poker", "leovegas", 89),
     IPokerSkin(("mr green",), "Mr Green Poker", "mr_green", 90),
+    # win2day on iPoker (#891). The client's folder names are not confirmed yet;
+    # every one known for the brand contains "win2day". Its Boss Media era files
+    # are another format, imported by the Boss converter, never by this parser.
+    IPokerSkin(("win2day",), "Win2day Poker", "win2day", 151, "Win2dayIPoker"),
     IPokerSkin(("expekt",), "Expekt Poker", "expekt"),
     IPokerSkin(("coolbet",), "Coolbet Poker", "coolbet"),
     IPokerSkin(("chilipoker",), "Chilipoker", "chilipoker"),

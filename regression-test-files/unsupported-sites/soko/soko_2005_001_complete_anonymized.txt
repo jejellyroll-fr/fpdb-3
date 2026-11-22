@@ -1,0 +1,48 @@
+Game # 90000001 - Soko Pot Limit EUR 0,25 - Table "Anonymous_Soko_01"
+Game ended 2005-01-01 12:00:00 UTC
+
+Players:
+Villain1 (EUR 62,50 in seat 1)
+Hero (EUR 40,50 in seat 2)
+Villain2 (EUR 53,75 in seat 4)
+Villain3 (EUR 8,00 in seat 5)
+
+Villain1 Ante (0,25)
+Hero Ante (0,25)
+Villain2 Ante (0,25)
+Villain3 Ante (0,25)
+
+Villain1 was dealt: ?? - 8s
+Hero was dealt: Ts - 9h
+Villain2 was dealt: ?? - Qh
+Villain3 was dealt: ?? - Jd
+
+Villain2 Bet (1,00)
+Villain3 Call (1,00)
+Villain1 Fold
+Hero Call (1,00)
+
+Hero was dealt: Ts - 9h - Td
+Villain2 was dealt: ?? - Qh - Th
+Villain3 was dealt: ?? - Jd - 4d
+
+Villain2 Bet (4,00)
+Villain3 Fold
+Hero Raise (16,00)
+Villain2 Call (12,00)
+
+Hero was dealt: Ts - 9h - Td - 3d
+Villain2 was dealt: ?? - Qh - Th - As
+
+Villain2 Check
+Hero All-In (23,25)
+Villain2 Call (23,25)
+
+Hero was dealt: Ts - 9h - Td - 3d - 2h
+Villain2 was dealt: ?? - Qh - Th - As - Jh
+
+Hero shows: Ts - 9h - Td - 3d - 2h (a pair of tens)
+Villain2 shows: Ad - Qh - Th - As - Jh (a pair of aces)
+
+Villain2 wins: EUR 80,50 (with a pair of aces)
+Rake: EUR 2,00

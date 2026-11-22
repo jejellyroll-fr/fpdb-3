@@ -341,6 +341,9 @@ class DatabaseSchemaMixin(DatabaseMigrationsMixin, DatabaseIndexesMixin):
         # iPoker skins 'Sisal Poker' (73) and 'Snai Poker' (76)
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('148', 'PokerStars on Sisal', 'PS')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('149', 'PokerStars on SNAI', 'PS')")
+        # win2day on iPoker (#891); its Boss Media era hands stay under 'Boss' (4).
+        # 150 is taken by the PHH data source (phh_import.PHH_SITE_ID).
+        c.execute("INSERT INTO Sites (id,name,code) VALUES ('151', 'Win2day Poker', 'IP')")
         c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('59', 'NetBet Poker', 'IP')",
         )

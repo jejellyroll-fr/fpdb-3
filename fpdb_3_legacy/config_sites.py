@@ -630,6 +630,7 @@ class ConfigSitesMixin(ConfigBase):
                 "PokerStars on Sky": 147,
                 "PokerStars on Sisal": 148,
                 "PokerStars on SNAI": 149,
+                "Win2day Poker": 151,
             }
             return fallbacks.get(site, 2)
         return self.site_ids[site]
