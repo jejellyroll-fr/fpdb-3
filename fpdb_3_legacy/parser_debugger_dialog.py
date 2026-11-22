@@ -28,7 +28,7 @@ from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtCore import QModelIndex, Qt
+from PySide6.QtCore import QModelIndex, QPersistentModelIndex, Qt
 from PySide6.QtGui import QColor, QFont, QFontDatabase, QGuiApplication, QPainter, QTextCursor, QTextFormat
 from PySide6.QtWidgets import (
     QApplication,
@@ -105,7 +105,12 @@ def _tree(headers: Iterable[str]) -> QTreeWidget:
 class _StatusColorDelegate(QStyledItemDelegate):
     """Paint status rows above qt_material's item stylesheet."""
 
-    def paint(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex) -> None:
+    def paint(
+        self,
+        painter: QPainter,
+        option: QStyleOptionViewItem,
+        index: QModelIndex | QPersistentModelIndex,
+    ) -> None:
         kind = index.siblingAtColumn(0).data(_STATUS_ROLE)
         if kind not in _STATUS_BACKGROUNDS:
             super().paint(painter, option, index)
@@ -342,11 +347,22 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         site = self.site_combo.currentData()
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         try:
-            options = {"trace_lines": self.trace_check.isChecked(), "derived": self.derived_check.isChecked()}
             if self.loaded_path is not None and text == self.loaded_text:
-                report = parser_debug.debug_parse_file(self.loaded_path, self.config, site, **options)
+                report = parser_debug.debug_parse_file(
+                    self.loaded_path,
+                    self.config,
+                    site,
+                    trace_lines=self.trace_check.isChecked(),
+                    derived=self.derived_check.isChecked(),
+                )
             else:
-                report = parser_debug.debug_parse_text(text, self.config, site, **options)
+                report = parser_debug.debug_parse_text(
+                    text,
+                    self.config,
+                    site,
+                    trace_lines=self.trace_check.isChecked(),
+                    derived=self.derived_check.isChecked(),
+                )
         finally:
             QApplication.restoreOverrideCursor()
         self.show_report(report)

@@ -219,7 +219,7 @@ class GuiBulkImport(QWidget):
         log.info(completion_message)
         # PHH files (#381) say more than the totals: what was unsupported, what malformed.
         phh = self.importer.phh_summary()
-        self.failed_import_paths = self._failed_import_paths()
+        self.failed_import_paths[:] = self._failed_import_paths()
         self.debug_failed_button.setEnabled(bool(self.failed_import_paths))
 
         self.importer.clearFileList()
