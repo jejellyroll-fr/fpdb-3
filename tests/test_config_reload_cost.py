@@ -152,3 +152,51 @@ class TestRebindConfig:
     def test_a_closed_connection_refuses_the_rebind(self) -> None:
         db = make_db(connected=False)
         assert db.rebind_config(FakeConfig()) is False
+
+
+class SitesConfig(FakeConfig):
+    """A config whose <site_ids> section is the stale copy an old file holds."""
+
+    def __init__(self, site_ids: dict[str, int]) -> None:
+        super().__init__()
+        self.site_ids = dict(site_ids)
+
+    def set_site_ids(self, sites: Any) -> None:
+        self.site_ids = dict(sites)
+
+
+class TestRebindKeepsTheSitesTable:
+    def test_a_reloaded_config_gets_the_rooms_its_site_ids_section_lacks(self) -> None:
+        # #889: <site_ids> was written once; the Sites table has the rooms
+        # registered since. A reload kept the connection and lost them, so
+        # Manage HUD Sites did not list PokerStars on Betfair or PokerStars.UK.
+        db = make_db(connected=True)
+        db._db_site_ids = {"PokerStars": 2, "PokerStars on Betfair": 143, "PokerStars.UK": 145}
+        reloaded = SitesConfig({"PokerStars": 2, "Full Tilt Poker": 1})
+
+        assert db.rebind_config(reloaded) is True
+
+        assert reloaded.site_ids == {
+            "Full Tilt Poker": 1,
+            "PokerStars": 2,
+            "PokerStars on Betfair": 143,
+            "PokerStars.UK": 145,
+        }
+        assert list(reloaded.site_ids.values()) == sorted(reloaded.site_ids.values())
+
+    def test_the_table_wins_over_a_stale_id(self) -> None:
+        db = make_db(connected=True)
+        db._db_site_ids = {"PokerStars.UK": 145}
+        reloaded = SitesConfig({"PokerStars.UK": 999})
+
+        db.rebind_config(reloaded)
+
+        assert reloaded.site_ids == {"PokerStars.UK": 145}
+
+    def test_before_the_table_is_read_the_config_keeps_its_own(self) -> None:
+        db = make_db(connected=True)
+        reloaded = SitesConfig({"PokerStars": 2})
+
+        db.rebind_config(reloaded)
+
+        assert reloaded.site_ids == {"PokerStars": 2}
