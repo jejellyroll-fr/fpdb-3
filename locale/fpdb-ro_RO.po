@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 17:23+0100\n"
+"POT-Creation-Date: 2026-11-22 18:05+0100\n"
 "PO-Revision-Date: 2011-05-13 08:55+0000\n"
 "Last-Translator: jax <jax@netmagnet.ro>\n"
 "Language-Team: Romanian (Romania) (http://www.transifex.net/projects/p/fpdb/"
@@ -5298,6 +5298,7 @@ msgstr ""
 "veche"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "OK"
 msgstr "OK"
@@ -5926,6 +5927,7 @@ msgid "Enter popup name:"
 msgstr "Introduceți numele de utilizator"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Error"
 msgstr "Eroare:"
@@ -7352,6 +7354,10 @@ msgid "Message"
 msgstr "Jurnalizare Mesaje"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Missing / not reached"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "No change."
 msgstr "Interval jos:"
@@ -7437,6 +7443,10 @@ msgstr "Salvează presetarea"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Sidecar"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Status colours"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py

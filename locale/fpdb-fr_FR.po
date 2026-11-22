@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 17:23+0100\n"
+"POT-Creation-Date: 2026-11-22 18:05+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -4783,6 +4783,7 @@ msgstr ""
 "valeur historique"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "OK"
 msgstr "OK"
 
@@ -5350,6 +5351,7 @@ msgid "Enter popup name:"
 msgstr "Saisissez le nom du popup :"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Error"
 msgstr "Erreur"
 
@@ -6643,6 +6645,10 @@ msgid "Message"
 msgstr "Message"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Missing / not reached"
+msgstr "Manquant / non atteint"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "No change."
 msgstr "Aucun changement."
 
@@ -6719,6 +6725,10 @@ msgstr "Enregistrer le rapport"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Sidecar"
 msgstr "Fichier attendu"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Status colours"
+msgstr "Couleurs des statuts"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Step"

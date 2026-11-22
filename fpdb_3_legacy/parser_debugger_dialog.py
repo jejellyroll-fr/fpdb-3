@@ -54,10 +54,29 @@ from fpdb_3_legacy import parser_debug
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.parser_debug import Diagnostic, HandResult, ParseDebugReport
 
+# Keep the status colours subtle enough for the dark theme while giving every
+# status table the same meaning. A text label remains beside every colour.
+_STATUS_BACKGROUNDS = {
+    "ok": QColor(34, 145, 88, 72),
+    "warning": QColor(230, 150, 25, 74),
+    "error": QColor(210, 55, 60, 88),
+}
+_STATUS_FOREGROUNDS = {
+    "ok": QColor("#78e2a1"),
+    "warning": QColor("#ffd080"),
+    "error": QColor("#ff9292"),
+}
+_STATUS_WORDS = {
+    "ok": {"ok", "pass", "passed", "met", "yes", "read", "every value matches"},
+    "warning": {"warning", "unread", "not reached", "not called", "missing", "skipped"},
+    "error": {"error", "failed", "fail", "raised", "mismatch", "bug"},
+}
 # Background of a line in the input, by what the report says of it.
 _LINE_COLOURS = {
-    "unread": QColor(255, 196, 0, 70),
-    "error": QColor(220, 50, 47, 90),
+    "read": _STATUS_BACKGROUNDS["ok"],
+    "unread": _STATUS_BACKGROUNDS["warning"],
+    "not reached": _STATUS_BACKGROUNDS["warning"],
+    "error": _STATUS_BACKGROUNDS["error"],
 }
 _SEVERITY_ORDER = {"error": 0, "warning": 1, "info": 2}
 _LINE_ROLE = Qt.ItemDataRole.UserRole
@@ -75,6 +94,37 @@ def _tree(headers: Iterable[str]) -> QTreeWidget:
     tree.setAlternatingRowColors(True)
     tree.setUniformRowHeights(True)
     return tree
+
+
+def _status_kind(status: str) -> str | None:
+    """Map the parser's varied status vocabulary to the UI's three colours."""
+    normalized = status.casefold().strip()
+    return next((kind for kind, words in _STATUS_WORDS.items() if normalized in words), None)
+
+
+def _colour_status_row(item: QTreeWidgetItem, status: str) -> None:
+    """Tint a whole table row and its status text according to the outcome."""
+    kind = _status_kind(status)
+    if kind is None:
+        return
+    for column in range(item.columnCount()):
+        item.setBackground(column, _STATUS_BACKGROUNDS[kind])
+        item.setForeground(column, _STATUS_FOREGROUNDS[kind])
+
+
+def _status_legend(parent: QWidget) -> QLabel:
+    legend = QLabel(parent)
+    legend.setObjectName("status_legend")
+    legend.setTextFormat(Qt.TextFormat.RichText)
+    legend.setAccessibleName(_("Status colours"))
+    legend.setText(
+        " &nbsp; ".join(
+            f"<span style='color:{_STATUS_FOREGROUNDS[kind].name()}'><b>●</b> {html.escape(label)}</span>"
+            for kind, label in (("ok", _("OK")), ("warning", _("Missing / not reached")), ("error", _("Error")))
+        )
+    )
+    legend.setAlignment(Qt.AlignmentFlag.AlignRight)
+    return legend
 
 
 def _fill_value(parent: QTreeWidgetItem, value: Any) -> None:
@@ -173,6 +223,8 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.hand_combo.currentIndexChanged.connect(self._show_hand)
         header.addWidget(self.hand_combo)
         layout.addLayout(header)
+
+        layout.addWidget(_status_legend(panel))
 
         self.tabs = QTabWidget(panel)
         self.summary = QTextBrowser(panel)
@@ -381,6 +433,8 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
                 font.setBold(True)
                 for column in range(item.columnCount()):
                     item.setFont(column, font)
+            if probe.identified:
+                _colour_status_row(item, "yes")
         for column in range(5):
             self.detection_tree.resizeColumnToContents(column)
 
@@ -428,17 +482,14 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
                     regexes,
                 ],
             )
-            if step.status == "raised":
-                item.setForeground(1, QColor("#c62828"))
-            elif step.status in ("not reached", "not called"):
-                item.setForeground(1, QColor("#888888"))
+            _colour_status_row(item, step.status)
         for column in range(4):
             self.steps_tree.resizeColumnToContents(column)
         self.steps_tree.setColumnWidth(3, min(self.steps_tree.columnWidth(3), 380))
 
     def _fill_contract(self, hand: HandResult) -> None:
         for violation in hand.violations:
-            QTreeWidgetItem(
+            item = QTreeWidgetItem(
                 self.contract_tree,
                 [
                     violation["step"],
@@ -449,12 +500,16 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
                     violation["found"],
                 ],
             )
+            _colour_status_row(item, violation["severity"])
         if not hand.violations and hand.ok:
-            QTreeWidgetItem(self.contract_tree, [_("contract"), _("met"), "", _("Every step produced what it must")])
+            item = QTreeWidgetItem(self.contract_tree, [_("contract"), _("met"), "", _("Every step produced what it must")])
+            _colour_status_row(item, "met")
         for check in hand.checks:
             item = QTreeWidgetItem(self.contract_tree, [check["name"], check["status"], "", check["message"]])
+            _colour_status_row(item, check["status"])
             for detail in check["details"]:
-                QTreeWidgetItem(item, ["", "", "", detail])
+                detail_item = QTreeWidgetItem(item, ["", "", "", detail])
+                _colour_status_row(detail_item, check["status"])
         for column in range(3):
             self.contract_tree.resizeColumnToContents(column)
 
@@ -467,20 +522,27 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
             if colour is not None:
                 for column in range(4):
                     item.setBackground(column, colour)
+                kind = _status_kind(mark.status)
+                if kind is not None:
+                    for column in range(4):
+                        item.setForeground(column, _STATUS_FOREGROUNDS[kind])
         for column in range(3):
             self.lines_tree.resizeColumnToContents(column)
         self.lines_tree.setColumnWidth(2, min(self.lines_tree.columnWidth(2), 460))
 
     def _fill_expected(self, hand: HandResult) -> None:
         if not hand.sidecars:
-            QTreeWidgetItem(self.expected_tree, [_("This file has no regression sidecar (.hands, .hp, .gt)")])
+            item = QTreeWidgetItem(self.expected_tree, [_("This file has no regression sidecar (.hands, .hp, .gt)")])
+            _colour_status_row(item, "missing")
             return
         if hand.sidecars.get("error"):
-            QTreeWidgetItem(self.expected_tree, [_("error"), hand.sidecars["error"]])
+            item = QTreeWidgetItem(self.expected_tree, [_("error"), hand.sidecars["error"]])
+            _colour_status_row(item, "error")
         if hand.sidecars["passed"]:
-            QTreeWidgetItem(self.expected_tree, [", ".join(hand.sidecars["compared"]), _("every value matches")])
+            item = QTreeWidgetItem(self.expected_tree, [", ".join(hand.sidecars["compared"]), _("every value matches")])
+            _colour_status_row(item, "every value matches")
         for issue in hand.sidecars["issues"]:
-            QTreeWidgetItem(
+            item = QTreeWidgetItem(
                 self.expected_tree,
                 [
                     issue["sidecar"],
@@ -490,6 +552,7 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
                     repr(issue["actual"]),
                 ],
             )
+            _colour_status_row(item, "mismatch")
 
     def _line_item_activated(self, item: QTreeWidgetItem, _column: int) -> None:
         line = item.data(0, _LINE_ROLE)

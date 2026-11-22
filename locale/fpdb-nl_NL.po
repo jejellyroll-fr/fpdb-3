@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 17:23+0100\n"
+"POT-Creation-Date: 2026-11-22 18:05+0100\n"
 "PO-Revision-Date: 2011-12-03 21:57+0000\n"
 "Last-Translator: LimburgCwboy <hdps.een@gmail.com>\n"
 "Language-Team: Dutch (Netherlands) (http://www.transifex.net/projects/p/fpdb/"
@@ -5350,6 +5350,7 @@ msgstr ""
 "Minimale breedte van elke statcel; Automatisch behoudt de oude standaard"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "OK"
 msgstr "OK"
@@ -5971,6 +5972,7 @@ msgid "Enter popup name:"
 msgstr "Voer uw gebruikersnaam in"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Error"
 msgstr ""
 
@@ -7383,6 +7385,10 @@ msgid "Message"
 msgstr "Logberichten"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Missing / not reached"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "No change."
 msgstr "Laag bereik:"
@@ -7468,6 +7474,10 @@ msgstr "Voorinstelling opslaan"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Sidecar"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Status colours"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py

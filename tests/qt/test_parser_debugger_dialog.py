@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 from PySide6.QtGui import QGuiApplication
-from PySide6.QtWidgets import QFileDialog
+from PySide6.QtWidgets import QFileDialog, QLabel
 
 from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.parser_debugger_dialog import ParserDebuggerDialog, show_parser_debugger
@@ -65,6 +65,14 @@ def test_a_pasted_refused_hand_shows_why(dialog) -> None:
     steps = {row[0]: row[1] for row in _rows(dialog.steps_tree)}
     assert steps["determineGameType"] == "raised"
     assert steps["readHandInfo"] == "not reached"
+    rows = {dialog.steps_tree.topLevelItem(index).text(0): dialog.steps_tree.topLevelItem(index) for index in range(dialog.steps_tree.topLevelItemCount())}
+    assert rows["determineGameType"].foreground(1).color().name() == "#ff9292"
+    assert rows["readHandInfo"].foreground(1).color().name() == "#ffd080"
+    legend = dialog.findChild(QLabel, "status_legend")
+    assert legend is not None
+    assert "#78e2a1" in legend.text()
+    assert "#ffd080" in legend.text()
+    assert "#ff9292" in legend.text()
     # The failing header line is coloured in the input.
     assert [selection.cursor.blockNumber() for selection in dialog.input.extraSelections()] == [0]
 
@@ -81,6 +89,20 @@ def test_an_opened_file_fills_every_tab(dialog, monkeypatch) -> None:
     assert dialog.detection_tree.topLevelItemCount() > 10
     assert any(row[0] == "readPlayerStacks" and row[1] == "ok" for row in _rows(dialog.steps_tree))
     assert any(row[0] == "chip conservation" and row[1] == "pass" for row in _rows(dialog.contract_tree))
+    steps = {dialog.steps_tree.topLevelItem(index).text(0): dialog.steps_tree.topLevelItem(index) for index in range(dialog.steps_tree.topLevelItemCount())}
+    assert steps["readPlayerStacks"].foreground(1).color().name() == "#78e2a1"
+    passed_check = next(
+        dialog.contract_tree.topLevelItem(index)
+        for index in range(dialog.contract_tree.topLevelItemCount())
+        if dialog.contract_tree.topLevelItem(index).text(0) == "chip conservation"
+    )
+    assert passed_check.foreground(1).color().name() == "#78e2a1"
+    detected = next(
+        dialog.detection_tree.topLevelItem(index)
+        for index in range(dialog.detection_tree.topLevelItemCount())
+        if dialog.detection_tree.topLevelItem(index).text(2) == "yes"
+    )
+    assert detected.foreground(2).color().name() == "#78e2a1"
     assert dialog.hand_tree.topLevelItemCount() == 1
     assert any("re_player_info" in row[3] for row in _rows(dialog.lines_tree))
     assert dialog.expected_tree.topLevelItemCount() > 0

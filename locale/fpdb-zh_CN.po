@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 17:23+0100\n"
+"POT-Creation-Date: 2026-11-22 18:05+0100\n"
 "PO-Revision-Date: 2011-04-07 08:53+0000\n"
 "Last-Translator: steffen123 <steffen@schaumburger.info>\n"
 "Language-Team: Chinese (China) <>\n"
@@ -5300,6 +5300,7 @@ msgid ""
 msgstr "每个统计单元格的最小宽度；“自动”保持旧的默认值"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "OK"
 msgstr "确定"
@@ -5914,6 +5915,7 @@ msgid "Enter popup name:"
 msgstr "输入你的用户名"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Error"
 msgstr ""
 
@@ -7313,6 +7315,10 @@ msgid "Message"
 msgstr "日志消息"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Missing / not reached"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "No change."
 msgstr "低值范围:"
@@ -7398,6 +7404,10 @@ msgstr "保存预设"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Sidecar"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Status colours"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
