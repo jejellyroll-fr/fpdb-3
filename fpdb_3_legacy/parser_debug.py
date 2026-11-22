@@ -375,6 +375,7 @@ def extract_hand(hand: Any) -> dict[str, Any]:
                 "total": getattr(hand, "totalpot", None),
                 "collected": getattr(hand, "totalcollected", None),
                 "rake": getattr(hand, "rake", None),
+                "uncalled_returns": dict(getattr(pot, "returned", None) or {}),
                 "pots": [
                     {"amount": amount, "players": sorted(contenders)}
                     for amount, contenders in (getattr(pot, "pots", None) or [])

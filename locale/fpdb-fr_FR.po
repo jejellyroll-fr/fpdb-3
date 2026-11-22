@@ -11732,6 +11732,58 @@ msgstr ""
 #~ msgid "warning: index %s_%s_idx not dropped %s, continuing ..."
 #~ msgstr "Index %s_%s_idx non supprimé: %s, poursuite des traitements ..."
 
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Save anonymized fixture…"
+msgstr "Enregistrer une fixture anonymisée…"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Anonymize fixture"
+msgstr "Anonymiser la fixture"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Player names to replace, one per line. Review the list and add any names the parser missed."
+msgstr "Noms de joueurs à remplacer, un par ligne. Vérifiez la liste et ajoutez ceux manqués par le parseur."
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Cannot anonymize fixture"
+msgstr "Impossible d’anonymiser la fixture"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Add at least one player name to replace."
+msgstr "Ajoutez au moins un nom de joueur à remplacer."
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Save anonymized hand history fixture"
+msgstr "Enregistrer l’historique anonymisé comme fixture"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Could not save fixture"
+msgstr "Impossible d’enregistrer la fixture"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Anonymized fixture saved"
+msgstr "Fixture anonymisée enregistrée"
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "Debug failed import…"
+msgstr "Déboguer un import en échec…"
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "Debug failed import"
+msgstr "Déboguer l’import en échec"
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "Choose the hand-history file to inspect:"
+msgstr "Choisissez le fichier d’historique à examiner :"
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "File unavailable"
+msgstr "Fichier indisponible"
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "The failed hand-history file can no longer be read."
+msgstr "Le fichier d’historique en échec n’est plus accessible."
+
 #~ msgid "writer stopping, error reading queue:"
 #~ msgstr "arrêt de l'écriture, erreur lors de la lecture de la file:"
 

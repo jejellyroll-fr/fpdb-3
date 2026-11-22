@@ -37,7 +37,9 @@ from PySide6.QtWidgets import (
     QDialog,
     QFileDialog,
     QHBoxLayout,
+    QInputDialog,
     QLabel,
+    QMessageBox,
     QPlainTextEdit,
     QPushButton,
     QSplitter,
@@ -236,6 +238,12 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         layout.addWidget(self.input, 1)
         return panel
 
+    def _fixture_action(self, parent: QWidget) -> QPushButton:
+        """Build the anonymized-fixture action without crowding the report layout."""
+        self.fixture_button = QPushButton(_("Save anonymized fixture…"), parent)
+        self.fixture_button.clicked.connect(self.save_fixture)
+        return self.fixture_button
+
     def _report_panel(self) -> QWidget:
         panel = QWidget(self)
         layout = QVBoxLayout(panel)
@@ -299,7 +307,7 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.compare_button = QPushButton(_("Compare with…"), panel)
         self.compare_button.setToolTip(_("What changed since a report saved earlier on the same text"))
         self.compare_button.clicked.connect(self.compare_report)
-        for button in (self.copy_button, self.save_button, self.compare_button):
+        for button in (self.copy_button, self.save_button, self.compare_button, self._fixture_action(panel)):
             button.setEnabled(False)
             buttons.addWidget(button)
         buttons.addStretch(1)
@@ -366,6 +374,42 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         previous = json.loads(Path(path).read_text(encoding="utf-8"))
         self.show_changes(parser_debug.diff_reports(previous, self.report.to_dict()))
 
+    def save_fixture(self) -> None:
+        """Save the selected hand as a text fixture after reviewing its names."""
+        hand = self._current_hand()
+        if hand is None:
+            return
+        players = hand.extracted.get("players", [])
+        names = list(dict.fromkeys(str(player.get("name", "")) for player in players if player.get("name")))
+        default_names = "\n".join(names)
+        names_text, accepted = QInputDialog.getMultiLineText(
+            self,
+            _("Anonymize fixture"),
+            _("Player names to replace, one per line. Review the list and add any names the parser missed."),
+            default_names,
+        )
+        if not accepted:
+            return
+        names = list(dict.fromkeys(name.strip() for name in names_text.splitlines() if name.strip()))
+        if not names:
+            QMessageBox.warning(self, _("Cannot anonymize fixture"), _("Add at least one player name to replace."))
+            return
+        hero = hand.extracted.get("header", {}).get("hero")
+        anonymized = parser_debug.anonymize(hand.text, names, hero if hero in names else None)
+        path, _filter = QFileDialog.getSaveFileName(
+            self,
+            _("Save anonymized hand history fixture"),
+            f"anonymized-hand-{hand.index}.txt",
+            "Text files (*.txt);;All files (*)",
+        )
+        if path:
+            try:
+                Path(path).write_text(anonymized, encoding="utf-8", newline="")
+            except OSError as exc:
+                QMessageBox.warning(self, _("Could not save fixture"), str(exc))
+                return
+            self.status_label.setText(_("Anonymized fixture saved"))
+
     def show_changes(self, changes: list[str]) -> None:
         self.changes_view.setPlainText("\n".join(changes) if changes else _("No change."))
         self.tabs.setCurrentWidget(self.changes_view)
@@ -405,7 +449,7 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.hand_combo.blockSignals(False)
         self._show_hand()
         self._colour_input(report)
-        for button in (self.copy_button, self.save_button, self.compare_button):
+        for button in (self.copy_button, self.save_button, self.compare_button, self.fixture_button):
             button.setEnabled(True)
         self.tabs.setCurrentWidget(self.summary)
 
@@ -485,7 +529,9 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.log_view.clear()
         hand = self._current_hand()
         if hand is None:
+            self.fixture_button.setEnabled(False)
             return
+        self.fixture_button.setEnabled(True)
         self._fill_steps(hand)
         self._fill_contract(hand)
         root = QTreeWidgetItem(self.hand_tree, [_("Hand"), hand.handid])
