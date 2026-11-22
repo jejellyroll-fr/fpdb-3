@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 18:28+0100\n"
+"POT-Creation-Date: 2026-11-22 19:08+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -944,8 +944,24 @@ msgid "Choose a destination directory"
 msgstr "Choisir un répertoire de destination"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+msgid "Choose the hand-history file to inspect:"
+msgstr "Choisissez le fichier d’historique à examiner :"
+
+#: fpdb_3_legacy/GuiBulkImport.py
 msgid "Configured Import Directories:"
 msgstr "Répertoires d'import configurés :"
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "Debug failed import"
+msgstr "Déboguer l’import en échec"
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "Debug failed import…"
+msgstr "Déboguer un import en échec…"
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "File unavailable"
+msgstr "Fichier indisponible"
 
 #: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
 msgid "Folder access needed"
@@ -1032,6 +1048,10 @@ msgid "Select at least one configured directory, or choose a folder to import."
 msgstr ""
 "Sélectionnez au moins un répertoire configuré, ou choisissez un dossier à "
 "importer."
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "The failed hand-history file can no longer be read."
+msgstr "Le fichier d’historique en échec n’est plus accessible."
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "+ New Rule"
@@ -6548,9 +6568,21 @@ msgid "Actual"
 msgstr "Obtenu"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Add at least one player name to replace."
+msgstr "Ajoutez au moins un nom de joueur à remplacer."
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Add what fpdb would store for each hand (Hands, HandsPlayers)"
 msgstr ""
 "Ajoute ce que fpdb enregistrerait pour chaque main (Hands, HandsPlayers)"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Anonymize fixture"
+msgstr "Anonymiser la fixture"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Anonymized fixture saved"
+msgstr "Fixture anonymisée enregistrée"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Auto-detect"
@@ -6559,6 +6591,10 @@ msgstr "Détection automatique"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Bug report copied"
 msgstr "Rapport de bug copié"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Cannot anonymize fixture"
+msgstr "Impossible d’anonymiser la fixture"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Changes"
@@ -6587,6 +6623,10 @@ msgstr "Convertisseur"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Copy bug report"
 msgstr "Copier le rapport de bug"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Could not save fixture"
+msgstr "Impossible d’enregistrer la fixture"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Debug parse"
@@ -6693,6 +6733,14 @@ msgid "Paste a hand history here, or open a file"
 msgstr "Collez un historique de main ici, ou ouvrez un fichier"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid ""
+"Player names to replace, one per line. Review the list and add any names the "
+"parser missed."
+msgstr ""
+"Noms de joueurs à remplacer, un par ligne. Vérifiez la liste et ajoutez ceux "
+"manqués par le parseur."
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Read by"
 msgstr "Lue par"
 
@@ -6717,6 +6765,14 @@ msgstr "Regex"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Report saved"
 msgstr "Rapport enregistré"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Save anonymized fixture…"
+msgstr "Enregistrer une fixture anonymisée…"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Save anonymized hand history fixture"
+msgstr "Enregistrer l’historique anonymisé comme fixture"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Save report…"
@@ -11731,58 +11787,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "warning: index %s_%s_idx not dropped %s, continuing ..."
 #~ msgstr "Index %s_%s_idx non supprimé: %s, poursuite des traitements ..."
-
-#: fpdb_3_legacy/parser_debugger_dialog.py
-msgid "Save anonymized fixture…"
-msgstr "Enregistrer une fixture anonymisée…"
-
-#: fpdb_3_legacy/parser_debugger_dialog.py
-msgid "Anonymize fixture"
-msgstr "Anonymiser la fixture"
-
-#: fpdb_3_legacy/parser_debugger_dialog.py
-msgid "Player names to replace, one per line. Review the list and add any names the parser missed."
-msgstr "Noms de joueurs à remplacer, un par ligne. Vérifiez la liste et ajoutez ceux manqués par le parseur."
-
-#: fpdb_3_legacy/parser_debugger_dialog.py
-msgid "Cannot anonymize fixture"
-msgstr "Impossible d’anonymiser la fixture"
-
-#: fpdb_3_legacy/parser_debugger_dialog.py
-msgid "Add at least one player name to replace."
-msgstr "Ajoutez au moins un nom de joueur à remplacer."
-
-#: fpdb_3_legacy/parser_debugger_dialog.py
-msgid "Save anonymized hand history fixture"
-msgstr "Enregistrer l’historique anonymisé comme fixture"
-
-#: fpdb_3_legacy/parser_debugger_dialog.py
-msgid "Could not save fixture"
-msgstr "Impossible d’enregistrer la fixture"
-
-#: fpdb_3_legacy/parser_debugger_dialog.py
-msgid "Anonymized fixture saved"
-msgstr "Fixture anonymisée enregistrée"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import…"
-msgstr "Déboguer un import en échec…"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import"
-msgstr "Déboguer l’import en échec"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Choose the hand-history file to inspect:"
-msgstr "Choisissez le fichier d’historique à examiner :"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "File unavailable"
-msgstr "Fichier indisponible"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "The failed hand-history file can no longer be read."
-msgstr "Le fichier d’historique en échec n’est plus accessible."
 
 #~ msgid "writer stopping, error reading queue:"
 #~ msgstr "arrêt de l'écriture, erreur lors de la lecture de la file:"

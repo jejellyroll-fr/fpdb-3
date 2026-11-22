@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 18:28+0100\n"
+"POT-Creation-Date: 2026-11-22 19:08+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -1008,8 +1008,28 @@ msgstr "Célmappa kiválasztása"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy
+msgid "Choose the hand-history file to inspect:"
+msgstr "A leosztástörténetek útvonala"
+
+#: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Configured Import Directories:"
 msgstr "Beállított importálási mappák:"
+
+#: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
+#| msgid "eMail Import"
+msgid "Debug failed import"
+msgstr "Email import"
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "Debug failed import…"
+msgstr ""
+
+#: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
+msgid "File unavailable"
+msgstr "Előnézet frissítése"
 
 #: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
 msgid "Folder access needed"
@@ -1095,6 +1115,10 @@ msgstr "Válaszd ki a könyvtárat az Auto Importhoz"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Select at least one configured directory, or choose a folder to import."
+msgstr ""
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "The failed hand-history file can no longer be read."
 msgstr ""
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
@@ -7245,7 +7269,20 @@ msgid "Actual"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Add at least one player name to replace."
+msgstr "Válasszon legalább egy figyelendő limitet."
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Add what fpdb would store for each hand (Hands, HandsPlayers)"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Anonymize fixture"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Anonymized fixture saved"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7255,6 +7292,10 @@ msgstr "🔍 Útvonalak automatikus felismerése"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Bug report copied"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Cannot anonymize fixture"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7291,6 +7332,12 @@ msgstr "Megfordítás"
 #, fuzzy
 msgid "Copy bug report"
 msgstr "Jelentés másolása"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+#| msgid "Could not split tourneys"
+msgid "Could not save fixture"
+msgstr "Versenyekre bontás sikertelen"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Debug parse"
@@ -7411,6 +7458,12 @@ msgid "Paste a hand history here, or open a file"
 msgstr "A leosztástörténetek útvonala"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid ""
+"Player names to replace, one per line. Review the list and add any names the "
+"parser missed."
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Read by"
 msgstr "Kész"
@@ -7438,6 +7491,15 @@ msgstr ""
 #, fuzzy
 msgid "Report saved"
 msgstr "Hiba bejelentése"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Save anonymized fixture…"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Save anonymized hand history fixture"
+msgstr "A leosztástörténetek útvonala"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
@@ -11258,9 +11320,6 @@ msgstr ""
 #~ "Nem sikerült az XID meghatározása az asztal xwininfo-jából. Az xwininfo: "
 #~ "%s"
 
-#~ msgid "Could not split tourneys"
-#~ msgstr "Versenyekre bontás sikertelen"
-
 #~ msgid "Create foreign key failed:"
 #~ msgstr "Idegen kulcs létrehozása sikertelen:"
 
@@ -13674,9 +13733,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "dropping pg index "
 #~ msgstr "MySQL index eldobása: "
-
-#~ msgid "eMail Import"
-#~ msgstr "Email import"
 
 #~ msgid "enter table name to find: "
 #~ msgstr "add meg a keresendő asztalnevet: "

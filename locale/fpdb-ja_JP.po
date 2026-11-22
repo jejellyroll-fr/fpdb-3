@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 18:28+0100\n"
+"POT-Creation-Date: 2026-11-22 19:08+0100\n"
 "PO-Revision-Date: 2014-06-15 03:46+0900\n"
 "Last-Translator: TAKAHASHI Kaoru <kaoru@kaisei.org>\n"
 "Language-Team: Fpdb\n"
@@ -1007,8 +1007,28 @@ msgstr "移動先フォルダーを選択"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy
+msgid "Choose the hand-history file to inspect:"
+msgstr "ハンド履歴ファイルのパス"
+
+#: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Configured Import Directories:"
 msgstr "設定済みのインポートフォルダー:"
+
+#: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
+#| msgid "eMail Import"
+msgid "Debug failed import"
+msgstr "Eメールインポート"
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "Debug failed import…"
+msgstr ""
+
+#: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
+msgid "File unavailable"
+msgstr "プレビューを更新"
 
 #: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
 msgid "Folder access needed"
@@ -1095,6 +1115,10 @@ msgstr "自動インポートの対象ディレクトリを選択してくださ
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Select at least one configured directory, or choose a folder to import."
+msgstr ""
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "The failed hand-history file can no longer be read."
 msgstr ""
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
@@ -7202,7 +7226,20 @@ msgid "Actual"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Add at least one player name to replace."
+msgstr "監視する上限を少なくとも 1 つ選んでください。"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Add what fpdb would store for each hand (Hands, HandsPlayers)"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Anonymize fixture"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Anonymized fixture saved"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7212,6 +7249,10 @@ msgstr "🔍 パスを自動検出"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Bug report copied"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Cannot anonymize fixture"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7249,6 +7290,13 @@ msgstr "反転"
 #, fuzzy
 msgid "Copy bug report"
 msgstr "レポートをコピー"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Could not save fixture"
+msgstr ""
+"ハンドを保存できませんでした:\n"
+"%s"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Debug parse"
@@ -7369,6 +7417,12 @@ msgid "Paste a hand history here, or open a file"
 msgstr "ハンド履歴ファイルのパス"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid ""
+"Player names to replace, one per line. Review the list and add any names the "
+"parser missed."
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Read by"
 msgstr "準備完了"
@@ -7396,6 +7450,15 @@ msgstr ""
 #, fuzzy
 msgid "Report saved"
 msgstr "問題を報告"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Save anonymized fixture…"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Save anonymized hand history fixture"
+msgstr "ハンド履歴ファイルのパス"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
@@ -12008,9 +12071,6 @@ msgstr ""
 
 #~ msgid "dropping pg index "
 #~ msgstr "PostgreSQL indexをdropしています "
-
-#~ msgid "eMail Import"
-#~ msgstr "Eメールインポート"
 
 #~ msgid "fpdb starting ..."
 #~ msgstr "fpdb を開始しています ..."

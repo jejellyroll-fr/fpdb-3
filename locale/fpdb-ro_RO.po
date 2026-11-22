@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 18:28+0100\n"
+"POT-Creation-Date: 2026-11-22 19:08+0100\n"
 "PO-Revision-Date: 2011-05-13 08:55+0000\n"
 "Last-Translator: jax <jax@netmagnet.ro>\n"
 "Language-Team: Romanian (Romania) (http://www.transifex.net/projects/p/fpdb/"
@@ -1025,8 +1025,28 @@ msgstr "Alegeți un dosar de destinație"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy
+msgid "Choose the hand-history file to inspect:"
+msgstr "Calea către istoricele de mâini"
+
+#: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Configured Import Directories:"
 msgstr "Dosare de import configurate:"
+
+#: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
+#| msgid "eMail Import"
+msgid "Debug failed import"
+msgstr "Importare eMail"
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "Debug failed import…"
+msgstr ""
+
+#: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
+msgid "File unavailable"
+msgstr "Actualizează previzualizarea"
 
 #: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
 msgid "Folder access needed"
@@ -1112,6 +1132,10 @@ msgstr "Alegeti calea dorita pentru Importarea Automata"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Select at least one configured directory, or choose a folder to import."
+msgstr ""
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "The failed hand-history file can no longer be read."
 msgstr ""
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
@@ -7241,7 +7265,20 @@ msgid "Actual"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Add at least one player name to replace."
+msgstr "Alegeți cel puțin o limită de urmărit."
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Add what fpdb would store for each hand (Hands, HandsPlayers)"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Anonymize fixture"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Anonymized fixture saved"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7251,6 +7288,10 @@ msgstr "🔍 Detectează automat căile"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Bug report copied"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Cannot anonymize fixture"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7287,6 +7328,11 @@ msgstr "Inversează"
 #, fuzzy
 msgid "Copy bug report"
 msgstr "Copiază raportul"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Could not save fixture"
+msgstr "nu se gaseste turneul: ignorare"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Debug parse"
@@ -7407,6 +7453,12 @@ msgid "Paste a hand history here, or open a file"
 msgstr "Calea către istoricele de mâini"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid ""
+"Player names to replace, one per line. Review the list and add any names the "
+"parser missed."
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Read by"
 msgstr "Pregătit"
@@ -7434,6 +7486,15 @@ msgstr ""
 #, fuzzy
 msgid "Report saved"
 msgstr "Raportează o problemă"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Save anonymized fixture…"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Save anonymized hand history fixture"
+msgstr "Calea către istoricele de mâini"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
@@ -11048,10 +11109,6 @@ msgstr ""
 #~ msgid "Could not retrieve XID from table xwininfo. xwininfo is %s"
 #~ msgstr "Nu pot regasi XID din tabela xwininfo. xwininfo este %s"
 
-#, fuzzy
-#~ msgid "Could not split tourneys"
-#~ msgstr "nu se gaseste turneul: ignorare"
-
 #~ msgid "Create foreign key failed:"
 #~ msgstr "Crearea cheii straine a esuat:"
 
@@ -12987,9 +13044,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "dropping pg index "
 #~ msgstr "Se renunta la index:"
-
-#~ msgid "eMail Import"
-#~ msgstr "Importare eMail"
 
 #~ msgid "enter table name to find: "
 #~ msgstr "introdu numele mesei pentru cautare:"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 18:28+0100\n"
+"POT-Creation-Date: 2026-11-22 19:08+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -921,6 +921,22 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/GuiBulkImport.py
+msgid "Debug failed import"
+msgstr ""
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "Choose the hand-history file to inspect:"
+msgstr ""
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "File unavailable"
+msgstr ""
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "The failed hand-history file can no longer be read."
+msgstr ""
+
+#: fpdb_3_legacy/GuiBulkImport.py
 #, python-brace-format
 msgid ""
 "PHH hands found: {found}\n"
@@ -954,6 +970,10 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Move failed files to:"
+msgstr ""
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "Debug failed import…"
 msgstr ""
 
 #: fpdb_3_legacy/GuiBulkImport.py
@@ -6177,6 +6197,10 @@ msgid "Paste a hand history here, or open a file"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Save anonymized fixture…"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Paste a hand history and press Debug parse."
 msgstr ""
 
@@ -6293,38 +6317,6 @@ msgid "Save report…"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
-msgid "Save anonymized fixture…"
-msgstr ""
-
-#: fpdb_3_legacy/parser_debugger_dialog.py
-msgid "Anonymize fixture"
-msgstr ""
-
-#: fpdb_3_legacy/parser_debugger_dialog.py
-msgid "Player names to replace, one per line. Review the list and add any names the parser missed."
-msgstr ""
-
-#: fpdb_3_legacy/parser_debugger_dialog.py
-msgid "Cannot anonymize fixture"
-msgstr ""
-
-#: fpdb_3_legacy/parser_debugger_dialog.py
-msgid "Add at least one player name to replace."
-msgstr ""
-
-#: fpdb_3_legacy/parser_debugger_dialog.py
-msgid "Save anonymized hand history fixture"
-msgstr ""
-
-#: fpdb_3_legacy/parser_debugger_dialog.py
-msgid "Could not save fixture"
-msgstr ""
-
-#: fpdb_3_legacy/parser_debugger_dialog.py
-msgid "Anonymized fixture saved"
-msgstr ""
-
-#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Compare with…"
 msgstr ""
 
@@ -6354,6 +6346,36 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Compare with a saved report"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Anonymize fixture"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid ""
+"Player names to replace, one per line. Review the list and add any names the "
+"parser missed."
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Add at least one player name to replace."
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Cannot anonymize fixture"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Save anonymized hand history fixture"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Could not save fixture"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Anonymized fixture saved"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -8798,24 +8820,4 @@ msgstr ""
 
 #: fpdb_3_legacy/update_notice.py
 msgid "GitHub could not be reached. Check your connection and try again later."
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import…"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Choose the hand-history file to inspect:"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "File unavailable"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "The failed hand-history file can no longer be read."
 msgstr ""

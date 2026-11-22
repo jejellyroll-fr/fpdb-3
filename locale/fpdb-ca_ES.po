@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 18:28+0100\n"
+"POT-Creation-Date: 2026-11-22 19:08+0100\n"
 "PO-Revision-Date: 2011-11-11 20:56+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Catalan (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -1044,8 +1044,26 @@ msgstr "Trieu una carpeta de destinació"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy
+msgid "Choose the hand-history file to inspect:"
+msgstr "Camí dels historials de mans"
+
+#: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Configured Import Directories:"
 msgstr "Carpetes d'importació configurades:"
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "Debug failed import"
+msgstr ""
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "Debug failed import…"
+msgstr ""
+
+#: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
+msgid "File unavailable"
+msgstr "Actualitza la previsualització"
 
 #: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
 msgid "Folder access needed"
@@ -1133,6 +1151,10 @@ msgstr "Trieu el camí que voleu importar automàticament"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Select at least one configured directory, or choose a folder to import."
+msgstr ""
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "The failed hand-history file can no longer be read."
 msgstr ""
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
@@ -7290,7 +7312,20 @@ msgid "Actual"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Add at least one player name to replace."
+msgstr "Trieu almenys un límit per vigilar."
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Add what fpdb would store for each hand (Hands, HandsPlayers)"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Anonymize fixture"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Anonymized fixture saved"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7300,6 +7335,10 @@ msgstr "🔍 Detecta els camins automàticament"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Bug report copied"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Cannot anonymize fixture"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7336,6 +7375,11 @@ msgstr "Inverteix"
 #, fuzzy
 msgid "Copy bug report"
 msgstr "Copia l'informe"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Could not save fixture"
+msgstr "No es pot trobar el fitxer %s"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Debug parse"
@@ -7454,6 +7498,12 @@ msgid "Paste a hand history here, or open a file"
 msgstr "Camí dels historials de mans"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid ""
+"Player names to replace, one per line. Review the list and add any names the "
+"parser missed."
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Read by"
 msgstr "A punt"
@@ -7481,6 +7531,15 @@ msgstr ""
 #, fuzzy
 msgid "Report saved"
 msgstr "Informa d'un problema"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Save anonymized fixture…"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Save anonymized hand history fixture"
+msgstr "Camí dels historials de mans"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy

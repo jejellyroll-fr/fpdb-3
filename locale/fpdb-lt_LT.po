@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 18:28+0100\n"
+"POT-Creation-Date: 2026-11-22 19:08+0100\n"
 "PO-Revision-Date: 2011-07-09 14:23+0000\n"
 "Last-Translator: OvidijusSv <OvidijusSv@gmail.com>\n"
 "Language-Team: Lithuanian (Lithuania) (http://www.transifex.net/projects/p/"
@@ -1035,8 +1035,26 @@ msgstr "Pasirinkite paskirties aplanką"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy
+msgid "Choose the hand-history file to inspect:"
+msgstr "Kelias iki rankų istorijų failų"
+
+#: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Configured Import Directories:"
 msgstr "Sukonfigūruoti importo aplankai:"
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "Debug failed import"
+msgstr ""
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "Debug failed import…"
+msgstr ""
+
+#: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
+msgid "File unavailable"
+msgstr "Atnaujinti peržiūrą"
 
 #: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
 msgid "Folder access needed"
@@ -1123,6 +1141,10 @@ msgstr "Pasirinkite vietą kurią norite automatiškai importuoti"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Select at least one configured directory, or choose a folder to import."
+msgstr ""
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "The failed hand-history file can no longer be read."
 msgstr ""
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
@@ -7269,7 +7291,20 @@ msgid "Actual"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Add at least one player name to replace."
+msgstr "Pasirinkite bent vieną stebimą limitą."
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Add what fpdb would store for each hand (Hands, HandsPlayers)"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Anonymize fixture"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Anonymized fixture saved"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7279,6 +7314,10 @@ msgstr "🔍 Automatiškai aptikti kelius"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Bug report copied"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Cannot anonymize fixture"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7315,6 +7354,11 @@ msgstr "Apversti"
 #, fuzzy
 msgid "Copy bug report"
 msgstr "Kopijuoti ataskaitą"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Could not save fixture"
+msgstr "Failas nerastas %s"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Debug parse"
@@ -7433,6 +7477,12 @@ msgid "Paste a hand history here, or open a file"
 msgstr "Kelias iki rankų istorijų failų"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid ""
+"Player names to replace, one per line. Review the list and add any names the "
+"parser missed."
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Read by"
 msgstr "Paruošta"
@@ -7460,6 +7510,15 @@ msgstr ""
 #, fuzzy
 msgid "Report saved"
 msgstr "Pranešti apie problemą"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Save anonymized fixture…"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Save anonymized hand history fixture"
+msgstr "Kelias iki rankų istorijų failų"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
@@ -10525,10 +10584,6 @@ msgstr ""
 
 #, fuzzy
 #~ msgid "Could not identify as a %s hand"
-#~ msgstr "Failas nerastas %s"
-
-#, fuzzy
-#~ msgid "Could not split tourneys"
 #~ msgstr "Failas nerastas %s"
 
 #~ msgid "Created directory '%s'"
