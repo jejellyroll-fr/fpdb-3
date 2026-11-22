@@ -215,6 +215,7 @@ class DatabaseConnectionMixin:
     if TYPE_CHECKING:
         # Declared as callables rather than stub methods: pylint reads a stub's
         # empty body as a method that returns nothing.
+        apply_site_ids: Callable[[Any], None]
         close_worker_pool: Callable[..., None]
         connect: Callable[..., None]
         ensure_feature_tables_on_connect: Callable[..., None]
@@ -252,6 +253,9 @@ class DatabaseConnectionMixin:
             return False
 
         self.config = c
+        # The reloaded config holds only its <site_ids> section, a copy written
+        # once: give it back the Sites rows read at connect time (#889).
+        self.apply_site_ids(c)
         self.import_options = c.get_import_parameters()
         gen = c.get_general_params()
         self.day_start = float(gen["day_start"]) if "day_start" in gen else 0.0

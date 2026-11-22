@@ -18,6 +18,7 @@ class DatabaseQueriesMixin:
     """Answer the read queries the GUI, the HUD and the importer ask."""
 
     # Provided by Database.
+    _db_site_ids: dict[str, int]
     _gameinfo_cache: Any
     config: Any
     connection: Any
@@ -31,10 +32,23 @@ class DatabaseQueriesMixin:
 
     def get_sites(self) -> None:
         self.cursor.execute("SELECT name,id FROM Sites")
-        db_sites = dict(self.cursor.fetchall())
-        configured_sites = getattr(self.config, "site_ids", {})
+        # Kept, so a reloaded config gets them back without a query.
+        self._db_site_ids = dict(self.cursor.fetchall())
+        self.apply_site_ids(self.config)
+
+    def apply_site_ids(self, config: Any) -> None:
+        """Give ``config`` the Sites table's ids on top of the ones it lists.
+
+        A configuration's <site_ids> section is a copy written once, so it lacks
+        the rooms registered since (#889); the table has them (ensure_sites_rows).
+        Before the table is read, ``config`` keeps what it has.
+        """
+        db_sites = getattr(self, "_db_site_ids", None)
+        if db_sites is None:
+            return
+        configured_sites = getattr(config, "site_ids", {})
         sites = {**configured_sites, **db_sites}
-        self.config.set_site_ids(sorted(sites.items(), key=lambda item: (item[1], item[0])))
+        config.set_site_ids(sorted(sites.items(), key=lambda item: (item[1], item[0])))
 
     @reconnect_on_connection_loss
     def get_table_name(self, hand_id: Any) -> Any:
