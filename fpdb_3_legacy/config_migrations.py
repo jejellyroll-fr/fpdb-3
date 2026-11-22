@@ -119,6 +119,7 @@ SITES_ADDED_IN_95 = ("BetRivers",)  # #731: text hand-history import, nothing li
 SITES_ADDED_IN_98 = ("PokerStars on Paddy Power",)  # #888: Paddy Power on PokerStars software
 SITES_ADDED_IN_99 = ("PokerStars on Betfair",)  # #733: a PokerStars skin with its own folders
 SITES_ADDED_IN_100 = ("PokerStars.UK",)  # #889: the retired UK client, for its old histories
+SITES_ADDED_IN_101 = ("PokerStars on Sky",)  # #887: Sky Poker on PokerStars software
 
 
 def _child_section(doc, section: str):
@@ -339,6 +340,20 @@ def _add_sites_99_to_100(doc, template) -> None:
     _add_sites(doc, template, SITES_ADDED_IN_100)
 
 
+def _add_sites_100_to_101(doc, template) -> None:
+    """Advance to v101, adding PokerStars on Sky (#887).
+
+    Sky Poker moved from iPoker to PokerStars software on 19 November 2026.
+    The new client is a room of its own: its <site> (off, PokerStars' network
+    and layouts, no folder, since none is documented) comes from the template.
+    It has no <hhc>: its files go through the PokerStars converter entry the
+    configuration already has. The iPoker Sky Poker room (72) is left as it
+    is, for the hands its client wrote. A configuration that already declares
+    the new room keeps it.
+    """
+    _add_sites(doc, template, SITES_ADDED_IN_101)
+
+
 def _repair_renamed_references(doc) -> None:
     aux_names = {cx.attr(n, "name") for n in cx.find_all(doc, "aw")}
     if "Classic_HUD" not in aux_names and "ClassicHud" in aux_names:
@@ -371,6 +386,7 @@ MIGRATIONS = (
     (97, 98, _add_sites_97_to_98),
     (98, 99, _add_sites_98_to_99),
     (99, 100, _add_sites_99_to_100),
+    (100, 101, _add_sites_100_to_101),
 )
 
 

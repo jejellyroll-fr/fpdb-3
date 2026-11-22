@@ -64,6 +64,7 @@ SITES_ADDED_LATER: tuple[tuple[int, str, str], ...] = (
     (143, "PokerStars on Betfair", "PS"),  # #733: a PokerStars skin
     (145, "PokerStars.UK", "PS"),  # #889: the retired UK client, historical imports
     (146, "PokerStars on Paddy Power", "PS"),  # #888: Paddy Power on PokerStars software
+    (147, "PokerStars on Sky", "PS"),  # #887: Sky Poker on PokerStars software
 )
 INSERT_SITE_QMARK = "INSERT INTO Sites (id,name,code) VALUES (?,?,?)"
 INSERT_SITE_FORMAT = "INSERT INTO Sites (id,name,code) VALUES (%s,%s,%s)"
