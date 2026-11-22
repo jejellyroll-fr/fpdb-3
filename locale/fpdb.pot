@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 19:08+0100\n"
+"POT-Creation-Date: 2026-11-22 19:42+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -6201,11 +6201,11 @@ msgid "Save anonymized fixture…"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
-msgid "Paste a hand history and press Debug parse."
+msgid "Parser not determined yet"
 msgstr ""
 
-#: fpdb_3_legacy/parser_debugger_dialog.py fpdb_3_legacy/research_labels.py
-msgid "Hand"
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "The Python class instantiated to parse the selected file."
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -6226,6 +6226,14 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Recognised"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Paste a hand history and press Debug parse."
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py fpdb_3_legacy/research_labels.py
+msgid "Hand"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -6414,6 +6422,14 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Nothing to report."
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Parser used"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "No hand parser was created for this file"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py

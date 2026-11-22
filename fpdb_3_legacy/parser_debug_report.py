@@ -68,6 +68,7 @@ class Detection:  # pylint: disable=too-many-instance-attributes  # a record of 
 
     site: str | None = None
     converter: str | None = None
+    parser_class: str | None = None
     file_type: str | None = None
     encoding: str | None = None
     hero: str | None = None

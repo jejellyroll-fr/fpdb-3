@@ -249,6 +249,21 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.fixture_button.clicked.connect(self.save_fixture)
         return self.fixture_button
 
+    def _detection_panel(self, parent: QWidget) -> QWidget:
+        """Show the instantiated parser above the converter probe table."""
+        panel = QWidget(parent)
+        layout = QVBoxLayout(panel)
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.parser_label = QLabel(_("Parser not determined yet"), panel)
+        self.parser_label.setFont(_monospace())
+        self.parser_label.setWordWrap(True)
+        self.parser_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        self.parser_label.setToolTip(_("The Python class instantiated to parse the selected file."))
+        layout.addWidget(self.parser_label)
+        self.detection_tree = _tree([_("Converter"), _("Site"), _("Recognised"), _("Line"), _("Lines read"), _("Note")])
+        layout.addWidget(self.detection_tree, 1)
+        return panel
+
     def _report_panel(self) -> QWidget:
         panel = QWidget(self)
         layout = QVBoxLayout(panel)
@@ -271,7 +286,7 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.summary = QTextBrowser(panel)
         self.summary.setOpenLinks(False)
         self.summary.anchorClicked.connect(lambda url: self.go_to_line(int(url.toString().removeprefix("line:"))))
-        self.detection_tree = _tree([_("Converter"), _("Site"), _("Recognised"), _("Line"), _("Lines read"), _("Note")])
+        detection_panel = self._detection_panel(panel)
         self.steps_tree = _tree([_("Step"), _("Status"), _("ms"), _("What it did"), _("Regexes")])
         self.contract_tree = _tree(
             [_("Step / check"), _("Status"), _("Field"), _("Message"), _("Expected"), _("Found")]
@@ -290,7 +305,7 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.changes_view.setReadOnly(True)
         for widget, title in (
             (self.summary, _("Summary")),
-            (self.detection_tree, _("Detection")),
+            (detection_panel, _("Detection")),
             (self.steps_tree, _("Steps")),
             (self.contract_tree, _("Contract")),
             (self.hand_tree, _("Hand")),
@@ -505,6 +520,12 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
 
     def _fill_detection(self, report: ParseDebugReport) -> None:
         self.detection_tree.clear()
+        parser_used = _("Parser used")
+        self.parser_label.setText(
+            f"{parser_used}: {report.detection.parser_class}"
+            if report.detection.parser_class
+            else _("No hand parser was created for this file")
+        )
         chosen = report.detection.converter
         disabled = _("disabled")
         for probe in sorted(report.detection.probes, key=lambda item: (not item.identified, -item.body_score)):

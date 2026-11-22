@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 19:08+0100\n"
+"POT-Creation-Date: 2026-11-22 19:42+0100\n"
 "PO-Revision-Date: 2011-06-16 13:21+0000\n"
 "Last-Translator: Lexej <alexej@glyvin.com>\n"
 "Language-Team: Russian (Russia) (http://www.transifex.net/projects/p/fpdb/"
@@ -7406,6 +7406,10 @@ msgid "No change."
 msgstr "Нижний диапазон:"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "No hand parser was created for this file"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "No warnings or logs were emitted during this parse."
 msgstr ""
 
@@ -7439,6 +7443,16 @@ msgstr ""
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Parser Debugger"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Parser not determined yet"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+#| msgid "database used"
+msgid "Parser used"
+msgstr "используемая база данных"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Paste a hand history and press Debug parse."
@@ -7526,6 +7540,10 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Summary"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "The Python class instantiated to parse the selected file."
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -11559,9 +11577,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "database error: skipping %s"
 #~ msgstr "Ошибка базы данных %s в руке %d. Пропуск.\n"
-
-#~ msgid "database used"
-#~ msgstr "используемая база данных"
 
 #~ msgid "db writer finished: stored %d hands (%d fails) in %.1f seconds"
 #~ msgstr ""

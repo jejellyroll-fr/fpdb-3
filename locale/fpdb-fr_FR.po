@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 19:08+0100\n"
+"POT-Creation-Date: 2026-11-22 19:42+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -6693,6 +6693,10 @@ msgid "No change."
 msgstr "Aucun changement."
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "No hand parser was created for this file"
+msgstr "Aucun parseur de mains n’a été créé pour ce fichier."
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "No warnings or logs were emitted during this parse."
 msgstr "Aucun avertissement ni journal n’a été émis pendant cette analyse."
 
@@ -6723,6 +6727,14 @@ msgstr "Analyse une seconde fois pour savoir quelle regex a lu chaque ligne"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Parser Debugger"
 msgstr "Débogueur de parser"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Parser not determined yet"
+msgstr "Parseur non déterminé"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Parser used"
+msgstr "Parseur utilisé"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Paste a hand history and press Debug parse."
@@ -6805,6 +6817,10 @@ msgstr "Étapes"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Summary"
 msgstr "Résumé"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "The Python class instantiated to parse the selected file."
+msgstr "Classe Python instanciée pour analyser le fichier sélectionné."
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "This file has no regression sidecar (.hands, .hp, .gt)"
@@ -10730,9 +10746,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "No community cards found on this street"
 #~ msgstr "Pas de carte privative trouvées pour %s"
-
-#~ msgid "No data found for the selected filters."
-#~ msgstr "Aucune donnée pour les filtres sélectionnés."
 
 #~ msgid "No games returned from database"
 #~ msgstr "Pas de parties retournées par la base de données"

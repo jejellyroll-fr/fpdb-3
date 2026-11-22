@@ -808,6 +808,8 @@ def debug_parse_file(
         return report
 
     converter = _build_converter(fobj, config)
+    parser_type = type(converter)
+    detection.parser_class = f"{parser_type.__module__}.{parser_type.__qualname__}"
     recorder = Recorder()
     trace_steps(converter, recorder, regexes=False)
     supported = None
