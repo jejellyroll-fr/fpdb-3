@@ -64,7 +64,7 @@ class PokerStarsSummary(TourneySummary):
 
         A file is given one room, from its whole text. A skin with a first or
         a last day (PokerStars on Paddy Power #888, PokerStars on Sky #887,
-        PokerStars.UK #889) cannot hold a tournament played outside them, and
+        PokerStars on Sisal and on SNAI #893, PokerStars.UK #889) cannot hold a tournament played outside them, and
         an export of several summaries can span that day. When the file was
         given such a skin, or its folder names one, each summary is filed as
         its own text and folder say: the export's older tournaments are not

@@ -22,8 +22,8 @@ from __future__ import annotations
 This module provides functionality to parse PokerStars hand history files
 and convert them into FPDB database format. It supports multiple PokerStars
 skins including .COM, .FR, .IT, .ES, .PT, .EU, and .DE variants, and Paddy
-Power's and Sky Poker's clients on PokerStars software (filed by their
-configured folders, #888, #887).
+Power's, Sky Poker's, Sisal's and SNAI's clients on PokerStars software (filed
+by their configured folders, #888, #887, #893).
 
 The converter handles various game types including Hold'em, Omaha, Stud,
 Draw games, and tournaments across different betting structures.
@@ -66,6 +66,12 @@ SITE_POKERSTARS_PADDY_POWER = 146
 # Sky Poker's client on PokerStars software, opened on 19 November 2026 (#887).
 # The older iPoker client keeps its own room, Sky Poker (72).
 SITE_POKERSTARS_SKY = 147
+# Sisal's and SNAI's Italian clients on the PokerStars Italy network (#893):
+# Sisal since December 2024, SNAI since May 2026. Their older iPoker clients keep
+# their own rooms, Sisal Poker (73) and Snai Poker (76), and PokerStars' own
+# Italian client stays PokerStars.IT (34).
+SITE_POKERSTARS_SISAL = 148
+SITE_POKERSTARS_SNAI = 149
 SITE_BOVADA = 19
 SITE_MERGE = 26
 STUD_HOLE_CARDS_COUNT = 3
@@ -83,6 +89,8 @@ POKERSTARS_SKIN_IDS = {
     "PokerStars.UK": SITE_POKERSTARS_UK,
     "PokerStars on Paddy Power": SITE_POKERSTARS_PADDY_POWER,
     "PokerStars on Sky": SITE_POKERSTARS_SKY,
+    "PokerStars on Sisal": SITE_POKERSTARS_SISAL,
+    "PokerStars on SNAI": SITE_POKERSTARS_SNAI,
 }
 
 # Skins whose client no longer exists, with the last day it dealt a hand. A hand
@@ -97,17 +105,29 @@ POKERSTARS_RETIRED_SKINS: dict[str, datetime.date] = {
 # hand. A hand dated before it cannot come from that client, whatever its folder
 # or hero mapping says: a Paddy Power player may have played PokerStars under
 # the same screen name before the move (#888), and so may a Sky player (#887).
+# Sisal's and SNAI's moves are known to the month only (#893): Sisal's players
+# were migrated through December 2024, and SNAI's client is reported on the
+# network from 2 May 2026. Their first day is the first of that month, so no
+# hand of the new client is turned away; a hand from the months before is.
 POKERSTARS_SKIN_FIRST_DAYS: dict[str, datetime.date] = {
     "PokerStars on Paddy Power": datetime.date(2026, 10, 28),
     "PokerStars on Sky": datetime.date(2026, 11, 19),
+    "PokerStars on Sisal": datetime.date(2024, 12, 1),
+    "PokerStars on SNAI": datetime.date(2026, 5, 1),
 }
 
 # Skins filed by the folder the user configured for them. Nothing in their files
 # names the skin and no default client folder is documented, so fpdb guesses
 # none: the folder the user set as the skin's HH or TS path is the provenance
-# (#888, #887). A copy of the files anywhere else is filed by its content, as
-# PokerStars.COM for GBP stakes, unless its hero is mapped to the skin.
-POKERSTARS_CONFIGURED_PATH_SKINS: tuple[str, ...] = ("PokerStars on Paddy Power", "PokerStars on Sky")
+# (#888, #887, #893). A copy of the files anywhere else is filed by its
+# content, as PokerStars.COM for GBP stakes or PokerStars.IT for an Italian
+# (ADM ID) header, unless its hero is mapped to the skin.
+POKERSTARS_CONFIGURED_PATH_SKINS: tuple[str, ...] = (
+    "PokerStars on Paddy Power",
+    "PokerStars on Sky",
+    "PokerStars on Sisal",
+    "PokerStars on SNAI",
+)
 
 _HEADER_DATE = re.compile(r"\b(?P<Y>\d{4})/(?P<M>\d{1,2})/(?P<D>\d{1,2})\b")
 # PokerStars on Betfair writes PokerStars histories under its own name:

@@ -120,6 +120,7 @@ SITES_ADDED_IN_98 = ("PokerStars on Paddy Power",)  # #888: Paddy Power on Poker
 SITES_ADDED_IN_99 = ("PokerStars on Betfair",)  # #733: a PokerStars skin with its own folders
 SITES_ADDED_IN_100 = ("PokerStars.UK",)  # #889: the retired UK client, for its old histories
 SITES_ADDED_IN_101 = ("PokerStars on Sky",)  # #887: Sky Poker on PokerStars software
+SITES_ADDED_IN_102 = ("PokerStars on Sisal", "PokerStars on SNAI")  # #893: the Italian skins
 
 
 def _child_section(doc, section: str):
@@ -354,6 +355,21 @@ def _add_sites_100_to_101(doc, template) -> None:
     _add_sites(doc, template, SITES_ADDED_IN_101)
 
 
+def _add_sites_101_to_102(doc, template) -> None:
+    """Advance to v102, adding PokerStars on Sisal and PokerStars on SNAI (#893).
+
+    Sisal (December 2024) and SNAI (May 2026) moved their Italian clients from
+    iPoker to the PokerStars Italy network. Each new client is a room of its
+    own: its <site> (off, PokerStars' network and layouts, no folder, since
+    none is documented) comes from the template. Neither has an <hhc>: their
+    files go through the PokerStars converter entry the configuration already
+    has. The iPoker rooms Sisal Poker (73) and Snai Poker (76), and
+    PokerStars.IT, are left as they are. A configuration that already declares
+    a new room keeps it.
+    """
+    _add_sites(doc, template, SITES_ADDED_IN_102)
+
+
 def _repair_renamed_references(doc) -> None:
     aux_names = {cx.attr(n, "name") for n in cx.find_all(doc, "aw")}
     if "Classic_HUD" not in aux_names and "ClassicHud" in aux_names:
@@ -387,6 +403,7 @@ MIGRATIONS = (
     (98, 99, _add_sites_98_to_99),
     (99, 100, _add_sites_99_to_100),
     (100, 101, _add_sites_100_to_101),
+    (101, 102, _add_sites_101_to_102),
 )
 
 

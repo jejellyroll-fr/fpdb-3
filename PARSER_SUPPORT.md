@@ -31,8 +31,11 @@ These converters have file-by-file semantic snapshots in
   client on PokerStars software is filed under a room of its own from the
   folder you configure for it, see
   [docs/pokerstars-paddy-power.md](docs/pokerstars-paddy-power.md), and so is
-  Sky Poker's, see [docs/pokerstars-sky.md](docs/pokerstars-sky.md); no real
-  export from the UK, Paddy Power or Sky clients is in the corpus yet)
+  Sky Poker's, see [docs/pokerstars-sky.md](docs/pokerstars-sky.md), and so
+  are Sisal's and SNAI's Italian clients, see
+  [docs/pokerstars-italy-skins.md](docs/pokerstars-italy-skins.md); no real
+  export from the UK, Paddy Power, Sky, Sisal or SNAI clients is in the corpus
+  yet)
 - PokerTracker (its own export format, cash and tournaments: Everest, iPoker,
   Merge and Microgaming hands, each filed under the room in its header -- pinned
   by `tests/test_pokertracker_rooms.py`)
