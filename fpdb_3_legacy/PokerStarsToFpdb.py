@@ -22,7 +22,8 @@ from __future__ import annotations
 This module provides functionality to parse PokerStars hand history files
 and convert them into FPDB database format. It supports multiple PokerStars
 skins including .COM, .FR, .IT, .ES, .PT, .EU, and .DE variants, and Paddy
-Power's client on PokerStars software (filed by its configured folder, #888).
+Power's and Sky Poker's clients on PokerStars software (filed by their
+configured folders, #888, #887).
 
 The converter handles various game types including Hold'em, Omaha, Stud,
 Draw games, and tournaments across different betting structures.
@@ -62,6 +63,9 @@ SITE_POKERSTARS_UK = 145
 # Paddy Power Poker's client on PokerStars software, opened on 28 October 2026
 # (#888). The older iPoker client keeps its own room, Paddy Power Poker (65).
 SITE_POKERSTARS_PADDY_POWER = 146
+# Sky Poker's client on PokerStars software, opened on 19 November 2026 (#887).
+# The older iPoker client keeps its own room, Sky Poker (72).
+SITE_POKERSTARS_SKY = 147
 SITE_BOVADA = 19
 SITE_MERGE = 26
 STUD_HOLE_CARDS_COUNT = 3
@@ -78,6 +82,7 @@ POKERSTARS_SKIN_IDS = {
     "PokerStars on Betfair": SITE_POKERSTARS_BETFAIR,
     "PokerStars.UK": SITE_POKERSTARS_UK,
     "PokerStars on Paddy Power": SITE_POKERSTARS_PADDY_POWER,
+    "PokerStars on Sky": SITE_POKERSTARS_SKY,
 }
 
 # Skins whose client no longer exists, with the last day it dealt a hand. A hand
@@ -91,17 +96,18 @@ POKERSTARS_RETIRED_SKINS: dict[str, datetime.date] = {
 # Skins whose client opened after PokerStars' own, with the first day it dealt a
 # hand. A hand dated before it cannot come from that client, whatever its folder
 # or hero mapping says: a Paddy Power player may have played PokerStars under
-# the same screen name before the move (#888).
+# the same screen name before the move (#888), and so may a Sky player (#887).
 POKERSTARS_SKIN_FIRST_DAYS: dict[str, datetime.date] = {
     "PokerStars on Paddy Power": datetime.date(2026, 10, 28),
+    "PokerStars on Sky": datetime.date(2026, 11, 19),
 }
 
 # Skins filed by the folder the user configured for them. Nothing in their files
 # names the skin and no default client folder is documented, so fpdb guesses
 # none: the folder the user set as the skin's HH or TS path is the provenance
-# (#888). A copy of the files anywhere else is filed by its content, as
+# (#888, #887). A copy of the files anywhere else is filed by its content, as
 # PokerStars.COM for GBP stakes, unless its hero is mapped to the skin.
-POKERSTARS_CONFIGURED_PATH_SKINS: tuple[str, ...] = ("PokerStars on Paddy Power",)
+POKERSTARS_CONFIGURED_PATH_SKINS: tuple[str, ...] = ("PokerStars on Paddy Power", "PokerStars on Sky")
 
 _HEADER_DATE = re.compile(r"\b(?P<Y>\d{4})/(?P<M>\d{1,2})/(?P<D>\d{1,2})\b")
 # PokerStars on Betfair writes PokerStars histories under its own name:

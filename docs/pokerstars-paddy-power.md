@@ -82,4 +82,6 @@ tools.
 
 - #733 / PR #805: PokerStars on Betfair (143).
 - #889 / PR #890: the retired PokerStars.UK client (145).
-- #887: Sky Poker's move to the PokerStars network; Sky's iPoker room is 72.
+- #887: Sky Poker's move to the PokerStars network, filed the same way under
+  `PokerStars on Sky` (147); Sky's iPoker room stays 72. See
+  [PokerStars on Sky](pokerstars-sky.md).

@@ -63,12 +63,13 @@ class PokerStarsSummary(TourneySummary):
         """The room of this one summary, when the file's room may not hold it.
 
         A file is given one room, from its whole text. A skin with a first or
-        a last day (PokerStars on Paddy Power #888, PokerStars.UK #889) cannot
-        hold a tournament played outside them, and an export of several
-        summaries can span that day. When the file was given such a skin, or
-        its folder names one, each summary is filed as its own text and folder
-        say: the export's older tournaments are not the new client's, and its
-        newer ones are, whichever came first in the file.
+        a last day (PokerStars on Paddy Power #888, PokerStars on Sky #887,
+        PokerStars.UK #889) cannot hold a tournament played outside them, and
+        an export of several summaries can span that day. When the file was
+        given such a skin, or its folder names one, each summary is filed as
+        its own text and folder say: the export's older tournaments are not
+        the new client's, and its newer ones are, whichever came first in the
+        file.
         """
         from fpdb_3_legacy.PokerStarsToFpdb import (
             POKERSTARS_RETIRED_SKINS,
