@@ -81,6 +81,47 @@ def test_site_card_get_values_returns_deduped_hero_aliases(qtbot) -> None:
     assert values["hero_aliases"] == ["newmain", "old", "second"]
 
 
+def _betfair_card(qtbot):
+    from fpdb_3_legacy.ModernSitePreferences import ModernSiteCard
+
+    site_config = types.SimpleNamespace(enabled=False, screen_name="", hero_aliases=[], HH_path="", TS_path="")
+    card = ModernSiteCard("PokerStars on Betfair", site_config)
+    qtbot.addWidget(card)
+    return card
+
+
+@pytest.mark.qt
+def test_a_folder_that_names_no_hero_keeps_the_typed_screen_name(qtbot) -> None:
+    """#854: typing the name, then Detect, saved the room with no hero."""
+    card = _betfair_card(qtbot)
+    card.screen_name_input.setText("alice")
+
+    card.apply_detection_results(
+        {
+            "detected": True,
+            "heroname": "",
+            "hhpath": "C:/Betfair.UK/HandHistory",
+            "tspath": "C:/Betfair.UK/TournSummary",
+        }
+    )
+
+    values = card.get_values()
+    assert values["screen_name"] == "alice"
+    assert values["hh_path"] == "C:/Betfair.UK/HandHistory"
+    assert values["ts_path"] == "C:/Betfair.UK/TournSummary"
+    assert values["enabled"] is True
+
+
+@pytest.mark.qt
+def test_a_folder_that_names_its_hero_fills_the_screen_name(qtbot) -> None:
+    card = _betfair_card(qtbot)
+    card.screen_name_input.setText("typo")
+
+    card.apply_detection_results({"detected": True, "heroname": "alice", "hhpath": "C:/hh/alice", "tspath": ""})
+
+    assert card.get_values()["screen_name"] == "alice"
+
+
 BWIN_FR = "/Containers/com.entainpt.bwinpokerfr.app/Data/Library/Application Support/Bwin.fr Online Poker"
 
 

@@ -13,6 +13,7 @@ tools/anonymize_hh.py: six hands and the tournament's summary.
 
 from __future__ import annotations
 
+import os
 import shutil
 from pathlib import Path
 from typing import Any
@@ -313,6 +314,91 @@ def test_histories_written_without_a_player_folder_are_still_found(detector, tmp
     assert found["detected"]
     assert Path(found["hhpath"]) == history
     assert found["heroname"] == ""
+
+
+def _flat_history(tmp_path: Path, files: dict[str, str]) -> Path:
+    """A Betfair.UK HandHistory folder holding ``files`` directly, newest first."""
+    local = tmp_path / "AppData" / "Local"
+    history = local / "Betfair.UK" / "HandHistory"
+    history.mkdir(parents=True)
+    for age, (name, text) in enumerate(files.items()):
+        path = history / name
+        path.write_text(text, encoding="utf-8")
+        os.utime(path, (1_800_000_000 - age * 60, 1_800_000_000 - age * 60))
+    return local
+
+
+def _detect_flat(detector, tmp_path: Path, local: Path) -> dict[str, Any]:
+    detector.platform = "Windows"
+    with patch.object(detect_module, "get_windows_paths", return_value=_windows_paths(local, tmp_path / "x")):
+        return detector._detect_variant(SKIN)
+
+
+def test_the_real_export_names_its_hero_without_a_player_folder(detector, tmp_path) -> None:
+    # The #854 reporter's files lie straight in HandHistory, with their real names:
+    # the hero is read from "Dealt to Hero [Qd 2d]" (CRLF, BOM and all).
+    local = tmp_path / "AppData" / "Local"
+    history = local / "Betfair.UK" / "HandHistory"
+    history.mkdir(parents=True)
+    shutil.copyfile(BETFAIR_HANDS, history / "HH20261019 T4040982342 No Limit Hold'em $0.46 + $0.04.txt")
+
+    found = _detect_flat(detector, tmp_path, local)
+
+    assert found["detected"]
+    assert Path(found["hhpath"]) == history
+    assert found["heroname"] == "Hero"
+
+
+def test_the_newest_history_names_the_hero(detector, tmp_path) -> None:
+    local = _flat_history(
+        tmp_path,
+        {
+            "HH20261020 new.txt": "Betfair Hand #2: ...\nDealt to new name [Ah Kh]\n",
+            "HH20261019 old.txt": "Betfair Hand #1: ...\nDealt to old_name [2c 3c]\n",
+        },
+    )
+
+    assert _detect_flat(detector, tmp_path, local)["heroname"] == "new name"
+
+
+def test_a_stud_opponents_upcards_do_not_name_the_hero(detector, tmp_path) -> None:
+    # Stud lists every upcard as "Dealt to": one card a street for an opponent,
+    # the hero's own three on third street.
+    local = _flat_history(
+        tmp_path,
+        {
+            "HH20261019 stud.txt": (
+                "Betfair Hand #3: 7 Card Stud\n*** 3rd STREET ***\n"
+                "Dealt to bob [4h]\nDealt to Hero [2c 3d 5s]\n*** 4th STREET ***\nDealt to bob [4h] [9c]\n"
+            )
+        },
+    )
+
+    assert _detect_flat(detector, tmp_path, local)["heroname"] == "Hero"
+
+
+def _detect_bytes(detector, tmp_path: Path, data: bytes) -> str:
+    local = tmp_path / "AppData" / "Local"
+    history = local / "Betfair.UK" / "HandHistory"
+    history.mkdir(parents=True)
+    (history / "HH20261019 T1.txt").write_bytes(data)
+    return _detect_flat(detector, tmp_path, local)["heroname"]
+
+
+@pytest.mark.parametrize("encoding", ["utf-8", "cp1252"])
+def test_a_non_ascii_hero_is_read_as_the_converter_reads_it(detector, tmp_path, encoding) -> None:
+    # PokerStars histories come in UTF-8 or CP1252 (the converter's codepage):
+    # the configured name must be the one the importer stores.
+    data = "Betfair Hand #1: ...\r\nDealt to André [Ah Kh]\r\n".encode(encoding)
+
+    assert _detect_bytes(detector, tmp_path, data) == "André"
+
+
+def test_a_utf8_character_cut_by_the_read_limit_keeps_the_file_utf8(detector, tmp_path) -> None:
+    head = "Betfair Hand #1: ...\nDealt to André [Ah Kh]\n".encode()
+    detector.HERO_BYTES = len(head) + 1  # stops inside the two-byte "é" below
+
+    assert _detect_bytes(detector, tmp_path, head + "éé".encode()) == "André"
 
 
 def test_the_betfair_client_folder_is_found_under_wine(detector, tmp_path) -> None:
