@@ -2,8 +2,9 @@
 """Developer CLI for the packaged hand-history anonymizer."""
 
 from fpdb_3_legacy import anonymize_hh as _implementation
+from fpdb_3_legacy.anonymize_hh import anonymize_text
 
-anonymize_text = _implementation.anonymize_text
+__all__ = ["anonymize_text"]
 
 
 def __getattr__(name: str):
