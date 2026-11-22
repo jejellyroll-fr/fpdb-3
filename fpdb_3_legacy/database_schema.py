@@ -337,6 +337,10 @@ class DatabaseSchemaMixin(DatabaseMigrationsMixin, DatabaseIndexesMixin):
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('146', 'PokerStars on Paddy Power', 'PS')")
         # Sky Poker on PokerStars software (#887), apart from the iPoker skin 'Sky Poker' (72)
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('147', 'PokerStars on Sky', 'PS')")
+        # Sisal and SNAI on the PokerStars Italy network (#893), apart from their
+        # iPoker skins 'Sisal Poker' (73) and 'Snai Poker' (76)
+        c.execute("INSERT INTO Sites (id,name,code) VALUES ('148', 'PokerStars on Sisal', 'PS')")
+        c.execute("INSERT INTO Sites (id,name,code) VALUES ('149', 'PokerStars on SNAI', 'PS')")
         c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('59', 'NetBet Poker', 'IP')",
         )

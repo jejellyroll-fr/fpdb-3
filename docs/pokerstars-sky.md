@@ -93,3 +93,5 @@ off; turn it on only after checking Sky's current rules on third-party tools.
 - #888: PokerStars on Paddy Power (146), filed the same way.
 - #733: PokerStars on Betfair (143).
 - #889: the retired PokerStars.UK client (145).
+- #893: PokerStars on Sisal (148) and PokerStars on SNAI (149), the Italian
+  skins, filed the same way; see [their page](pokerstars-italy-skins.md).

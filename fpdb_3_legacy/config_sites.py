@@ -628,6 +628,8 @@ class ConfigSitesMixin(ConfigBase):
                 "PokerStars.UK": 145,
                 "PokerStars on Paddy Power": 146,
                 "PokerStars on Sky": 147,
+                "PokerStars on Sisal": 148,
+                "PokerStars on SNAI": 149,
             }
             return fallbacks.get(site, 2)
         return self.site_ids[site]

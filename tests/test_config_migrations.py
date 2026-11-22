@@ -11,6 +11,8 @@ from fpdb_3_legacy.Configuration import CONFIG_VERSION
 
 PADDY_POWER = "PokerStars on Paddy Power"
 SKY = "PokerStars on Sky"
+SISAL = "PokerStars on Sisal"
+SNAI = "PokerStars on SNAI"
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -305,6 +307,8 @@ def test_v90_adds_the_current_unibet_room():
         "PokerStars on Betfair",
         "PokerStars.UK",
         "PokerStars on Sky",
+        SISAL,
+        SNAI,
     }
     assert sites["Unibet"].getAttribute("network") == "Unibet"
     assert sites["Unibet"].getAttribute("enabled") == "False"
@@ -339,6 +343,8 @@ def test_v91_adds_the_betclic_2025_room():
         "PokerStars on Betfair",
         "PokerStars.UK",
         "PokerStars on Sky",
+        SISAL,
+        SNAI,
     }
     assert sites["Betclic"].getAttribute("network") == "Betclic"
     assert sites["Betclic"].getAttribute("enabled") == "False"
@@ -377,6 +383,8 @@ def test_v94_adds_coinpoker_back_as_an_import_only_room():
         "PokerStars on Betfair",
         "PokerStars.UK",
         "PokerStars on Sky",
+        SISAL,
+        SNAI,
     }
     assert sites["CoinPoker"].getAttribute("enabled") == "False"
     assert sites["CoinPoker"].getAttribute("aux_enabled") == "False"
@@ -433,6 +441,8 @@ def test_v95_adds_betrivers_as_an_import_only_room():
         "PokerStars on Betfair",
         "PokerStars.UK",
         "PokerStars on Sky",
+        SISAL,
+        SNAI,
     }
     assert sites["BetRivers"].getAttribute("enabled") == "False"
     assert sites["BetRivers"].getAttribute("aux_enabled") == "False"
@@ -460,7 +470,7 @@ def test_v99_adds_the_pokerstars_on_betfair_skin():
 
     sites = {node.getAttribute("site_name"): node for node in updated.getElementsByTagName("site")}
     # v100 adds UK (#889), v101 PokerStars on Sky (#887)
-    assert set(sites) == {"PokerStars", "PokerStars on Betfair", "PokerStars.UK", "PokerStars on Sky"}
+    assert set(sites) == {"PokerStars", "PokerStars on Betfair", "PokerStars.UK", "PokerStars on Sky", SISAL, SNAI}
     betfair = sites["PokerStars on Betfair"]
     assert betfair.getAttribute("enabled") == "False"
     assert betfair.getAttribute("network") == "PokerStars"
@@ -523,6 +533,8 @@ def test_v97_leaves_a_configuration_as_it_was():
         "PokerStars on Betfair",
         "PokerStars.UK",
         "PokerStars on Sky",
+        SISAL,
+        SNAI,
     ]
     assert [n.getAttribute("site") for n in updated.getElementsByTagName("hhc")] == [
         "PokerStars on Betfair",
@@ -546,7 +558,7 @@ def test_v100_adds_the_legacy_pokerstars_uk_room():
     updated = upgrade_document(old, template, CONFIG_VERSION)
 
     sites = {node.getAttribute("site_name"): node for node in updated.getElementsByTagName("site")}
-    assert set(sites) == {"PokerStars", "PokerStars.UK", "PokerStars on Sky"}  # v101 (#887)
+    assert set(sites) == {"PokerStars", "PokerStars.UK", "PokerStars on Sky", SISAL, SNAI}  # v101 (#887), v102 (#893)
     uk = sites["PokerStars.UK"]
     assert uk.getAttribute("enabled") == "False"
     assert uk.getAttribute("network") == "PokerStars"
@@ -602,6 +614,8 @@ def test_v98_adds_paddy_power_on_pokerstars_as_a_room_of_its_own():
         "PokerStars on Betfair",
         "PokerStars.UK",
         "PokerStars on Sky",
+        SISAL,
+        SNAI,
     }
     new = sites["PokerStars on Paddy Power"]
     assert new.getAttribute("enabled") == "False"
@@ -655,7 +669,7 @@ def test_v101_adds_sky_on_pokerstars_as_a_room_of_its_own():
     updated = upgrade_document(old, template, CONFIG_VERSION)
 
     sites = {node.getAttribute("site_name"): node for node in updated.getElementsByTagName("site")}
-    assert set(sites) == {"Sky Poker", SKY}
+    assert set(sites) == {"Sky Poker", SKY, SISAL, SNAI}  # v102 (#893)
     new = sites[SKY]
     assert new.getAttribute("enabled") == "False"
     assert new.getAttribute("network") == "PokerStars"
@@ -684,3 +698,59 @@ def test_v101_keeps_a_sky_on_pokerstars_entry_the_user_wrote():
     (site,) = [n for n in updated.getElementsByTagName("site") if n.getAttribute("site_name") == SKY]
     assert site.getAttribute("HH_path") == "/my/sky"
     assert site.getAttribute("enabled") == "True"
+
+
+def test_v102_adds_sisal_and_snai_on_pokerstars_as_rooms_of_their_own():
+    # Sisal (December 2024) and SNAI (May 2026) moved their Italian clients from
+    # iPoker to the PokerStars Italy network (#893). Each new client gets its own
+    # room, off, on PokerStars' network and layouts, with no folder (none is
+    # documented) and no <hhc>: its files go through the PokerStars entry already
+    # there. The iPoker rooms and PokerStars.IT are left exactly as they were.
+    template = defusedxml.minidom.parse(str(ROOT / "HUD_config.xml.example"))
+    old = parse("""<FreePokerToolsConfig><general version="101"/>
+      <supported_sites>
+      <site site_name="Sisal Poker" HH_path="/old/sisal" network="iPoker"><layout_set ls="custom"/></site>
+      <site site_name="Snai Poker" HH_path="/old/snai" network="iPoker"><layout_set ls="custom"/></site>
+      <site site_name="PokerStars" HH_path="/my/stars" network="PokerStars"><layout_set ls="custom"/></site>
+      </supported_sites>
+      <layout_sets><ls name="custom"/></layout_sets>
+      <hhcs><hhc site="PokerStars" converter="PokerStarsToFpdb" summaryImporter="PokerStarsSummary"/>
+      <hhc site="Sisal Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/></hhcs>
+      </FreePokerToolsConfig>""")
+
+    updated = upgrade_document(old, template, CONFIG_VERSION)
+
+    sites = {node.getAttribute("site_name"): node for node in updated.getElementsByTagName("site")}
+    assert set(sites) == {"Sisal Poker", "Snai Poker", "PokerStars", SISAL, SNAI}
+    for name in (SISAL, SNAI):
+        new = sites[name]
+        assert new.getAttribute("enabled") == "False"
+        assert new.getAttribute("network") == "PokerStars"
+        assert new.getAttribute("HH_path") == new.getAttribute("TS_path") == ""
+        assert {n.getAttribute("ls") for n in new.getElementsByTagName("layout_set")} == {"ps_default"}
+    for name, path in (("Sisal Poker", "/old/sisal"), ("Snai Poker", "/old/snai")):
+        assert sites[name].getAttribute("network") == "iPoker"
+        assert sites[name].getAttribute("HH_path") == path
+    assert sites["PokerStars"].getAttribute("HH_path") == "/my/stars"
+    hhcs = {n.getAttribute("site"): n.getAttribute("converter") for n in updated.getElementsByTagName("hhc")}
+    assert hhcs == {"PokerStars": "PokerStarsToFpdb", "Sisal Poker": "iPokerToFpdb"}
+    assert "ps_default" in {node.getAttribute("name") for node in updated.getElementsByTagName("ls")}
+    assert not reference_errors(updated)
+    assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()
+
+
+def test_v102_keeps_an_italian_entry_the_user_wrote():
+    template = defusedxml.minidom.parse(str(ROOT / "HUD_config.xml.example"))
+    old = parse("""<FreePokerToolsConfig><general version="101"/>
+      <supported_sites><site site_name="PokerStars on Sisal" enabled="True" HH_path="/my/sisal">
+      <layout_set ls="custom"/></site></supported_sites>
+      <layout_sets><ls name="custom"/></layout_sets>
+      <hhcs/>
+      </FreePokerToolsConfig>""")
+
+    updated = upgrade_document(old, template, CONFIG_VERSION)
+
+    (site,) = [n for n in updated.getElementsByTagName("site") if n.getAttribute("site_name") == SISAL]
+    assert site.getAttribute("HH_path") == "/my/sisal"
+    assert site.getAttribute("enabled") == "True"
+    assert [n.getAttribute("site_name") for n in updated.getElementsByTagName("site")].count(SNAI) == 1

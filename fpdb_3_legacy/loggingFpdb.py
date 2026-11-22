@@ -879,7 +879,7 @@ class LoggerDevTool:
             else:
                 # Get current level from the combo box widget in column 1
                 combo = self.tree.itemWidget(item, 1)
-                if combo:
+                if isinstance(combo, QComboBox):
                     current_level = combo.currentText()
                     level_match = current_level == level_filter
                 else:
@@ -928,7 +928,7 @@ class LoggerDevTool:
             if item.data(0, Qt.ItemDataRole.UserRole) == logger_name:
                 # Update the combo box in column 1 (not the text, since we have a widget there)
                 combo = self.tree.itemWidget(item, 1)
-                if combo:
+                if isinstance(combo, QComboBox):
                     combo.setCurrentText(logging.getLevelName(info.current_level))
                 # Column 2 text stays the same (original level doesn't change)
                 break
@@ -938,17 +938,16 @@ class LoggerDevTool:
 
         Prompts the user for confirmation and, if confirmed, restores all registered loggers to their original levels. After resetting, the logger tree is refreshed and a success message is displayed.
         """
-        from PySide6.QtWidgets import QMessageBox
-
+        buttons = QMessageBox.StandardButton
         reply = QMessageBox.question(
             self.dialog,
             "Confirmation",
             "Do you want to reset all loggers to their default level?",
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No,
+            buttons.Yes | buttons.No,
+            buttons.No,
         )
 
-        if reply == QMessageBox.Yes:
+        if reply == buttons.Yes:
             for name, info in self.registry.get_all_loggers().items():
                 default_level = info.original_level if info.original_level != logging.NOTSET else logging.INFO
                 self.registry.set_logger_level(name, default_level)
