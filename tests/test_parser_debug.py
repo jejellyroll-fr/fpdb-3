@@ -172,7 +172,7 @@ def test_derived_stats_are_optional(config) -> None:
 
 
 def test_fixture_anonymization_reuses_room_token_rules() -> None:
-    from tools.anonymize_hh import anonymize_text
+    from fpdb_3_legacy.anonymize_hh import anonymize_text
 
     text = "Seat 1: Hero (10)\nSeat 2: RealName[Unibet_a1b2c3d4e5f6] (20)\n"
     rewritten, leftovers = anonymize_text(text, "Unibet", ["Hero", "RealName"], "Hero")
