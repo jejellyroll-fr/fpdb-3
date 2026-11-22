@@ -27,6 +27,9 @@ from __future__ import annotations
 
 import contextlib
 import datetime
+import hashlib
+import json
+import os
 import re
 import tempfile
 import time
@@ -104,6 +107,9 @@ DETECTION_WINDOW: Final = 5000
 _BODY_SCORE_LINES: Final = 200
 #: At most this many "unread line" diagnostics per hand; the line view has them all.
 _MAX_LINE_DIAGNOSTICS: Final = 20
+_SNAPSHOT_MANIFEST: Final = (
+    Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "hands" / "live_parser_snapshots.json"
+)
 
 _SUMMARY_MARKER: Final = re.compile(r"^\s*(\*+\s*summary\s*\*+|summary\b|-+\s*summary\s*-+)", re.IGNORECASE)
 _NOISE_LINE: Final = re.compile(r"^[\W_]*$")
@@ -281,6 +287,8 @@ def detect(path: str, config: Any, site: str | None = None) -> tuple[Detection, 
     detection.file_type = fobj.ftype
     detection.hero = fobj.hero
     detection.archive = bool(fobj.archive)
+    detection.archive_head = bool(fobj.archiveHead)
+    detection.archive_divider = bool(fobj.archiveDivider)
     winner = next((probe for probe in detection.probes if probe.converter == detection.converter), None)
     if winner is not None:
         detection.marker, detection.marker_line = winner.pattern, winner.line
@@ -428,8 +436,121 @@ def _compare_sidecars(path: str, hand: Any) -> dict[str, Any]:
     }
 
 
+def _stable_snapshot_value(value: Any) -> Any:
+    """Convert parser values to deterministic JSON values for corpus fingerprints."""
+    if isinstance(value, dict):
+        return {
+            str(key): _stable_snapshot_value(item) for key, item in sorted(value.items(), key=lambda pair: str(pair[0]))
+        }
+    if isinstance(value, (list, tuple)):
+        return [_stable_snapshot_value(item) for item in value]
+    if isinstance(value, (set, frozenset)):
+        return sorted((_stable_snapshot_value(item) for item in value), key=str)
+    if hasattr(value, "isoformat"):
+        return value.isoformat()
+    return jsonable(value)
+
+
+def _hand_fingerprint(hand: Any) -> dict[str, Any]:
+    """Semantic parser output used by the live regression corpus."""
+    gametype = getattr(hand, "gametype", {}) or {}
+    keys = ("type", "base", "category", "limitType", "currency", "sb", "bb", "ante", "mix")
+    return _stable_snapshot_value(
+        {
+            "handid": hand.handid,
+            "tour_no": getattr(hand, "tourNo", None),
+            "table": getattr(hand, "tablename", None),
+            "button": getattr(hand, "buttonpos", None),
+            "gametype": {key: gametype.get(key) for key in keys},
+            "players": hand.players,
+            "board": hand.board,
+            "actions": hand.actions,
+            "collectees": hand.collectees,
+            "totalpot": hand.totalpot,
+            "rake": hand.rake,
+        }
+    )
+
+
+def _snapshot_key(path: str) -> str | None:
+    """Find a file's key in the checked-in hand-history snapshot manifest."""
+    try:
+        manifest = json.loads(_SNAPSHOT_MANIFEST.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    candidate = Path(path).resolve()
+    repo = _SNAPSHOT_MANIFEST.parents[3]
+    roots = (
+        (_SNAPSHOT_MANIFEST.parent, ""),
+        (repo / "regression-test-files" / "cash", "regression/"),
+        (repo / "regression-test-files" / "tour", "regression-tour/"),
+    )
+    for root, prefix in roots:
+        try:
+            key = prefix + candidate.relative_to(root).as_posix()
+        except ValueError:
+            continue
+        if key in manifest:
+            return key
+    return None
+
+
+def update_snapshot_manifest(path: str | Path, report: ParseDebugReport) -> tuple[str, dict[str, Any]]:
+    """Record the reviewed parser output for one regression-corpus file.
+
+    The caller must explicitly opt into accepting the current output. This
+    function refuses failed/partial parses and paths outside the snapshot test
+    corpus; it does not determine whether a successful parse is semantically
+    correct.
+    """
+    candidate = Path(path).resolve()
+    repo = _SNAPSHOT_MANIFEST.parents[3]
+    roots = (
+        (_SNAPSHOT_MANIFEST.parent.resolve(), ""),
+        ((repo / "regression-test-files" / "cash").resolve(), "regression/"),
+        ((repo / "regression-test-files" / "tour").resolve(), "regression-tour/"),
+    )
+    key = None
+    for root, prefix in roots:
+        try:
+            key = prefix + candidate.relative_to(root).as_posix()
+            break
+        except ValueError:
+            continue
+    if key is None:
+        raise ValueError("snapshot input must be under tests/fixtures/hands, regression-test-files/cash, or regression-test-files/tour")
+    parse_errors = [
+        diagnostic
+        for diagnostic in report.diagnostics
+        if diagnostic.severity == ERROR and diagnostic.kind != "SnapshotMismatch"
+    ]
+    if not report.hands or any(not hand.ok or hand.fingerprint is None for hand in report.hands) or parse_errors:
+        raise ValueError("only a fully parsed hand-history file can be added to the snapshot manifest")
+
+    fingerprints = [hand.fingerprint for hand in report.hands]
+    payload = json.dumps(fingerprints, ensure_ascii=True, separators=(",", ":"), sort_keys=True)
+    entry = {"hand_count": len(fingerprints), "sha256": hashlib.sha256(payload.encode()).hexdigest()}
+    manifest = json.loads(_SNAPSHOT_MANIFEST.read_text(encoding="utf-8"))
+    manifest[key] = entry
+    text = json.dumps(manifest, indent=2, ensure_ascii=False, sort_keys=True) + "\n"
+    _SNAPSHOT_MANIFEST.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(
+        mode="w", encoding="utf-8", newline="", dir=_SNAPSHOT_MANIFEST.parent, prefix=".live_parser_snapshots.", delete=False
+    ) as staged:
+        staged.write(text)
+        staged_path = Path(staged.name)
+    try:
+        os.replace(staged_path, _SNAPSHOT_MANIFEST)
+    finally:
+        staged_path.unlink(missing_ok=True)
+    return key, entry
+
+
 def _line_marks(recorder: Recorder, text: str, filetype: str) -> tuple[list[LineMark], str]:
     marks: list[LineMark] = []
+    spans_by_line: dict[int, list[dict[str, Any]]] = {}
+    for span in recorder.spans:
+        spans_by_line.setdefault(int(span["line"]), []).append(span)
     in_summary = False
     for number, line in enumerate(text.split("\n")):
         regexes = sorted(recorder.marks.get(number, ()))
@@ -445,7 +566,7 @@ def _line_marks(recorder: Recorder, text: str, filetype: str) -> tuple[list[Line
             status = "summary"
         else:
             status = "unread"
-        marks.append(LineMark(number + 1, line, status, regexes))
+        marks.append(LineMark(number + 1, line, status, regexes, spans_by_line.get(number + 1, [])))
     if filetype != "text":
         note = "XML histories are mostly read by an XML parser, not by regexes: unread lines are expected"
     else:
@@ -522,7 +643,7 @@ def _coverage_pass(fobj: FPDBFile, config: Any, texts: Sequence[str]) -> list[Re
         # start_hand() gives the recorder fresh containers for the next hand,
         # so this hand's steps and marks can be kept as they are.
         snapshot = Recorder()
-        snapshot.steps, snapshot.marks = recorder.steps, recorder.marks
+        snapshot.steps, snapshot.marks, snapshot.spans = recorder.steps, recorder.marks, recorder.spans
         traced.append(snapshot)
     return traced
 
@@ -765,6 +886,7 @@ def _hand_result(context: _Context, index: int, text: str, start_line: int, capt
         result.violations = [violation.as_dict() for violation in parser_contract.check_hand(hand, context.supported)]
         result.checks = [check.as_dict() for check in parser_contract.hand_invariants(hand)]
         result.extracted = extract_hand(hand)
+        result.fingerprint = _hand_fingerprint(hand)
         if context.derived:
             result.extracted["derived"] = _derived(hand)
         if index == 0 and has_sidecars(context.path):
@@ -830,6 +952,34 @@ def debug_parse_file(
             report.diagnostics += _hand_diagnostics(result)
             report.hands.append(result)
         report.diagnostics += _unread_line_diagnostics(report.hands)
+
+    key = _snapshot_key(path)
+    if key:
+        try:
+            manifest = json.loads(_SNAPSHOT_MANIFEST.read_text(encoding="utf-8"))
+            expected = manifest[key]
+            snapshot = [hand.fingerprint for hand in report.hands if hand.fingerprint is not None]
+            payload = json.dumps(snapshot, ensure_ascii=True, separators=(",", ":"), sort_keys=True)
+            actual_digest = hashlib.sha256(payload.encode()).hexdigest()
+            report.snapshot = {
+                "key": key,
+                "expected_hand_count": expected["hand_count"],
+                "actual_hand_count": len(snapshot),
+                "expected_sha256": expected["sha256"],
+                "actual_sha256": actual_digest,
+                "passed": len(snapshot) == expected["hand_count"] and actual_digest == expected["sha256"],
+            }
+            if not report.snapshot["passed"]:
+                report.diagnostics.append(
+                    Diagnostic(
+                        ERROR,
+                        "SnapshotMismatch",
+                        f"Parser output differs from live snapshot {key} (expected {expected['sha256']}, got {actual_digest})",
+                    )
+                )
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            report.snapshot = {"key": key, "passed": False, "error": f"{type(exc).__name__}: {exc}"}
+            report.diagnostics.append(Diagnostic(WARNING, "SnapshotUnavailable", report.snapshot["error"]))
 
     report.duration_ms = _elapsed(started)
     return report

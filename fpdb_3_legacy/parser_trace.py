@@ -125,6 +125,7 @@ class Recorder:  # pylint: disable=too-many-instance-attributes  # the state of 
         self.hand_text = ""
         self.line_starts: list[int] = [0]
         self.marks: dict[int, set[str]] = {}
+        self.spans: list[dict[str, Any]] = []
         self._located: dict[tuple[str, int], int] = {}
         self._streets: dict[int, tuple[str, int]] = {}
         self.street_starts: dict[str, int] = {}
@@ -136,6 +137,7 @@ class Recorder:  # pylint: disable=too-many-instance-attributes  # the state of 
         self.hand_text = text
         self.line_starts = [0] + [index + 1 for index, char in enumerate(text) if char == "\n"]
         self.marks = {}
+        self.spans = []
         self._located = {}
         self._streets = {}
         self.street_starts = {}
@@ -183,6 +185,16 @@ class Recorder:  # pylint: disable=too-many-instance-attributes  # the state of 
         if span is None:
             return
         start, end = span
+        self.spans.append(
+            {
+                "regex": regex,
+                "start": start,
+                "end": end,
+                "line": bisect.bisect_right(self.line_starts, start),
+                "text": self.hand_text[start:end],
+                "step": self.current_step,
+            }
+        )
         first = bisect.bisect_right(self.line_starts, start) - 1
         last = bisect.bisect_right(self.line_starts, end - 1) - 1
         for line in range(first, last + 1):
@@ -327,7 +339,7 @@ class LogCapture(logging.Handler):
     """Collects the records emitted while a hand is parsed."""
 
     def __init__(self) -> None:
-        super().__init__(level=logging.WARNING)
+        super().__init__(level=logging.NOTSET)
         self.records: list[LogRecord] = []
 
     def emit(self, record: logging.LogRecord) -> None:
@@ -342,8 +354,24 @@ class LogCapture(logging.Handler):
 def captured_logs() -> Iterator[LogCapture]:
     capture = LogCapture()
     root = logging.getLogger()
+    detached: list[logging.Logger] = []
     root.addHandler(capture)
+    # fpdb's logging configuration can mark a logger non-propagating and give
+    # it its own console/file handlers. Capture those records too, temporarily,
+    # without changing levels or suppressing the app's existing handlers.
+    for name, candidate in logging.Logger.manager.loggerDict.items():
+        if not isinstance(candidate, logging.Logger) or candidate.propagate:
+            continue
+        if (
+            name == "hand_history_converter"
+            or name.startswith("hand_history_converter.")
+            or name.startswith("fpdb_3_legacy.")
+        ):
+            candidate.addHandler(capture)
+            detached.append(candidate)
     try:
         yield capture
     finally:
         root.removeHandler(capture)
+        for logger in detached:
+            logger.removeHandler(capture)

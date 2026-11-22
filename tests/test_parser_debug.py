@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import re
 import shutil
 from pathlib import Path
@@ -169,6 +170,18 @@ def test_derived_stats_are_optional(config) -> None:
     assert report.hands[0].coverage == "Line coverage was not traced"
 
 
+def test_fixture_anonymization_reuses_room_token_rules() -> None:
+    from tools.anonymize_hh import anonymize_text
+
+    text = "Seat 1: Hero (10)\nSeat 2: RealName[Unibet_a1b2c3d4e5f6] (20)\n"
+    rewritten, leftovers = anonymize_text(text, "Unibet", ["Hero", "RealName"], "Hero")
+
+    assert "RealName" not in rewritten
+    assert "Unibet_a1b2c3d4e5f6" not in rewritten
+    assert "Seat 1: Hero" in rewritten
+    assert leftovers == []
+
+
 def test_pasted_text_is_debugged_like_its_file(config, stars) -> None:
     report = debug_parse_text(STARS.read_text(encoding="utf-8"), config)
 
@@ -290,6 +303,31 @@ def test_a_traced_regex_behaves_like_the_regex() -> None:
     assert traced.flags == pattern.flags
     assert traced.sub("x", "Seat 3: carol") == "x"
     assert recorder.marks == {0: {"re_seat"}, 1: {"re_seat"}}
+    assert recorder.spans[0]["regex"] == "re_seat"
+    assert recorder.spans[0]["line"] == 1
+    assert recorder.spans[0]["text"] == "Seat 1: alice"
+
+
+def test_capture_includes_non_propagating_hand_converter_warnings() -> None:
+    logger = logging.getLogger("hand_history_converter.parser_debug_test")
+    previous = logger.propagate
+    logger.propagate = False
+    try:
+        with parser_trace.captured_logs() as capture:
+            logger.warning("expected data is missing: no betting actions")
+    finally:
+        logger.propagate = previous
+
+    assert any("expected data is missing" in record.message for record in capture.records)
+
+
+def test_a_live_fixture_shows_its_hand_fingerprint_and_manifest_comparison(config) -> None:
+    report = debug_parse_file(STARS, config, trace_lines=False)
+
+    assert report.snapshot is not None
+    assert report.snapshot["passed"] is True
+    assert report.hands[0].fingerprint is not None
+    assert "handid" in report.hands[0].fingerprint
 
 
 # ---------------------------------------------------------------------------

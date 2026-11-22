@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import ast
 import datetime
+import os
+import pprint
+import tempfile
 from dataclasses import dataclass, field
 from decimal import Decimal
 from pathlib import Path
@@ -187,6 +190,52 @@ def compare_hand_sidecars(filename: str | Path, hands: list[Any]) -> ComparisonR
             _compare_gametype(path, hand, report)
 
     return report
+
+
+def write_hand_sidecars(filename: str | Path, hands: list[Any], *, overwrite: bool = False) -> list[Path]:
+    """Write reviewed THP sidecars for exactly one parsed hand.
+
+    The caller must explicitly opt into using the current parser output as the
+    expected result.  This helper only serializes values; it cannot establish
+    that they are correct.  One hand per file is required because the sidecar
+    comparison contract uses the first hand only.
+    """
+    path = Path(filename)
+    if len(hands) != 1:
+        raise ValueError(f"expected exactly one parsed hand, found {len(hands)}")
+    hand = hands[0]
+    hand.syncMaxSeats()
+    hand.gametyperow = hand.gametypeRow()
+    if not getattr(hand, "handsplayers", None):
+        hand.assembleHand()
+
+    hand_row = dict(hand.stats.getHands())
+    hand_row.pop("boards", None)
+    hand_row.pop("boardfeatures", None)
+    payloads = {
+        ".hands": pprint.pformat(hand_row, sort_dicts=True) + "\n",
+        ".hp": pprint.pformat(hand.stats.getHandsPlayers(), sort_dicts=True) + "\n",
+        ".gt": pprint.pformat(hand.gametyperow, sort_dicts=True) + "\n",
+    }
+    targets = [path.with_name(path.name + suffix) for suffix in payloads]
+    existing = [target for target in targets if target.exists()]
+    if existing and not overwrite:
+        raise FileExistsError("sidecars already exist: " + ", ".join(str(target) for target in existing))
+
+    staged: list[tuple[Path, Path]] = []
+    try:
+        for target, text in zip(targets, payloads.values(), strict=True):
+            with tempfile.NamedTemporaryFile(
+                mode="w", encoding="utf-8", newline="", dir=target.parent, prefix=f".{target.name}.", delete=False
+            ) as temp:
+                temp.write(text)
+                staged.append((Path(temp.name), target))
+        for temporary, target in staged:
+            os.replace(temporary, target)
+    finally:
+        for temporary, _target in staged:
+            temporary.unlink(missing_ok=True)
+    return targets
 
 
 def _compare_hands(path: Path, hand: Any, report: ComparisonReport) -> None:

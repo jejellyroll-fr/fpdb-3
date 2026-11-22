@@ -40,7 +40,6 @@ _ANON_NAMES: Final = (
     "trent",
     "victor",
     "walter",
-    "yolanda",
 )
 
 # ---------------------------------------------------------------------------
@@ -73,6 +72,8 @@ class Detection:  # pylint: disable=too-many-instance-attributes  # a record of 
     encoding: str | None = None
     hero: str | None = None
     archive: bool = False
+    archive_head: bool = False
+    archive_divider: bool = False
     forced: bool = False
     marker: str = ""
     marker_line: int | None = None
@@ -106,6 +107,7 @@ class LineMark:
     text: str
     status: str
     regexes: list[str] = field(default_factory=list)
+    spans: list[dict[str, Any]] = field(default_factory=list)
 
 
 @dataclass
@@ -148,6 +150,7 @@ class HandResult:  # pylint: disable=too-many-instance-attributes  # a record of
     coverage: str = ""
     extracted: dict[str, Any] = field(default_factory=dict)
     sidecars: dict[str, Any] | None = None
+    fingerprint: dict[str, Any] | None = None
 
     @property
     def ok(self) -> bool:
@@ -164,6 +167,7 @@ class ParseDebugReport:
     diagnostics: list[Diagnostic] = field(default_factory=list)
     duration_ms: float = 0.0
     file_kind: str = "hh"
+    snapshot: dict[str, Any] | None = None
 
     @property
     def verdict(self) -> str:
@@ -244,6 +248,9 @@ def _render_detection(report: ParseDebugReport) -> list[str]:
     ]
     if detection.marker:
         out.append(f"  recognised by {detection.marker!r} on line {detection.marker_line}")
+    out.append(
+        f"  archive flags: archive={detection.archive}, head={detection.archive_head}, divider={detection.archive_divider}"
+    )
     if detection.hero:
         out.append(f"  hero: {detection.hero}")
     if detection.message:
@@ -291,6 +298,11 @@ def _render_hand(result: HandResult, *, lines: bool) -> list[str]:
             + (f"   <- {', '.join(mark.regexes)}" if mark.regexes else "")
             for mark in result.lines
         ]
+        out += [
+            f"      span {span['regex']} [{span['start']}:{span['end']}] {span['text']!r}"
+            for mark in result.lines
+            for span in mark.spans
+        ]
     return out
 
 
@@ -312,6 +324,18 @@ def render_text(report: ParseDebugReport, *, hand: int | None = None, lines: boo
     for result in report.hands:
         if hand is None or result.index == hand:
             out += _render_hand(result, lines=lines)
+    if report.snapshot:
+        status = "PASS" if report.snapshot.get("passed") else "FAIL"
+        out += ["", f"Live parser snapshot {status}: {report.snapshot.get('key', '')}"]
+        if report.snapshot.get("expected_sha256"):
+            out.append(
+                f"  expected {report.snapshot.get('expected_hand_count')} hands, {report.snapshot['expected_sha256']}"
+            )
+            out.append(
+                f"  actual   {report.snapshot.get('actual_hand_count')} hands, {report.snapshot.get('actual_sha256')}"
+            )
+        elif report.snapshot.get("error"):
+            out.append(f"  {report.snapshot['error']}")
     if report.diagnostics:
         out += ["", "Diagnostics"]
         for diagnostic in report.diagnostics:
@@ -327,13 +351,27 @@ def anonymize(text: str, names: Sequence[str], hero: str | None) -> str:
     """``text`` with ``hero`` renamed Hero and the other players alice, bob..."""
     mapping: dict[str, str] = {}
     others = iter(_ANON_NAMES)
+    real_names = set(names)
     for name in names:
         if not name or name in mapping:
             continue
-        mapping[name] = "Hero" if name == hero else next(others, f"player{len(mapping) + 1}")
+        if name == hero:
+            mapping[name] = "Hero"
+            continue
+        fake = next(
+            (candidate for candidate in others if candidate not in real_names and candidate not in mapping.values()),
+            None,
+        )
+        fallback = 0
+        while fake is None:
+            fallback += 1
+            candidate = f"player{fallback}"
+            if candidate not in real_names and candidate not in mapping.values():
+                fake = candidate
+        mapping[name] = fake
     # Longest first, so a name that contains another is replaced whole.
     for name in sorted(mapping, key=len, reverse=True):
-        text = re.sub(rf"(?<![\w]){re.escape(name)}(?![\w])", mapping[name], text)
+        text = re.sub(rf"(?<![\w-]){re.escape(name)}(?![\w-])", mapping[name], text)
     return text
 
 
@@ -400,6 +438,10 @@ def diff_reports(previous: Mapping[str, Any], current: Mapping[str, Any]) -> lis
             changes.append(f"hand {index}: status {old.get('status')} -> {new.get('status')}")
         changes += [
             f"hand {index}: {item}" for item in _diff_values(old.get("extracted", {}), new.get("extracted", {}), "")
+        ]
+        changes += [
+            f"hand {index}: {item}"
+            for item in _diff_values(old.get("fingerprint", {}), new.get("fingerprint", {}), "fingerprint")
         ]
         old_violations = {json.dumps(item, sort_keys=True) for item in old.get("violations", [])}
         new_violations = {json.dumps(item, sort_keys=True) for item in new.get("violations", [])}

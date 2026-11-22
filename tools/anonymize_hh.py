@@ -281,13 +281,17 @@ class Anonymizer:
         if self.mapping.names:
             names = "|".join(re.escape(real) for real in sorted(self.mapping.names, key=len, reverse=True))
             boundary = r"[0-9A-Za-z]" if filename else r"[\w-]"
-            text = re.sub(rf"(?<!{boundary})(?:{names})(?!{boundary})", lambda match: self.mapping.names[match.group(0)], text)
+            text = re.sub(
+                rf"(?<!{boundary})(?:{names})(?!{boundary})", lambda match: self.mapping.names[match.group(0)], text
+            )
         return text
 
     def leftovers(self, text: str, *, filename: bool = False) -> list[str]:
         fakes = set(self.mapping.names.values())
         found = [
-            real for real in self.mapping.names if real not in fakes and _name_pattern(real, filename=filename).search(text)
+            real
+            for real in self.mapping.names
+            if real not in fakes and _name_pattern(real, filename=filename).search(text)
         ]
         fake_tokens = set(self.mapping.tokens.values())
         found += [real for real in self.mapping.tokens if real not in fake_tokens and real in text]
@@ -353,6 +357,37 @@ class Anonymizer:
             msg = f"{source.name}: the anonymised file no longer parses into the same hands, players, game types, actions and cards"
             raise ValueError(msg)
         return Result(source, target, len(again.hands))
+
+
+def anonymize_text(text: str, room: str, names: Iterable[str], hero: str | None = None) -> tuple[str, list[str]]:
+    """Anonymize one hand with the same name and token rules as the fixture CLI.
+
+    The Parser Debugger can also save a hand the converter refuses, so it cannot
+    use :meth:`Anonymizer.collect`'s parse-and-round-trip verification. It still
+    shares the CLI's collision-safe aliases, room-specific summary/event names,
+    account-token rewriting, and leftover scan. The caller must review the
+    returned text before committing a fixture.
+    """
+    mapping = Mapping()
+    for name in dict.fromkeys(str(name).strip() for name in names if name and str(name).strip()):
+        mapping.add_name(name, hero=(name == hero))
+
+    extras = ROOMS.get(room, RoomExtras())
+    for pattern in extras.summary_names + extras.event_names:
+        for match in pattern.finditer(text):
+            name = match.group("NAME")
+            stripped = name
+            if pattern in extras.summary_names and extras.token is not None:
+                stripped = re.sub(rf"\[{extras.token.pattern}\]$", "", name)
+            mapping.add_name(stripped, hero=stripped == hero or stripped != name)
+    if extras.token is not None:
+        for match in extras.token.finditer(text):
+            mapping.add_token(match.group("TOKEN"), extras.fake_token)
+
+    anonymizer = object.__new__(Anonymizer)
+    anonymizer.mapping = mapping
+    rewritten = anonymizer.rewrite(text)
+    return rewritten, anonymizer.leftovers(rewritten)
 
 
 def _inputs(paths: Iterable[Path]) -> list[Path]:

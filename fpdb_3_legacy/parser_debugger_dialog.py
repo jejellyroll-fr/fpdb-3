@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import html
 import json
+import re
 from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import Any
@@ -85,6 +86,85 @@ _LINE_COLOURS = {
 }
 _SEVERITY_ORDER = {"error": 0, "warning": 1, "info": 2}
 _LINE_ROLE = Qt.ItemDataRole.UserRole
+
+
+class _LineNumberArea(QWidget):
+    """Editor gutter with source line numbers and parser coverage colours."""
+
+    def __init__(self, editor: _TraceTextEdit) -> None:
+        super().__init__(editor)
+        self.editor = editor
+
+    def sizeHint(self):  # noqa: N802 - Qt API
+        return self.editor.line_number_area_width(), 0
+
+    def paintEvent(self, event):  # noqa: N802 - Qt API
+        self.editor.paint_line_number_area(event)
+
+
+class _TraceTextEdit(QPlainTextEdit):
+    """Plain text editor that paints the line coverage beside the input."""
+
+    def __init__(self, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.coverage: dict[int, str] = {}
+        self.line_number_area = _LineNumberArea(self)
+        self.blockCountChanged.connect(self._update_line_number_area_width)
+        self.updateRequest.connect(self._update_line_number_area)
+        self._update_line_number_area_width(0)
+
+    def line_number_area_width(self) -> int:
+        digits = len(str(max(1, self.blockCount())))
+        return 12 + self.fontMetrics().horizontalAdvance("9") * digits
+
+    def _update_line_number_area_width(self, _new_block_count: int) -> None:
+        self.setViewportMargins(self.line_number_area_width(), 0, 0, 0)
+
+    def _update_line_number_area(self, rect, dy: int) -> None:
+        if dy:
+            self.line_number_area.scroll(0, dy)
+        else:
+            self.line_number_area.update(0, rect.y(), self.line_number_area.width(), rect.height())
+        if rect.contains(self.viewport().rect()):
+            self._update_line_number_area_width(0)
+
+    def resizeEvent(self, event):  # noqa: N802 - Qt API
+        super().resizeEvent(event)
+        contents = self.contentsRect()
+        self.line_number_area.setGeometry(
+            contents.left(), contents.top(), self.line_number_area_width(), contents.height()
+        )
+
+    def paint_line_number_area(self, event) -> None:
+        painter = QPainter(self.line_number_area)
+        painter.fillRect(event.rect(), QColor("#081322"))
+        block = self.firstVisibleBlock()
+        block_number = block.blockNumber()
+        top = round(self.blockBoundingGeometry(block).translated(self.contentOffset()).top())
+        bottom = top + round(self.blockBoundingRect(block).height())
+        while block.isValid() and top <= event.rect().bottom():
+            if block.isVisible() and bottom >= event.rect().top():
+                line = block_number + 1
+                kind = _status_kind(self.coverage.get(line, ""))
+                if kind:
+                    painter.fillRect(0, top, 4, self.fontMetrics().height(), _STATUS_BACKGROUNDS[kind])
+                painter.setPen(QColor("#8393a8"))
+                painter.drawText(
+                    7,
+                    top,
+                    self.line_number_area.width() - 9,
+                    self.fontMetrics().height(),
+                    int(Qt.AlignmentFlag.AlignRight),
+                    str(line),
+                )
+            block = block.next()
+            top = bottom
+            bottom = top + round(self.blockBoundingRect(block).height())
+            block_number += 1
+
+    def set_coverage(self, coverage: dict[int, str]) -> None:
+        self.coverage = coverage
+        self.line_number_area.update()
 
 
 def _monospace() -> QFont:
@@ -214,7 +294,8 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.site_combo = QComboBox(panel)
         self.site_combo.addItem(_("Auto-detect"), None)
         for site in parser_debug.available_sites(self.config):
-            self.site_combo.addItem(site, site)
+            label = site if parser_debug._site_enabled(self.config, site) else _("{site} (disabled)").format(site=site)
+            self.site_combo.addItem(label, site)
         controls.addWidget(self.site_combo, 1)
         self.open_button = QPushButton(_("Open file…"), panel)
         self.open_button.clicked.connect(self.open_file)
@@ -236,7 +317,7 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         options.addStretch(1)
         layout.addLayout(options)
 
-        self.input = QPlainTextEdit(panel)
+        self.input = _TraceTextEdit(panel)
         self.input.setFont(_monospace())
         self.input.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
         self.input.setPlaceholderText(_("Paste a hand history here, or open a file"))
@@ -292,7 +373,7 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
             [_("Step / check"), _("Status"), _("Field"), _("Message"), _("Expected"), _("Found")]
         )
         self.hand_tree = _tree([_("Field"), _("Value")])
-        self.lines_tree = _tree([_("Line"), _("Status"), _("Text"), _("Read by")])
+        self.lines_tree = _tree([_("Line"), _("Status"), _("Text"), _("Read by"), _("Regex match spans")])
         self.lines_tree.itemActivated.connect(self._line_item_activated)
         self.expected_tree = _tree([_("Sidecar"), _("Field"), _("Player"), _("Expected"), _("Actual")])
         self.log_view = QPlainTextEdit(panel)
@@ -345,14 +426,15 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
 
     def load_file(self, path: Path) -> None:
         """Show ``path`` and debug it as a file, so its name and encoding count as at import."""
-        raw = path.read_bytes()
-        if raw[:2] in (b"\xff\xfe", b"\xfe\xff"):
-            text = raw.decode("utf-16", errors="ignore").replace("\r\n", "\n")
-        else:
-            text = next((raw.decode(codec) for codec in ("utf-8-sig", "cp1252") if _decodes(raw, codec)), "")
+        from fpdb_3_legacy.IdentifySite import IdentifySite
+
+        text, encoding = IdentifySite(self.config).read_file(str(path))
+        text = text or ""
         self.input.setPlainText(text)
         self.loaded_path, self.loaded_text = path, self.input.toPlainText()
-        self.status_label.setText(path.name)
+        self.status_label.setText(
+            _("{name} · {encoding}").format(name=path.name, encoding=encoding or _("unknown encoding"))
+        )
 
     def run(self) -> None:
         text = self.input.toPlainText()
@@ -421,25 +503,68 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         )
         if not accepted:
             return
-        names = list(dict.fromkeys(name.strip() for name in names_text.splitlines() if name.strip()))
+        names = list(
+            dict.fromkeys(
+                [str(player.get("name", "")).strip() for player in players if player.get("name")]
+                + [name.strip() for name in names_text.splitlines() if name.strip()]
+            )
+        )
         if not names:
             QMessageBox.warning(self, _("Cannot anonymize fixture"), _("Add at least one player name to replace."))
             return
         hero = hand.extracted.get("header", {}).get("hero")
-        anonymized = parser_debug.anonymize(hand.text, names, hero if hero in names else None)
+        room = self.report.detection.converter if self.report is not None else ""
+        from tools.anonymize_hh import anonymize_text
+
+        anonymized, leftovers = anonymize_text(hand.text, room or "", names, hero if hero in names else None)
+        if leftovers:
+            QMessageBox.warning(
+                self,
+                _("Anonymization incomplete"),
+                _(
+                    "These real names or account tokens are still present: {values}. Add them to the list or review the text."
+                ).format(values=", ".join(leftovers)),
+            )
+            return
         path, _filter = QFileDialog.getSaveFileName(
             self,
             _("Save anonymized hand history fixture"),
-            f"anonymized-hand-{hand.index}.txt",
+            self._fixture_default_path(hand),
             "Text files (*.txt);;All files (*)",
         )
         if path:
             try:
-                Path(path).write_text(anonymized, encoding="utf-8", newline="")
+                target = Path(path)
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(anonymized, encoding="utf-8", newline="")
             except OSError as exc:
                 QMessageBox.warning(self, _("Could not save fixture"), str(exc))
                 return
-            self.status_label.setText(_("Anonymized fixture saved"))
+            self.status_label.setText(_("Anonymized fixture saved; review privacy before commit"))
+            QMessageBox.information(
+                self,
+                _("Fixture saved"),
+                _(
+                    "Fixture saved to {path}. Review the anonymized text before committing it. If it changes generated statistics, regenerate the stats guide."
+                ).format(path=path),
+            )
+
+    def _fixture_default_path(self, hand: HandResult) -> str:
+        """Suggest a repository fixture location and a descriptive anonymized name."""
+        site = self.report.detection.site if self.report is not None else None
+        site = site or "unknown-site"
+        safe_site = re.sub(r"[^A-Za-z0-9_-]+", "-", site).strip("-") or "unknown-site"
+        root = Path(__file__).resolve().parents[1] / "regression-test-files"
+        gametype = hand.extracted.get("gametype", {})
+        base = str(gametype.get("base", "unknown")).lower()
+        if hand.status != "ok":
+            directory = root / "unsupported-sites" / safe_site
+        else:
+            header = hand.extracted.get("header", {})
+            street = "Stud" if base == "stud" else "Draw" if base in {"draw", "badugi"} else "Flop"
+            folder = "tour" if header.get("tournament") or header.get("buyin") else "cash"
+            directory = root / folder / safe_site / street
+        return str(directory / f"{safe_site}-{base}-parser-debug-hand-{hand.index + 1}-anonymized.txt")
 
     def show_changes(self, changes: list[str]) -> None:
         self.changes_view.setPlainText("\n".join(changes) if changes else _("No change."))
@@ -504,6 +629,8 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
                 )
         if detection.message:
             parts.append(f"<br>{html.escape(detection.message)}")
+        if detection.encoding:
+            parts.append("<br>" + html.escape(_("File encoding: {encoding}").format(encoding=detection.encoding)))
         closest = html.escape(_("Closest"))
         parts += [f"<br>{closest}: {html.escape(item)}" for item in detection.closest]
         parts.append("</p>")
@@ -521,8 +648,13 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
     def _fill_detection(self, report: ParseDebugReport) -> None:
         self.detection_tree.clear()
         parser_used = _("Parser used")
+        archive_flags = _("Archive: {archive}; head: {head}; divider: {divider}").format(
+            archive=report.detection.archive,
+            head=report.detection.archive_head,
+            divider=report.detection.archive_divider,
+        )
         self.parser_label.setText(
-            f"{parser_used}: {report.detection.parser_class}"
+            f"{parser_used}: {report.detection.parser_class} · {archive_flags}"
             if report.detection.parser_class
             else _("No hand parser was created for this file")
         )
@@ -580,11 +712,9 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         log = [f"{record.level:<8} {record.logger}: {record.message}" for record in hand.logs]
         if self.report is not None:
             log.extend(
-                f"{diagnostic.severity.upper():<8} parser_debugger: {diagnostic.message}"
+                f"{diagnostic.severity.upper():<8} parser_debugger [{diagnostic.kind}]: {diagnostic.message}"
                 for diagnostic in self.report.diagnostics
                 if diagnostic.hand_index == hand.index
-                and diagnostic.severity in ("warning", "error")
-                and diagnostic.kind in ("ContractViolation", "CheckFailed")
             )
         if hand.traceback:
             log += ["", hand.traceback]
@@ -626,7 +756,9 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
             )
             _colour_status_row(item, violation["severity"])
         if not hand.violations and hand.ok:
-            item = QTreeWidgetItem(self.contract_tree, [_("contract"), _("met"), "", _("Every step produced what it must")])
+            item = QTreeWidgetItem(
+                self.contract_tree, [_("contract"), _("met"), "", _("Every step produced what it must")]
+            )
             _colour_status_row(item, "met")
         for check in hand.checks:
             item = QTreeWidgetItem(self.contract_tree, [check["name"], check["status"], "", check["message"]])
@@ -640,14 +772,39 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
     def _fill_lines(self, hand: HandResult) -> None:
         for mark in hand.lines:
             line = hand.start_line + mark.number - 1
-            item = QTreeWidgetItem(self.lines_tree, [str(line), mark.status, mark.text, ", ".join(mark.regexes)])
+            spans = "; ".join(
+                f"{span['regex']} [{span['start']}:{span['end']}] {span['text']!r}" for span in mark.spans
+            )
+            item = QTreeWidgetItem(self.lines_tree, [str(line), mark.status, mark.text, ", ".join(mark.regexes), spans])
             item.setData(0, _LINE_ROLE, line)
             _colour_status_row(item, mark.status)
-        for column in range(3):
+        for column in range(4):
             self.lines_tree.resizeColumnToContents(column)
         self.lines_tree.setColumnWidth(2, min(self.lines_tree.columnWidth(2), 460))
+        self.lines_tree.setColumnWidth(4, min(self.lines_tree.columnWidth(4), 500))
 
     def _fill_expected(self, hand: HandResult) -> None:
+        if hand.fingerprint is not None:
+            item = QTreeWidgetItem(
+                self.expected_tree,
+                [_("Hand fingerprint"), "", "", json.dumps(hand.fingerprint, ensure_ascii=False, sort_keys=True), ""],
+            )
+            item.setToolTip(3, json.dumps(hand.fingerprint, ensure_ascii=False, indent=2, sort_keys=True))
+        if self.report is not None and self.report.snapshot and hand.index == 0:
+            snapshot = self.report.snapshot
+            snapshot_status = _("matches") if snapshot.get("passed") else _("differs")
+            item = QTreeWidgetItem(
+                self.expected_tree,
+                [
+                    _("Live parser snapshot"),
+                    snapshot_status,
+                    "",
+                    snapshot.get("key", ""),
+                    snapshot.get("actual_sha256", snapshot.get("error", "")),
+                ],
+            )
+            item.setToolTip(3, json.dumps(snapshot, ensure_ascii=False, indent=2, sort_keys=True))
+            _colour_status_row(item, "ok" if snapshot.get("passed") else "error")
         if not hand.sidecars:
             item = QTreeWidgetItem(self.expected_tree, [_("This file has no regression sidecar (.hands, .hp, .gt)")])
             _colour_status_row(item, "missing")
@@ -678,15 +835,23 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
 
     def _colour_input(self, report: ParseDebugReport) -> None:
         selections = []
+        coverage: dict[int, str] = {}
         failed_lines = {hand.start_line for hand in report.hands if not hand.ok}
         failed_lines |= {
             diagnostic.line for diagnostic in report.diagnostics if diagnostic.severity == "error" and diagnostic.line
         }
         for hand in report.hands:
             for mark in hand.lines:
+                line = hand.start_line + mark.number - 1
+                coverage[line] = mark.status
                 if mark.status == "unread":
-                    selections.append(self._line_selection(hand.start_line + mark.number - 1, _LINE_COLOURS["unread"]))
+                    selections.append(self._line_selection(line, _LINE_COLOURS["unread"]))
         selections += [self._line_selection(line, _LINE_COLOURS["error"]) for line in sorted(failed_lines)]
+        for diagnostic in report.diagnostics:
+            if diagnostic.line and diagnostic.severity in {"warning", "error"}:
+                coverage[diagnostic.line] = diagnostic.severity
+        if isinstance(self.input, _TraceTextEdit):
+            self.input.set_coverage(coverage)
         self.input.setExtraSelections([selection for selection in selections if selection is not None])
 
     def _line_selection(self, line: int, colour: QColor) -> QTextEdit.ExtraSelection | None:
@@ -698,14 +863,6 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         selection.format.setProperty(QTextFormat.Property.FullWidthSelection, True)
         selection.cursor = QTextCursor(block)
         return selection
-
-
-def _decodes(raw: bytes, codec: str) -> bool:
-    try:
-        raw.decode(codec)
-    except UnicodeDecodeError:
-        return False
-    return True
 
 
 def _diagnostic_html(diagnostic: Diagnostic) -> str:

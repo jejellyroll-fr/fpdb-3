@@ -812,26 +812,108 @@ def _pot_check(hand: Any) -> Check:
     return Check("chip conservation", "pass", "Collected + rake = total pot", details)
 
 
+@dataclass
+class _BettingState:
+    folded: set[str] = field(default_factory=set)
+    all_in: set[str] = field(default_factory=set)
+    remaining: dict[str, Decimal] = field(default_factory=dict)
+    committed: dict[str, Decimal] = field(default_factory=dict)
+    problems: list[str] = field(default_factory=list)
+    current_bet: Decimal = Decimal(0)
+    last_raise: Decimal = Decimal(0)
+
+
+def _action_contribution(action: Sequence[Any], kind: str) -> Decimal:
+    amount = to_decimal(action[2]) if len(action) > 2 else None
+    if amount is None:
+        return Decimal(0)
+    if kind in {"raises", "completes"}:
+        call_amount = to_decimal(action[4]) if len(action) > 4 else Decimal(0)
+        return amount + (call_amount or Decimal(0))
+    if kind in {"calls", "bets", "ante", "bringin"} | BLIND_TYPES:
+        return amount
+    return Decimal(0)
+
+
+def _action_all_in(action: Sequence[Any], kind: str) -> bool:
+    if kind not in {"calls", "bets", "raises", "completes"} | BLIND_TYPES:
+        return False
+    index = 5 if kind in {"raises", "completes"} else 3
+    return len(action) > index and bool(action[index])
+
+
+def _check_action_stack(street: str, player: str, action: Sequence[Any], kind: str, state: _BettingState) -> None:
+    contribution = _action_contribution(action, kind)
+    if contribution and player in state.remaining:
+        if contribution > state.remaining[player] + Decimal("0.005"):
+            state.problems.append(
+                f"{street}: '{player}' commits {contribution} with only {state.remaining[player]} remaining"
+            )
+        state.remaining[player] -= contribution
+
+    flagged = _action_all_in(action, kind)
+    if flagged and player in state.remaining and state.remaining[player] > Decimal("0.005"):
+        state.problems.append(f"{street}: '{player}' is flagged all-in with {state.remaining[player]} chips remaining")
+    elif flagged is False and kind in {"calls", "bets", "raises", "completes"} | BLIND_TYPES:
+        if player in state.remaining and state.remaining[player] <= Decimal("0.005"):
+            state.problems.append(f"{street}: '{player}' reaches zero chips but the action is not flagged all-in")
+    if flagged:
+        state.all_in.add(player)
+
+
+def _check_raise(street: str, player: str, action: Sequence[Any], kind: str, state: _BettingState) -> None:
+    if kind not in {"raises", "completes"}:
+        return
+    raise_by = to_decimal(action[2]) if len(action) > 2 else Decimal(0)
+    raise_to = to_decimal(action[3]) if len(action) > 3 else None
+    if raise_to is None:
+        return
+    if raise_to <= state.current_bet:
+        state.problems.append(f"{street}: '{player}' raises to {raise_to}, not above {state.current_bet}")
+    if raise_by is not None and raise_by + Decimal("0.005") < state.last_raise and not _action_all_in(action, kind):
+        state.problems.append(
+            f"{street}: '{player}' raises by {raise_by}, less than the previous bet {state.last_raise}"
+        )
+    state.last_raise = max(raise_by or Decimal(0), Decimal(0))
+    state.current_bet = max(state.current_bet, raise_to)
+
+
+def _check_one_betting_action(street: str, action: Sequence[Any], state: _BettingState) -> None:
+    if len(action) < 2:
+        return
+    player, kind = str(action[0]), action[1]
+    if player in state.folded and kind != "cashout":
+        state.problems.append(f"{street}: '{player}' {kind} after folding")
+    if player in state.all_in:
+        state.problems.append(f"{street}: '{player}' {kind} after going all-in")
+    contribution = _action_contribution(action, kind)
+    _check_action_stack(street, player, action, kind, state)
+    if kind in {"bets", "calls", "raises", "completes"}:
+        state.committed[player] = state.committed.get(player, Decimal(0)) + contribution
+    _check_raise(street, player, action, kind, state)
+    if kind in {"bets", "calls"}:
+        state.current_bet = max(state.current_bet, state.committed.get(player, Decimal(0)))
+    if kind == "folds":
+        state.folded.add(player)
+
+
 def _betting_order_check(hand: Any) -> Check:
-    folded: set[str] = set()
-    problems: list[str] = []
+    starting_stacks = {
+        str(player[1]): to_decimal(player[2])
+        for player in getattr(hand, "players", []) or []
+        if len(player) > 2 and to_decimal(player[2]) is not None
+    }
     streets = getattr(hand, "actionStreets", None) or list(_actions(hand))
-    for street in streets:
-        for act in _actions(hand).get(street, []):
-            if len(act) < 2:
-                continue
-            player, kind = str(act[0]), act[1]
-            if player in folded and kind != "cashout":
-                problems.append(f"{street}: '{player}' {kind} after folding")
-            if kind == "folds":
-                folded.add(player)
-    for player, stack in (getattr(hand, "stacks", None) or {}).items():
-        remaining = to_decimal(stack)
-        if remaining is not None and remaining < 0:
-            problems.append(f"'{player}' committed {-remaining} more than the starting stack")
-    if problems:
-        return Check("betting order", "warn", "Some actions are not possible as read", problems)
-    return Check("betting order", "pass", "No action after a fold, nobody bets more than the stack")
+    state = _BettingState(remaining=dict(starting_stacks))
+    for street in dict.fromkeys(["BLINDSANTES", *streets]):
+        state.committed = {}
+        state.current_bet = to_decimal(_gametype(hand).get("bb")) if street == "PREFLOP" else Decimal(0)
+        state.last_raise = state.current_bet
+        for action in _actions(hand).get(street, []):
+            _check_one_betting_action(street, action, state)
+    if state.problems:
+        return Check("betting order", "warn", "Some actions are not possible as read", state.problems)
+    return Check("betting order", "pass", "Action order, bet sizes, stacks and all-in flags are consistent")
 
 
 def _winners_check(hand: Any) -> Check:

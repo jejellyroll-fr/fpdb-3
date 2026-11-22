@@ -296,11 +296,49 @@ def test_run_it_twice_boards_are_not_duplicates() -> None:
 
 def test_acting_after_a_fold_and_overbetting_warn() -> None:
     hand = _hand(
-        actions={"PREFLOP": [("bob", "folds"), ("bob", "calls", Decimal(1), False)]},
-        stacks={"alice": Decimal("-1"), "bob": Decimal(0)},
+        players=[[1, "alice", "0.10"], [2, "bob", "2.00"]],
+        actions={
+            "PREFLOP": [
+                ("alice", "bets", Decimal("0.11"), False),
+                ("bob", "folds"),
+                ("bob", "calls", Decimal(1), False),
+            ]
+        },
     )
 
-    assert len(_check(hand, "betting order").details) == 2
+    details = _check(hand, "betting order").details
+    assert any("commits 0.11 with only 0.10 remaining" in detail for detail in details)
+    assert any("after folding" in detail for detail in details)
+
+
+def test_a_short_raise_warns_unless_it_is_all_in() -> None:
+    hand = _hand(
+        actions={
+            "BLINDSANTES": [
+                ("alice", "small blind", Decimal("0.01"), False),
+                ("bob", "big blind", Decimal("0.02"), False),
+            ],
+            "PREFLOP": [("alice", "raises", Decimal("0.01"), Decimal("0.03"), Decimal("0.01"), False)],
+        }
+    )
+
+    assert any("less than the previous bet" in detail for detail in _check(hand, "betting order").details)
+
+
+def test_a_player_cannot_act_after_going_all_in() -> None:
+    hand = _hand(
+        players=[[1, "alice", "0.10"], [2, "bob", "2.00"]],
+        actions={
+            "BLINDSANTES": [],
+            "PREFLOP": [
+                ("alice", "bets", Decimal("0.10"), True),
+                ("bob", "calls", Decimal("0.10"), False),
+                ("alice", "checks"),
+            ],
+        },
+    )
+
+    assert any("after going all-in" in detail for detail in _check(hand, "betting order").details)
 
 
 def test_a_folded_player_collecting_warns_unless_for_nothing() -> None:

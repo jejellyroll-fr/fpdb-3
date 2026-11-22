@@ -48,7 +48,7 @@ from fpdb_3_legacy import Configuration, Database, Importer, interlocks
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
-from fpdb_3_legacy.RegressionFileComparator import compare_importer_sidecars
+from fpdb_3_legacy.RegressionFileComparator import compare_importer_sidecars, write_hand_sidecars
 
 #    fpdb/FreePokerTools modules
 
@@ -600,6 +600,14 @@ def _compare_regression_sidecars(filename: str, importer, *, quiet: bool) -> int
     return mismatches
 
 
+def _write_regression_sidecars(filename: str, importer, *, overwrite: bool) -> list[Path]:
+    """Write sidecars from the single hand retained by this importer run."""
+    path = Path(filename)
+    hhc = importer.getCachedHHC(str(path)) or importer.getCachedHHC()
+    hands = hhc.getProcessedHands() if hhc is not None else []
+    return write_hand_sidecars(path, hands, overwrite=overwrite)
+
+
 def main(argv=None) -> int:
     """CLI entry point for headless bulk import.
 
@@ -632,6 +640,21 @@ def main(argv=None) -> int:
         action="store_true",
         help="compare imported hands with adjacent .hands/.hp/.gt THP sidecar files",
     )
+    parser.add_argument(
+        "--write-regression-sidecars",
+        action="store_true",
+        help="write .hands/.hp/.gt from this import's single parsed hand",
+    )
+    parser.add_argument(
+        "--accept-current-output-as-expected",
+        action="store_true",
+        help="confirm that you independently reviewed this parser output before saving it as a baseline",
+    )
+    parser.add_argument(
+        "--overwrite-regression-sidecars",
+        action="store_true",
+        help="allow --write-regression-sidecars to replace existing expected values",
+    )
     args = parser.parse_args(argv)
 
     Configuration.set_logfile("fpdb-log.txt")
@@ -649,6 +672,18 @@ def main(argv=None) -> int:
     if not os.path.exists(args.filename):
         log.error("Import path does not exist: %s", args.filename)
         return 2
+    if args.overwrite_regression_sidecars and not args.write_regression_sidecars:
+        log.error("--overwrite-regression-sidecars requires --write-regression-sidecars")
+        return 2
+    if args.write_regression_sidecars and not args.accept_current_output_as_expected:
+        log.error("--write-regression-sidecars requires --accept-current-output-as-expected")
+        return 2
+    if args.accept_current_output_as_expected and not args.write_regression_sidecars:
+        log.error("--accept-current-output-as-expected requires --write-regression-sidecars")
+        return 2
+    if args.write_regression_sidecars and not Path(args.filename).is_file():
+        log.error("--write-regression-sidecars requires one hand-history file, not a directory")
+        return 2
 
     settings = {"os": "windows" if os.name == "nt" else "linuxmac"}
     settings.update(config.get_db_parameters())
@@ -665,7 +700,7 @@ def main(argv=None) -> int:
     importer = Importer.Importer(caller=None, settings=settings, config=config)
     importer.setThreads(-1)
     importer.setCallHud(False)
-    if args.compare_regression:
+    if args.compare_regression or args.write_regression_sidecars:
         # The comparison reads the parsed hands back off the converter, which the
         # importer only keeps when this is on; without it the flag crashed.
         importer.setFakeCacheHHC(True)
@@ -677,6 +712,22 @@ def main(argv=None) -> int:
 
     phh = importer.phh_summary()
     comparison_errors = 0
+    sidecar_write_errors = 0
+    if args.write_regression_sidecars:
+        if errs or partial or skipped:
+            sidecar_write_errors = 1
+            reason = f"import did not complete cleanly (partial={partial}, skipped={skipped}, errors={errs})"
+            log.warning("Regression sidecars %s: %s", args.filename, reason)
+            print(f"Regression sidecars {args.filename}: could not write: {reason}")
+        else:
+            try:
+                paths = _write_regression_sidecars(args.filename, importer, overwrite=args.overwrite_regression_sidecars)
+                if not args.quiet:
+                    print("Regression sidecars written: " + ", ".join(str(path) for path in paths))
+            except (OSError, ValueError, AttributeError) as exc:
+                sidecar_write_errors = 1
+                log.warning("Regression sidecars %s: could not write expected values: %s", args.filename, exc)
+                print(f"Regression sidecars {args.filename}: could not write: {exc}")
     if args.compare_regression:
         comparison_errors = _compare_regression_sidecars(args.filename, importer, quiet=args.quiet)
 
@@ -691,10 +742,11 @@ def main(argv=None) -> int:
         f"Duplicates: {format_number(dups, 0)}, Partial: {format_number(partial, 0)}, "
         f"Skipped: {format_number(skipped, 0)}, Errors: {format_number(errs, 0)}, "
         f"Regression mismatches: {format_number(comparison_errors, 0)}, "
+        f"Sidecar write errors: {format_number(sidecar_write_errors, 0)}, "
         f"Time: {format_number(elapsed, 3)}s, Stored/second: {format_number(stored / elapsed, 0)}",
     )
     _print_phh_summary(phh, quiet=args.quiet)
-    return 0 if errs == 0 and comparison_errors == 0 else 1
+    return 0 if errs == 0 and comparison_errors == 0 and sidecar_write_errors == 0 else 1
 
 
 def _print_phh_summary(phh, *, quiet: bool) -> None:

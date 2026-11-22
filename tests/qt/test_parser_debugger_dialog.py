@@ -66,7 +66,10 @@ def test_a_pasted_refused_hand_shows_why(dialog) -> None:
     steps = {row[0]: row[1] for row in _rows(dialog.steps_tree)}
     assert steps["determineGameType"] == "raised"
     assert steps["readHandInfo"] == "not reached"
-    rows = {dialog.steps_tree.topLevelItem(index).text(0): dialog.steps_tree.topLevelItem(index) for index in range(dialog.steps_tree.topLevelItemCount())}
+    rows = {
+        dialog.steps_tree.topLevelItem(index).text(0): dialog.steps_tree.topLevelItem(index)
+        for index in range(dialog.steps_tree.topLevelItemCount())
+    }
     assert rows["determineGameType"].foreground(1).color().name() == "#ff9292"
     assert rows["readHandInfo"].foreground(1).color().name() == "#ffd080"
     legend = dialog.findChild(QLabel, "status_legend")
@@ -90,7 +93,10 @@ def test_an_opened_file_fills_every_tab(dialog, monkeypatch) -> None:
     assert dialog.detection_tree.topLevelItemCount() > 10
     assert any(row[0] == "readPlayerStacks" and row[1] == "ok" for row in _rows(dialog.steps_tree))
     assert any(row[0] == "chip conservation" and row[1] == "pass" for row in _rows(dialog.contract_tree))
-    steps = {dialog.steps_tree.topLevelItem(index).text(0): dialog.steps_tree.topLevelItem(index) for index in range(dialog.steps_tree.topLevelItemCount())}
+    steps = {
+        dialog.steps_tree.topLevelItem(index).text(0): dialog.steps_tree.topLevelItem(index)
+        for index in range(dialog.steps_tree.topLevelItemCount())
+    }
     assert steps["readPlayerStacks"].foreground(1).color().name() == "#78e2a1"
     passed_check = next(
         dialog.contract_tree.topLevelItem(index)
@@ -155,7 +161,9 @@ def test_contract_warnings_are_in_the_log_tab(dialog) -> None:
     )
     dialog._show_hand()
 
-    assert "WARNING  parser_debugger: Seat 5 is above the table size" in dialog.log_view.toPlainText()
+    assert (
+        "WARNING  parser_debugger [ContractViolation]: Seat 5 is above the table size" in dialog.log_view.toPlainText()
+    )
 
 
 def test_editing_an_opened_file_debugs_the_text(dialog, monkeypatch) -> None:
@@ -176,6 +184,15 @@ def test_a_line_of_the_lines_tab_selects_it_in_the_input(dialog) -> None:
     dialog._line_item_activated(item, 0)
 
     assert dialog.input.textCursor().selectedText() == "Seat 1: Blåveis ($55.10 in chips)"
+
+
+def test_the_input_gutter_shows_line_numbers_and_coverage(dialog) -> None:
+    dialog.input.setPlainText(STARS.read_text(encoding="utf-8"))
+    dialog.run()
+
+    assert dialog.input.line_number_area_width() > 0
+    assert dialog.input.coverage[1] == "read"
+    assert dialog.input.line_number_area.sizeHint().width() == dialog.input.line_number_area_width()
 
 
 def test_the_bug_report_is_copied(dialog) -> None:

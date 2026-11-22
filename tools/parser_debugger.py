@@ -36,6 +36,16 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--lines", action="store_true", help="show the line coverage of each hand")
     parser.add_argument("--no-trace", action="store_true", help="skip the line coverage (one parse instead of two)")
     parser.add_argument("--derived", action="store_true", help="add what fpdb would store for each hand")
+    parser.add_argument(
+        "--update-snapshot-manifest",
+        action="store_true",
+        help="record this file's current parser output in the reviewed snapshot manifest",
+    )
+    parser.add_argument(
+        "--accept-current-output-as-expected",
+        action="store_true",
+        help="confirm that you independently verified the current output before updating the manifest",
+    )
     output = parser.add_mutually_exclusive_group()
     output.add_argument("--json", action="store_true", help="print the whole report as JSON")
     output.add_argument("--bug-report", action="store_true", help="print a Markdown report with names replaced")
@@ -45,11 +55,31 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.update_snapshot_manifest and not args.accept_current_output_as_expected:
+        print("--update-snapshot-manifest requires --accept-current-output-as-expected", file=sys.stderr)
+        return 2
+    if args.accept_current_output_as_expected and not args.update_snapshot_manifest:
+        print("--accept-current-output-as-expected requires --update-snapshot-manifest", file=sys.stderr)
+        return 2
+    if args.update_snapshot_manifest and (args.json or args.bug_report or args.compare):
+        print("--update-snapshot-manifest cannot be combined with a report output option", file=sys.stderr)
+        return 2
     if not args.path.is_file():
         print(f"No such file: {args.path}", file=sys.stderr)
         return 2
     config = Configuration.Config(file=str(args.config)) if args.config else Configuration.Config()
     report = debug_parse_file(args.path, config, args.site, trace_lines=not args.no_trace, derived=args.derived)
+
+    if args.update_snapshot_manifest:
+        try:
+            from fpdb_3_legacy.parser_debug import update_snapshot_manifest
+
+            key, entry = update_snapshot_manifest(args.path, report)
+        except (OSError, ValueError) as exc:
+            print(f"Could not update snapshot manifest: {exc}", file=sys.stderr)
+            return 1
+        print(f"Snapshot manifest updated: {key} ({entry['hand_count']} hand(s), sha256 {entry['sha256']})")
+        return 0
 
     if args.json:
         print(report.to_json())
