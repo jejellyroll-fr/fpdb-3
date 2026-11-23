@@ -471,7 +471,7 @@ def test_cannot_list_tells_a_refused_folder_from_an_empty_one(tmp_path, monkeypa
 
 
 @pytest.mark.qt
-def test_partial_import_moved_to_imported_directory_remains_debuggable(qtbot, bulk_import_widget, tmp_path):
+def test_partial_import_moved_to_imported_directory_remains_debuggable(bulk_import_widget, tmp_path):
     widget, _lock = bulk_import_widget
     imported_dir = tmp_path / "imported"
     imported_dir.mkdir()
