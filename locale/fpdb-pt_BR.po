@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 18:43+0100\n"
+"POT-Creation-Date: 2026-11-23 19:34+0100\n"
 "PO-Revision-Date: 2011-07-27 15:17+0000\n"
 "Last-Translator: pkpkpkdo <ofelipedbzgt@hotmail.com>\n"
 "Language-Team: Portuguese (Brazilian) (http://www.transifex.net/projects/p/"
@@ -1034,26 +1034,8 @@ msgstr "Escolher uma pasta de destino"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy
-msgid "Choose the hand-history file to inspect:"
-msgstr "Caminho dos históricos de mãos"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
 msgid "Configured Import Directories:"
 msgstr "Pastas de importação configuradas:"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import…"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
-msgid "File unavailable"
-msgstr "Atualizar prévia"
 
 #: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
 msgid "Folder access needed"
@@ -1142,10 +1124,6 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Select at least one configured directory, or choose a folder to import."
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "The failed hand-history file can no longer be read."
 msgstr ""
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
@@ -10808,6 +10786,10 @@ msgstr ""
 #~ msgid "Capture failed to start — see the log above."
 #~ msgstr "A captura não pôde iniciar — veja o registro acima."
 
+#, fuzzy
+#~ msgid "Choose the hand-history file to inspect:"
+#~ msgstr "Caminho dos históricos de mãos"
+
 #~ msgid "Closed, no graph exported"
 #~ msgstr "Fechado, nenhum gráfico exportado."
 
@@ -11014,6 +10996,10 @@ msgstr ""
 
 #~ msgid "File to be split is a PokerStars or Full Tilt Poker archive file"
 #~ msgstr "Arquivo a ser dividido é do PokerStars ou Full Tilt Poker"
+
+#, fuzzy
+#~ msgid "File unavailable"
+#~ msgstr "Atualizar prévia"
 
 #, fuzzy
 #~ msgid "Finished downloading emails."

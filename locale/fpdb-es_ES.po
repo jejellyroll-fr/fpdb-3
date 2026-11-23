@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 18:43+0100\n"
+"POT-Creation-Date: 2026-11-23 19:34+0100\n"
 "PO-Revision-Date: 2011-11-13 01:00+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Spanish (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -1010,28 +1010,8 @@ msgstr "Elegir una carpeta de destino"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy
-msgid "Choose the hand-history file to inspect:"
-msgstr "Ruta a los historiales de manos"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
 msgid "Configured Import Directories:"
 msgstr "Carpetas de importación configuradas:"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
-#| msgid "eMail Import"
-msgid "Debug failed import"
-msgstr "Importación vía eMail"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import…"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
-msgid "File unavailable"
-msgstr "Actualizar vista previa"
 
 #: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
 msgid "Folder access needed"
@@ -1118,10 +1098,6 @@ msgstr "Por favor, selecciona la ruta que quieres auto importar"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Select at least one configured directory, or choose a folder to import."
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "The failed hand-history file can no longer be read."
 msgstr ""
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
@@ -10889,6 +10865,10 @@ msgstr ""
 #~ msgid "Cell already used"
 #~ msgstr "bloqueo ya puesto por:"
 
+#, fuzzy
+#~ msgid "Choose the hand-history file to inspect:"
+#~ msgstr "Ruta a los historiales de manos"
+
 #~ msgid "Closed, no graph exported"
 #~ msgstr "Cerrado, ningún gráfico exportado"
 
@@ -11020,6 +11000,11 @@ msgstr ""
 
 #~ msgid "Debug Statistics Windows"
 #~ msgstr "Limpiar Ventana de Estadísticas"
+
+#, fuzzy
+#~| msgid "eMail Import"
+#~ msgid "Debug failed import"
+#~ msgstr "Importación vía eMail"
 
 #, fuzzy
 #~ msgid "Default game:"
@@ -11223,6 +11208,10 @@ msgstr ""
 
 #~ msgid "File not found"
 #~ msgstr "Fichero no encontrado"
+
+#, fuzzy
+#~ msgid "File unavailable"
+#~ msgstr "Actualizar vista previa"
 
 #~ msgid "Finished downloading emails."
 #~ msgstr "Finalizada la descarga de mensajes de correo electrónico."

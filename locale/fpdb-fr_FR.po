@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 18:43+0100\n"
+"POT-Creation-Date: 2026-11-23 19:34+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -944,24 +944,8 @@ msgid "Choose a destination directory"
 msgstr "Choisir un répertoire de destination"
 
 #: fpdb_3_legacy/GuiBulkImport.py
-msgid "Choose the hand-history file to inspect:"
-msgstr "Choisissez le fichier d’historique à examiner :"
-
-#: fpdb_3_legacy/GuiBulkImport.py
 msgid "Configured Import Directories:"
 msgstr "Répertoires d'import configurés :"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import"
-msgstr "Déboguer l’import en échec"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import…"
-msgstr "Déboguer un import en échec…"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "File unavailable"
-msgstr "Fichier indisponible"
 
 #: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
 msgid "Folder access needed"
@@ -1048,10 +1032,6 @@ msgid "Select at least one configured directory, or choose a folder to import."
 msgstr ""
 "Sélectionnez au moins un répertoire configuré, ou choisissez un dossier à "
 "importer."
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "The failed hand-history file can no longer be read."
-msgstr "Le fichier d’historique en échec n’est plus accessible."
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "+ New Rule"
@@ -10030,6 +10010,9 @@ msgstr ""
 #~ msgid "Cell already used"
 #~ msgstr "Case déjà occupée"
 
+#~ msgid "Choose the hand-history file to inspect:"
+#~ msgstr "Choisissez le fichier d’historique à examiner :"
+
 #~ msgid "Clear a grid cell by emptying its text in Item Properties."
 #~ msgstr ""
 #~ "Pour vider une case de la grille, effacez son texte dans les propriétés "
@@ -10203,6 +10186,12 @@ msgstr ""
 #, fuzzy
 #~ msgid "Debug Statistics Windows"
 #~ msgstr "Debug de la fenêtre de stats"
+
+#~ msgid "Debug failed import"
+#~ msgstr "Déboguer l’import en échec"
+
+#~ msgid "Debug failed import…"
+#~ msgstr "Déboguer un import en échec…"
 
 #~ msgid "Default encoding set to US-ASCII, defaulting to CP1252 instead."
 #~ msgstr "Bascule de l'encodage par défaut de US-ASCII à CP1252."
@@ -10420,6 +10409,9 @@ msgstr ""
 #~ msgstr ""
 #~ "le fichier à scinder est un fichier d'archive PokerStars ou Full Tilt "
 #~ "Poker"
+
+#~ msgid "File unavailable"
+#~ msgstr "Fichier indisponible"
 
 #, fuzzy
 #~ msgid "Finished downloading emails."
@@ -11447,6 +11439,9 @@ msgstr ""
 
 #~ msgid "Thank you"
 #~ msgstr "Merci"
+
+#~ msgid "The failed hand-history file can no longer be read."
+#~ msgstr "Le fichier d’historique en échec n’est plus accessible."
 
 #, fuzzy
 #~ msgid "The lower, the more stable the amounts won"

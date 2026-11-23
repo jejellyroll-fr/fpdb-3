@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 18:43+0100\n"
+"POT-Creation-Date: 2026-11-23 19:34+0100\n"
 "PO-Revision-Date: 2011-12-04 06:20+0200\n"
 "Last-Translator: Steffen Schaumburg <steffen@schaumburger.info>\n"
 "Language-Team: Fpdb\n"
@@ -1005,28 +1005,8 @@ msgstr "Zielordner wählen"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy
-msgid "Choose the hand-history file to inspect:"
-msgstr "Pfad zu den Handhistorien"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
 msgid "Configured Import Directories:"
 msgstr "Konfigurierte Importordner:"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
-#| msgid "eMail Import"
-msgid "Debug failed import"
-msgstr "Import per eMail"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import…"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
-msgid "File unavailable"
-msgstr "Vorschau aktualisieren"
 
 #: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
 msgid "Folder access needed"
@@ -1113,10 +1093,6 @@ msgstr "Bitte wähle den Pfad den Du automatisch importieren möchtest"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Select at least one configured directory, or choose a folder to import."
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "The failed hand-history file can no longer be read."
 msgstr ""
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
@@ -11159,6 +11135,10 @@ msgstr ""
 #~ msgid "Cell already used"
 #~ msgstr "Lock wird bereits gehalten durch:"
 
+#, fuzzy
+#~ msgid "Choose the hand-history file to inspect:"
+#~ msgstr "Pfad zu den Handhistorien"
+
 #~ msgid "Closed, no graph exported"
 #~ msgstr "Geschlossen, kein Graph exportiert"
 
@@ -11350,6 +11330,11 @@ msgstr ""
 
 #~ msgid "Debug Statistics Windows"
 #~ msgstr "Statistikfenster debuggen"
+
+#, fuzzy
+#~| msgid "eMail Import"
+#~ msgid "Debug failed import"
+#~ msgstr "Import per eMail"
 
 #, fuzzy
 #~ msgid ""
@@ -11620,6 +11605,10 @@ msgstr ""
 #~ msgstr ""
 #~ "Datei die zu spalten ist ist eine PokerStars oder Full Tilt Poker "
 #~ "Archivdatei"
+
+#, fuzzy
+#~ msgid "File unavailable"
+#~ msgstr "Vorschau aktualisieren"
 
 #~ msgid "Finished downloading emails."
 #~ msgstr "Emails fertig geladen."

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 18:43+0100\n"
+"POT-Creation-Date: 2026-11-23 19:34+0100\n"
 "PO-Revision-Date: 2011-11-11 20:56+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Catalan (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -1044,26 +1044,8 @@ msgstr "Trieu una carpeta de destinació"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy
-msgid "Choose the hand-history file to inspect:"
-msgstr "Camí dels historials de mans"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
 msgid "Configured Import Directories:"
 msgstr "Carpetes d'importació configurades:"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import…"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
-msgid "File unavailable"
-msgstr "Actualitza la previsualització"
 
 #: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
 msgid "Folder access needed"
@@ -1151,10 +1133,6 @@ msgstr "Trieu el camí que voleu importar automàticament"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Select at least one configured directory, or choose a folder to import."
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "The failed hand-history file can no longer be read."
 msgstr ""
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
@@ -10615,6 +10593,10 @@ msgstr ""
 #~ msgstr "La captura no s'ha pogut iniciar — vegeu el registre de dalt."
 
 #, fuzzy
+#~ msgid "Choose the hand-history file to inspect:"
+#~ msgstr "Camí dels historials de mans"
+
+#, fuzzy
 #~ msgid "CoinPoker Live Capture"
 #~ msgstr "Captura en directe de CoinPoker"
 
@@ -10654,6 +10636,10 @@ msgstr ""
 #~ msgstr ""
 #~ "Edita el títol, els colors de la vora, la posició i l'etiqueta del tauler "
 #~ "seleccionat"
+
+#, fuzzy
+#~ msgid "File unavailable"
+#~ msgstr "Actualitza la previsualització"
 
 #, fuzzy
 #~ msgid "Finishing previous capture…"

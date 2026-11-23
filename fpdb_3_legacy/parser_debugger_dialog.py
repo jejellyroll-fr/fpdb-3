@@ -38,11 +38,13 @@ from PySide6.QtWidgets import (
     QDialog,
     QFileDialog,
     QHBoxLayout,
+    QHeaderView,
     QInputDialog,
     QLabel,
     QMessageBox,
     QPlainTextEdit,
     QPushButton,
+    QSizePolicy,
     QSplitter,
     QStyledItemDelegate,
     QStyleOptionViewItem,
@@ -184,11 +186,22 @@ def _monospace() -> QFont:
     return QFontDatabase.systemFont(QFontDatabase.SystemFont.FixedFont)
 
 
-def _tree(headers: Iterable[str]) -> QTreeWidget:
+def _tree(
+    headers: Iterable[str],
+    *,
+    widths: tuple[int, ...] = (),
+    stretch_columns: tuple[int, ...] = (),
+) -> QTreeWidget:
     tree = QTreeWidget()
     labels = list(headers)
     tree.setColumnCount(len(labels))
     tree.setHeaderLabels(labels)
+    header = tree.header()
+    header.setStretchLastSection(False)
+    for column, width in enumerate(widths):
+        tree.setColumnWidth(column, width)
+    for column in stretch_columns:
+        header.setSectionResizeMode(column, QHeaderView.ResizeMode.Stretch)
     tree.setAlternatingRowColors(True)
     tree.setUniformRowHeights(True)
     tree.setItemDelegate(_StatusColorDelegate(tree))
@@ -289,7 +302,9 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self._failed_hand_keys: list[str] = []
         self._failed_hands_signature: tuple[tuple[str, int], ...] | None = None
         self.setWindowTitle(_("Parser Debugger"))
-        self.resize(1320, 820)
+        self.resize(1180, 760)
+        self.setMinimumSize(900, 620)
+        self.setMaximumSize(1420, 1000)
         self.setWindowFlag(Qt.WindowType.WindowMaximizeButtonHint, True)
 
         splitter = QSplitter(Qt.Orientation.Horizontal, self)
@@ -360,7 +375,11 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.parser_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         self.parser_label.setToolTip(_("The Python class instantiated to parse the selected file."))
         layout.addWidget(self.parser_label)
-        self.detection_tree = _tree([_("Converter"), _("Site"), _("Recognised"), _("Line"), _("Lines read"), _("Note")])
+        self.detection_tree = _tree(
+            [_("Converter"), _("Site"), _("Recognised"), _("Line"), _("Lines read"), _("Note")],
+            widths=(180, 120, 105, 70, 95, 180),
+            stretch_columns=(5,),
+        )
         layout.addWidget(self.detection_tree, 1)
         return panel
 
@@ -384,7 +403,11 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.failed_hands_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.failed_hands_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.failed_hands_table.setWordWrap(False)
-        self.failed_hands_table.horizontalHeader().setStretchLastSection(True)
+        header = self.failed_hands_table.horizontalHeader()
+        header.setStretchLastSection(False)
+        for column, width in enumerate((180, 230, 90, 100, 100, 165)):
+            self.failed_hands_table.setColumnWidth(column, width)
+        header.setSectionResizeMode(6, QHeaderView.ResizeMode.Stretch)
         self.failed_hands_table.itemDoubleClicked.connect(lambda _item: self.replay_failed_hand())
         layout.addWidget(self.failed_hands_table, 1)
 
@@ -416,12 +439,16 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.verdict_label = QLabel(_("Paste a hand history and press Debug parse."), panel)
         self.verdict_label.setTextFormat(Qt.TextFormat.RichText)
         self.verdict_label.setWordWrap(True)
+        self.verdict_label.setMinimumWidth(0)
+        self.verdict_label.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         header.addWidget(self.verdict_label, 1)
         self.failed_hands_button = QPushButton(_("Hands to debug ({count})").format(count=0), panel)
+        self.failed_hands_button.setMaximumWidth(190)
         self.failed_hands_button.clicked.connect(self.show_failed_hands)
         header.addWidget(self.failed_hands_button)
         header.addWidget(QLabel(_("Hand")))
         self.hand_combo = QComboBox(panel)
+        self.hand_combo.setMaximumWidth(150)
         self.hand_combo.currentIndexChanged.connect(self._show_hand)
         header.addWidget(self.hand_combo)
         layout.addLayout(header)
@@ -433,14 +460,28 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.summary.setOpenLinks(False)
         self.summary.anchorClicked.connect(lambda url: self.go_to_line(int(url.toString().removeprefix("line:"))))
         detection_panel = self._detection_panel(panel)
-        self.steps_tree = _tree([_("Step"), _("Status"), _("ms"), _("What it did"), _("Regexes")])
-        self.contract_tree = _tree(
-            [_("Step / check"), _("Status"), _("Field"), _("Message"), _("Expected"), _("Found")]
+        self.steps_tree = _tree(
+            [_("Step"), _("Status"), _("ms"), _("What it did"), _("Regexes")],
+            widths=(125, 90, 60, 280, 200),
+            stretch_columns=(3,),
         )
-        self.hand_tree = _tree([_("Field"), _("Value")])
-        self.lines_tree = _tree([_("Line"), _("Status"), _("Text"), _("Read by"), _("Regex match spans")])
+        self.contract_tree = _tree(
+            [_("Step / check"), _("Status"), _("Field"), _("Message"), _("Expected"), _("Found")],
+            widths=(160, 90, 120, 260, 140, 140),
+            stretch_columns=(3,),
+        )
+        self.hand_tree = _tree([_("Field"), _("Value")], widths=(180, 300), stretch_columns=(1,))
+        self.lines_tree = _tree(
+            [_("Line"), _("Status"), _("Text"), _("Read by"), _("Regex match spans")],
+            widths=(55, 90, 300, 180, 220),
+            stretch_columns=(2,),
+        )
         self.lines_tree.itemActivated.connect(self._line_item_activated)
-        self.expected_tree = _tree([_("Sidecar"), _("Field"), _("Player"), _("Expected"), _("Actual")])
+        self.expected_tree = _tree(
+            [_("Sidecar"), _("Field"), _("Player"), _("Expected"), _("Actual")],
+            widths=(150, 140, 140, 200, 200),
+            stretch_columns=(3, 4),
+        )
         self.log_view = QPlainTextEdit(panel)
         self.log_view.setReadOnly(True)
         self.log_view.setFont(_monospace())

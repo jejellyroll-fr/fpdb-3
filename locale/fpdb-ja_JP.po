@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 18:43+0100\n"
+"POT-Creation-Date: 2026-11-23 19:34+0100\n"
 "PO-Revision-Date: 2014-06-15 03:46+0900\n"
 "Last-Translator: TAKAHASHI Kaoru <kaoru@kaisei.org>\n"
 "Language-Team: Fpdb\n"
@@ -1007,28 +1007,8 @@ msgstr "移動先フォルダーを選択"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy
-msgid "Choose the hand-history file to inspect:"
-msgstr "ハンド履歴ファイルのパス"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
 msgid "Configured Import Directories:"
 msgstr "設定済みのインポートフォルダー:"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
-#| msgid "eMail Import"
-msgid "Debug failed import"
-msgstr "Eメールインポート"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import…"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
-msgid "File unavailable"
-msgstr "プレビューを更新"
 
 #: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
 msgid "Folder access needed"
@@ -1115,10 +1095,6 @@ msgstr "自動インポートの対象ディレクトリを選択してくださ
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Select at least one configured directory, or choose a folder to import."
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "The failed hand-history file can no longer be read."
 msgstr ""
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
@@ -10938,6 +10914,10 @@ msgstr ""
 #~ msgid "Cell already used"
 #~ msgstr "ロックは既に取得されています:"
 
+#, fuzzy
+#~ msgid "Choose the hand-history file to inspect:"
+#~ msgstr "ハンド履歴ファイルのパス"
+
 #~ msgid "Click OK to close Fpdb"
 #~ msgstr "FPDBを閉じるにはOKをクリック"
 
@@ -11035,6 +11015,11 @@ msgstr ""
 
 #~ msgid "Database error %s in hand %d. Skipping."
 #~ msgstr "データベースエラー %s がハンド %dで起きました。スキップします。"
+
+#, fuzzy
+#~| msgid "eMail Import"
+#~ msgid "Debug failed import"
+#~ msgstr "Eメールインポート"
 
 #~ msgid "Default encoding set to US-ASCII, defaulting to CP1252 instead."
 #~ msgstr "既定の文字エンコーディングをUS-ASCIIからCP1252に変更します。"
@@ -11168,6 +11153,10 @@ msgstr ""
 
 #~ msgid "File to be split is a PokerStars or Full Tilt Poker archive file"
 #~ msgstr "分割したいPokerStarsもしくはFull Tilt Pokerアーカイブファイル"
+
+#, fuzzy
+#~ msgid "File unavailable"
+#~ msgstr "プレビューを更新"
 
 #~ msgid "Finished downloading emails."
 #~ msgstr "Eメールのダウンロードが完了しました。"

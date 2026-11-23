@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 18:43+0100\n"
+"POT-Creation-Date: 2026-11-23 19:34+0100\n"
 "PO-Revision-Date: 2011-10-08 08:58+0000\n"
 "Last-Translator: greg20 <greg20@hushmail.com>\n"
 "Language-Team: Polish (Poland) (http://www.transifex.net/projects/p/fpdb/"
@@ -1012,28 +1012,8 @@ msgstr "Wybierz folder docelowy"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy
-msgid "Choose the hand-history file to inspect:"
-msgstr "Ścieżka do historii rozdań"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
 msgid "Configured Import Directories:"
 msgstr "Skonfigurowane foldery importu:"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
-#| msgid "eMail Import"
-msgid "Debug failed import"
-msgstr "Import przez pocztę"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import…"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
-msgid "File unavailable"
-msgstr "Odśwież podgląd"
 
 #: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
 msgid "Folder access needed"
@@ -1120,10 +1100,6 @@ msgstr "Wybierz ścieżkę z której chcesz auto-importować"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Select at least one configured directory, or choose a folder to import."
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "The failed hand-history file can no longer be read."
 msgstr ""
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
@@ -10959,6 +10935,10 @@ msgstr ""
 #~ msgid "Cell already used"
 #~ msgstr "blokada jest trzymana przez"
 
+#, fuzzy
+#~ msgid "Choose the hand-history file to inspect:"
+#~ msgstr "Ścieżka do historii rozdań"
+
 #~ msgid "Closed, no graph exported"
 #~ msgstr "Niewyeksportowano żadnych wykresów"
 
@@ -11092,6 +11072,11 @@ msgstr ""
 
 #~ msgid "Debug Statistics Windows"
 #~ msgstr "Debugowanie okien ze statystykami"
+
+#, fuzzy
+#~| msgid "eMail Import"
+#~ msgid "Debug failed import"
+#~ msgstr "Import przez pocztę"
 
 #~ msgid "Default encoding set to US-ASCII, defaulting to CP1252 instead."
 #~ msgstr "Zmiana domyślnego kodowania z US-ASCII na CP1252."
@@ -11294,6 +11279,10 @@ msgstr ""
 #~ msgid "File to be split is a PokerStars or Full Tilt Poker archive file"
 #~ msgstr ""
 #~ "Plik do podziału jest plikiem archiwalnym PokerStars lub Full Tilt Poker"
+
+#, fuzzy
+#~ msgid "File unavailable"
+#~ msgstr "Odśwież podgląd"
 
 #~ msgid "Finished downloading emails."
 #~ msgstr "Zakończono pobieranie e-maili."
