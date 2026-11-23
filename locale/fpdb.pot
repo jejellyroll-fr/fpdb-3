@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 14:13+0100\n"
+"POT-Creation-Date: 2026-11-23 22:13+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -921,22 +921,6 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Choose the hand-history file to inspect:"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "File unavailable"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "The failed hand-history file can no longer be read."
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
 #, python-brace-format
 msgid ""
 "PHH hands found: {found}\n"
@@ -970,10 +954,6 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Move failed files to:"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import…"
 msgstr ""
 
 #: fpdb_3_legacy/GuiBulkImport.py
@@ -1398,7 +1378,7 @@ msgstr ""
 msgid "Broadway"
 msgstr ""
 
-#: fpdb_3_legacy/GuiHandViewer.py
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Clear"
 msgstr ""
 
@@ -4845,6 +4825,7 @@ msgid "Edit"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Remove"
 msgstr ""
 
@@ -6182,6 +6163,10 @@ msgid "Debug parse"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Clear the raw hand and its analysis"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Trace lines"
 msgstr ""
 
@@ -6234,11 +6219,48 @@ msgid "Recognised"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
-msgid "Paste a hand history and press Debug parse."
+msgid "Site / converter"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Source file"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Mode"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py fpdb_3_legacy/research_labels.py
 msgid "Hand"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Failure"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Time"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Parser message"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Replay selected hand"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Clear list"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Paste a hand history and press Debug parse."
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "Hands to debug ({count})"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -6322,6 +6344,10 @@ msgid "Changes"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Hands to debug"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Copy bug report"
 msgstr ""
 
@@ -6352,6 +6378,16 @@ msgstr ""
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
 msgid "{name} · {encoding}"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "Captured from {source} · {site}"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "{hand} · {attempts} attempts"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py

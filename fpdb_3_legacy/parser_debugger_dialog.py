@@ -29,23 +29,29 @@ from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtCore import QModelIndex, QPersistentModelIndex, QSize, Qt
+from PySide6.QtCore import QModelIndex, QPersistentModelIndex, QSize, Qt, QTimer
 from PySide6.QtGui import QColor, QFont, QFontDatabase, QGuiApplication, QPainter, QTextCursor, QTextFormat
 from PySide6.QtWidgets import (
+    QAbstractItemView,
     QApplication,
     QCheckBox,
     QComboBox,
     QDialog,
     QFileDialog,
+    QGridLayout,
     QHBoxLayout,
+    QHeaderView,
     QInputDialog,
     QLabel,
     QMessageBox,
     QPlainTextEdit,
     QPushButton,
+    QSizePolicy,
     QSplitter,
     QStyledItemDelegate,
     QStyleOptionViewItem,
+    QTableWidget,
+    QTableWidgetItem,
     QTabWidget,
     QTextBrowser,
     QTextEdit,
@@ -56,6 +62,7 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy import parser_debug
+from fpdb_3_legacy.failed_hand_debug import failed_hands
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.parser_debug import Diagnostic, HandResult, ParseDebugReport
 
@@ -181,13 +188,26 @@ def _monospace() -> QFont:
     return QFontDatabase.systemFont(QFontDatabase.SystemFont.FixedFont)
 
 
-def _tree(headers: Iterable[str]) -> QTreeWidget:
+def _tree(
+    headers: Iterable[str],
+    *,
+    widths: tuple[int, ...] = (),
+) -> QTreeWidget:
     tree = QTreeWidget()
     labels = list(headers)
     tree.setColumnCount(len(labels))
     tree.setHeaderLabels(labels)
+    header = tree.header()
+    header.setStretchLastSection(False)
+    header.setSectionsMovable(True)
+    header.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
+    for column, width in enumerate(widths):
+        tree.setColumnWidth(column, width)
     tree.setAlternatingRowColors(True)
     tree.setUniformRowHeights(True)
+    tree.setHorizontalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
+    tree.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
+    tree.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
     tree.setItemDelegate(_StatusColorDelegate(tree))
     return tree
 
@@ -273,22 +293,44 @@ def _add_value(parent: QTreeWidgetItem, key: str, value: Any) -> None:
 class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attributes  # one per widget
     """The Parser Debugger window."""
 
+    replay_failed_hand_button: QPushButton
+    remove_failed_hand_button: QPushButton
+    clear_failed_hands_button: QPushButton
+    failed_hands_timer: QTimer
+    clear_button: QPushButton
+
     def __init__(self, config: Any, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.config = config
         self.report: ParseDebugReport | None = None
         self.loaded_path: Path | None = None
         self.loaded_text = ""
+        self.loaded_name: str | None = None
         self.fixture_button: QPushButton
         self.parser_label: QLabel
         self.detection_tree: QTreeWidget
+        self.failed_hands_table: QTableWidget
+        self._failed_hand_keys: list[str] = []
+        self._failed_hands_signature: tuple[tuple[str, int], ...] | None = None
         self.setWindowTitle(_("Parser Debugger"))
-        self.resize(1320, 820)
+        self.resize(1160, 780)
+        self.setMinimumSize(900, 620)
+        self.setMaximumSize(1320, 1000)
         self.setWindowFlag(Qt.WindowType.WindowMaximizeButtonHint, True)
 
         splitter = QSplitter(Qt.Orientation.Horizontal, self)
-        splitter.addWidget(self._input_panel())
-        splitter.addWidget(self._report_panel())
+        splitter.setHandleWidth(10)
+        splitter.setChildrenCollapsible(False)
+        splitter.setStyleSheet(
+            "QSplitter::handle:horizontal { background: #172b45; }"
+            "QSplitter::handle:horizontal:hover { background: #00c78a; }"
+        )
+        input_panel = self._input_panel()
+        report_panel = self._report_panel()
+        input_panel.setMinimumWidth(340)
+        report_panel.setMinimumWidth(420)
+        splitter.addWidget(input_panel)
+        splitter.addWidget(report_panel)
         splitter.setStretchFactor(0, 2)
         splitter.setStretchFactor(1, 3)
 
@@ -317,6 +359,10 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.run_button.setDefault(True)
         self.run_button.clicked.connect(self.run)
         controls.addWidget(self.run_button)
+        self.clear_button = QPushButton(_("Clear"), panel)
+        self.clear_button.setToolTip(_("Clear the raw hand and its analysis"))
+        self.clear_button.clicked.connect(self.clear_debugger)
+        controls.addWidget(self.clear_button)
         layout.addLayout(controls)
 
         options = QHBoxLayout()
@@ -354,11 +400,65 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.parser_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         self.parser_label.setToolTip(_("The Python class instantiated to parse the selected file."))
         layout.addWidget(self.parser_label)
-        self.detection_tree = _tree([_("Converter"), _("Site"), _("Recognised"), _("Line"), _("Lines read"), _("Note")])
+        self.detection_tree = _tree(
+            [_("Converter"), _("Site"), _("Recognised"), _("Line"), _("Lines read"), _("Note")],
+            widths=(180, 120, 105, 70, 95, 180),
+        )
         layout.addWidget(self.detection_tree, 1)
         return panel
 
-    def _report_panel(self) -> QWidget:
+    def _failed_hands_panel(self, parent: QWidget) -> QWidget:
+        """Show the session queue inside the Parser Debugger."""
+        panel = QWidget(parent)
+        layout = QVBoxLayout(panel)
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.failed_hands_table = QTableWidget(0, 7, panel)
+        self.failed_hands_table.setHorizontalHeaderLabels(
+            [
+                _("Site / converter"),
+                _("Source file"),
+                _("Mode"),
+                _("Hand"),
+                _("Failure"),
+                _("Time"),
+                _("Parser message"),
+            ]
+        )
+        self.failed_hands_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.failed_hands_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self.failed_hands_table.setWordWrap(False)
+        header = self.failed_hands_table.horizontalHeader()
+        header.setStretchLastSection(False)
+        header.setSectionsMovable(True)
+        header.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
+        for column, width in enumerate((180, 230, 90, 100, 100, 165)):
+            self.failed_hands_table.setColumnWidth(column, width)
+        self.failed_hands_table.setHorizontalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
+        self.failed_hands_table.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
+        self.failed_hands_table.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.failed_hands_table.itemDoubleClicked.connect(lambda _item: self.replay_failed_hand())
+        layout.addWidget(self.failed_hands_table, 1)
+
+        actions = QHBoxLayout()
+        self.replay_failed_hand_button = QPushButton(_("Replay selected hand"), panel)
+        self.remove_failed_hand_button = QPushButton(_("Remove"), panel)
+        self.clear_failed_hands_button = QPushButton(_("Clear list"), panel)
+        self.replay_failed_hand_button.clicked.connect(self.replay_failed_hand)
+        self.remove_failed_hand_button.clicked.connect(self.remove_failed_hand)
+        self.clear_failed_hands_button.clicked.connect(self.clear_failed_hands)
+        actions.addWidget(self.replay_failed_hand_button)
+        actions.addWidget(self.remove_failed_hand_button)
+        actions.addWidget(self.clear_failed_hands_button)
+        actions.addStretch(1)
+        layout.addLayout(actions)
+
+        self.refresh_failed_hands()
+        self.failed_hands_timer = QTimer(self)
+        self.failed_hands_timer.timeout.connect(self.refresh_failed_hands)
+        self.failed_hands_timer.start(1500)
+        return panel
+
+    def _report_panel(self) -> QWidget:  # noqa: PLR0915 - one tab for each parser report view
         panel = QWidget(self)
         layout = QVBoxLayout(panel)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -367,9 +467,16 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.verdict_label = QLabel(_("Paste a hand history and press Debug parse."), panel)
         self.verdict_label.setTextFormat(Qt.TextFormat.RichText)
         self.verdict_label.setWordWrap(True)
+        self.verdict_label.setMinimumWidth(0)
+        self.verdict_label.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         header.addWidget(self.verdict_label, 1)
+        self.failed_hands_button = QPushButton(_("Hands to debug ({count})").format(count=0), panel)
+        self.failed_hands_button.setMaximumWidth(190)
+        self.failed_hands_button.clicked.connect(self.show_failed_hands)
+        header.addWidget(self.failed_hands_button)
         header.addWidget(QLabel(_("Hand")))
         self.hand_combo = QComboBox(panel)
+        self.hand_combo.setMaximumWidth(150)
         self.hand_combo.currentIndexChanged.connect(self._show_hand)
         header.addWidget(self.hand_combo)
         layout.addLayout(header)
@@ -377,18 +484,32 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         layout.addWidget(_status_legend(panel))
 
         self.tabs = QTabWidget(panel)
+        self.tabs.setUsesScrollButtons(True)
+        self.tabs.setElideMode(Qt.TextElideMode.ElideNone)
+        self.tabs.setMovable(True)
+        self.tabs.tabBar().setExpanding(False)
         self.summary = QTextBrowser(panel)
         self.summary.setOpenLinks(False)
         self.summary.anchorClicked.connect(lambda url: self.go_to_line(int(url.toString().removeprefix("line:"))))
         detection_panel = self._detection_panel(panel)
-        self.steps_tree = _tree([_("Step"), _("Status"), _("ms"), _("What it did"), _("Regexes")])
-        self.contract_tree = _tree(
-            [_("Step / check"), _("Status"), _("Field"), _("Message"), _("Expected"), _("Found")]
+        self.steps_tree = _tree(
+            [_("Step"), _("Status"), _("ms"), _("What it did"), _("Regexes")],
+            widths=(125, 90, 60, 280, 200),
         )
-        self.hand_tree = _tree([_("Field"), _("Value")])
-        self.lines_tree = _tree([_("Line"), _("Status"), _("Text"), _("Read by"), _("Regex match spans")])
+        self.contract_tree = _tree(
+            [_("Step / check"), _("Status"), _("Field"), _("Message"), _("Expected"), _("Found")],
+            widths=(160, 90, 120, 260, 140, 140),
+        )
+        self.hand_tree = _tree([_("Field"), _("Value")], widths=(180, 300))
+        self.lines_tree = _tree(
+            [_("Line"), _("Status"), _("Text"), _("Read by"), _("Regex match spans")],
+            widths=(55, 90, 300, 180, 220),
+        )
         self.lines_tree.itemActivated.connect(self._line_item_activated)
-        self.expected_tree = _tree([_("Sidecar"), _("Field"), _("Player"), _("Expected"), _("Actual")])
+        self.expected_tree = _tree(
+            [_("Sidecar"), _("Field"), _("Player"), _("Expected"), _("Actual")],
+            widths=(150, 140, 140, 200, 200),
+        )
         self.log_view = QPlainTextEdit(panel)
         self.log_view.setReadOnly(True)
         self.log_view.setFont(_monospace())
@@ -409,10 +530,14 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
             (self.json_view, _("JSON")),
             (self.changes_view, _("Changes")),
         ):
-            self.tabs.addTab(widget, title)
+            tab_index = self.tabs.addTab(widget, title)
+            self.tabs.setTabToolTip(tab_index, title)
+        self.failed_hands_panel = self._failed_hands_panel(panel)
+        failed_hands_index = self.tabs.addTab(self.failed_hands_panel, _("Hands to debug"))
+        self.tabs.setTabToolTip(failed_hands_index, _("Hands to debug"))
         layout.addWidget(self.tabs, 1)
 
-        buttons = QHBoxLayout()
+        buttons = QGridLayout()
         self.copy_button = QPushButton(_("Copy bug report"), panel)
         self.copy_button.setToolTip(_("Markdown for a GitHub issue, player names replaced"))
         self.copy_button.clicked.connect(self.copy_bug_report)
@@ -421,16 +546,53 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.compare_button = QPushButton(_("Compare with…"), panel)
         self.compare_button.setToolTip(_("What changed since a report saved earlier on the same text"))
         self.compare_button.clicked.connect(self.compare_report)
-        for button in (self.copy_button, self.save_button, self.compare_button, self._fixture_action(panel)):
+        action_buttons = (self.copy_button, self.save_button, self.compare_button, self._fixture_action(panel))
+        for index, button in enumerate(action_buttons):
             button.setEnabled(False)
-            buttons.addWidget(button)
-        buttons.addStretch(1)
+            button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+            buttons.addWidget(button, index // 2, index % 2)
+        buttons.setColumnStretch(0, 1)
+        buttons.setColumnStretch(1, 1)
         self.status_label = QLabel(panel)
-        buttons.addWidget(self.status_label)
+        self.status_label.setMinimumWidth(0)
+        self.status_label.setMaximumWidth(560)
+        self.status_label.setWordWrap(True)
+        buttons.addWidget(self.status_label, 2, 0, 1, 2)
         layout.addLayout(buttons)
         return panel
 
     # -- actions --------------------------------------------------------------
+
+    def clear_debugger(self) -> None:
+        """Clear the raw hand and all analysis produced for it."""
+        self.input.clear()
+        self.input.set_coverage({})
+        self.input.setExtraSelections([])
+        self.loaded_path = None
+        self.loaded_text = ""
+        self.loaded_name = None
+        self.report = None
+        self.verdict_label.setText(_("Paste a hand history and press Debug parse."))
+        self.parser_label.setText(_("Parser not determined yet"))
+        self.hand_combo.blockSignals(True)
+        self.hand_combo.clear()
+        self.hand_combo.blockSignals(False)
+        self.summary.clear()
+        for tree in (
+            self.detection_tree,
+            self.steps_tree,
+            self.contract_tree,
+            self.hand_tree,
+            self.lines_tree,
+            self.expected_tree,
+        ):
+            tree.clear()
+        for view in (self.log_view, self.json_view, self.changes_view):
+            view.clear()
+        self.status_label.clear()
+        for button in (self.copy_button, self.save_button, self.compare_button, self.fixture_button):
+            button.setEnabled(False)
+        self.tabs.setCurrentWidget(self.summary)
 
     def open_file(self) -> None:
         path, _filter = QFileDialog.getOpenFileName(self, _("Open a hand history"))
@@ -445,9 +607,86 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         text = text or ""
         self.input.setPlainText(text)
         self.loaded_path, self.loaded_text = path, self.input.toPlainText()
+        self.loaded_name = None
         self.status_label.setText(
             _("{name} · {encoding}").format(name=path.name, encoding=encoding or _("unknown encoding"))
         )
+
+    def load_import_failure(self, text: str, site: str, source: str) -> None:
+        """Load a captured hand without consulting its original source file."""
+        self.input.setPlainText(text)
+        self.loaded_path = None
+        self.loaded_text = self.input.toPlainText()
+        self.loaded_name = Path(source).name
+        site_index = self.site_combo.findData(site)
+        if site_index >= 0:
+            self.site_combo.setCurrentIndex(site_index)
+        self.status_label.setText(_("Captured from {source} · {site}").format(source=source, site=site))
+
+    def show_failed_hands(self) -> None:
+        """Focus the import-failure list embedded in the debugger."""
+        self.refresh_failed_hands()
+        self.tabs.setCurrentWidget(self.failed_hands_panel)
+
+    def refresh_failed_hands(self) -> None:
+        selected_key = self._selected_failed_hand_key()
+        entries = failed_hands.entries()
+        self.failed_hands_button.setText(_("Hands to debug ({count})").format(count=len(entries)))
+        signature = tuple((entry.key, entry.attempts) for entry in entries)
+        if signature == self._failed_hands_signature:
+            return
+        self._failed_hands_signature = signature
+        self._failed_hand_keys = [entry.key for entry in entries]
+        self.failed_hands_table.setRowCount(len(entries))
+        for row, entry in enumerate(entries):
+            hand = entry.hand_identifier or str(entry.hand_index)
+            if entry.attempts > 1:
+                hand = _("{hand} · {attempts} attempts").format(hand=hand, attempts=entry.attempts)
+            values = (
+                f"{entry.site} · {entry.converter}",
+                entry.source,
+                entry.mode,
+                hand,
+                entry.failure_type,
+                entry.timestamp.strftime("%Y-%m-%d %H:%M:%S %Z"),
+                entry.message,
+            )
+            for column, value in enumerate(values):
+                self.failed_hands_table.setItem(row, column, QTableWidgetItem(value))
+        has_entries = bool(entries)
+        self.failed_hands_table.clearSelection()
+        if selected_key is not None and selected_key in self._failed_hand_keys:
+            self.failed_hands_table.selectRow(self._failed_hand_keys.index(selected_key))
+        self.replay_failed_hand_button.setEnabled(has_entries)
+        self.remove_failed_hand_button.setEnabled(has_entries)
+        self.clear_failed_hands_button.setEnabled(has_entries)
+
+    def _selected_failed_hand_key(self) -> str | None:
+        rows = self.failed_hands_table.selectionModel().selectedRows()
+        if rows and rows[0].row() < len(self._failed_hand_keys):
+            return self._failed_hand_keys[rows[0].row()]
+        return None
+
+    def replay_failed_hand(self) -> None:
+        key = self._selected_failed_hand_key()
+        if key is None:
+            return
+        entry = next((candidate for candidate in failed_hands.entries() if candidate.key == key), None)
+        if entry is None:
+            self.refresh_failed_hands()
+            return
+        self.load_import_failure(entry.replay_text, entry.site, entry.source)
+        self.run()
+
+    def remove_failed_hand(self) -> None:
+        key = self._selected_failed_hand_key()
+        if key is not None:
+            failed_hands.remove(key)
+            self.refresh_failed_hands()
+
+    def clear_failed_hands(self) -> None:
+        failed_hands.clear()
+        self.refresh_failed_hands()
 
     def run(self) -> None:
         text = self.input.toPlainText()
@@ -470,6 +709,7 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
                     text,
                     self.config,
                     site,
+                    name=self.loaded_name if text == self.loaded_text and self.loaded_name else "pasted.txt",
                     trace_lines=self.trace_check.isChecked(),
                     derived=self.derived_check.isChecked(),
                 )

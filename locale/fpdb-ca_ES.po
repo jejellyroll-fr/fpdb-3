@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 14:13+0100\n"
+"POT-Creation-Date: 2026-11-23 22:13+0100\n"
 "PO-Revision-Date: 2011-11-11 20:56+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Catalan (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -1044,26 +1044,8 @@ msgstr "Trieu una carpeta de destinació"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy
-msgid "Choose the hand-history file to inspect:"
-msgstr "Camí dels historials de mans"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
 msgid "Configured Import Directories:"
 msgstr "Carpetes d'importació configurades:"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import…"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
-msgid "File unavailable"
-msgstr "Actualitza la previsualització"
 
 #: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
 msgid "Folder access needed"
@@ -1151,10 +1133,6 @@ msgstr "Trieu el camí que voleu importar automàticament"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Select at least one configured directory, or choose a folder to import."
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "The failed hand-history file can no longer be read."
 msgstr ""
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
@@ -1770,7 +1748,7 @@ msgstr "Ha passat"
 msgid "Choose hands…"
 msgstr "Tria les mans…"
 
-#: fpdb_3_legacy/GuiHandViewer.py
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Clear"
 msgstr "Esborra"
@@ -6500,6 +6478,7 @@ msgid "Redo the change just undone (Ctrl+Shift+Z)"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Remove"
 msgstr "Treu"
@@ -7351,9 +7330,23 @@ msgid "Cannot anonymize fixture"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "Captured from {source} · {site}"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Changes"
 msgstr "Desa els canvis"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Clear list"
+msgstr "Esborra-ho tot"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Clear the raw hand and its analysis"
+msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
@@ -7417,6 +7410,10 @@ msgid "Expected"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Failure"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
 msgid "File encoding: {encoding}"
 msgstr ""
@@ -7452,6 +7449,16 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
+msgid "Hands to debug"
+msgstr "Mans després de"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy, python-brace-format
+msgid "Hands to debug ({count})"
+msgstr "Mans després de"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
 msgid "JSON"
 msgstr "Copia el JSON"
 
@@ -7484,6 +7491,10 @@ msgstr "Missatges de registre"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Missing / not reached"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Mode"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7528,6 +7539,10 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Parser Debugger"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Parser message"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7583,6 +7598,11 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
+msgid "Replay selected hand"
+msgstr "Actualitza la seleccionada"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
 msgid "Report saved"
 msgstr "Informa d'un problema"
 
@@ -7608,6 +7628,16 @@ msgstr "Desa el preajust"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Sidecar"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Site / converter"
+msgstr "Inverteix"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Source file"
+msgstr "Mans d'origen"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Status colours"
@@ -7650,6 +7680,10 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "This file has no regression sidecar (.hands, .hp, .gt)"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Time"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7728,6 +7762,11 @@ msgstr "no trobat"
 #, fuzzy
 msgid "unknown encoding"
 msgstr "Sala desconeguda"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "{hand} · {attempts} attempts"
+msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
@@ -10558,6 +10597,10 @@ msgstr ""
 #~ msgstr "La captura no s'ha pogut iniciar — vegeu el registre de dalt."
 
 #, fuzzy
+#~ msgid "Choose the hand-history file to inspect:"
+#~ msgstr "Camí dels historials de mans"
+
+#, fuzzy
 #~ msgid "CoinPoker Live Capture"
 #~ msgstr "Captura en directe de CoinPoker"
 
@@ -10597,6 +10640,10 @@ msgstr ""
 #~ msgstr ""
 #~ "Edita el títol, els colors de la vora, la posició i l'etiqueta del tauler "
 #~ "seleccionat"
+
+#, fuzzy
+#~ msgid "File unavailable"
+#~ msgstr "Actualitza la previsualització"
 
 #, fuzzy
 #~ msgid "Finishing previous capture…"

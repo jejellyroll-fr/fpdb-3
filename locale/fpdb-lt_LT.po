@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 14:13+0100\n"
+"POT-Creation-Date: 2026-11-23 22:13+0100\n"
 "PO-Revision-Date: 2011-07-09 14:23+0000\n"
 "Last-Translator: OvidijusSv <OvidijusSv@gmail.com>\n"
 "Language-Team: Lithuanian (Lithuania) (http://www.transifex.net/projects/p/"
@@ -1035,26 +1035,8 @@ msgstr "Pasirinkite paskirties aplanką"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy
-msgid "Choose the hand-history file to inspect:"
-msgstr "Kelias iki rankų istorijų failų"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
 msgid "Configured Import Directories:"
 msgstr "Sukonfigūruoti importo aplankai:"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import…"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
-msgid "File unavailable"
-msgstr "Atnaujinti peržiūrą"
 
 #: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
 msgid "Folder access needed"
@@ -1141,10 +1123,6 @@ msgstr "Pasirinkite vietą kurią norite automatiškai importuoti"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Select at least one configured directory, or choose a folder to import."
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "The failed hand-history file can no longer be read."
 msgstr ""
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
@@ -1759,7 +1737,7 @@ msgstr "Patikrino"
 msgid "Choose hands…"
 msgstr "Pasirinkti rankas…"
 
-#: fpdb_3_legacy/GuiHandViewer.py
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Clear"
 msgstr "Išvalyti"
@@ -6478,6 +6456,7 @@ msgid "Redo the change just undone (Ctrl+Shift+Z)"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Remove"
 msgstr "Pašalinti"
@@ -7330,9 +7309,23 @@ msgid "Cannot anonymize fixture"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "Captured from {source} · {site}"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Changes"
 msgstr "Įrašyti pakeitimus"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Clear list"
+msgstr "Išvalyti viską"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Clear the raw hand and its analysis"
+msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
@@ -7396,6 +7389,10 @@ msgid "Expected"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Failure"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
 msgid "File encoding: {encoding}"
 msgstr ""
@@ -7431,6 +7428,16 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
+msgid "Hands to debug"
+msgstr "Rankos po"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy, python-brace-format
+msgid "Hands to debug ({count})"
+msgstr "Rankos po"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
 msgid "JSON"
 msgstr "Kopijuoti JSON"
 
@@ -7463,6 +7470,10 @@ msgstr "Žurnalo pranešimai"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Missing / not reached"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Mode"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7507,6 +7518,10 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Parser Debugger"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Parser message"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7562,6 +7577,11 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
+msgid "Replay selected hand"
+msgstr "Atnaujinti pasirinktą"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
 msgid "Report saved"
 msgstr "Pranešti apie problemą"
 
@@ -7587,6 +7607,16 @@ msgstr "Įrašyti šabloną"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Sidecar"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Site / converter"
+msgstr "Apversti"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Source file"
+msgstr "Šaltinio rankos"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Status colours"
@@ -7629,6 +7659,10 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "This file has no regression sidecar (.hands, .hp, .gt)"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Time"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7707,6 +7741,11 @@ msgstr "nerasta"
 #, fuzzy
 msgid "unknown encoding"
 msgstr "Nežinoma svetainė"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "{hand} · {attempts} attempts"
+msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
@@ -10646,6 +10685,10 @@ msgstr ""
 #~ msgid "Capture failed to start — see the log above."
 #~ msgstr "Fiksavimas nepasileido — žr. žurnalą aukščiau."
 
+#, fuzzy
+#~ msgid "Choose the hand-history file to inspect:"
+#~ msgstr "Kelias iki rankų istorijų failų"
+
 #~ msgid "Closed, no graph exported"
 #~ msgstr "Uždaryta, jokių grafikų neeksportuota"
 
@@ -10774,6 +10817,10 @@ msgstr ""
 
 #~ msgid "File not found"
 #~ msgstr "Failas nerastas"
+
+#, fuzzy
+#~ msgid "File unavailable"
+#~ msgstr "Atnaujinti peržiūrą"
 
 #, fuzzy
 #~ msgid "Finished downloading emails."

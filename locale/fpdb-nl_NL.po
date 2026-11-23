@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 14:13+0100\n"
+"POT-Creation-Date: 2026-11-23 22:13+0100\n"
 "PO-Revision-Date: 2011-12-03 21:57+0000\n"
 "Last-Translator: LimburgCwboy <hdps.een@gmail.com>\n"
 "Language-Team: Dutch (Netherlands) (http://www.transifex.net/projects/p/fpdb/"
@@ -1044,26 +1044,8 @@ msgstr "Kies een doelmap"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy
-msgid "Choose the hand-history file to inspect:"
-msgstr "Pad naar de handgeschiedenissen"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
 msgid "Configured Import Directories:"
 msgstr "Ingestelde importmappen:"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import…"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
-msgid "File unavailable"
-msgstr "Voorbeeld bijwerken"
 
 #: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
 msgid "Folder access needed"
@@ -1151,10 +1133,6 @@ msgstr "Kies het pad dat u automatisch wilt importeren"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Select at least one configured directory, or choose a folder to import."
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "The failed hand-history file can no longer be read."
 msgstr ""
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
@@ -1768,7 +1746,7 @@ msgstr "Gecheckt"
 msgid "Choose hands…"
 msgstr "Handen kiezen…"
 
-#: fpdb_3_legacy/GuiHandViewer.py
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Clear"
 msgstr "Wissen"
@@ -6486,6 +6464,7 @@ msgid "Redo the change just undone (Ctrl+Shift+Z)"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Remove"
 msgstr "Verwijderen"
@@ -7335,9 +7314,23 @@ msgid "Cannot anonymize fixture"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "Captured from {source} · {site}"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Changes"
 msgstr "Wijzigingen opslaan"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Clear list"
+msgstr "Alles wissen"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Clear the raw hand and its analysis"
+msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
@@ -7401,6 +7394,10 @@ msgid "Expected"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Failure"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
 msgid "File encoding: {encoding}"
 msgstr ""
@@ -7436,6 +7433,16 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
+msgid "Hands to debug"
+msgstr "Handen na"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy, python-brace-format
+msgid "Hands to debug ({count})"
+msgstr "Handen na"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
 msgid "JSON"
 msgstr "JSON kopiëren"
 
@@ -7468,6 +7475,10 @@ msgstr "Logberichten"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Missing / not reached"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Mode"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7512,6 +7523,10 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Parser Debugger"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Parser message"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7567,6 +7582,11 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
+msgid "Replay selected hand"
+msgstr "Selectie bijwerken"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
 msgid "Report saved"
 msgstr "Een probleem melden"
 
@@ -7592,6 +7612,16 @@ msgstr "Voorinstelling opslaan"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Sidecar"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Site / converter"
+msgstr "Omkeren"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Source file"
+msgstr "Bronhanden"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Status colours"
@@ -7634,6 +7664,10 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "This file has no regression sidecar (.hands, .hp, .gt)"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Time"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7712,6 +7746,11 @@ msgstr "niet gevonden"
 #, fuzzy
 msgid "unknown encoding"
 msgstr "Onbekende site"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "{hand} · {attempts} attempts"
+msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
@@ -10549,6 +10588,10 @@ msgstr ""
 #~ msgstr "Opname kon niet starten — zie het logboek hierboven."
 
 #, fuzzy
+#~ msgid "Choose the hand-history file to inspect:"
+#~ msgstr "Pad naar de handgeschiedenissen"
+
+#, fuzzy
 #~ msgid "CoinPoker Live Capture"
 #~ msgstr "Live-opname van CoinPoker"
 
@@ -10603,6 +10646,10 @@ msgstr ""
 
 #~ msgid "Error rebuilding hudcache:"
 #~ msgstr "Fout heropbouwen hudcache:"
+
+#, fuzzy
+#~ msgid "File unavailable"
+#~ msgstr "Voorbeeld bijwerken"
 
 #~ msgid "Finished recreating tables"
 #~ msgstr "Klaar met regenereren tabellen"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 14:13+0100\n"
+"POT-Creation-Date: 2026-11-23 22:13+0100\n"
 "PO-Revision-Date: 2011-07-27 15:17+0000\n"
 "Last-Translator: pkpkpkdo <ofelipedbzgt@hotmail.com>\n"
 "Language-Team: Portuguese (Brazilian) (http://www.transifex.net/projects/p/"
@@ -1034,26 +1034,8 @@ msgstr "Escolher uma pasta de destino"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy
-msgid "Choose the hand-history file to inspect:"
-msgstr "Caminho dos históricos de mãos"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
 msgid "Configured Import Directories:"
 msgstr "Pastas de importação configuradas:"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import…"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
-msgid "File unavailable"
-msgstr "Atualizar prévia"
 
 #: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
 msgid "Folder access needed"
@@ -1142,10 +1124,6 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Select at least one configured directory, or choose a folder to import."
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "The failed hand-history file can no longer be read."
 msgstr ""
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
@@ -1755,7 +1733,7 @@ msgstr "Deu check"
 msgid "Choose hands…"
 msgstr "Escolher mãos…"
 
-#: fpdb_3_legacy/GuiHandViewer.py
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Clear"
 msgstr "Limpar"
@@ -6469,6 +6447,7 @@ msgid "Redo the change just undone (Ctrl+Shift+Z)"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Remove"
 msgstr "Remover"
@@ -7317,9 +7296,23 @@ msgid "Cannot anonymize fixture"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "Captured from {source} · {site}"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Changes"
 msgstr "Salvar alterações"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Clear list"
+msgstr "Limpar tudo"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Clear the raw hand and its analysis"
+msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
@@ -7383,6 +7376,10 @@ msgid "Expected"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Failure"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
 msgid "File encoding: {encoding}"
 msgstr ""
@@ -7415,6 +7412,16 @@ msgstr "Mão"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Hand fingerprint"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Hands to debug"
+msgstr "Mãos depois de"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy, python-brace-format
+msgid "Hands to debug ({count})"
+msgstr "Mãos depois de"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
@@ -7451,6 +7458,10 @@ msgstr "Mensagens de Log"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Missing / not reached"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Mode"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7495,6 +7506,10 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Parser Debugger"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Parser message"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7550,6 +7565,11 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
+msgid "Replay selected hand"
+msgstr "Atualizar selecionada"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
 msgid "Report saved"
 msgstr "Relatar um problema"
 
@@ -7575,6 +7595,16 @@ msgstr "Salvar predefinição"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Sidecar"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Site / converter"
+msgstr "Inverter"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Source file"
+msgstr "Mãos de origem"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Status colours"
@@ -7618,6 +7648,12 @@ msgstr ""
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "This file has no regression sidecar (.hands, .hp, .gt)"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+#| msgid "utcTime:"
+msgid "Time"
+msgstr "utcTime:"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Trace lines"
@@ -7695,6 +7731,11 @@ msgstr "não encontrado"
 #, fuzzy
 msgid "unknown encoding"
 msgstr "Sala desconhecida"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "{hand} · {attempts} attempts"
+msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
@@ -10749,6 +10790,10 @@ msgstr ""
 #~ msgid "Capture failed to start — see the log above."
 #~ msgstr "A captura não pôde iniciar — veja o registro acima."
 
+#, fuzzy
+#~ msgid "Choose the hand-history file to inspect:"
+#~ msgstr "Caminho dos históricos de mãos"
+
 #~ msgid "Closed, no graph exported"
 #~ msgstr "Fechado, nenhum gráfico exportado."
 
@@ -10955,6 +11000,10 @@ msgstr ""
 
 #~ msgid "File to be split is a PokerStars or Full Tilt Poker archive file"
 #~ msgstr "Arquivo a ser dividido é do PokerStars ou Full Tilt Poker"
+
+#, fuzzy
+#~ msgid "File unavailable"
+#~ msgstr "Atualizar prévia"
 
 #, fuzzy
 #~ msgid "Finished downloading emails."
@@ -11889,9 +11938,6 @@ msgstr ""
 
 #~ msgid "unable to read file with any codec in list!"
 #~ msgstr "incapaz de ler o arquivo com os codecs da lista"
-
-#~ msgid "utcTime:"
-#~ msgstr "utcTime:"
 
 #, fuzzy
 #~ msgid "↑ Up"

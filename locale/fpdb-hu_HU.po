@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 14:13+0100\n"
+"POT-Creation-Date: 2026-11-23 22:13+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -1008,28 +1008,8 @@ msgstr "Célmappa kiválasztása"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy
-msgid "Choose the hand-history file to inspect:"
-msgstr "A leosztástörténetek útvonala"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
 msgid "Configured Import Directories:"
 msgstr "Beállított importálási mappák:"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
-#| msgid "eMail Import"
-msgid "Debug failed import"
-msgstr "Email import"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import…"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
-msgid "File unavailable"
-msgstr "Előnézet frissítése"
 
 #: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
 msgid "Folder access needed"
@@ -1115,10 +1095,6 @@ msgstr "Válaszd ki a könyvtárat az Auto Importhoz"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Select at least one configured directory, or choose a folder to import."
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "The failed hand-history file can no longer be read."
 msgstr ""
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
@@ -1727,7 +1703,7 @@ msgstr "Passzolt"
 msgid "Choose hands…"
 msgstr "Kezek kiválasztása…"
 
-#: fpdb_3_legacy/GuiHandViewer.py
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Clear"
 msgstr "Törlés"
@@ -6439,6 +6415,7 @@ msgid "Redo the change just undone (Ctrl+Shift+Z)"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Remove"
 msgstr "Eltávolítás"
@@ -7308,9 +7285,23 @@ msgid "Cannot anonymize fixture"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "Captured from {source} · {site}"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Changes"
 msgstr "Változások mentése"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Clear list"
+msgstr "Összes törlése"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Clear the raw hand and its analysis"
+msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
@@ -7376,6 +7367,10 @@ msgid "Expected"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Failure"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
 msgid "File encoding: {encoding}"
 msgstr ""
@@ -7408,6 +7403,16 @@ msgstr "Leosztás"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Hand fingerprint"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Hands to debug"
+msgstr "Leosztások ez után"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy, python-brace-format
+msgid "Hands to debug ({count})"
+msgstr "Leosztások ez után"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
@@ -7444,6 +7449,10 @@ msgstr "Naplóbejegyzések"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Missing / not reached"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Mode"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7489,6 +7498,12 @@ msgstr ""
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Parser Debugger"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+#| msgid "database used"
+msgid "Parser message"
+msgstr "használt adatbázis"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Parser not determined yet"
@@ -7545,6 +7560,11 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
+msgid "Replay selected hand"
+msgstr "Kijelölt frissítése"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
 msgid "Report saved"
 msgstr "Hiba bejelentése"
 
@@ -7570,6 +7590,17 @@ msgstr "Előbeállítás mentése"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Sidecar"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+#| msgid "Suited connectors"
+msgid "Site / converter"
+msgstr "Egyszínű kapcsolódó"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Source file"
+msgstr "Forrásleosztások"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Status colours"
@@ -7613,6 +7644,12 @@ msgstr ""
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "This file has no regression sidecar (.hands, .hp, .gt)"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+#| msgid "utcTime:"
+msgid "Time"
+msgstr "utcTime:"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Trace lines"
@@ -7692,6 +7729,11 @@ msgstr "nem található"
 #| msgid "Unknown Site"
 msgid "unknown encoding"
 msgstr "Ismeretlen terem"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "{hand} · {attempts} attempts"
+msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
@@ -11302,6 +11344,10 @@ msgstr ""
 #~ msgid "Cell already used"
 #~ msgstr "a zárolást már elvégezte:"
 
+#, fuzzy
+#~ msgid "Choose the hand-history file to inspect:"
+#~ msgstr "A leosztástörténetek útvonala"
+
 #~ msgid "Closed, no graph exported"
 #~ msgstr "Bezárva, nincs exportált grafikon"
 
@@ -11520,6 +11566,11 @@ msgstr ""
 
 #~ msgid "Debug Statistics Windows"
 #~ msgstr "Statisztika ablakok debugolása"
+
+#, fuzzy
+#~| msgid "eMail Import"
+#~ msgid "Debug failed import"
+#~ msgstr "Email import"
 
 #~ msgid ""
 #~ "Default encoding set to US-ASCII, defaulting to CP1252 instead -- If "
@@ -11848,6 +11899,10 @@ msgstr ""
 
 #~ msgid "File to be split is a PokerStars or Full Tilt Poker archive file"
 #~ msgstr "A darabolandó fájl PokerStars vagy Full Tilt Poker archív fájl"
+
+#, fuzzy
+#~ msgid "File unavailable"
+#~ msgstr "Előnézet frissítése"
 
 #~ msgid "Finished downloading emails."
 #~ msgstr "Az üzenetek letöltése befejeződött."
@@ -13238,9 +13293,6 @@ msgstr ""
 #~ msgid "Stud"
 #~ msgstr "Stud"
 
-#~ msgid "Suited connectors"
-#~ msgstr "Egyszínű kapcsolódó"
-
 #~ msgid "Summary file '%s' correctly parsed (took %.3f seconds)"
 #~ msgstr "A(z) '%s' összefoglaló fájl rendben értelmezve (%.3f mp)"
 
@@ -14077,9 +14129,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "using db name = %s"
 #~ msgstr "%s nevű adatbázis használata"
-
-#~ msgid "utcTime:"
-#~ msgstr "utcTime:"
 
 #~ msgid "waiting for writers to finish ..."
 #~ msgstr "várakozás az írások befejeződésére ..."

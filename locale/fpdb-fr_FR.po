@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 14:13+0100\n"
+"POT-Creation-Date: 2026-11-23 22:13+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -944,24 +944,8 @@ msgid "Choose a destination directory"
 msgstr "Choisir un répertoire de destination"
 
 #: fpdb_3_legacy/GuiBulkImport.py
-msgid "Choose the hand-history file to inspect:"
-msgstr "Choisissez le fichier d’historique à examiner :"
-
-#: fpdb_3_legacy/GuiBulkImport.py
 msgid "Configured Import Directories:"
 msgstr "Répertoires d'import configurés :"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import"
-msgstr "Déboguer l’import en échec"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import…"
-msgstr "Déboguer un import en échec…"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "File unavailable"
-msgstr "Fichier indisponible"
 
 #: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
 msgid "Folder access needed"
@@ -1048,10 +1032,6 @@ msgid "Select at least one configured directory, or choose a folder to import."
 msgstr ""
 "Sélectionnez au moins un répertoire configuré, ou choisissez un dossier à "
 "importer."
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "The failed hand-history file can no longer be read."
-msgstr "Le fichier d’historique en échec n’est plus accessible."
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "+ New Rule"
@@ -1561,7 +1541,7 @@ msgstr "Checké"
 msgid "Choose hands…"
 msgstr "Choisir les mains…"
 
-#: fpdb_3_legacy/GuiHandViewer.py
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Clear"
 msgstr "Effacer"
 
@@ -5818,6 +5798,7 @@ msgid "Redo the change just undone (Ctrl+Shift+Z)"
 msgstr "Rétablir la modification annulée (Ctrl+Maj+Z)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Remove"
 msgstr "Retirer"
 
@@ -6608,8 +6589,21 @@ msgid "Cannot anonymize fixture"
 msgstr "Impossible d’anonymiser la fixture"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "Captured from {source} · {site}"
+msgstr "Capturée depuis {source} · {site}"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Changes"
 msgstr "Changements"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Clear list"
+msgstr "Vider la liste"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Clear the raw hand and its analysis"
+msgstr "Effacer la main brute et son analyse"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Closest"
@@ -6664,6 +6658,10 @@ msgid "Expected"
 msgstr "Attendu"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Failure"
+msgstr "Échec"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
 msgid "File encoding: {encoding}"
 msgstr ""
@@ -6696,6 +6694,15 @@ msgid "Hand fingerprint"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Hands to debug"
+msgstr "Mains à déboguer"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "Hands to debug ({count})"
+msgstr "Mains à déboguer ({count})"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "JSON"
 msgstr "JSON"
 
@@ -6726,6 +6733,10 @@ msgstr "Message"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Missing / not reached"
 msgstr "Manquant / non atteint"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Mode"
+msgstr "Mode"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "No change."
@@ -6766,6 +6777,10 @@ msgstr "Analyse une seconde fois pour savoir quelle regex a lu chaque ligne"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Parser Debugger"
 msgstr "Débogueur de parser"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Parser message"
+msgstr "Message du parseur"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Parser not determined yet"
@@ -6818,6 +6833,10 @@ msgid "Regexes"
 msgstr "Regex"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Replay selected hand"
+msgstr "Rejouer la main sélectionnée"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Report saved"
 msgstr "Rapport enregistré"
 
@@ -6840,6 +6859,14 @@ msgstr "Enregistrer le rapport"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Sidecar"
 msgstr "Fichier attendu"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Site / converter"
+msgstr "Site / convertisseur"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Source file"
+msgstr "Fichier source"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Status colours"
@@ -6870,7 +6897,9 @@ msgstr "Classe Python instanciée pour analyser le fichier sélectionné."
 msgid ""
 "The saved text does not reproduce this hand ({expected}); validation "
 "returned {actual}."
-msgstr "Le texte enregistré ne reproduit pas cette main ({expected}) ; la validation a renvoyé {actual}."
+msgstr ""
+"Le texte enregistré ne reproduit pas cette main ({expected}) ; la validation "
+"a renvoyé {actual}."
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
@@ -6882,6 +6911,10 @@ msgstr ""
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "This file has no regression sidecar (.hands, .hp, .gt)"
 msgstr "Ce fichier n'a pas de fichier attendu de régression (.hands, .hp, .gt)"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Time"
+msgstr "Heure"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Trace lines"
@@ -6954,6 +6987,11 @@ msgstr "non reconnu"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "unknown encoding"
 msgstr "encodage inconnu"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "{hand} · {attempts} attempts"
+msgstr "{hand} · {attempts} tentatives"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
@@ -9976,6 +10014,9 @@ msgstr ""
 #~ msgid "Cell already used"
 #~ msgstr "Case déjà occupée"
 
+#~ msgid "Choose the hand-history file to inspect:"
+#~ msgstr "Choisissez le fichier d’historique à examiner :"
+
 #~ msgid "Clear a grid cell by emptying its text in Item Properties."
 #~ msgstr ""
 #~ "Pour vider une case de la grille, effacez son texte dans les propriétés "
@@ -10149,6 +10190,12 @@ msgstr ""
 #, fuzzy
 #~ msgid "Debug Statistics Windows"
 #~ msgstr "Debug de la fenêtre de stats"
+
+#~ msgid "Debug failed import"
+#~ msgstr "Déboguer l’import en échec"
+
+#~ msgid "Debug failed import…"
+#~ msgstr "Déboguer un import en échec…"
 
 #~ msgid "Default encoding set to US-ASCII, defaulting to CP1252 instead."
 #~ msgstr "Bascule de l'encodage par défaut de US-ASCII à CP1252."
@@ -10367,6 +10414,9 @@ msgstr ""
 #~ "le fichier à scinder est un fichier d'archive PokerStars ou Full Tilt "
 #~ "Poker"
 
+#~ msgid "File unavailable"
+#~ msgstr "Fichier indisponible"
+
 #, fuzzy
 #~ msgid "Finished downloading emails."
 #~ msgstr "Fin de re-création des tables"
@@ -10562,6 +10612,9 @@ msgstr ""
 
 #~ msgid "Hands marked as all-in"
 #~ msgstr "Mains marquées comme tapis"
+
+#~ msgid "Hands to debug…"
+#~ msgstr "Mains à déboguer…"
 
 #~ msgid "Hands/file:"
 #~ msgstr "Mains/fichier :"
@@ -10906,6 +10959,9 @@ msgstr ""
 
 #~ msgid "Open"
 #~ msgstr "Ouvrir"
+
+#~ msgid "Open in Parser Debugger"
+#~ msgstr "Ouvrir dans le débogueur du parseur"
 
 #~ msgid "Operating System"
 #~ msgstr "Système d'exploitation"
@@ -11329,9 +11385,6 @@ msgstr ""
 #~ msgid "Stud"
 #~ msgstr "Stud"
 
-#~ msgid "Suited connectors"
-#~ msgstr "Connecteurs assortis"
-
 #, fuzzy
 #~ msgid "Summary file '%s' correctly parsed (took %.3f seconds)"
 #~ msgstr ""
@@ -11390,6 +11443,9 @@ msgstr ""
 
 #~ msgid "Thank you"
 #~ msgstr "Merci"
+
+#~ msgid "The failed hand-history file can no longer be read."
+#~ msgstr "Le fichier d’historique en échec n’est plus accessible."
 
 #, fuzzy
 #~ msgid "The lower, the more stable the amounts won"
@@ -11852,9 +11908,6 @@ msgstr ""
 #~ msgstr ""
 #~ "Impossible de lire le fichier avec aucun des codecs présents dans la "
 #~ "liste !"
-
-#~ msgid "utcTime:"
-#~ msgstr "utcTime:"
 
 #~ msgid "waiting for writers to finish ..."
 #~ msgstr "En attente de finition de la sauvegarde..."

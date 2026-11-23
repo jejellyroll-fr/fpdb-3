@@ -28,6 +28,7 @@ SOKO_COMPLETE = SOKO / "soko_2005_001_complete_anonymized.txt"
 SOKO_HEADERLESS = SOKO / "soko_2005_002_header_missing_anonymized.txt"
 STARS = ROOT / "regression-test-files" / "cash" / "Stars" / "Flop" / "NLHE-6max-USD-0.05-0.10-200912.Allin-pre.txt"
 STARS_SITOUT_EVENTS = ROOT / "regression-test-files" / "cash" / "Stars" / "Flop" / "NLHE-FR-USD-0.01-0.02-201004.4betPF.txt"
+ABSOLUTE = ROOT / "regression-test-files" / "cash" / "Absolute" / "Flop" / "IHH20090610 Chile Way - Hold'em No Limit $0.02(Real Money) Table 9339866.txt"
 BOVADA = ROOT / "tests" / "fixtures" / "hands" / "bovada" / "zone_poker.txt"
 
 
@@ -201,6 +202,15 @@ def test_pasted_text_is_debugged_like_its_file(config, stars) -> None:
     assert report.source == "pasted text"
     assert report.detection.site == stars.detection.site
     assert report.hands[0].extracted["players"] == stars.hands[0].extracted["players"]
+
+
+def test_forced_legacy_site_keeps_decoded_text_during_replay(config) -> None:
+    text = ABSOLUTE.read_text(encoding="cp1252").replace("$", "€", 1)
+
+    report = debug_parse_text(text, config, "Absolute", trace_lines=False)
+
+    assert report.source_text == text
+    assert "€" in report.source_text
 
 
 # ---------------------------------------------------------------------------

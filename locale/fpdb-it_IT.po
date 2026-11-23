@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 14:13+0100\n"
+"POT-Creation-Date: 2026-11-23 22:13+0100\n"
 "PO-Revision-Date: 2012-02-17 20:03+0000\n"
 "Last-Translator: seppone1991 <seppone1991@gmail.com>\n"
 "Language-Team: Italian (Italy) (http://www.transifex.net/projects/p/fpdb/"
@@ -1012,28 +1012,8 @@ msgstr "Scegli una cartella di destinazione"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy
-msgid "Choose the hand-history file to inspect:"
-msgstr "Percorso degli storici delle mani"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
 msgid "Configured Import Directories:"
 msgstr "Cartelle di importazione configurate:"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
-#| msgid "eMail Import"
-msgid "Debug failed import"
-msgstr "Importazione da Mail"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import…"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
-msgid "File unavailable"
-msgstr "Aggiorna anteprima"
 
 #: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
 msgid "Folder access needed"
@@ -1123,10 +1103,6 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Select at least one configured directory, or choose a folder to import."
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "The failed hand-history file can no longer be read."
 msgstr ""
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
@@ -1734,7 +1710,7 @@ msgstr "Check"
 msgid "Choose hands…"
 msgstr "Scegli le mani…"
 
-#: fpdb_3_legacy/GuiHandViewer.py
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Clear"
 msgstr "Cancella"
@@ -6451,6 +6427,7 @@ msgid "Redo the change just undone (Ctrl+Shift+Z)"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Remove"
 msgstr "Rimuovi"
@@ -7312,9 +7289,23 @@ msgid "Cannot anonymize fixture"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "Captured from {source} · {site}"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Changes"
 msgstr "Salva modifiche"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Clear list"
+msgstr "Cancella tutto"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Clear the raw hand and its analysis"
+msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
@@ -7380,6 +7371,10 @@ msgid "Expected"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Failure"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
 msgid "File encoding: {encoding}"
 msgstr ""
@@ -7412,6 +7407,16 @@ msgstr "Mano"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Hand fingerprint"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Hands to debug"
+msgstr "Mani dopo"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy, python-brace-format
+msgid "Hands to debug ({count})"
+msgstr "Mani dopo"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
@@ -7448,6 +7453,10 @@ msgstr "Messaggi di Log"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Missing / not reached"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Mode"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7493,6 +7502,12 @@ msgstr ""
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Parser Debugger"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+#| msgid "database used"
+msgid "Parser message"
+msgstr "database usato"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Parser not determined yet"
@@ -7549,6 +7564,11 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
+msgid "Replay selected hand"
+msgstr "Aggiorna selezionata"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
 msgid "Report saved"
 msgstr "Segnala un problema"
 
@@ -7574,6 +7594,17 @@ msgstr "Salva preimpostazione"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Sidecar"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+#| msgid "Suited connectors"
+msgid "Site / converter"
+msgstr "Suited Connectors"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Source file"
+msgstr "Mani di origine"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Status colours"
@@ -7616,6 +7647,10 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "This file has no regression sidecar (.hands, .hp, .gt)"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Time"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7696,6 +7731,11 @@ msgstr "non trovato"
 #| msgid "Unknown Site"
 msgid "unknown encoding"
 msgstr "Sito conosciuto"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "{hand} · {attempts} attempts"
+msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
@@ -10991,6 +11031,10 @@ msgstr ""
 #~ msgid "Cell already used"
 #~ msgstr "blocco già in possesso da:"
 
+#, fuzzy
+#~ msgid "Choose the hand-history file to inspect:"
+#~ msgstr "Percorso degli storici delle mani"
+
 #~ msgid "Closed, no graph exported"
 #~ msgstr "Fermato,Nessun grafico esportato"
 
@@ -11132,6 +11176,11 @@ msgstr ""
 
 #~ msgid "Debug Statistics Windows"
 #~ msgstr "Debug Statistics Windows"
+
+#, fuzzy
+#~| msgid "eMail Import"
+#~ msgid "Debug failed import"
+#~ msgstr "Importazione da Mail"
 
 #~ msgid "Default encoding set to US-ASCII, defaulting to CP1252 instead."
 #~ msgstr ""
@@ -11358,6 +11407,10 @@ msgstr ""
 #~ msgid "File to be split is a PokerStars or Full Tilt Poker archive file"
 #~ msgstr ""
 #~ "File da dividere è un file di archivio di Pokerstars o di Full Tilt Poker"
+
+#, fuzzy
+#~ msgid "File unavailable"
+#~ msgstr "Aggiorna anteprima"
 
 #~ msgid "Finished downloading emails."
 #~ msgstr "Downloading emails completato."
@@ -12379,9 +12432,6 @@ msgstr ""
 
 #~ msgid "Stud"
 #~ msgstr "Stud"
-
-#~ msgid "Suited connectors"
-#~ msgstr "Suited Connectors"
 
 #~ msgid "Summary file '%s' correctly parsed (took %.3f seconds)"
 #~ msgstr "Summary file '%s' correctly parsed (impiegati %.3f secondi)"

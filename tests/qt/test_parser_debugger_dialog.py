@@ -7,13 +7,17 @@ from __future__ import annotations
 
 import json
 import shutil
+from datetime import datetime
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QGuiApplication
-from PySide6.QtWidgets import QFileDialog, QLabel
+from PySide6.QtWidgets import QFileDialog, QHeaderView, QLabel, QTreeWidgetItem
 
 from fpdb_3_legacy import parser_debug
+from fpdb_3_legacy import parser_debugger_dialog as debugger_module
 from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.parser_debug_report import Diagnostic
 from fpdb_3_legacy.parser_debugger_dialog import ParserDebuggerDialog, _standalone_fixture_text, show_parser_debugger
@@ -58,6 +62,95 @@ def test_nothing_to_parse_says_so(dialog) -> None:
 
     assert "Nothing to parse" in dialog.verdict_label.text()
     assert dialog.report is None
+
+
+def test_clear_button_clears_the_raw_hand_and_analysis(dialog) -> None:
+    dialog.input.setPlainText("raw hand")
+    dialog.loaded_path = STARS
+    dialog.loaded_text = "raw hand"
+    dialog.report = object()
+    dialog.summary.setHtml("<p>analysis</p>")
+    dialog.steps_tree.addTopLevelItem(QTreeWidgetItem(["step"]))
+    dialog.status_label.setText("report status")
+    dialog.copy_button.setEnabled(True)
+
+    dialog.clear_button.click()
+
+    assert dialog.input.toPlainText() == ""
+    assert dialog.loaded_path is None
+    assert dialog.loaded_text == ""
+    assert dialog.report is None
+    assert dialog.summary.toPlainText() == ""
+    assert dialog.steps_tree.topLevelItemCount() == 0
+    assert dialog.status_label.text() == ""
+    assert not dialog.copy_button.isEnabled()
+
+
+def test_replaying_an_import_failure_preserves_the_source_filename(dialog, monkeypatch) -> None:
+    original = parser_debug.debug_parse_text
+    captured_names: list[str] = []
+
+    def capture_name(*args, **kwargs):
+        captured_names.append(kwargs["name"])
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(parser_debug, "debug_parse_text", capture_name)
+    source_name = "HH12345678 T1-G2.txt"
+    dialog.load_import_failure(STARS.read_text(encoding="utf-8"), "PokerStars", source_name)
+
+    dialog.run()
+
+    assert captured_names == [source_name]
+
+
+def test_failed_hand_selection_tracks_its_key_when_the_queue_reorders(dialog, monkeypatch) -> None:
+    def entry(key: str):
+        return SimpleNamespace(
+            key=key,
+            site="Site",
+            converter="Converter",
+            source=f"{key}.txt",
+            mode="manual",
+            hand_identifier=None,
+            hand_index=1,
+            failure_type="ParseError",
+            timestamp=datetime.now().astimezone(),
+            message="failure",
+            attempts=1,
+        )
+
+    queued = [entry("first"), entry("second")]
+    monkeypatch.setattr(debugger_module.failed_hands, "entries", lambda: queued)
+    dialog.refresh_failed_hands()
+    dialog.failed_hands_table.selectRow(0)
+
+    queued[:] = [queued[1], queued[0]]
+    dialog.refresh_failed_hands()
+
+    assert dialog._selected_failed_hand_key() == "first"
+    assert dialog.failed_hands_table.selectionModel().selectedRows()[0].row() == 1
+
+    queued[:] = [queued[0]]
+    dialog.refresh_failed_hands()
+
+    assert dialog._selected_failed_hand_key() is None
+
+
+def test_every_debugger_table_has_resizable_columns_and_horizontal_scrolling(dialog) -> None:
+    trees = (
+        dialog.detection_tree,
+        dialog.steps_tree,
+        dialog.contract_tree,
+        dialog.hand_tree,
+        dialog.lines_tree,
+        dialog.expected_tree,
+    )
+    tables = (*trees, dialog.failed_hands_table)
+    for table in tables:
+        header = table.header() if hasattr(table, "header") else table.horizontalHeader()
+        for column in range(table.columnCount()):
+            assert header.sectionResizeMode(column) == QHeaderView.ResizeMode.Interactive
+        assert table.horizontalScrollBarPolicy() == Qt.ScrollBarPolicy.ScrollBarAsNeeded
 
 
 def test_a_pasted_refused_hand_shows_why(dialog) -> None:

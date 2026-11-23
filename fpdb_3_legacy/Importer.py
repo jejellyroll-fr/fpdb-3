@@ -254,7 +254,7 @@ def is_valid_import_file(filepath: str) -> bool:
     Checks for:
     1. Hidden files (starting with .)
     2. Common system files
-    3. Known binary/ignored extensions
+    3. Known binary, documentation, and ignored extensions
 
     Args:
         filepath: The full path to the file.
@@ -317,6 +317,7 @@ def is_valid_import_file(filepath: str) -> bool:
         ".flv",
         ".wmv",
         # Documents/Office (excluding xls/xlsx which are supported)
+        ".md",
         ".pdf",
         ".doc",
         ".docx",
@@ -1551,6 +1552,20 @@ class Importer:
                 # Reuse the Importer's connection without making standalone
                 # hand parsing open a database by itself.
                 setattr(hhc, "db", self.database)
+            def capture_failed_hand(**record: Any) -> None:
+                # Keep the failure queue (and its Qt dialog) out of the normal
+                # successful import path; the module loads only for an error.
+                from fpdb_3_legacy.failed_hand_debug import failed_hands
+
+                failed_hands.add(
+                    site=getattr(hhc, "sitename", None) or fpdb_site.name,
+                    converter=type(hhc).__name__,
+                    source=str(fpdbfile.path),
+                    mode=self.mode or "unknown",
+                    **record,
+                )
+
+            hhc.failed_hand_callback = capture_failed_hand
             hhc.setAutoPop(self.mode == "auto")
             hhc.start()
 
@@ -1682,6 +1697,7 @@ class Importer:
                             import traceback
 
                             partial += 1
+                            hhc._capture_failed_hand(i + 1, hand.handText, "partial", str(e), e)
                             self.import_issues.append(
                                 f"[PARTIAL] In {fpdbfile.path}: Hand starting with '{hand.handText[:30]}...' - {e}"
                             )
@@ -1707,6 +1723,7 @@ class Importer:
                             import traceback
 
                             errors += 1
+                            hhc._capture_failed_hand(i + 1, hand.handText, "error", str(e), e)
                             self.import_issues.append(
                                 f"[ERROR] In {fpdbfile.path}: Hand starting with '{hand.handText[:30]}...' - {e}"
                             )
