@@ -95,7 +95,8 @@ def test_every_debugger_table_has_resizable_columns_and_horizontal_scrolling(dia
     tables = (*trees, dialog.failed_hands_table)
     for table in tables:
         header = table.header() if hasattr(table, "header") else table.horizontalHeader()
-        assert header.sectionResizeMode(0) == QHeaderView.ResizeMode.Interactive
+        for column in range(table.columnCount()):
+            assert header.sectionResizeMode(column) == QHeaderView.ResizeMode.Interactive
         assert table.horizontalScrollBarPolicy() == Qt.ScrollBarPolicy.ScrollBarAsNeeded
 
 
