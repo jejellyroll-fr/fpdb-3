@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 14:13+0100\n"
+"POT-Creation-Date: 2026-11-23 17:51+0100\n"
 "PO-Revision-Date: 2011-05-13 08:55+0000\n"
 "Last-Translator: jax <jax@netmagnet.ro>\n"
 "Language-Team: Romanian (Romania) (http://www.transifex.net/projects/p/fpdb/"
@@ -67,7 +67,7 @@ msgstr "Neimplementat %s: '%s' '%s'"
 msgid "reading antes"
 msgstr "citire ante-uri"
 
-#: fpdb_3_legacy/Aux_Hud.py
+#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/failed_hand_debug.py
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
 #, fuzzy
 msgid "Close"
@@ -779,6 +779,10 @@ msgstr "Baza de date inaccesibilă - nouă încercare"
 #, fuzzy
 msgid "FPDB Auto Import"
 msgstr "Import automat FPDB"
+
+#: fpdb_3_legacy/GuiAutoImport.py fpdb_3_legacy/GuiBulkImport.py
+msgid "Hands to debug…"
+msgstr ""
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
@@ -4111,6 +4115,68 @@ msgid ""
 "yet. Until then, the panels can be set up and previewed in Preferences."
 msgstr ""
 
+#: fpdb_3_legacy/failed_hand_debug.py
+#, fuzzy
+msgid "Clear list"
+msgstr "Golește tot"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+msgid "Failure"
+msgstr ""
+
+#: fpdb_3_legacy/failed_hand_debug.py fpdb_3_legacy/parser_debugger_dialog.py
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hand"
+msgstr "Mână"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+#, fuzzy
+msgid "Hands to debug"
+msgstr "Mâini după"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+msgid "Mode"
+msgstr ""
+
+#: fpdb_3_legacy/failed_hand_debug.py
+msgid "Open in Parser Debugger"
+msgstr ""
+
+#: fpdb_3_legacy/failed_hand_debug.py
+#, fuzzy
+#| msgid "database used"
+msgid "Parser message"
+msgstr "baza de date folosita"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Remove"
+msgstr "Elimină"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+#, fuzzy
+#| msgid "Suited connectors"
+msgid "Site / converter"
+msgstr "Conectori in suita"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+#, fuzzy
+msgid "Source file"
+msgstr "Mâini sursă"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+#, fuzzy
+#| msgid "utcTime:"
+msgid "Time"
+msgstr "utcTime:"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+#, python-brace-format
+msgid "{hand} · {attempts} attempts"
+msgstr ""
+
 #: fpdb_3_legacy/fpdb.pyw
 #, fuzzy
 msgid "Back up and upgrade"
@@ -6445,11 +6511,6 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Remove"
-msgstr "Elimină"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Rename"
 msgstr "Nume fisier:"
 
@@ -7304,6 +7365,11 @@ msgid "Cannot anonymize fixture"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "Captured from {source} · {site}"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Changes"
 msgstr "hud_main: Joc schimbat."
@@ -7394,11 +7460,6 @@ msgstr "Familie de situații"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Found"
 msgstr ""
-
-#: fpdb_3_legacy/parser_debugger_dialog.py fpdb_3_legacy/research_labels.py
-#, fuzzy
-msgid "Hand"
-msgstr "Mână"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Hand fingerprint"
@@ -12714,9 +12775,6 @@ msgstr ""
 #~ msgid "Stud"
 #~ msgstr "Stud"
 
-#~ msgid "Suited connectors"
-#~ msgstr "Conectori in suita"
-
 #, fuzzy
 #~ msgid "Summary file '%s' correctly parsed (took %.3f seconds)"
 #~ msgstr "Fisierul sumar '%s' a fost parcurs cu succes (a durat %.3f secunde)"
@@ -13307,9 +13365,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "using db name = %s"
 #~ msgstr "Folosirea bd numita = %s"
-
-#~ msgid "utcTime:"
-#~ msgstr "utcTime:"
 
 #~ msgid "waiting for writers to finish ..."
 #~ msgstr "se asteapta sa termine scrierile ..."

@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 14:13+0100\n"
+"POT-Creation-Date: 2026-11-23 17:51+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -71,7 +71,7 @@ msgstr "Non implémenté %s: '%s' '%s'"
 msgid "reading antes"
 msgstr "lecture antes"
 
-#: fpdb_3_legacy/Aux_Hud.py
+#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/failed_hand_debug.py
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
 msgid "Close"
 msgstr "Fermer"
@@ -729,6 +729,10 @@ msgstr "Base de données injoignable - nouvelle tentative"
 #: fpdb_3_legacy/GuiAutoImport.py
 msgid "FPDB Auto Import"
 msgstr "Import automatique FPDB"
+
+#: fpdb_3_legacy/GuiAutoImport.py fpdb_3_legacy/GuiBulkImport.py
+msgid "Hands to debug…"
+msgstr "Mains à déboguer…"
 
 #: fpdb_3_legacy/GuiAutoImport.py
 msgid "Import cycle is taking longer than usual..."
@@ -3707,6 +3711,57 @@ msgstr ""
 "dans toute room pas encore vérifiée. D'ici là, les panneaux peuvent être "
 "configurés et prévisualisés dans les Préférences."
 
+#: fpdb_3_legacy/failed_hand_debug.py
+msgid "Clear list"
+msgstr "Vider la liste"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+msgid "Failure"
+msgstr "Échec"
+
+#: fpdb_3_legacy/failed_hand_debug.py fpdb_3_legacy/parser_debugger_dialog.py
+#: fpdb_3_legacy/research_labels.py
+msgid "Hand"
+msgstr "Main"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+msgid "Hands to debug"
+msgstr "Mains à déboguer"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+msgid "Mode"
+msgstr "Mode"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+msgid "Open in Parser Debugger"
+msgstr "Ouvrir dans le débogueur du parseur"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+msgid "Parser message"
+msgstr "Message du parseur"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Remove"
+msgstr "Retirer"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+msgid "Site / converter"
+msgstr "Site / convertisseur"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+msgid "Source file"
+msgstr "Fichier source"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+msgid "Time"
+msgstr "Heure"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+#, python-brace-format
+msgid "{hand} · {attempts} attempts"
+msgstr "{hand} · {attempts} tentatives"
+
 #: fpdb_3_legacy/fpdb.pyw
 msgid "Back up and upgrade"
 msgstr "Sauvegarder et mettre à jour"
@@ -5818,10 +5873,6 @@ msgid "Redo the change just undone (Ctrl+Shift+Z)"
 msgstr "Rétablir la modification annulée (Ctrl+Maj+Z)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Remove"
-msgstr "Retirer"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Rename"
 msgstr "Renommer"
 
@@ -6608,6 +6659,11 @@ msgid "Cannot anonymize fixture"
 msgstr "Impossible d’anonymiser la fixture"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "Captured from {source} · {site}"
+msgstr "Capturée depuis {source} · {site}"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Changes"
 msgstr "Changements"
 
@@ -6686,10 +6742,6 @@ msgstr "Échec de la validation du fichier de fixture"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Found"
 msgstr "Trouvé"
-
-#: fpdb_3_legacy/parser_debugger_dialog.py fpdb_3_legacy/research_labels.py
-msgid "Hand"
-msgstr "Main"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Hand fingerprint"
@@ -6870,7 +6922,9 @@ msgstr "Classe Python instanciée pour analyser le fichier sélectionné."
 msgid ""
 "The saved text does not reproduce this hand ({expected}); validation "
 "returned {actual}."
-msgstr "Le texte enregistré ne reproduit pas cette main ({expected}) ; la validation a renvoyé {actual}."
+msgstr ""
+"Le texte enregistré ne reproduit pas cette main ({expected}) ; la validation "
+"a renvoyé {actual}."
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
@@ -11329,9 +11383,6 @@ msgstr ""
 #~ msgid "Stud"
 #~ msgstr "Stud"
 
-#~ msgid "Suited connectors"
-#~ msgstr "Connecteurs assortis"
-
 #, fuzzy
 #~ msgid "Summary file '%s' correctly parsed (took %.3f seconds)"
 #~ msgstr ""
@@ -11852,9 +11903,6 @@ msgstr ""
 #~ msgstr ""
 #~ "Impossible de lire le fichier avec aucun des codecs présents dans la "
 #~ "liste !"
-
-#~ msgid "utcTime:"
-#~ msgstr "utcTime:"
 
 #~ msgid "waiting for writers to finish ..."
 #~ msgstr "En attente de finition de la sauvegarde..."

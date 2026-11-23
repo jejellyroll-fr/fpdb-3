@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 14:13+0100\n"
+"POT-Creation-Date: 2026-11-23 17:51+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -65,7 +65,7 @@ msgstr "Nem kivitelezett %s: '%s' '%s'"
 msgid "reading antes"
 msgstr "antek olvasása"
 
-#: fpdb_3_legacy/Aux_Hud.py
+#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/failed_hand_debug.py
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
 #, fuzzy
 msgid "Close"
@@ -762,6 +762,10 @@ msgstr "Az adatbázis nem érhető el - újrapróbálás"
 #, fuzzy
 msgid "FPDB Auto Import"
 msgstr "FPDB automatikus importálás"
+
+#: fpdb_3_legacy/GuiAutoImport.py fpdb_3_legacy/GuiBulkImport.py
+msgid "Hands to debug…"
+msgstr ""
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
@@ -4097,6 +4101,68 @@ msgid ""
 "yet. Until then, the panels can be set up and previewed in Preferences."
 msgstr ""
 
+#: fpdb_3_legacy/failed_hand_debug.py
+#, fuzzy
+msgid "Clear list"
+msgstr "Összes törlése"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+msgid "Failure"
+msgstr ""
+
+#: fpdb_3_legacy/failed_hand_debug.py fpdb_3_legacy/parser_debugger_dialog.py
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hand"
+msgstr "Leosztás"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+#, fuzzy
+msgid "Hands to debug"
+msgstr "Leosztások ez után"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+msgid "Mode"
+msgstr ""
+
+#: fpdb_3_legacy/failed_hand_debug.py
+msgid "Open in Parser Debugger"
+msgstr ""
+
+#: fpdb_3_legacy/failed_hand_debug.py
+#, fuzzy
+#| msgid "database used"
+msgid "Parser message"
+msgstr "használt adatbázis"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Remove"
+msgstr "Eltávolítás"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+#, fuzzy
+#| msgid "Suited connectors"
+msgid "Site / converter"
+msgstr "Egyszínű kapcsolódó"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+#, fuzzy
+msgid "Source file"
+msgstr "Forrásleosztások"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+#, fuzzy
+#| msgid "utcTime:"
+msgid "Time"
+msgstr "utcTime:"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+#, python-brace-format
+msgid "{hand} · {attempts} attempts"
+msgstr ""
+
 #: fpdb_3_legacy/fpdb.pyw
 #, fuzzy
 msgid "Back up and upgrade"
@@ -6440,11 +6506,6 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Remove"
-msgstr "Eltávolítás"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Rename"
 msgstr "Szabály neve"
 
@@ -7308,6 +7369,11 @@ msgid "Cannot anonymize fixture"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "Captured from {source} · {site}"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Changes"
 msgstr "Változások mentése"
@@ -7399,11 +7465,6 @@ msgstr "Helyzetcsalád"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Found"
 msgstr ""
-
-#: fpdb_3_legacy/parser_debugger_dialog.py fpdb_3_legacy/research_labels.py
-#, fuzzy
-msgid "Hand"
-msgstr "Leosztás"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Hand fingerprint"
@@ -13238,9 +13299,6 @@ msgstr ""
 #~ msgid "Stud"
 #~ msgstr "Stud"
 
-#~ msgid "Suited connectors"
-#~ msgstr "Egyszínű kapcsolódó"
-
 #~ msgid "Summary file '%s' correctly parsed (took %.3f seconds)"
 #~ msgstr "A(z) '%s' összefoglaló fájl rendben értelmezve (%.3f mp)"
 
@@ -14077,9 +14135,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "using db name = %s"
 #~ msgstr "%s nevű adatbázis használata"
-
-#~ msgid "utcTime:"
-#~ msgstr "utcTime:"
 
 #~ msgid "waiting for writers to finish ..."
 #~ msgstr "várakozás az írások befejeződésére ..."

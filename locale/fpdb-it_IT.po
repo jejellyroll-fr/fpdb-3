@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 14:13+0100\n"
+"POT-Creation-Date: 2026-11-23 17:51+0100\n"
 "PO-Revision-Date: 2012-02-17 20:03+0000\n"
 "Last-Translator: seppone1991 <seppone1991@gmail.com>\n"
 "Language-Team: Italian (Italy) (http://www.transifex.net/projects/p/fpdb/"
@@ -69,7 +69,7 @@ msgstr "Non implementati %s: '%s' '%s'"
 msgid "reading antes"
 msgstr "lettura ante"
 
-#: fpdb_3_legacy/Aux_Hud.py
+#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/failed_hand_debug.py
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
 #, fuzzy
 msgid "Close"
@@ -766,6 +766,10 @@ msgstr "Database irraggiungibile - nuovo tentativo"
 #, fuzzy
 msgid "FPDB Auto Import"
 msgstr "Importazione automatica FPDB"
+
+#: fpdb_3_legacy/GuiAutoImport.py fpdb_3_legacy/GuiBulkImport.py
+msgid "Hands to debug…"
+msgstr ""
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
@@ -4101,6 +4105,66 @@ msgid ""
 "yet. Until then, the panels can be set up and previewed in Preferences."
 msgstr ""
 
+#: fpdb_3_legacy/failed_hand_debug.py
+#, fuzzy
+msgid "Clear list"
+msgstr "Cancella tutto"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+msgid "Failure"
+msgstr ""
+
+#: fpdb_3_legacy/failed_hand_debug.py fpdb_3_legacy/parser_debugger_dialog.py
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hand"
+msgstr "Mano"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+#, fuzzy
+msgid "Hands to debug"
+msgstr "Mani dopo"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+msgid "Mode"
+msgstr ""
+
+#: fpdb_3_legacy/failed_hand_debug.py
+msgid "Open in Parser Debugger"
+msgstr ""
+
+#: fpdb_3_legacy/failed_hand_debug.py
+#, fuzzy
+#| msgid "database used"
+msgid "Parser message"
+msgstr "database usato"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Remove"
+msgstr "Rimuovi"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+#, fuzzy
+#| msgid "Suited connectors"
+msgid "Site / converter"
+msgstr "Suited Connectors"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+#, fuzzy
+msgid "Source file"
+msgstr "Mani di origine"
+
+#: fpdb_3_legacy/failed_hand_debug.py
+msgid "Time"
+msgstr ""
+
+#: fpdb_3_legacy/failed_hand_debug.py
+#, python-brace-format
+msgid "{hand} · {attempts} attempts"
+msgstr ""
+
 #: fpdb_3_legacy/fpdb.pyw
 #, fuzzy
 msgid "Back up and upgrade"
@@ -6452,11 +6516,6 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Remove"
-msgstr "Rimuovi"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Rename"
 msgstr "Nome della regola"
 
@@ -7312,6 +7371,11 @@ msgid "Cannot anonymize fixture"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "Captured from {source} · {site}"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Changes"
 msgstr "Salva modifiche"
@@ -7403,11 +7467,6 @@ msgstr "Famiglia di situazioni"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Found"
 msgstr ""
-
-#: fpdb_3_legacy/parser_debugger_dialog.py fpdb_3_legacy/research_labels.py
-#, fuzzy
-msgid "Hand"
-msgstr "Mano"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Hand fingerprint"
@@ -12379,9 +12438,6 @@ msgstr ""
 
 #~ msgid "Stud"
 #~ msgstr "Stud"
-
-#~ msgid "Suited connectors"
-#~ msgstr "Suited Connectors"
 
 #~ msgid "Summary file '%s' correctly parsed (took %.3f seconds)"
 #~ msgstr "Summary file '%s' correctly parsed (impiegati %.3f secondi)"
