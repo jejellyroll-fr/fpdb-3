@@ -254,7 +254,7 @@ def is_valid_import_file(filepath: str) -> bool:
     Checks for:
     1. Hidden files (starting with .)
     2. Common system files
-    3. Known binary/ignored extensions
+    3. Known binary, documentation, and ignored extensions
 
     Args:
         filepath: The full path to the file.
@@ -317,6 +317,7 @@ def is_valid_import_file(filepath: str) -> bool:
         ".flv",
         ".wmv",
         # Documents/Office (excluding xls/xlsx which are supported)
+        ".md",
         ".pdf",
         ".doc",
         ".docx",
