@@ -163,6 +163,7 @@ class ParseDebugReport:
 
     source: str
     detection: Detection
+    source_text: str = ""
     hands: list[HandResult] = field(default_factory=list)
     diagnostics: list[Diagnostic] = field(default_factory=list)
     duration_ms: float = 0.0
@@ -394,6 +395,29 @@ def _history_player_names(text: str) -> list[str]:
     return names
 
 
+def _privacy_warning(
+    player_names_unavailable: list[int], names_outside_parsed_players: set[str], unparsed_source: bool
+) -> str:
+    """Explain when an exported report needs a manual privacy check."""
+    if unparsed_source:
+        return (
+            "> **Manual privacy review required**: no hand was parsed, so player names could not be "
+            "verified. Review the complete source text and replace any real names before posting."
+        )
+    if player_names_unavailable:
+        indices = ", ".join(str(index) for index in player_names_unavailable)
+        return (
+            f"> **Manual privacy review required**: player names could not be extracted for hand(s) {indices}. "
+            "Review the complete report and replace any real names before posting."
+        )
+    if names_outside_parsed_players:
+        return (
+            "> **Manual privacy review recommended**: names found in seat or table-event lines outside the parsed "
+            "player list were redacted too. Review unusual room-specific events before posting."
+        )
+    return "> **Not anonymized**: no player name could be read. Replace the names before posting."
+
+
 def bug_report(report: ParseDebugReport, hand: int | None = None) -> str:
     """Markdown ready to paste into a GitHub issue, with player names replaced."""
     selected = [result for result in report.hands if hand is None or result.index == hand] or report.hands
@@ -408,10 +432,13 @@ def bug_report(report: ParseDebugReport, hand: int | None = None) -> str:
         if result in selected:
             names_outside_parsed_players.update(set(history_names) - set(parsed_names))
         hero = result.extracted.get("header", {}).get("hero") or hero
-    texts = "\n\n".join(result.text for result in selected) if selected else ""
+    if not report.hands and report.source_text:
+        names += _history_player_names(report.source_text)
+    texts = "\n\n".join(result.text for result in selected) if selected else report.source_text
     player_names_unavailable = [
         result.index for result in selected if not result.extracted.get("players")
     ]
+    unparsed_source = not selected and bool(report.source_text)
     anonymized = bool(names) and not player_names_unavailable
     hand_text = texts
     detection = report.detection
@@ -442,20 +469,8 @@ def bug_report(report: ParseDebugReport, hand: int | None = None) -> str:
     if failed_steps:
         lines += ["", "#### Failed steps", "", *failed_steps]
     lines += ["", "#### Hand history", ""]
-    if not anonymized or names_outside_parsed_players:
-        if player_names_unavailable:
-            indices = ", ".join(str(index) for index in player_names_unavailable)
-            lines.append(
-                f"> **Manual privacy review required**: player names could not be extracted for hand(s) {indices}. "
-                "Review the complete report and replace any real names before posting."
-            )
-        elif names_outside_parsed_players:
-            lines.append(
-                "> **Manual privacy review recommended**: names found in seat or table-event lines outside the parsed "
-                "player list were redacted too. Review unusual room-specific events before posting."
-            )
-        else:
-            lines.append("> **Not anonymized**: no player name could be read. Replace the names before posting.")
+    if not anonymized or names_outside_parsed_players or unparsed_source:
+        lines.append(_privacy_warning(player_names_unavailable, names_outside_parsed_players, unparsed_source))
         lines.append("")
     lines += ["```text", hand_text or anonymize(first_line(texts), [], None), "```"]
     rendered = "\n".join(lines)

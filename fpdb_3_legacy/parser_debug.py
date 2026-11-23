@@ -919,6 +919,7 @@ def debug_parse_file(
     path = str(path)
     detection, fobj, whole_file = detect(path, config, site)
     report = ParseDebugReport(source=source or path, detection=detection)
+    report.source_text = whole_file
     report.diagnostics += _detection_diagnostics(detection, fobj, whole_file)
     if fobj is None or fobj.ftype == "summary":
         report.file_kind = "summary" if fobj is not None else report.file_kind

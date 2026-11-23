@@ -96,6 +96,17 @@ def test_an_unrecognised_text_names_the_closest_converter(config) -> None:
     assert "`Game\\s\\#\\s\\d+\\s\\-\\s`" in report.detection.closest[0]
 
 
+def test_an_unrecognised_text_is_kept_in_the_bug_report(config) -> None:
+    report = debug_parse_file(SOKO_HEADERLESS, config)
+
+    exported = bug_report(report)
+
+    assert report.source_text.startswith("Players:")
+    assert "Manual privacy review required" in exported
+    assert "Players:" in exported
+    assert "Hero was dealt: Ks - Kd" in exported
+
+
 def test_a_header_with_the_wrong_case_is_hinted(config, tmp_path) -> None:
     text = (
         SOKO_COMPLETE.read_text(encoding="utf-8").replace("Game # ", "GAME # ", 1).replace("Game ended", "GAME ENDED")
