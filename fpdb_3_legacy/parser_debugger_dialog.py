@@ -449,6 +449,16 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
             _("{name} · {encoding}").format(name=path.name, encoding=encoding or _("unknown encoding"))
         )
 
+    def load_import_failure(self, text: str, site: str, source: str) -> None:
+        """Load a captured hand without consulting its original source file."""
+        self.input.setPlainText(text)
+        self.loaded_path = None
+        self.loaded_text = ""
+        site_index = self.site_combo.findData(site)
+        if site_index >= 0:
+            self.site_combo.setCurrentIndex(site_index)
+        self.status_label.setText(_("Captured from {source} · {site}").format(source=source, site=site))
+
     def run(self) -> None:
         text = self.input.toPlainText()
         if not text.strip():

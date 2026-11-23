@@ -336,6 +336,12 @@ class GuiBulkImport(QWidget):
         dialog.load_file(path)
         dialog.run()
 
+    def show_failed_hands(self) -> None:
+        """Open the session-wide queue shared with Auto Import."""
+        from fpdb_3_legacy.failed_hand_debug import show_failed_hands
+
+        self.failed_hands_dialog = show_failed_hands(self.config, self.main_window or self)
+
     @staticmethod
     def _phh_lines(phh) -> str:
         """The PHH part of the completion message: the counts the totals fold together."""
@@ -456,6 +462,9 @@ class GuiBulkImport(QWidget):
         self.debug_failed_button.setEnabled(False)
         self.debug_failed_button.clicked.connect(self.debug_failed_import)
         self.main_layout.addWidget(self.debug_failed_button)
+        self.debug_hands_button = QPushButton(_("Hands to debug…"))
+        self.debug_hands_button.clicked.connect(self.show_failed_hands)
+        self.main_layout.addWidget(self.debug_hands_button)
 
         self.progress_bar = QProgressBar()
         self.progress_bar.setTextVisible(False)

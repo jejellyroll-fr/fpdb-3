@@ -32,6 +32,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QProgressBar,
+    QPushButton,
     QSpinBox,
     QTextEdit,
     QVBoxLayout,
@@ -636,6 +637,10 @@ class GuiAutoImport(QWidget):
         self.startButton.stateChanged.connect(self.startClicked)
         controlsLayout.addWidget(self.startButton)
 
+        self.failedHandsButton = QPushButton(_("Hands to debug…"))
+        self.failedHandsButton.clicked.connect(self.show_failed_hands)
+        controlsLayout.addWidget(self.failedHandsButton)
+
         # Add a progress indicator
         self.progressBar = QProgressBar()
         self.progressBar.setTextVisible(False)
@@ -656,6 +661,12 @@ class GuiAutoImport(QWidget):
         mainLayout.addWidget(self.statusLabel)
 
         self.addText(_("Auto Import Ready.\n"), "info")
+
+    def show_failed_hands(self) -> None:
+        """Open the session-wide queue shared with Bulk Import."""
+        from fpdb_3_legacy.failed_hand_debug import show_failed_hands
+
+        self.failed_hands_dialog = show_failed_hands(self.config, self.parent or self)
 
     def apply_theme(self, theme_name="dark_purple.xml") -> None:
         """Apply a qt_material theme to the widget."""

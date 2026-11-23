@@ -217,7 +217,7 @@ HandHistoryConverter: '{sitename}'
         if not handsList or self.isSummary(handsList[0]) is False:
             self.parsedObjectType = "HH"
             last_error_info = None
-            for handText in handsList:
+            for hand_index, handText in enumerate(handsList, start=1):
                 try:
                     self.processedHands.append(self.processHand(handText))
                     lastParsed = "stored"
@@ -230,6 +230,7 @@ HandHistoryConverter: '{sitename}'
                         str(e),
                         handText,
                     )
+                    self._capture_failed_hand(hand_index, handText, "partial", str(e), e)
                     self.parsing_issues.append(f"[PARTIAL] Hand starting with '{handText[:30]}...': {e}")
                     log.info(f"partial {e}")
                 except FpdbHandSkipped:
@@ -244,6 +245,7 @@ HandHistoryConverter: '{sitename}'
                         str(e),
                         handText,
                     )
+                    self._capture_failed_hand(hand_index, handText, "error", str(e), e)
                     self.parsing_issues.append(f"[ERROR] Hand starting with '{handText[:30]}...': {e}")
                     log.exception(f"FpdbParseError for file '{self.in_path}'")
 
@@ -283,6 +285,29 @@ HandHistoryConverter: '{sitename}'
                 log.warning(
                     f"Error converting summary file '{self.in_path}' (took {endtime - starttime:.3f} seconds)",
                 )
+
+    def _capture_failed_hand(self, hand_index: int, hand_text: str, failure_type: str, message: str, error: Exception) -> None:
+        """Publish the complete failed hand only when an importer requested capture."""
+        callback = getattr(self, "failed_hand_callback", None)
+        if callback is None:
+            return
+        shared_header = ""
+        if self.copyGameHeader and getattr(self, "whole_file", ""):
+            split_hands_re = getattr(self, "re_split_hands", getattr(self, "re_SplitHands", None))
+            if split_hands_re is not None:
+                shared_header = re.split(split_hands_re, self.whole_file, maxsplit=1)[0].strip()
+        hand_identifier = getattr(error, "handid", None)
+        try:
+            callback(
+                hand_index=hand_index,
+                failure_type=failure_type,
+                message=message,
+                raw_text=hand_text,
+                shared_header=shared_header,
+                hand_identifier=str(hand_identifier) if hand_identifier else None,
+            )
+        except Exception:  # noqa: BLE001 - debug capture must never interfere with importing
+            log.exception("Could not capture a failed hand for Parser Debugger replay")
 
     def setAutoPop(self, value) -> None:
         self.autoPop = value
