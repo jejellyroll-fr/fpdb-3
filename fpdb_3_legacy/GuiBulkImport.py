@@ -125,6 +125,8 @@ class BulkImportThread(QThread):
 class GuiBulkImport(QWidget):
     """Widget for bulk importing hand history files."""
 
+    failed_hands_dialog: Any
+
     def load_clicked(self) -> None:
         """Handle load button click event by spawning a background thread."""
         # Does the lock acquisition need to be more sophisticated for multiple dirs?

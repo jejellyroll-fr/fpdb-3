@@ -219,9 +219,9 @@ HandHistoryConverter: '{sitename}'
         if not handsList or self.isSummary(handsList[0]) is False:
             self.parsedObjectType = "HH"
             last_error_info = None
-            for hand_index, handText in enumerate(handsList, start=1):
+            for hand_index, hand_text in enumerate(handsList, start=1):
                 try:
-                    self.processedHands.append(self.processHand(handText))
+                    self.processedHands.append(self.processHand(hand_text))
                     lastParsed = "stored"
                 except FpdbHandPartial as e:
                     self.numPartial += 1
@@ -230,10 +230,10 @@ HandHistoryConverter: '{sitename}'
                         self.in_path,
                         "partial",
                         str(e),
-                        handText,
+                        hand_text,
                     )
-                    self._capture_failed_hand(hand_index, handText, "partial", str(e), e)
-                    self.parsing_issues.append(f"[PARTIAL] Hand starting with '{handText[:30]}...': {e}")
+                    self._capture_failed_hand(hand_index, hand_text, "partial", str(e), e)
+                    self.parsing_issues.append(f"[PARTIAL] Hand starting with '{hand_text[:30]}...': {e}")
                     log.info(f"partial {e}")
                 except FpdbHandSkipped:
                     self.numSkipped += 1
@@ -245,10 +245,10 @@ HandHistoryConverter: '{sitename}'
                         self.in_path,
                         "error",
                         str(e),
-                        handText,
+                        hand_text,
                     )
-                    self._capture_failed_hand(hand_index, handText, "error", str(e), e)
-                    self.parsing_issues.append(f"[ERROR] Hand starting with '{handText[:30]}...': {e}")
+                    self._capture_failed_hand(hand_index, hand_text, "error", str(e), e)
+                    self.parsing_issues.append(f"[ERROR] Hand starting with '{hand_text[:30]}...': {e}")
                     log.exception(f"FpdbParseError for file '{self.in_path}'")
 
             # Improved error handling - only reset file position when truly necessary

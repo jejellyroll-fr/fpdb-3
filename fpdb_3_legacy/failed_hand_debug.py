@@ -28,7 +28,7 @@ MAX_TOTAL_BYTES = 32 * 1024 * 1024
 
 
 @dataclass
-class FailedHand:
+class FailedHand:  # pylint: disable=too-many-instance-attributes  # captures all import context for replay
     """A raw failed hand and the context needed to replay it in this session."""
 
     key: str
@@ -126,7 +126,7 @@ class FailedHandRegistry:
 failed_hands = FailedHandRegistry()
 
 
-class FailedHandsDialog(QDialog):
+class FailedHandsDialog(QDialog):  # pylint: disable=too-many-instance-attributes  # one attribute per control
     """Session-local queue with direct Parser Debugger replay."""
 
     def __init__(self, config: Any, parent: QWidget | None = None) -> None:
