@@ -299,9 +299,9 @@ class GuiBulkImport(QWidget):
                 # Importer relocates files based on parser errors, not on the
                 # presence of partial/skipped hands. Such files still belong
                 # to the imported directory when errors == 0.
-                failed = bool(getattr(result, "errors", 0))
-                setting = "movefailedfiles" if failed else "moveimportedfiles"
-                directory = "moveFailedFilesDir" if failed else "moveImportedFilesDir"
+                has_errors = bool(getattr(result, "errors", 0))
+                setting = "movefailedfiles" if has_errors else "moveimportedfiles"
+                directory = "moveFailedFilesDir" if has_errors else "moveImportedFilesDir"
                 target_dir = settings.get(directory)
                 if settings.get(setting) and target_dir:
                     moved = Path(target_dir) / path.name
