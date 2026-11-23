@@ -291,13 +291,22 @@ HandHistoryConverter: '{sitename}'
     def _capture_failed_hand(self, hand_index: int, hand_text: str, failure_type: str, message: str, error: Exception) -> None:
         """Publish the complete failed hand only when an importer requested capture."""
         callback = self.failed_hand_callback
-        if callback is None:
+        if not callable(callback):
             return
         shared_header = ""
-        if self.copyGameHeader and self.whole_file:
-            split_hands_re = getattr(self, "re_split_hands", getattr(self, "re_SplitHands", None))
-            if split_hands_re is not None:
-                shared_header = re.split(split_hands_re, self.whole_file, maxsplit=1)[0].strip()
+        copy_game_header = self.copyGameHeader or getattr(self, "copy_game_header", False)
+        if copy_game_header and self.whole_file:
+            # Some converters split on the closing tag, so the first split
+            # contains the first hand body as well as session metadata. Prefer
+            # the start-of-hand marker when available to keep replay input valid.
+            identify_re = getattr(self, "re_identify", getattr(self, "re_Identify", None))
+            match = identify_re.search(self.whole_file) if identify_re is not None else None
+            if match is not None:
+                shared_header = self.whole_file[: match.start()].strip()
+            else:
+                split_hands_re = getattr(self, "re_split_hands", getattr(self, "re_SplitHands", None))
+                if split_hands_re is not None:
+                    shared_header = re.split(split_hands_re, self.whole_file, maxsplit=1)[0].strip()
         hand_identifier = getattr(error, "handid", None)
         try:
             callback(

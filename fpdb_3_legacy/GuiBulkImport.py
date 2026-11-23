@@ -124,6 +124,32 @@ class BulkImportThread(QThread):
 class GuiBulkImport(QWidget):
     """Widget for bulk importing hand history files."""
 
+    def _failed_import_paths(self) -> list[Path]:
+        """Return readable hand-history files that had errors, partials, or skips."""
+        failed: list[Path] = []
+        settings = getattr(self.importer, "settings", {})
+        for raw_path, result in getattr(self.importer, "file_results", {}).items():
+            if getattr(result, "is_summary_file", False) or not (
+                getattr(result, "errors", 0) or getattr(result, "partial", 0) or getattr(result, "skipped", 0)
+            ):
+                continue
+            path = Path(raw_path)
+            if not path.is_file():
+                # Importer relocates files based on parser errors, not on the
+                # presence of partial/skipped hands. Such files still belong
+                # to the imported directory when errors == 0.
+                has_errors = bool(getattr(result, "errors", 0))
+                setting = "movefailedfiles" if has_errors else "moveimportedfiles"
+                directory = "moveFailedFilesDir" if has_errors else "moveImportedFilesDir"
+                target_dir = settings.get(directory)
+                if settings.get(setting) and target_dir:
+                    moved = Path(target_dir) / path.name
+                    if moved.is_file():
+                        path = moved
+            if path.is_file():
+                failed.append(path)
+        return failed
+
     def load_clicked(self) -> None:
         """Handle load button click event by spawning a background thread."""
         # Does the lock acquisition need to be more sophisticated for multiple dirs?

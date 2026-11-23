@@ -294,6 +294,11 @@ def _add_value(parent: QTreeWidgetItem, key: str, value: Any) -> None:
 class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attributes  # one per widget
     """The Parser Debugger window."""
 
+    replay_failed_hand_button: QPushButton
+    remove_failed_hand_button: QPushButton
+    clear_failed_hands_button: QPushButton
+    failed_hands_timer: QTimer
+
     def __init__(self, config: Any, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.config = config

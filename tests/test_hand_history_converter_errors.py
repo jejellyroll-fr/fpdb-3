@@ -1,8 +1,10 @@
+import re
 from types import SimpleNamespace
 
 import pytest
 
 from fpdb_3_legacy.Exceptions import FpdbParseError
+from fpdb_3_legacy.HandHistoryConverter import HandHistoryConverter
 from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 
 
@@ -43,3 +45,25 @@ def test_missing_required_hand_metadata_is_reported_non_fatally() -> None:
     assert "missing required startTime" in warning
     assert "missing required tablename" in warning
     assert "missing required tourNo" in warning
+
+
+def test_failed_hand_capture_uses_only_session_header_and_snake_case_flag() -> None:
+    captured = []
+    converter = SimpleNamespace(
+        failed_hand_callback=lambda **values: captured.append(values),
+        copyGameHeader=False,
+        copy_game_header=True,
+        whole_file='<gametype>holdem</gametype>\n<game gamecode="1">first hand</game>',
+        re_identify=re.compile(r'<game gamecode="\d+">'),
+    )
+
+    HandHistoryConverter._capture_failed_hand(
+        converter,
+        1,
+        '<game gamecode="2">failed hand</game>',
+        "error",
+        "bad",
+        Exception(),
+    )
+
+    assert captured[0]["shared_header"] == "<gametype>holdem</gametype>"
