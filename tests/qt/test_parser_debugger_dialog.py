@@ -13,15 +13,17 @@ import pytest
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import QFileDialog, QLabel
 
+from fpdb_3_legacy import parser_debug
 from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.parser_debug_report import Diagnostic
-from fpdb_3_legacy.parser_debugger_dialog import ParserDebuggerDialog, show_parser_debugger
+from fpdb_3_legacy.parser_debugger_dialog import ParserDebuggerDialog, _standalone_fixture_text, show_parser_debugger
 
 pytestmark = pytest.mark.qt
 
 ROOT = Path(__file__).resolve().parents[2]
 SOKO = ROOT / "regression-test-files" / "unsupported-sites" / "soko" / "soko_2005_001_complete_anonymized.txt"
 STARS = ROOT / "regression-test-files" / "cash" / "Stars" / "Flop" / "NLHE-6max-USD-0.05-0.10-200912.Allin-pre.txt"
+MERGE = ROOT / "regression-test-files" / "cash" / "Merge" / "Mixed" / "HORSE-8max-USD-0.25-0.50-201409.new.format.txt"
 
 
 @pytest.fixture(scope="module")
@@ -204,6 +206,18 @@ def test_the_bug_report_is_copied(dialog) -> None:
     copied = QGuiApplication.clipboard().text()
     assert copied.startswith("### Parser Debugger report")
     assert "AAALISAAAA" not in copied
+
+
+def test_a_selected_merge_hand_keeps_its_shared_header(config) -> None:
+    report = parser_debug.debug_parse_file(MERGE, config, trace_lines=False)
+    hand = report.hands[1]
+
+    fixture = _standalone_fixture_text(report, hand)
+    replay = parser_debug.debug_parse_text(fixture, config, report.detection.site, trace_lines=False)
+
+    assert fixture.startswith('<description type="HORSE"')
+    assert len(replay.hands) == 1
+    assert replay.hands[0].status == hand.status
 
 
 def test_save_then_compare(dialog, monkeypatch, tmp_path) -> None:

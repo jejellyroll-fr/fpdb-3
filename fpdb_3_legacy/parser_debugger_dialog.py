@@ -88,6 +88,16 @@ _SEVERITY_ORDER = {"error": 0, "warning": 1, "info": 2}
 _LINE_ROLE = Qt.ItemDataRole.UserRole
 
 
+def _standalone_fixture_text(report: ParseDebugReport, hand: HandResult) -> str:
+    """Keep Merge's file-level game description when exporting one game node."""
+    if report.detection.converter != "Merge" or not report.source_text:
+        return hand.text
+    header = re.match(r"\s*(<description\b[^>]*/>\s*)", report.source_text, re.IGNORECASE)
+    if header and not hand.text.lstrip().startswith("<description"):
+        return header.group(1) + hand.text
+    return hand.text
+
+
 class _LineNumberArea(QWidget):
     """Editor gutter with source line numbers and parser coverage colours."""
 
@@ -519,7 +529,8 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         room = self.report.detection.converter if self.report is not None else ""
         from fpdb_3_legacy.anonymize_hh import anonymize_text
 
-        anonymized, leftovers = anonymize_text(hand.text, room or "", names, hero if hero in names else None)
+        fixture_text = _standalone_fixture_text(self.report, hand) if self.report is not None else hand.text
+        anonymized, leftovers = anonymize_text(fixture_text, room or "", names, hero if hero in names else None)
         if leftovers:
             QMessageBox.warning(
                 self,
@@ -527,6 +538,22 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
                 _(
                     "These real names or account tokens are still present: {values}. Add them to the list or review the text."
                 ).format(values=", ".join(leftovers)),
+            )
+            return
+        validation = parser_debug.debug_parse_text(
+            anonymized,
+            self.config,
+            self.report.detection.site if self.report is not None else None,
+            trace_lines=False,
+        )
+        if len(validation.hands) != 1 or validation.hands[0].status != hand.status:
+            actual = validation.hands[0].status if len(validation.hands) == 1 else f"{len(validation.hands)} hands"
+            QMessageBox.warning(
+                self,
+                _("Fixture validation failed"),
+                _("The saved text does not reproduce this hand ({expected}); validation returned {actual}.").format(
+                    expected=hand.status, actual=actual
+                ),
             )
             return
         path, _filter = QFileDialog.getSaveFileName(
