@@ -305,6 +305,7 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.report: ParseDebugReport | None = None
         self.loaded_path: Path | None = None
         self.loaded_text = ""
+        self.loaded_name: str | None = None
         self.fixture_button: QPushButton
         self.parser_label: QLabel
         self.detection_tree: QTreeWidget
@@ -569,6 +570,7 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.input.setExtraSelections([])
         self.loaded_path = None
         self.loaded_text = ""
+        self.loaded_name = None
         self.report = None
         self.verdict_label.setText(_("Paste a hand history and press Debug parse."))
         self.parser_label.setText(_("Parser not determined yet"))
@@ -605,6 +607,7 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         text = text or ""
         self.input.setPlainText(text)
         self.loaded_path, self.loaded_text = path, self.input.toPlainText()
+        self.loaded_name = None
         self.status_label.setText(
             _("{name} · {encoding}").format(name=path.name, encoding=encoding or _("unknown encoding"))
         )
@@ -613,7 +616,8 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         """Load a captured hand without consulting its original source file."""
         self.input.setPlainText(text)
         self.loaded_path = None
-        self.loaded_text = ""
+        self.loaded_text = self.input.toPlainText()
+        self.loaded_name = Path(source).name
         site_index = self.site_combo.findData(site)
         if site_index >= 0:
             self.site_combo.setCurrentIndex(site_index)
@@ -701,6 +705,7 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
                     text,
                     self.config,
                     site,
+                    name=self.loaded_name if text == self.loaded_text and self.loaded_name else "pasted.txt",
                     trace_lines=self.trace_check.isChecked(),
                     derived=self.derived_check.isChecked(),
                 )

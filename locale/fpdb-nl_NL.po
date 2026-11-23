@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 19:34+0100\n"
+"POT-Creation-Date: 2026-11-23 22:13+0100\n"
 "PO-Revision-Date: 2011-12-03 21:57+0000\n"
 "Last-Translator: LimburgCwboy <hdps.een@gmail.com>\n"
 "Language-Team: Dutch (Netherlands) (http://www.transifex.net/projects/p/fpdb/"
@@ -1746,7 +1746,7 @@ msgstr "Gecheckt"
 msgid "Choose hands…"
 msgstr "Handen kiezen…"
 
-#: fpdb_3_legacy/GuiHandViewer.py
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Clear"
 msgstr "Wissen"
@@ -7327,6 +7327,10 @@ msgstr "Wijzigingen opslaan"
 #, fuzzy
 msgid "Clear list"
 msgstr "Alles wissen"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Clear the raw hand and its analysis"
+msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy

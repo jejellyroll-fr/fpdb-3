@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 19:34+0100\n"
+"POT-Creation-Date: 2026-11-23 22:13+0100\n"
 "PO-Revision-Date: 2011-04-07 08:53+0000\n"
 "Last-Translator: steffen123 <steffen@schaumburger.info>\n"
 "Language-Team: Chinese (China) <>\n"
@@ -1746,7 +1746,7 @@ msgstr "过牌"
 msgid "Choose hands…"
 msgstr "选择手牌…"
 
-#: fpdb_3_legacy/GuiHandViewer.py
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Clear"
 msgstr "清除"
@@ -7257,6 +7257,10 @@ msgstr "保存更改"
 #, fuzzy
 msgid "Clear list"
 msgstr "全部清除"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Clear the raw hand and its analysis"
+msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy

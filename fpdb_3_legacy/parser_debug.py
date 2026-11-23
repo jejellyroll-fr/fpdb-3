@@ -991,7 +991,11 @@ def debug_parse_text(
     trace_lines: bool = True,
     derived: bool = False,
 ) -> ParseDebugReport:
-    """:func:`debug_parse_file` on pasted text, through a temporary file the report does not name."""
+    """:func:`debug_parse_file` on text, through a temporary file the report does not name.
+
+    ``name`` preserves filename-dependent parser behavior when replaying an
+    imported hand; the source file itself is never opened.
+    """
     suffix = ".xml" if text.lstrip("﻿ \t\r\n").startswith("<") else Path(name).suffix or ".txt"
     with tempfile.TemporaryDirectory(prefix="fpdb-parser-debug-") as directory:
         path = Path(directory) / (Path(name).stem + suffix)

@@ -83,6 +83,23 @@ def test_clear_button_clears_the_raw_hand_and_analysis(dialog) -> None:
     assert not dialog.copy_button.isEnabled()
 
 
+def test_replaying_an_import_failure_preserves_the_source_filename(dialog, monkeypatch) -> None:
+    original = parser_debug.debug_parse_text
+    captured_names: list[str] = []
+
+    def capture_name(*args, **kwargs):
+        captured_names.append(kwargs["name"])
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(parser_debug, "debug_parse_text", capture_name)
+    source_name = "HH12345678 T1-G2.txt"
+    dialog.load_import_failure(STARS.read_text(encoding="utf-8"), "PokerStars", source_name)
+
+    dialog.run()
+
+    assert captured_names == [source_name]
+
+
 def test_every_debugger_table_has_resizable_columns_and_horizontal_scrolling(dialog) -> None:
     trees = (
         dialog.detection_tree,
