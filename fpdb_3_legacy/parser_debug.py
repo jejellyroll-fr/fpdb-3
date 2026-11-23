@@ -997,7 +997,21 @@ def debug_parse_text(
     imported hand; the source file itself is never opened.
     """
     suffix = ".xml" if text.lstrip("﻿ \t\r\n").startswith("<") else Path(name).suffix or ".txt"
+    site_config = getattr(config, "hhcs", {}).get(site) if site else None
+    site_definitions = IdentifySite(config, hhcs={site: site_config}).sitelist if site_config is not None else {}
+    site_definition = next(iter(site_definitions.values()), None)
+    codepages = site_definition.codepage if site_definition is not None else "utf-8"
+    if isinstance(codepages, str):
+        codepages = (codepages,)
+    for encoding in codepages:
+        try:
+            encoded_text = text.encode(encoding)
+            break
+        except (LookupError, UnicodeEncodeError):
+            continue
+    else:
+        encoded_text = text.encode("utf-8")
     with tempfile.TemporaryDirectory(prefix="fpdb-parser-debug-") as directory:
         path = Path(directory) / (Path(name).stem + suffix)
-        path.write_text(text, encoding="utf-8")
+        path.write_bytes(encoded_text)
         return debug_parse_file(path, config, site, trace_lines=trace_lines, derived=derived, source="pasted text")

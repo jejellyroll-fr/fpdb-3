@@ -629,6 +629,7 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.tabs.setCurrentWidget(self.failed_hands_panel)
 
     def refresh_failed_hands(self) -> None:
+        selected_key = self._selected_failed_hand_key()
         entries = failed_hands.entries()
         self.failed_hands_button.setText(_("Hands to debug ({count})").format(count=len(entries)))
         signature = tuple((entry.key, entry.attempts) for entry in entries)
@@ -653,6 +654,9 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
             for column, value in enumerate(values):
                 self.failed_hands_table.setItem(row, column, QTableWidgetItem(value))
         has_entries = bool(entries)
+        self.failed_hands_table.clearSelection()
+        if selected_key is not None and selected_key in self._failed_hand_keys:
+            self.failed_hands_table.selectRow(self._failed_hand_keys.index(selected_key))
         self.replay_failed_hand_button.setEnabled(has_entries)
         self.remove_failed_hand_button.setEnabled(has_entries)
         self.clear_failed_hands_button.setEnabled(has_entries)

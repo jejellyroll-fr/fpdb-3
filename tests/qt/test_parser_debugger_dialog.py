@@ -7,7 +7,9 @@ from __future__ import annotations
 
 import json
 import shutil
+from datetime import datetime
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 from PySide6.QtCore import Qt
@@ -15,6 +17,7 @@ from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import QFileDialog, QHeaderView, QLabel, QTreeWidgetItem
 
 from fpdb_3_legacy import parser_debug
+from fpdb_3_legacy import parser_debugger_dialog as debugger_module
 from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.parser_debug_report import Diagnostic
 from fpdb_3_legacy.parser_debugger_dialog import ParserDebuggerDialog, _standalone_fixture_text, show_parser_debugger
@@ -98,6 +101,39 @@ def test_replaying_an_import_failure_preserves_the_source_filename(dialog, monke
     dialog.run()
 
     assert captured_names == [source_name]
+
+
+def test_failed_hand_selection_tracks_its_key_when_the_queue_reorders(dialog, monkeypatch) -> None:
+    def entry(key: str):
+        return SimpleNamespace(
+            key=key,
+            site="Site",
+            converter="Converter",
+            source=f"{key}.txt",
+            mode="manual",
+            hand_identifier=None,
+            hand_index=1,
+            failure_type="ParseError",
+            timestamp=datetime.now().astimezone(),
+            message="failure",
+            attempts=1,
+        )
+
+    queued = [entry("first"), entry("second")]
+    monkeypatch.setattr(debugger_module.failed_hands, "entries", lambda: queued)
+    dialog.refresh_failed_hands()
+    dialog.failed_hands_table.selectRow(0)
+
+    queued[:] = [queued[1], queued[0]]
+    dialog.refresh_failed_hands()
+
+    assert dialog._selected_failed_hand_key() == "first"
+    assert dialog.failed_hands_table.selectionModel().selectedRows()[0].row() == 1
+
+    queued[:] = [queued[0]]
+    dialog.refresh_failed_hands()
+
+    assert dialog._selected_failed_hand_key() is None
 
 
 def test_every_debugger_table_has_resizable_columns_and_horizontal_scrolling(dialog) -> None:
