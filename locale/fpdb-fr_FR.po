@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 22:24+0100\n"
+"POT-Creation-Date: 2026-11-23 14:13+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -6585,9 +6585,10 @@ msgid "Anonymize fixture"
 msgstr "Anonymiser la fixture"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
-#| msgid "Anonymized fixture saved"
 msgid "Anonymized fixture saved; review privacy before commit"
-msgstr "Fixture anonymisée enregistrée ; vérifiez sa confidentialité avant de la valider"
+msgstr ""
+"Fixture anonymisée enregistrée ; vérifiez sa confidentialité avant de la "
+"valider"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
@@ -6668,7 +6669,6 @@ msgid "File encoding: {encoding}"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
-#| msgid "Anonymized fixture saved"
 msgid "Fixture saved"
 msgstr "Fixture enregistrée"
 
@@ -6678,6 +6678,10 @@ msgid ""
 "Fixture saved to {path}. Review the anonymized text before committing it. If "
 "it changes generated statistics, regenerate the stats guide."
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Fixture validation failed"
+msgstr "Échec de la validation du fichier de fixture"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Found"
@@ -6864,6 +6868,13 @@ msgstr "Classe Python instanciée pour analyser le fichier sélectionné."
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
 msgid ""
+"The saved text does not reproduce this hand ({expected}); validation "
+"returned {actual}."
+msgstr "Le texte enregistré ne reproduit pas cette main ({expected}) ; la validation a renvoyé {actual}."
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid ""
 "These real names or account tokens are still present: {values}. Add them to "
 "the list or review the text."
 msgstr ""
@@ -6941,7 +6952,6 @@ msgid "not recognised"
 msgstr "non reconnu"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
-#| msgid "unknown"
 msgid "unknown encoding"
 msgstr "encodage inconnu"
 
@@ -6952,7 +6962,6 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
-#| msgid "disabled"
 msgid "{site} (disabled)"
 msgstr "{site} (désactivé)"
 
