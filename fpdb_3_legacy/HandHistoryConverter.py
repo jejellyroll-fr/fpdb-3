@@ -29,7 +29,6 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable
 from decimal import Decimal
 from pathlib import Path
-from typing import cast
 
 import defusedxml.minidom
 import pytz
@@ -294,7 +293,7 @@ HandHistoryConverter: '{sitename}'
         callback = self.failed_hand_callback
         if not callable(callback):
             return
-        callback_fn = cast(Callable[..., None], callback)
+        invoke_callback = getattr(callback, "__call__")
         shared_header = ""
         copy_game_header = self.copyGameHeader or getattr(self, "copy_game_header", False)
         if copy_game_header and self.whole_file:
@@ -311,7 +310,7 @@ HandHistoryConverter: '{sitename}'
                     shared_header = re.split(split_hands_re, self.whole_file, maxsplit=1)[0].strip()
         hand_identifier = getattr(error, "handid", None)
         try:
-            callback_fn(
+            invoke_callback(
                 hand_index=hand_index,
                 failure_type=failure_type,
                 message=message,
