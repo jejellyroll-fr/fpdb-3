@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 17:51+0100\n"
+"POT-Creation-Date: 2026-11-23 18:33+0100\n"
 "PO-Revision-Date: 2011-07-09 14:23+0000\n"
 "Last-Translator: OvidijusSv <OvidijusSv@gmail.com>\n"
 "Language-Team: Lithuanian (Lithuania) (http://www.transifex.net/projects/p/"
@@ -68,7 +68,7 @@ msgstr "Neįgyvendinta %s: '%s' '%s'"
 msgid "reading antes"
 msgstr "skaitomi antai"
 
-#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/failed_hand_debug.py
+#: fpdb_3_legacy/Aux_Hud.py
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
 #, fuzzy
 msgid "Close"
@@ -4138,63 +4138,6 @@ msgid ""
 "yet. Until then, the panels can be set up and previewed in Preferences."
 msgstr ""
 
-#: fpdb_3_legacy/failed_hand_debug.py
-#, fuzzy
-msgid "Clear list"
-msgstr "Išvalyti viską"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Failure"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py fpdb_3_legacy/parser_debugger_dialog.py
-#: fpdb_3_legacy/research_labels.py
-#, fuzzy
-msgid "Hand"
-msgstr "Ranka"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-#, fuzzy
-msgid "Hands to debug"
-msgstr "Rankos po"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Mode"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Open in Parser Debugger"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Parser message"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Remove"
-msgstr "Pašalinti"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-#, fuzzy
-msgid "Site / converter"
-msgstr "Apversti"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-#, fuzzy
-msgid "Source file"
-msgstr "Šaltinio rankos"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Time"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py
-#, python-brace-format
-msgid "{hand} · {attempts} attempts"
-msgstr ""
-
 #: fpdb_3_legacy/fpdb.pyw
 #, fuzzy
 msgid "Back up and upgrade"
@@ -6539,6 +6482,12 @@ msgid "Redo the change just undone (Ctrl+Shift+Z)"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Remove"
+msgstr "Pašalinti"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Rename"
 msgstr "Naudotojo vardas"
@@ -7397,6 +7346,11 @@ msgstr "Įrašyti pakeitimus"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
+msgid "Clear list"
+msgstr "Išvalyti viską"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
 msgid "Closest"
 msgstr "Uždaryti"
 
@@ -7457,6 +7411,10 @@ msgid "Expected"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Failure"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
 msgid "File encoding: {encoding}"
 msgstr ""
@@ -7481,9 +7439,19 @@ msgstr "Situacijų šeima"
 msgid "Found"
 msgstr ""
 
+#: fpdb_3_legacy/parser_debugger_dialog.py fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hand"
+msgstr "Ranka"
+
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Hand fingerprint"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Hands to debug"
+msgstr "Rankos po"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
@@ -7519,6 +7487,10 @@ msgstr "Žurnalo pranešimai"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Missing / not reached"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Mode"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7563,6 +7535,10 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Parser Debugger"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Parser message"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7618,6 +7594,11 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
+msgid "Replay selected hand"
+msgstr "Atnaujinti pasirinktą"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
 msgid "Report saved"
 msgstr "Pranešti apie problemą"
 
@@ -7643,6 +7624,16 @@ msgstr "Įrašyti šabloną"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Sidecar"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Site / converter"
+msgstr "Apversti"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Source file"
+msgstr "Šaltinio rankos"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Status colours"
@@ -7685,6 +7676,10 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "This file has no regression sidecar (.hands, .hp, .gt)"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Time"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7763,6 +7758,11 @@ msgstr "nerasta"
 #, fuzzy
 msgid "unknown encoding"
 msgstr "Nežinoma svetainė"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "{hand} · {attempts} attempts"
+msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format

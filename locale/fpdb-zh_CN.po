@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 17:51+0100\n"
+"POT-Creation-Date: 2026-11-23 18:33+0100\n"
 "PO-Revision-Date: 2011-04-07 08:53+0000\n"
 "Last-Translator: steffen123 <steffen@schaumburger.info>\n"
 "Language-Team: Chinese (China) <>\n"
@@ -67,7 +67,7 @@ msgstr "未实现的 %s: '%s' '%s'"
 msgid "reading antes"
 msgstr "读取赌注"
 
-#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/failed_hand_debug.py
+#: fpdb_3_legacy/Aux_Hud.py
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
 #, fuzzy
 msgid "Close"
@@ -4125,63 +4125,6 @@ msgid ""
 "yet. Until then, the panels can be set up and previewed in Preferences."
 msgstr ""
 
-#: fpdb_3_legacy/failed_hand_debug.py
-#, fuzzy
-msgid "Clear list"
-msgstr "全部清除"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Failure"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py fpdb_3_legacy/parser_debugger_dialog.py
-#: fpdb_3_legacy/research_labels.py
-#, fuzzy
-msgid "Hand"
-msgstr "手牌"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-#, fuzzy
-msgid "Hands to debug"
-msgstr "此手牌之后"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Mode"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Open in Parser Debugger"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Parser message"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Remove"
-msgstr "删除"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-#, fuzzy
-msgid "Site / converter"
-msgstr "反选"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-#, fuzzy
-msgid "Source file"
-msgstr "来源手牌"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Time"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py
-#, python-brace-format
-msgid "{hand} · {attempts} attempts"
-msgstr ""
-
 #: fpdb_3_legacy/fpdb.pyw
 #, fuzzy
 msgid "Back up and upgrade"
@@ -6486,6 +6429,12 @@ msgid "Redo the change just undone (Ctrl+Shift+Z)"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Remove"
+msgstr "删除"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Rename"
 msgstr "文件名：%s"
@@ -7332,6 +7281,11 @@ msgstr "保存更改"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
+msgid "Clear list"
+msgstr "全部清除"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
 msgid "Closest"
 msgstr "关闭"
 
@@ -7392,6 +7346,10 @@ msgid "Expected"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Failure"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
 msgid "File encoding: {encoding}"
 msgstr ""
@@ -7416,9 +7374,19 @@ msgstr "局面类别"
 msgid "Found"
 msgstr ""
 
+#: fpdb_3_legacy/parser_debugger_dialog.py fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hand"
+msgstr "手牌"
+
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Hand fingerprint"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Hands to debug"
+msgstr "此手牌之后"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
@@ -7454,6 +7422,10 @@ msgstr "日志消息"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Missing / not reached"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Mode"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7498,6 +7470,10 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Parser Debugger"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Parser message"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7553,6 +7529,11 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
+msgid "Replay selected hand"
+msgstr "更新所选"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
 msgid "Report saved"
 msgstr "报告问题"
 
@@ -7578,6 +7559,16 @@ msgstr "保存预设"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Sidecar"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Site / converter"
+msgstr "反选"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Source file"
+msgstr "来源手牌"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Status colours"
@@ -7620,6 +7611,10 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "This file has no regression sidecar (.hands, .hp, .gt)"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Time"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7698,6 +7693,11 @@ msgstr "文件%s无法找到"
 #, fuzzy
 msgid "unknown encoding"
 msgstr "未知站点"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "{hand} · {attempts} attempts"
+msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format

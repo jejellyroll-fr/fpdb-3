@@ -29,7 +29,7 @@ from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtCore import QModelIndex, QPersistentModelIndex, QSize, Qt
+from PySide6.QtCore import QModelIndex, QPersistentModelIndex, QSize, Qt, QTimer
 from PySide6.QtGui import QColor, QFont, QFontDatabase, QGuiApplication, QPainter, QTextCursor, QTextFormat
 from PySide6.QtWidgets import (
     QApplication,
@@ -46,6 +46,8 @@ from PySide6.QtWidgets import (
     QSplitter,
     QStyledItemDelegate,
     QStyleOptionViewItem,
+    QTableWidget,
+    QTableWidgetItem,
     QTabWidget,
     QTextBrowser,
     QTextEdit,
@@ -56,6 +58,7 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy import parser_debug
+from fpdb_3_legacy.failed_hand_debug import failed_hands
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.parser_debug import Diagnostic, HandResult, ParseDebugReport
 
@@ -282,6 +285,9 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.fixture_button: QPushButton
         self.parser_label: QLabel
         self.detection_tree: QTreeWidget
+        self.failed_hands_table: QTableWidget
+        self._failed_hand_keys: list[str] = []
+        self._failed_hands_signature: tuple[tuple[str, int], ...] | None = None
         self.setWindowTitle(_("Parser Debugger"))
         self.resize(1320, 820)
         self.setWindowFlag(Qt.WindowType.WindowMaximizeButtonHint, True)
@@ -358,7 +364,50 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         layout.addWidget(self.detection_tree, 1)
         return panel
 
-    def _report_panel(self) -> QWidget:
+    def _failed_hands_panel(self, parent: QWidget) -> QWidget:
+        """Show the session queue inside the Parser Debugger."""
+        panel = QWidget(parent)
+        layout = QVBoxLayout(panel)
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.failed_hands_table = QTableWidget(0, 7, panel)
+        self.failed_hands_table.setHorizontalHeaderLabels(
+            [
+                _("Site / converter"),
+                _("Source file"),
+                _("Mode"),
+                _("Hand"),
+                _("Failure"),
+                _("Time"),
+                _("Parser message"),
+            ]
+        )
+        self.failed_hands_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.failed_hands_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self.failed_hands_table.setWordWrap(False)
+        self.failed_hands_table.horizontalHeader().setStretchLastSection(True)
+        self.failed_hands_table.itemDoubleClicked.connect(lambda _item: self.replay_failed_hand())
+        layout.addWidget(self.failed_hands_table, 1)
+
+        actions = QHBoxLayout()
+        self.replay_failed_hand_button = QPushButton(_("Replay selected hand"), panel)
+        self.remove_failed_hand_button = QPushButton(_("Remove"), panel)
+        self.clear_failed_hands_button = QPushButton(_("Clear list"), panel)
+        self.replay_failed_hand_button.clicked.connect(self.replay_failed_hand)
+        self.remove_failed_hand_button.clicked.connect(self.remove_failed_hand)
+        self.clear_failed_hands_button.clicked.connect(self.clear_failed_hands)
+        actions.addWidget(self.replay_failed_hand_button)
+        actions.addWidget(self.remove_failed_hand_button)
+        actions.addWidget(self.clear_failed_hands_button)
+        actions.addStretch(1)
+        layout.addLayout(actions)
+
+        self.refresh_failed_hands()
+        self.failed_hands_timer = QTimer(self)
+        self.failed_hands_timer.timeout.connect(self.refresh_failed_hands)
+        self.failed_hands_timer.start(1500)
+        return panel
+
+    def _report_panel(self) -> QWidget:  # noqa: PLR0915 - one tab for each parser report view
         panel = QWidget(self)
         layout = QVBoxLayout(panel)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -410,6 +459,8 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
             (self.changes_view, _("Changes")),
         ):
             self.tabs.addTab(widget, title)
+        self.failed_hands_panel = self._failed_hands_panel(panel)
+        self.tabs.addTab(self.failed_hands_panel, _("Hands to debug"))
         layout.addWidget(self.tabs, 1)
 
         buttons = QHBoxLayout()
@@ -458,6 +509,66 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         if site_index >= 0:
             self.site_combo.setCurrentIndex(site_index)
         self.status_label.setText(_("Captured from {source} · {site}").format(source=source, site=site))
+
+    def show_failed_hands(self) -> None:
+        """Focus the import-failure list embedded in the debugger."""
+        self.refresh_failed_hands()
+        self.tabs.setCurrentWidget(self.failed_hands_panel)
+
+    def refresh_failed_hands(self) -> None:
+        entries = failed_hands.entries()
+        signature = tuple((entry.key, entry.attempts) for entry in entries)
+        if signature == self._failed_hands_signature:
+            return
+        self._failed_hands_signature = signature
+        self._failed_hand_keys = [entry.key for entry in entries]
+        self.failed_hands_table.setRowCount(len(entries))
+        for row, entry in enumerate(entries):
+            hand = entry.hand_identifier or str(entry.hand_index)
+            if entry.attempts > 1:
+                hand = _("{hand} · {attempts} attempts").format(hand=hand, attempts=entry.attempts)
+            values = (
+                f"{entry.site} · {entry.converter}",
+                entry.source,
+                entry.mode,
+                hand,
+                entry.failure_type,
+                entry.timestamp.strftime("%Y-%m-%d %H:%M:%S %Z"),
+                entry.message,
+            )
+            for column, value in enumerate(values):
+                self.failed_hands_table.setItem(row, column, QTableWidgetItem(value))
+        has_entries = bool(entries)
+        self.replay_failed_hand_button.setEnabled(has_entries)
+        self.remove_failed_hand_button.setEnabled(has_entries)
+        self.clear_failed_hands_button.setEnabled(has_entries)
+
+    def _selected_failed_hand_key(self) -> str | None:
+        rows = self.failed_hands_table.selectionModel().selectedRows()
+        if rows and rows[0].row() < len(self._failed_hand_keys):
+            return self._failed_hand_keys[rows[0].row()]
+        return None
+
+    def replay_failed_hand(self) -> None:
+        key = self._selected_failed_hand_key()
+        if key is None:
+            return
+        entry = next((candidate for candidate in failed_hands.entries() if candidate.key == key), None)
+        if entry is None:
+            self.refresh_failed_hands()
+            return
+        self.load_import_failure(entry.replay_text, entry.site, entry.source)
+        self.run()
+
+    def remove_failed_hand(self) -> None:
+        key = self._selected_failed_hand_key()
+        if key is not None:
+            failed_hands.remove(key)
+            self.refresh_failed_hands()
+
+    def clear_failed_hands(self) -> None:
+        failed_hands.clear()
+        self.refresh_failed_hands()
 
     def run(self) -> None:
         text = self.input.toPlainText()

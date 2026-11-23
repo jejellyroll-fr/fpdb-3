@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 17:51+0100\n"
+"POT-Creation-Date: 2026-11-23 18:33+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -103,7 +103,7 @@ msgstr ""
 msgid "Stop the HUD on this table"
 msgstr ""
 
-#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/failed_hand_debug.py
+#: fpdb_3_legacy/Aux_Hud.py
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
 msgid "Close"
 msgstr ""
@@ -3494,57 +3494,6 @@ msgid ""
 "it. Help ▸ What fpdb does while you play says what each room's page says."
 msgstr ""
 
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Hands to debug"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Failure"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py fpdb_3_legacy/parser_debugger_dialog.py
-#: fpdb_3_legacy/research_labels.py
-msgid "Hand"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Mode"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Parser message"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Site / converter"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Source file"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Time"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Open in Parser Debugger"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Remove"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Clear list"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py
-#, python-brace-format
-msgid "{hand} · {attempts} attempts"
-msgstr ""
-
 #: fpdb_3_legacy/fpdb.pyw
 msgid "Database Statistics"
 msgstr ""
@@ -4897,6 +4846,11 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Edit"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Remove"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -6285,6 +6239,42 @@ msgid "Recognised"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Site / converter"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Source file"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Mode"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py fpdb_3_legacy/research_labels.py
+msgid "Hand"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Failure"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Time"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Parser message"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Replay selected hand"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Clear list"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Paste a hand history and press Debug parse."
 msgstr ""
 
@@ -6369,6 +6359,10 @@ msgid "Changes"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Hands to debug"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Copy bug report"
 msgstr ""
 
@@ -6404,6 +6398,11 @@ msgstr ""
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
 msgid "Captured from {source} · {site}"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "{hand} · {attempts} attempts"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py

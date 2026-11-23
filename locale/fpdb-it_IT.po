@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 17:51+0100\n"
+"POT-Creation-Date: 2026-11-23 18:33+0100\n"
 "PO-Revision-Date: 2012-02-17 20:03+0000\n"
 "Last-Translator: seppone1991 <seppone1991@gmail.com>\n"
 "Language-Team: Italian (Italy) (http://www.transifex.net/projects/p/fpdb/"
@@ -69,7 +69,7 @@ msgstr "Non implementati %s: '%s' '%s'"
 msgid "reading antes"
 msgstr "lettura ante"
 
-#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/failed_hand_debug.py
+#: fpdb_3_legacy/Aux_Hud.py
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
 #, fuzzy
 msgid "Close"
@@ -4105,66 +4105,6 @@ msgid ""
 "yet. Until then, the panels can be set up and previewed in Preferences."
 msgstr ""
 
-#: fpdb_3_legacy/failed_hand_debug.py
-#, fuzzy
-msgid "Clear list"
-msgstr "Cancella tutto"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Failure"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py fpdb_3_legacy/parser_debugger_dialog.py
-#: fpdb_3_legacy/research_labels.py
-#, fuzzy
-msgid "Hand"
-msgstr "Mano"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-#, fuzzy
-msgid "Hands to debug"
-msgstr "Mani dopo"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Mode"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Open in Parser Debugger"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py
-#, fuzzy
-#| msgid "database used"
-msgid "Parser message"
-msgstr "database usato"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Remove"
-msgstr "Rimuovi"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-#, fuzzy
-#| msgid "Suited connectors"
-msgid "Site / converter"
-msgstr "Suited Connectors"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-#, fuzzy
-msgid "Source file"
-msgstr "Mani di origine"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Time"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py
-#, python-brace-format
-msgid "{hand} · {attempts} attempts"
-msgstr ""
-
 #: fpdb_3_legacy/fpdb.pyw
 #, fuzzy
 msgid "Back up and upgrade"
@@ -6515,6 +6455,12 @@ msgid "Redo the change just undone (Ctrl+Shift+Z)"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Remove"
+msgstr "Rimuovi"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Rename"
 msgstr "Nome della regola"
@@ -7382,6 +7328,11 @@ msgstr "Salva modifiche"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
+msgid "Clear list"
+msgstr "Cancella tutto"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
 msgid "Closest"
 msgstr "Chiudi"
 
@@ -7444,6 +7395,10 @@ msgid "Expected"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Failure"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
 msgid "File encoding: {encoding}"
 msgstr ""
@@ -7468,9 +7423,19 @@ msgstr "Famiglia di situazioni"
 msgid "Found"
 msgstr ""
 
+#: fpdb_3_legacy/parser_debugger_dialog.py fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hand"
+msgstr "Mano"
+
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Hand fingerprint"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Hands to debug"
+msgstr "Mani dopo"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
@@ -7507,6 +7472,10 @@ msgstr "Messaggi di Log"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Missing / not reached"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Mode"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7552,6 +7521,12 @@ msgstr ""
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Parser Debugger"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+#| msgid "database used"
+msgid "Parser message"
+msgstr "database usato"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Parser not determined yet"
@@ -7608,6 +7583,11 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
+msgid "Replay selected hand"
+msgstr "Aggiorna selezionata"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
 msgid "Report saved"
 msgstr "Segnala un problema"
 
@@ -7633,6 +7613,17 @@ msgstr "Salva preimpostazione"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Sidecar"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+#| msgid "Suited connectors"
+msgid "Site / converter"
+msgstr "Suited Connectors"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Source file"
+msgstr "Mani di origine"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Status colours"
@@ -7675,6 +7666,10 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "This file has no regression sidecar (.hands, .hp, .gt)"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Time"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7755,6 +7750,11 @@ msgstr "non trovato"
 #| msgid "Unknown Site"
 msgid "unknown encoding"
 msgstr "Sito conosciuto"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "{hand} · {attempts} attempts"
+msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format

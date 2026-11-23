@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 17:51+0100\n"
+"POT-Creation-Date: 2026-11-23 18:33+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -65,7 +65,7 @@ msgstr "Nem kivitelezett %s: '%s' '%s'"
 msgid "reading antes"
 msgstr "antek olvasása"
 
-#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/failed_hand_debug.py
+#: fpdb_3_legacy/Aux_Hud.py
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
 #, fuzzy
 msgid "Close"
@@ -4101,68 +4101,6 @@ msgid ""
 "yet. Until then, the panels can be set up and previewed in Preferences."
 msgstr ""
 
-#: fpdb_3_legacy/failed_hand_debug.py
-#, fuzzy
-msgid "Clear list"
-msgstr "Összes törlése"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Failure"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py fpdb_3_legacy/parser_debugger_dialog.py
-#: fpdb_3_legacy/research_labels.py
-#, fuzzy
-msgid "Hand"
-msgstr "Leosztás"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-#, fuzzy
-msgid "Hands to debug"
-msgstr "Leosztások ez után"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Mode"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py
-msgid "Open in Parser Debugger"
-msgstr ""
-
-#: fpdb_3_legacy/failed_hand_debug.py
-#, fuzzy
-#| msgid "database used"
-msgid "Parser message"
-msgstr "használt adatbázis"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Remove"
-msgstr "Eltávolítás"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-#, fuzzy
-#| msgid "Suited connectors"
-msgid "Site / converter"
-msgstr "Egyszínű kapcsolódó"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-#, fuzzy
-msgid "Source file"
-msgstr "Forrásleosztások"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-#, fuzzy
-#| msgid "utcTime:"
-msgid "Time"
-msgstr "utcTime:"
-
-#: fpdb_3_legacy/failed_hand_debug.py
-#, python-brace-format
-msgid "{hand} · {attempts} attempts"
-msgstr ""
-
 #: fpdb_3_legacy/fpdb.pyw
 #, fuzzy
 msgid "Back up and upgrade"
@@ -6505,6 +6443,12 @@ msgid "Redo the change just undone (Ctrl+Shift+Z)"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Remove"
+msgstr "Eltávolítás"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Rename"
 msgstr "Szabály neve"
@@ -7380,6 +7324,11 @@ msgstr "Változások mentése"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
+msgid "Clear list"
+msgstr "Összes törlése"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
 msgid "Closest"
 msgstr "Bezárás"
 
@@ -7442,6 +7391,10 @@ msgid "Expected"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Failure"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
 msgid "File encoding: {encoding}"
 msgstr ""
@@ -7466,9 +7419,19 @@ msgstr "Helyzetcsalád"
 msgid "Found"
 msgstr ""
 
+#: fpdb_3_legacy/parser_debugger_dialog.py fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hand"
+msgstr "Leosztás"
+
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Hand fingerprint"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Hands to debug"
+msgstr "Leosztások ez után"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
@@ -7505,6 +7468,10 @@ msgstr "Naplóbejegyzések"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Missing / not reached"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Mode"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7550,6 +7517,12 @@ msgstr ""
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Parser Debugger"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+#| msgid "database used"
+msgid "Parser message"
+msgstr "használt adatbázis"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Parser not determined yet"
@@ -7606,6 +7579,11 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
+msgid "Replay selected hand"
+msgstr "Kijelölt frissítése"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
 msgid "Report saved"
 msgstr "Hiba bejelentése"
 
@@ -7631,6 +7609,17 @@ msgstr "Előbeállítás mentése"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Sidecar"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+#| msgid "Suited connectors"
+msgid "Site / converter"
+msgstr "Egyszínű kapcsolódó"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Source file"
+msgstr "Forrásleosztások"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Status colours"
@@ -7674,6 +7663,12 @@ msgstr ""
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "This file has no regression sidecar (.hands, .hp, .gt)"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+#| msgid "utcTime:"
+msgid "Time"
+msgstr "utcTime:"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Trace lines"
@@ -7753,6 +7748,11 @@ msgstr "nem található"
 #| msgid "Unknown Site"
 msgid "unknown encoding"
 msgstr "Ismeretlen terem"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "{hand} · {attempts} attempts"
+msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format

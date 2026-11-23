@@ -9,19 +9,6 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
-from PySide6.QtCore import Qt, QTimer
-from PySide6.QtWidgets import (
-    QDialog,
-    QHBoxLayout,
-    QPushButton,
-    QTableWidget,
-    QTableWidgetItem,
-    QVBoxLayout,
-    QWidget,
-)
-
-from fpdb_3_legacy.i18n import gettext as _
-
 MAX_ENTRIES = 200
 MAX_ENTRY_BYTES = 8 * 1024 * 1024
 MAX_TOTAL_BYTES = 32 * 1024 * 1024
@@ -126,107 +113,11 @@ class FailedHandRegistry:
 failed_hands = FailedHandRegistry()
 
 
-class FailedHandsDialog(QDialog):  # pylint: disable=too-many-instance-attributes  # one attribute per control
-    """Session-local queue with direct Parser Debugger replay."""
 
-    def __init__(self, config: Any, parent: QWidget | None = None) -> None:
-        super().__init__(parent)
-        self.config = config
-        self.setWindowTitle(_("Hands to debug"))
-        self.resize(1000, 420)
-        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
-        self.table = QTableWidget(0, 7, self)
-        self.table.setHorizontalHeaderLabels(
-            [_("Site / converter"), _("Source file"), _("Mode"), _("Hand"), _("Failure"), _("Time"), _("Parser message")]
-        )
-        self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
-        self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
-        self.table.setWordWrap(False)
-        self.table.horizontalHeader().setStretchLastSection(True)
-        self.table.itemDoubleClicked.connect(lambda _item: self.replay_selected())
+def show_failed_hands(config: Any, parent: Any = None) -> Any:
+    """Open the Parser Debugger directly on its shared session queue."""
+    from fpdb_3_legacy.parser_debugger_dialog import show_parser_debugger
 
-        buttons = QHBoxLayout()
-        self.replay_button = QPushButton(_("Open in Parser Debugger"), self)
-        self.remove_button = QPushButton(_("Remove"), self)
-        self.clear_button = QPushButton(_("Clear list"), self)
-        close_button = QPushButton(_("Close"), self)
-        self.replay_button.clicked.connect(self.replay_selected)
-        self.remove_button.clicked.connect(self.remove_selected)
-        self.clear_button.clicked.connect(self.clear_entries)
-        close_button.clicked.connect(self.close)
-        for button in (self.replay_button, self.remove_button, self.clear_button):
-            buttons.addWidget(button)
-        buttons.addStretch(1)
-        buttons.addWidget(close_button)
-
-        layout = QVBoxLayout(self)
-        layout.addWidget(self.table)
-        layout.addLayout(buttons)
-        self._keys: list[str] = []
-        self._signature: tuple[tuple[str, int], ...] | None = None
-        self.refresh()
-        self._timer = QTimer(self)
-        self._timer.timeout.connect(self.refresh)
-        self._timer.start(1500)
-
-    def refresh(self) -> None:
-        entries = failed_hands.entries()
-        signature = tuple((entry.key, entry.attempts) for entry in entries)
-        if signature == self._signature:
-            return
-        self._signature = signature
-        self._keys = [entry.key for entry in entries]
-        self.table.setRowCount(len(entries))
-        for row, entry in enumerate(entries):
-            hand = entry.hand_identifier or str(entry.hand_index)
-            if entry.attempts > 1:
-                hand = _("{hand} · {attempts} attempts").format(hand=hand, attempts=entry.attempts)
-            values = (
-                f"{entry.site} · {entry.converter}",
-                entry.source,
-                entry.mode,
-                hand,
-                entry.failure_type,
-                entry.timestamp.strftime("%Y-%m-%d %H:%M:%S %Z"),
-                entry.message,
-            )
-            for column, value in enumerate(values):
-                self.table.setItem(row, column, QTableWidgetItem(value))
-        self.replay_button.setEnabled(bool(entries))
-        self.remove_button.setEnabled(bool(entries))
-        self.clear_button.setEnabled(bool(entries))
-
-    def _selected_key(self) -> str | None:
-        rows = self.table.selectionModel().selectedRows()
-        return self._keys[rows[0].row()] if rows and rows[0].row() < len(self._keys) else None
-
-    def replay_selected(self) -> None:
-        key = self._selected_key()
-        if key is None:
-            return
-        entry = next((candidate for candidate in failed_hands.entries() if candidate.key == key), None)
-        if entry is None:
-            self.refresh()
-            return
-        from fpdb_3_legacy.parser_debugger_dialog import show_parser_debugger
-
-        dialog = show_parser_debugger(self.config, self.parentWidget())
-        dialog.load_import_failure(entry.replay_text, entry.site, entry.source)
-        dialog.run()
-
-    def remove_selected(self) -> None:
-        key = self._selected_key()
-        if key is not None:
-            failed_hands.remove(key)
-            self.refresh()
-
-    def clear_entries(self) -> None:
-        failed_hands.clear()
-        self.refresh()
-
-
-def show_failed_hands(config: Any, parent: QWidget | None = None) -> FailedHandsDialog:
-    """Open the shared session queue."""
-    dialog = FailedHandsDialog(config, parent)
-    dialog.show()
+    dialog = show_parser_debugger(config, parent)
+    dialog.show_failed_hands()
     return dialog
