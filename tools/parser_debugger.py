@@ -27,8 +27,13 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from fpdb_3_legacy import Configuration
-from fpdb_3_legacy.parser_debug import bug_report, debug_parse_file, diff_reports, render_text
+from fpdb_3_legacy import Configuration  # pylint: disable=wrong-import-position
+from fpdb_3_legacy.parser_debug import (  # pylint: disable=wrong-import-position
+    bug_report,
+    debug_parse_file,
+    diff_reports,
+    render_text,
+)
 
 
 def build_parser() -> argparse.ArgumentParser:

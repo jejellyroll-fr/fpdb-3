@@ -8,8 +8,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from fpdb_3_legacy import anonymize_hh as _implementation
-from fpdb_3_legacy.anonymize_hh import anonymize_text
+from fpdb_3_legacy import anonymize_hh as _implementation  # pylint: disable=wrong-import-position
+from fpdb_3_legacy.anonymize_hh import anonymize_text  # pylint: disable=wrong-import-position
 
 __all__ = ["anonymize_text"]
 

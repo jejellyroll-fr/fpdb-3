@@ -375,13 +375,38 @@ def anonymize(text: str, names: Sequence[str], hero: str | None) -> str:
     return text
 
 
+def _history_player_names(text: str) -> list[str]:
+    """Find seated players and common table-event names in the source text."""
+    names: list[str] = []
+    patterns = (
+        re.compile(r"^Seat\s+\d+:\s*(.+?)\s+\([^\r\n]*\)"),
+        re.compile(r"^(.+?):\s*(?:is\s+sitting\s+out|sits?\s+out)\b", re.IGNORECASE),
+        re.compile(r"^(.+?)\s+(?:joins?|leaves?)\s+(?:the\s+)?table\b", re.IGNORECASE),
+    )
+    for line in text.splitlines():
+        for pattern in patterns:
+            match = pattern.match(line)
+            if match:
+                name = match.group(1).strip()
+                if name and name not in names:
+                    names.append(name)
+                break
+    return names
+
+
 def bug_report(report: ParseDebugReport, hand: int | None = None) -> str:
     """Markdown ready to paste into a GitHub issue, with player names replaced."""
     selected = [result for result in report.hands if hand is None or result.index == hand] or report.hands
     names: list[str] = []
+    names_outside_parsed_players: set[str] = set()
     hero = report.detection.hero
     for result in report.hands:
-        names += [str(player["name"]) for player in result.extracted.get("players", [])]
+        parsed_names = [str(player["name"]) for player in result.extracted.get("players", [])]
+        history_names = _history_player_names(result.text)
+        names += parsed_names
+        names += history_names
+        if result in selected:
+            names_outside_parsed_players.update(set(history_names) - set(parsed_names))
         hero = result.extracted.get("header", {}).get("hero") or hero
     texts = "\n\n".join(result.text for result in selected) if selected else ""
     player_names_unavailable = [
@@ -417,12 +442,17 @@ def bug_report(report: ParseDebugReport, hand: int | None = None) -> str:
     if failed_steps:
         lines += ["", "#### Failed steps", "", *failed_steps]
     lines += ["", "#### Hand history", ""]
-    if not anonymized:
+    if not anonymized or names_outside_parsed_players:
         if player_names_unavailable:
             indices = ", ".join(str(index) for index in player_names_unavailable)
             lines.append(
                 f"> **Manual privacy review required**: player names could not be extracted for hand(s) {indices}. "
                 "Review the complete report and replace any real names before posting."
+            )
+        elif names_outside_parsed_players:
+            lines.append(
+                "> **Manual privacy review recommended**: names found in seat or table-event lines outside the parsed "
+                "player list were redacted too. Review unusual room-specific events before posting."
             )
         else:
             lines.append("> **Not anonymized**: no player name could be read. Replace the names before posting.")

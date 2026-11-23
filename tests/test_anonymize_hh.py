@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import io
 import json
-import os
+import runpy
 import shutil
-import subprocess
 import sys
+from contextlib import redirect_stdout
 from pathlib import Path
 
 import pytest
@@ -41,20 +42,34 @@ def _sitting_out_names(text: str) -> set[str]:
     }
 
 
-def test_direct_script_runs_without_pythonpath(tmp_path: Path) -> None:
-    env = os.environ.copy()
-    env.pop("PYTHONPATH", None)
-    result = subprocess.run(
-        [sys.executable, str(ROOT / "tools" / "anonymize_hh.py"), "--help"],
-        cwd=tmp_path,
-        env=env,
-        capture_output=True,
-        text=True,
-        check=False,
+def test_direct_script_bootstraps_repository_imports(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        sys,
+        "path",
+        [entry for entry in sys.path if Path(entry or ".").resolve() != ROOT],
     )
+    monkeypatch.setattr(sys, "argv", [str(ROOT / "tools" / "anonymize_hh.py"), "--help"])
+    output = io.StringIO()
+    app_modules = {
+        name: module
+        for name, module in sys.modules.items()
+        if name == "fpdb_3_legacy" or name.startswith("fpdb_3_legacy.")
+    }
+    for name in app_modules:
+        sys.modules.pop(name)
 
-    assert result.returncode == 0
-    assert "--map MAP" in result.stdout
+    try:
+        with redirect_stdout(output), pytest.raises(SystemExit) as exit_info:
+            runpy.run_path(str(ROOT / "tools" / "anonymize_hh.py"), run_name="__main__")
+    finally:
+        for name in tuple(sys.modules):
+            if name == "fpdb_3_legacy" or name.startswith("fpdb_3_legacy."):
+                sys.modules.pop(name)
+        sys.modules.update(app_modules)
+
+    assert exit_info.value.code == 0
+    assert "--map MAP" in output.getvalue()
 
 
 @pytest.fixture

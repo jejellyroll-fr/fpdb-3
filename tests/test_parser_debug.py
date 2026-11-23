@@ -27,6 +27,7 @@ SOKO = ROOT / "regression-test-files" / "unsupported-sites" / "soko"
 SOKO_COMPLETE = SOKO / "soko_2005_001_complete_anonymized.txt"
 SOKO_HEADERLESS = SOKO / "soko_2005_002_header_missing_anonymized.txt"
 STARS = ROOT / "regression-test-files" / "cash" / "Stars" / "Flop" / "NLHE-6max-USD-0.05-0.10-200912.Allin-pre.txt"
+STARS_SITOUT_EVENTS = ROOT / "regression-test-files" / "cash" / "Stars" / "Flop" / "NLHE-FR-USD-0.01-0.02-201004.4betPF.txt"
 BOVADA = ROOT / "tests" / "fixtures" / "hands" / "bovada" / "zone_poker.txt"
 
 
@@ -368,6 +369,14 @@ def test_the_bug_report_replaces_player_names(stars) -> None:
     assert "Not anonymized" not in report
 
 
+def test_the_bug_report_redacts_sitting_out_and_table_join_names(config) -> None:
+    report = bug_report(debug_parse_file(STARS_SITOUT_EVENTS, config))
+
+    assert "Alehta" not in report
+    assert "AFMAT" not in report
+    assert "Manual privacy review recommended" in report
+
+
 def test_a_bug_report_without_extracted_players_requests_privacy_review(config) -> None:
     report = bug_report(debug_parse_file(SOKO_COMPLETE, config))
 
@@ -395,7 +404,7 @@ def test_bug_report_warns_when_a_failed_hand_has_no_extracted_players(stars) -> 
     assert "Manual privacy review required" in report
     assert "hand(s) 1" in report
     assert "Blåveis" not in report
-    assert "PrivatePlayer" in report
+    assert "PrivatePlayer" not in report
 
 
 def test_anonymize_replaces_whole_names_only() -> None:
