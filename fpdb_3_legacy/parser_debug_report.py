@@ -158,7 +158,7 @@ class HandResult:  # pylint: disable=too-many-instance-attributes  # a record of
 
 
 @dataclass
-class ParseDebugReport:
+class ParseDebugReport:  # pylint: disable=too-many-instance-attributes  # one input's complete parse result
     """The whole answer for one input."""
 
     source: str
