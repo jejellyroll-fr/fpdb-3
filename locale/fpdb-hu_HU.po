@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 18:33+0100\n"
+"POT-Creation-Date: 2026-11-23 18:43+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -762,10 +762,6 @@ msgstr "Az adatbázis nem érhető el - újrapróbálás"
 #, fuzzy
 msgid "FPDB Auto Import"
 msgstr "FPDB automatikus importálás"
-
-#: fpdb_3_legacy/GuiAutoImport.py fpdb_3_legacy/GuiBulkImport.py
-msgid "Hands to debug…"
-msgstr ""
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
@@ -7431,6 +7427,11 @@ msgstr ""
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Hands to debug"
+msgstr "Leosztások ez után"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy, python-brace-format
+msgid "Hands to debug ({count})"
 msgstr "Leosztások ez után"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py

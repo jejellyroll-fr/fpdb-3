@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 18:33+0100\n"
+"POT-Creation-Date: 2026-11-23 18:43+0100\n"
 "PO-Revision-Date: 2011-12-04 06:20+0200\n"
 "Last-Translator: Steffen Schaumburg <steffen@schaumburger.info>\n"
 "Language-Team: Fpdb\n"
@@ -759,10 +759,6 @@ msgstr "Datenbank nicht erreichbar – neuer Versuch"
 #, fuzzy
 msgid "FPDB Auto Import"
 msgstr "FPDB Auto-Import"
-
-#: fpdb_3_legacy/GuiAutoImport.py fpdb_3_legacy/GuiBulkImport.py
-msgid "Hands to debug…"
-msgstr ""
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
@@ -7423,6 +7419,11 @@ msgstr ""
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Hands to debug"
+msgstr "Hände nach"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy, python-brace-format
+msgid "Hands to debug ({count})"
 msgstr "Hände nach"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py

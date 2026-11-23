@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 18:33+0100\n"
+"POT-Creation-Date: 2026-11-23 18:43+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -631,10 +631,6 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiAutoImport.py
 msgid "Start Auto Import"
-msgstr ""
-
-#: fpdb_3_legacy/GuiAutoImport.py fpdb_3_legacy/GuiBulkImport.py
-msgid "Hands to debug…"
 msgstr ""
 
 #: fpdb_3_legacy/GuiAutoImport.py
@@ -6276,6 +6272,11 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Paste a hand history and press Debug parse."
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "Hands to debug ({count})"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py

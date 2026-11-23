@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 18:33+0100\n"
+"POT-Creation-Date: 2026-11-23 18:43+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -729,10 +729,6 @@ msgstr "Base de données injoignable - nouvelle tentative"
 #: fpdb_3_legacy/GuiAutoImport.py
 msgid "FPDB Auto Import"
 msgstr "Import automatique FPDB"
-
-#: fpdb_3_legacy/GuiAutoImport.py fpdb_3_legacy/GuiBulkImport.py
-msgid "Hands to debug…"
-msgstr "Mains à déboguer…"
 
 #: fpdb_3_legacy/GuiAutoImport.py
 msgid "Import cycle is taking longer than usual..."
@@ -6718,6 +6714,11 @@ msgid "Hands to debug"
 msgstr "Mains à déboguer"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "Hands to debug ({count})"
+msgstr "Mains à déboguer ({count})"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "JSON"
 msgstr "JSON"
 
@@ -10615,6 +10616,9 @@ msgstr ""
 
 #~ msgid "Hands marked as all-in"
 #~ msgstr "Mains marquées comme tapis"
+
+#~ msgid "Hands to debug…"
+#~ msgstr "Mains à déboguer…"
 
 #~ msgid "Hands/file:"
 #~ msgstr "Mains/fichier :"

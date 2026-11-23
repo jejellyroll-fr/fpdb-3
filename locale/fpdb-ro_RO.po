@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 18:33+0100\n"
+"POT-Creation-Date: 2026-11-23 18:43+0100\n"
 "PO-Revision-Date: 2011-05-13 08:55+0000\n"
 "Last-Translator: jax <jax@netmagnet.ro>\n"
 "Language-Team: Romanian (Romania) (http://www.transifex.net/projects/p/fpdb/"
@@ -779,10 +779,6 @@ msgstr "Baza de date inaccesibilă - nouă încercare"
 #, fuzzy
 msgid "FPDB Auto Import"
 msgstr "Import automat FPDB"
-
-#: fpdb_3_legacy/GuiAutoImport.py fpdb_3_legacy/GuiBulkImport.py
-msgid "Hands to debug…"
-msgstr ""
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
@@ -7426,6 +7422,11 @@ msgstr ""
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Hands to debug"
+msgstr "Mâini după"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy, python-brace-format
+msgid "Hands to debug ({count})"
 msgstr "Mâini după"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py

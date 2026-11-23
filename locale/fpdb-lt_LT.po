@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 18:33+0100\n"
+"POT-Creation-Date: 2026-11-23 18:43+0100\n"
 "PO-Revision-Date: 2011-07-09 14:23+0000\n"
 "Last-Translator: OvidijusSv <OvidijusSv@gmail.com>\n"
 "Language-Team: Lithuanian (Lithuania) (http://www.transifex.net/projects/p/"
@@ -785,10 +785,6 @@ msgstr "Duomenų bazė nepasiekiama - bandoma dar kartą"
 #, fuzzy
 msgid "FPDB Auto Import"
 msgstr "FPDB automatinis importas"
-
-#: fpdb_3_legacy/GuiAutoImport.py fpdb_3_legacy/GuiBulkImport.py
-msgid "Hands to debug…"
-msgstr ""
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
@@ -7451,6 +7447,11 @@ msgstr ""
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Hands to debug"
+msgstr "Rankos po"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy, python-brace-format
+msgid "Hands to debug ({count})"
 msgstr "Rankos po"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py

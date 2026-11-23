@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 18:33+0100\n"
+"POT-Creation-Date: 2026-11-23 18:43+0100\n"
 "PO-Revision-Date: 2011-11-11 20:56+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Catalan (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -792,10 +792,6 @@ msgstr "Base de dades inaccessible - tornant-ho a provar"
 #, fuzzy
 msgid "FPDB Auto Import"
 msgstr "Importació automàtica de FPDB"
-
-#: fpdb_3_legacy/GuiAutoImport.py fpdb_3_legacy/GuiBulkImport.py
-msgid "Hands to debug…"
-msgstr ""
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
@@ -7472,6 +7468,11 @@ msgstr ""
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Hands to debug"
+msgstr "Mans després de"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy, python-brace-format
+msgid "Hands to debug ({count})"
 msgstr "Mans després de"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py

@@ -417,6 +417,9 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.verdict_label.setTextFormat(Qt.TextFormat.RichText)
         self.verdict_label.setWordWrap(True)
         header.addWidget(self.verdict_label, 1)
+        self.failed_hands_button = QPushButton(_("Hands to debug ({count})").format(count=0), panel)
+        self.failed_hands_button.clicked.connect(self.show_failed_hands)
+        header.addWidget(self.failed_hands_button)
         header.addWidget(QLabel(_("Hand")))
         self.hand_combo = QComboBox(panel)
         self.hand_combo.currentIndexChanged.connect(self._show_hand)
@@ -517,6 +520,7 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
 
     def refresh_failed_hands(self) -> None:
         entries = failed_hands.entries()
+        self.failed_hands_button.setText(_("Hands to debug ({count})").format(count=len(entries)))
         signature = tuple((entry.key, entry.attempts) for entry in entries)
         if signature == self._failed_hands_signature:
             return

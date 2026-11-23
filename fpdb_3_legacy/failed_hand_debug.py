@@ -7,7 +7,6 @@ import threading
 from collections import OrderedDict
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any
 
 MAX_ENTRIES = 200
 MAX_ENTRY_BYTES = 8 * 1024 * 1024
@@ -111,13 +110,3 @@ class FailedHandRegistry:
 
 
 failed_hands = FailedHandRegistry()
-
-
-
-def show_failed_hands(config: Any, parent: Any = None) -> Any:
-    """Open the Parser Debugger directly on its shared session queue."""
-    from fpdb_3_legacy.parser_debugger_dialog import show_parser_debugger
-
-    dialog = show_parser_debugger(config, parent)
-    dialog.show_failed_hands()
-    return dialog
