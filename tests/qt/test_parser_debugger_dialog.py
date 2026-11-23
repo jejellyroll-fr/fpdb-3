@@ -10,8 +10,9 @@ import shutil
 from pathlib import Path
 
 import pytest
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QGuiApplication
-from PySide6.QtWidgets import QFileDialog, QLabel
+from PySide6.QtWidgets import QFileDialog, QHeaderView, QLabel, QTreeWidgetItem
 
 from fpdb_3_legacy import parser_debug
 from fpdb_3_legacy.Configuration import Config
@@ -58,6 +59,43 @@ def test_nothing_to_parse_says_so(dialog) -> None:
 
     assert "Nothing to parse" in dialog.verdict_label.text()
     assert dialog.report is None
+
+
+def test_clear_button_clears_the_raw_hand_and_analysis(dialog) -> None:
+    dialog.input.setPlainText("raw hand")
+    dialog.loaded_path = STARS
+    dialog.loaded_text = "raw hand"
+    dialog.report = object()
+    dialog.summary.setHtml("<p>analysis</p>")
+    dialog.steps_tree.addTopLevelItem(QTreeWidgetItem(["step"]))
+    dialog.status_label.setText("report status")
+    dialog.copy_button.setEnabled(True)
+
+    dialog.clear_button.click()
+
+    assert dialog.input.toPlainText() == ""
+    assert dialog.loaded_path is None
+    assert dialog.loaded_text == ""
+    assert dialog.report is None
+    assert dialog.summary.toPlainText() == ""
+    assert dialog.steps_tree.topLevelItemCount() == 0
+    assert dialog.status_label.text() == ""
+    assert not dialog.copy_button.isEnabled()
+
+
+def test_every_debugger_table_has_resizable_columns_and_horizontal_scrolling(dialog) -> None:
+    trees = (
+        dialog.detection_tree,
+        dialog.steps_tree,
+        dialog.contract_tree,
+        dialog.hand_tree,
+        dialog.lines_tree,
+        dialog.expected_tree,
+    )
+    tables = (*trees, dialog.failed_hands_table)
+    for table in tables:
+        assert table.header().sectionResizeMode(0) == QHeaderView.ResizeMode.Interactive
+        assert table.horizontalScrollBarPolicy() == Qt.ScrollBarPolicy.ScrollBarAsNeeded
 
 
 def test_a_pasted_refused_hand_shows_why(dialog) -> None:

@@ -192,7 +192,6 @@ def _tree(
     headers: Iterable[str],
     *,
     widths: tuple[int, ...] = (),
-    stretch_columns: tuple[int, ...] = (),
 ) -> QTreeWidget:
     tree = QTreeWidget()
     labels = list(headers)
@@ -201,14 +200,14 @@ def _tree(
     header = tree.header()
     header.setStretchLastSection(False)
     header.setSectionsMovable(True)
+    header.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
     for column, width in enumerate(widths):
         tree.setColumnWidth(column, width)
-    for column in stretch_columns:
-        header.setSectionResizeMode(column, QHeaderView.ResizeMode.Stretch)
     tree.setAlternatingRowColors(True)
     tree.setUniformRowHeights(True)
     tree.setHorizontalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
     tree.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
+    tree.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
     tree.setItemDelegate(_StatusColorDelegate(tree))
     return tree
 
@@ -298,6 +297,7 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
     remove_failed_hand_button: QPushButton
     clear_failed_hands_button: QPushButton
     failed_hands_timer: QTimer
+    clear_button: QPushButton
 
     def __init__(self, config: Any, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -358,6 +358,10 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.run_button.setDefault(True)
         self.run_button.clicked.connect(self.run)
         controls.addWidget(self.run_button)
+        self.clear_button = QPushButton(_("Clear"), panel)
+        self.clear_button.setToolTip(_("Clear the raw hand and its analysis"))
+        self.clear_button.clicked.connect(self.clear_debugger)
+        controls.addWidget(self.clear_button)
         layout.addLayout(controls)
 
         options = QHBoxLayout()
@@ -398,7 +402,6 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.detection_tree = _tree(
             [_("Converter"), _("Site"), _("Recognised"), _("Line"), _("Lines read"), _("Note")],
             widths=(180, 120, 105, 70, 95, 180),
-            stretch_columns=(5,),
         )
         layout.addWidget(self.detection_tree, 1)
         return panel
@@ -426,11 +429,12 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         header = self.failed_hands_table.horizontalHeader()
         header.setStretchLastSection(False)
         header.setSectionsMovable(True)
+        header.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
         for column, width in enumerate((180, 230, 90, 100, 100, 165)):
             self.failed_hands_table.setColumnWidth(column, width)
-        header.setSectionResizeMode(6, QHeaderView.ResizeMode.Stretch)
         self.failed_hands_table.setHorizontalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
         self.failed_hands_table.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
+        self.failed_hands_table.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.failed_hands_table.itemDoubleClicked.connect(lambda _item: self.replay_failed_hand())
         layout.addWidget(self.failed_hands_table, 1)
 
@@ -490,24 +494,20 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.steps_tree = _tree(
             [_("Step"), _("Status"), _("ms"), _("What it did"), _("Regexes")],
             widths=(125, 90, 60, 280, 200),
-            stretch_columns=(3,),
         )
         self.contract_tree = _tree(
             [_("Step / check"), _("Status"), _("Field"), _("Message"), _("Expected"), _("Found")],
             widths=(160, 90, 120, 260, 140, 140),
-            stretch_columns=(3,),
         )
-        self.hand_tree = _tree([_("Field"), _("Value")], widths=(180, 300), stretch_columns=(1,))
+        self.hand_tree = _tree([_("Field"), _("Value")], widths=(180, 300))
         self.lines_tree = _tree(
             [_("Line"), _("Status"), _("Text"), _("Read by"), _("Regex match spans")],
             widths=(55, 90, 300, 180, 220),
-            stretch_columns=(2,),
         )
         self.lines_tree.itemActivated.connect(self._line_item_activated)
         self.expected_tree = _tree(
             [_("Sidecar"), _("Field"), _("Player"), _("Expected"), _("Actual")],
             widths=(150, 140, 140, 200, 200),
-            stretch_columns=(3, 4),
         )
         self.log_view = QPlainTextEdit(panel)
         self.log_view.setReadOnly(True)
@@ -561,6 +561,36 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         return panel
 
     # -- actions --------------------------------------------------------------
+
+    def clear_debugger(self) -> None:
+        """Clear the raw hand and all analysis produced for it."""
+        self.input.clear()
+        self.input.set_coverage({})
+        self.input.setExtraSelections([])
+        self.loaded_path = None
+        self.loaded_text = ""
+        self.report = None
+        self.verdict_label.setText(_("Paste a hand history and press Debug parse."))
+        self.parser_label.setText(_("Parser not determined yet"))
+        self.hand_combo.blockSignals(True)
+        self.hand_combo.clear()
+        self.hand_combo.blockSignals(False)
+        self.summary.clear()
+        for tree in (
+            self.detection_tree,
+            self.steps_tree,
+            self.contract_tree,
+            self.hand_tree,
+            self.lines_tree,
+            self.expected_tree,
+        ):
+            tree.clear()
+        for view in (self.log_view, self.json_view, self.changes_view):
+            view.clear()
+        self.status_label.clear()
+        for button in (self.copy_button, self.save_button, self.compare_button, self.fixture_button):
+            button.setEnabled(False)
+        self.tabs.setCurrentWidget(self.summary)
 
     def open_file(self) -> None:
         path, _filter = QFileDialog.getOpenFileName(self, _("Open a hand history"))
