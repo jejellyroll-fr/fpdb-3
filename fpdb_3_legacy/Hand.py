@@ -396,31 +396,18 @@ class Hand:
             log.exception(f"'{self.handid}': Major failure while adding holecards: '{e}'")
             raise FpdbParseError
 
-    def prepInsert(self, db, printtest=False) -> None:
-        #####
-        # Players, Gametypes, TourneyTypes are all shared functions that are needed for additional tables
-        # These functions are intended for prep insert eventually
-        #####
+    def syncMaxSeats(self) -> None:
+        """Make ``maxseats`` and ``gametype['maxSeats']`` agree, the game type winning."""
         if self.gametype.get("maxSeats") is None:
             if self.maxseats is not None:
                 self.gametype["maxSeats"] = self.maxseats
         else:
             self.maxseats = self.gametype["maxSeats"]
-        self.playerIds = db.getSqlPlayerIDs(
-            [p[1] for p in self.players],
-            self.siteId,
-            self.hero,
-        )
-        self.dbid_gt = db.getSqlGameTypeId(
-            self.siteId,
-            self.gametype,
-            printdata=printtest,
-        )
 
-        # Gametypes
+    def gametypeRow(self) -> tuple:
+        """The GameTypes row of this hand, without asking the database for its id."""
         hilo = Card.games[self.gametype["category"]][2]
-
-        self.gametyperow = (
+        return (
             self.siteId,
             self.gametype["currency"],
             self.gametype["type"],
@@ -441,8 +428,27 @@ class Hand:
             self.gametype["homeGame"],
             self.gametype["split"],
         )
-        # Note: the above data is calculated in db.getGameTypeId
-        #       Only being calculated above so we can grab the testdata
+
+    def prepInsert(self, db, printtest=False) -> None:
+        #####
+        # Players, Gametypes, TourneyTypes are all shared functions that are needed for additional tables
+        # These functions are intended for prep insert eventually
+        #####
+        self.syncMaxSeats()
+        self.playerIds = db.getSqlPlayerIDs(
+            [p[1] for p in self.players],
+            self.siteId,
+            self.hero,
+        )
+        self.dbid_gt = db.getSqlGameTypeId(
+            self.siteId,
+            self.gametype,
+            printdata=printtest,
+        )
+
+        # Note: the row is calculated in db.getGameTypeId as well; it is kept on
+        # the hand so the regression sidecars (.gt) can be compared to it.
+        self.gametyperow = self.gametypeRow()
         if self.tourNo is not None:
             self.tourneyTypeId = db.getSqlTourneyTypeIDs(self)
             self.tourneyId = db.getSqlTourneyIDs(self)

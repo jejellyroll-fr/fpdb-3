@@ -1,0 +1,243 @@
+"""Tools > Parser Debugger (#903): the window renders the report it is given.
+
+Run offscreen; the file dialogs are the static ``QFileDialog`` calls, patched.
+"""
+
+from __future__ import annotations
+
+import json
+import shutil
+from pathlib import Path
+
+import pytest
+from PySide6.QtGui import QGuiApplication
+from PySide6.QtWidgets import QFileDialog, QLabel
+
+from fpdb_3_legacy import parser_debug
+from fpdb_3_legacy.Configuration import Config
+from fpdb_3_legacy.parser_debug_report import Diagnostic
+from fpdb_3_legacy.parser_debugger_dialog import ParserDebuggerDialog, _standalone_fixture_text, show_parser_debugger
+
+pytestmark = pytest.mark.qt
+
+ROOT = Path(__file__).resolve().parents[2]
+SOKO = ROOT / "regression-test-files" / "unsupported-sites" / "soko" / "soko_2005_001_complete_anonymized.txt"
+STARS = ROOT / "regression-test-files" / "cash" / "Stars" / "Flop" / "NLHE-6max-USD-0.05-0.10-200912.Allin-pre.txt"
+MERGE = ROOT / "regression-test-files" / "cash" / "Merge" / "Mixed" / "HORSE-8max-USD-0.25-0.50-201409.new.format.txt"
+
+
+@pytest.fixture(scope="module")
+def config(tmp_path_factory) -> Config:
+    path = tmp_path_factory.mktemp("config") / "HUD_config.xml"
+    shutil.copyfile(ROOT / "HUD_config.xml", path)
+    return Config(file=str(path))
+
+
+@pytest.fixture
+def dialog(qtbot, config) -> ParserDebuggerDialog:
+    window = ParserDebuggerDialog(config)
+    qtbot.addWidget(window)
+    return window
+
+
+def _rows(tree) -> list[list[str]]:
+    return [
+        [tree.topLevelItem(row).text(column) for column in range(tree.columnCount())]
+        for row in range(tree.topLevelItemCount())
+    ]
+
+
+def test_the_site_list_offers_auto_detect_then_every_site(dialog) -> None:
+    assert dialog.site_combo.itemData(0) is None
+    listed_sites = {dialog.site_combo.itemData(index) for index in range(1, dialog.site_combo.count())}
+    assert listed_sites == set(dialog.config.hhcs)
+
+
+def test_nothing_to_parse_says_so(dialog) -> None:
+    dialog.run()
+
+    assert "Nothing to parse" in dialog.verdict_label.text()
+    assert dialog.report is None
+
+
+def test_a_pasted_refused_hand_shows_why(dialog) -> None:
+    dialog.input.setPlainText(SOKO.read_text(encoding="utf-8"))
+    dialog.run()
+
+    assert "FAILED" in dialog.verdict_label.text()
+    assert "UnsupportedGame" in dialog.summary.toPlainText()
+    steps = {row[0]: row[1] for row in _rows(dialog.steps_tree)}
+    assert steps["determineGameType"] == "raised"
+    assert steps["readHandInfo"] == "not reached"
+    rows = {
+        dialog.steps_tree.topLevelItem(index).text(0): dialog.steps_tree.topLevelItem(index)
+        for index in range(dialog.steps_tree.topLevelItemCount())
+    }
+    assert rows["determineGameType"].foreground(1).color().name() == "#ff9292"
+    assert rows["readHandInfo"].foreground(1).color().name() == "#ffd080"
+    legend = dialog.findChild(QLabel, "status_legend")
+    assert legend is not None
+    assert "#78e2a1" in legend.text()
+    assert "#ffd080" in legend.text()
+    assert "#ff9292" in legend.text()
+    # The failing header line is coloured in the input.
+    assert [selection.cursor.blockNumber() for selection in dialog.input.extraSelections()] == [0]
+
+
+def test_an_opened_file_fills_every_tab(dialog, monkeypatch) -> None:
+    monkeypatch.setattr(QFileDialog, "getOpenFileName", staticmethod(lambda *args, **kwargs: (str(STARS), "")))
+    dialog.open_file()
+    dialog.run()
+
+    assert dialog.report is not None
+    assert dialog.report.source == str(STARS)
+    assert "OK" in dialog.verdict_label.text()
+    assert dialog.hand_combo.count() == 1
+    assert dialog.detection_tree.topLevelItemCount() > 10
+    assert any(row[0] == "readPlayerStacks" and row[1] == "ok" for row in _rows(dialog.steps_tree))
+    assert any(row[0] == "chip conservation" and row[1] == "pass" for row in _rows(dialog.contract_tree))
+    steps = {
+        dialog.steps_tree.topLevelItem(index).text(0): dialog.steps_tree.topLevelItem(index)
+        for index in range(dialog.steps_tree.topLevelItemCount())
+    }
+    assert steps["readPlayerStacks"].foreground(1).color().name() == "#78e2a1"
+    passed_check = next(
+        dialog.contract_tree.topLevelItem(index)
+        for index in range(dialog.contract_tree.topLevelItemCount())
+        if dialog.contract_tree.topLevelItem(index).text(0) == "chip conservation"
+    )
+    assert passed_check.foreground(1).color().name() == "#78e2a1"
+    detected = next(
+        dialog.detection_tree.topLevelItem(index)
+        for index in range(dialog.detection_tree.topLevelItemCount())
+        if dialog.detection_tree.topLevelItem(index).text(2) == "yes"
+    )
+    assert detected.foreground(2).color().name() == "#78e2a1"
+    assert dialog.hand_tree.topLevelItemCount() == 1
+    assert any("re_player_info" in row[3] for row in _rows(dialog.lines_tree))
+    assert dialog.expected_tree.topLevelItemCount() > 0
+    assert json.loads(dialog.json_view.toPlainText())["verdict"] == "ok"
+    assert dialog.log_view.toPlainText()
+
+
+def test_opened_crlf_history_keeps_its_file_context(dialog, monkeypatch, tmp_path) -> None:
+    path = tmp_path / "stars-crlf.txt"
+    path.write_bytes(STARS.read_bytes().replace(b"\n", b"\r\n"))
+    monkeypatch.setattr(QFileDialog, "getOpenFileName", staticmethod(lambda *args, **kwargs: (str(path), "")))
+
+    dialog.open_file()
+    assert dialog.loaded_text == dialog.input.toPlainText()
+    dialog.run()
+
+    assert dialog.report is not None
+    assert dialog.report.source == str(path)
+
+
+def test_file_decoder_requires_a_bom_for_utf16(dialog, tmp_path) -> None:
+    history = STARS.read_text(encoding="utf-8")
+    cp1252 = history.encode("cp1252")
+    if len(cp1252) % 2:
+        cp1252 += b"\n"
+        history += "\n"
+    cp1252_path = tmp_path / "stars-cp1252.txt"
+    cp1252_path.write_bytes(cp1252)
+
+    dialog.load_file(cp1252_path)
+
+    assert dialog.input.toPlainText() == history
+
+    utf16_path = tmp_path / "stars-utf16.txt"
+    utf16_path.write_bytes(history.encode("utf-16"))
+    dialog.load_file(utf16_path)
+
+    assert dialog.input.toPlainText() == history
+
+
+def test_contract_warnings_are_in_the_log_tab(dialog) -> None:
+    dialog.input.setPlainText(STARS.read_text(encoding="utf-8"))
+    dialog.trace_check.setChecked(False)
+    dialog.run()
+
+    assert dialog.report is not None
+    dialog.report.diagnostics.append(
+        Diagnostic("warning", "ContractViolation", "Seat 5 is above the table size", hand_index=0)
+    )
+    dialog._show_hand()
+
+    assert (
+        "WARNING  parser_debugger [ContractViolation]: Seat 5 is above the table size" in dialog.log_view.toPlainText()
+    )
+
+
+def test_editing_an_opened_file_debugs_the_text(dialog, monkeypatch) -> None:
+    monkeypatch.setattr(QFileDialog, "getOpenFileName", staticmethod(lambda *args, **kwargs: (str(STARS), "")))
+    dialog.open_file()
+    dialog.input.setPlainText(dialog.input.toPlainText() + "\n")
+    dialog.run()
+
+    assert dialog.report is not None
+    assert dialog.report.source == "pasted text"
+
+
+def test_a_line_of_the_lines_tab_selects_it_in_the_input(dialog) -> None:
+    dialog.input.setPlainText(STARS.read_text(encoding="utf-8"))
+    dialog.run()
+    item = dialog.lines_tree.topLevelItem(2)
+
+    dialog._line_item_activated(item, 0)
+
+    assert dialog.input.textCursor().selectedText() == "Seat 1: Blåveis ($55.10 in chips)"
+
+
+def test_the_input_gutter_shows_line_numbers_and_coverage(dialog) -> None:
+    dialog.input.setPlainText(STARS.read_text(encoding="utf-8"))
+    dialog.run()
+
+    assert dialog.input.line_number_area_width() > 0
+    assert dialog.input.coverage[1] == "read"
+    assert dialog.input.line_number_area.sizeHint().width() == dialog.input.line_number_area_width()
+
+
+def test_the_bug_report_is_copied(dialog) -> None:
+    dialog.input.setPlainText(STARS.read_text(encoding="utf-8"))
+    dialog.run()
+    dialog.copy_bug_report()
+
+    copied = QGuiApplication.clipboard().text()
+    assert copied.startswith("### Parser Debugger report")
+    assert "AAALISAAAA" not in copied
+
+
+def test_a_selected_merge_hand_keeps_its_shared_header(config) -> None:
+    report = parser_debug.debug_parse_file(MERGE, config, trace_lines=False)
+    hand = report.hands[1]
+
+    fixture = _standalone_fixture_text(report, hand)
+    replay = parser_debug.debug_parse_text(fixture, config, report.detection.site, trace_lines=False)
+
+    assert fixture.startswith('<description type="HORSE"')
+    assert len(replay.hands) == 1
+    assert replay.hands[0].status == hand.status
+
+
+def test_save_then_compare(dialog, monkeypatch, tmp_path) -> None:
+    saved = tmp_path / "report.json"
+    dialog.input.setPlainText(STARS.read_text(encoding="utf-8"))
+    dialog.trace_check.setChecked(False)
+    dialog.run()
+    monkeypatch.setattr(QFileDialog, "getSaveFileName", staticmethod(lambda *args, **kwargs: (str(saved), "")))
+    monkeypatch.setattr(QFileDialog, "getOpenFileName", staticmethod(lambda *args, **kwargs: (str(saved), "")))
+
+    dialog.save_report()
+    dialog.compare_report()
+
+    assert json.loads(saved.read_text(encoding="utf-8"))["verdict"] == "ok"
+    assert dialog.changes_view.toPlainText() == "No change."
+
+
+def test_show_parser_debugger_opens_a_modeless_window(qtbot, config) -> None:
+    window = show_parser_debugger(config)
+    qtbot.addWidget(window)
+
+    assert window.isVisible()
+    assert not window.isModal()

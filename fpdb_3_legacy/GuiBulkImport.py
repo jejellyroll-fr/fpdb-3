@@ -32,6 +32,7 @@ from PySide6.QtWidgets import (
     QCheckBox,
     QFileDialog,
     QHBoxLayout,
+    QInputDialog,
     QLabel,
     QLineEdit,
     QMessageBox,
@@ -47,7 +48,7 @@ from fpdb_3_legacy import Configuration, Database, Importer, interlocks
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
-from fpdb_3_legacy.RegressionFileComparator import compare_importer_sidecars
+from fpdb_3_legacy.RegressionFileComparator import compare_importer_sidecars, write_hand_sidecars
 
 #    fpdb/FreePokerTools modules
 
@@ -218,6 +219,8 @@ class GuiBulkImport(QWidget):
         log.info(completion_message)
         # PHH files (#381) say more than the totals: what was unsupported, what malformed.
         phh = self.importer.phh_summary()
+        self.failed_import_paths[:] = self._failed_import_paths()
+        self.debug_failed_button.setEnabled(bool(self.failed_import_paths))
 
         self.importer.clearFileList()
         self.settings["global_lock"].release()
@@ -282,6 +285,57 @@ class GuiBulkImport(QWidget):
         if main_window is not None and hasattr(main_window, "refresh_after_import"):
             main_window.refresh_after_import()
 
+    def _failed_import_paths(self) -> list[Path]:
+        """Keep readable hand-history files that had errors, partials, or skips."""
+        failed: list[Path] = []
+        settings = getattr(self.importer, "settings", {})
+        for raw_path, result in getattr(self.importer, "file_results", {}).items():
+            if getattr(result, "is_summary_file", False) or not (
+                getattr(result, "errors", 0) or getattr(result, "partial", 0) or getattr(result, "skipped", 0)
+            ):
+                continue
+            path = Path(raw_path)
+            if not path.is_file():
+                # Importer relocates files based on parser errors, not on the
+                # presence of partial/skipped hands. Such files still belong
+                # to the imported directory when errors == 0.
+                has_errors = bool(getattr(result, "errors", 0))
+                setting = "movefailedfiles" if has_errors else "moveimportedfiles"
+                directory = "moveFailedFilesDir" if has_errors else "moveImportedFilesDir"
+                target_dir = settings.get(directory)
+                if settings.get(setting) and target_dir:
+                    moved = Path(target_dir) / path.name
+                    if moved.is_file():
+                        path = moved
+            if path.is_file():
+                failed.append(path)
+        return failed
+
+    def debug_failed_import(self) -> None:
+        """Open a file with failed hands directly in the Parser Debugger."""
+        if not self.failed_import_paths:
+            return
+        labels = [str(path) for path in self.failed_import_paths]
+        label, accepted = QInputDialog.getItem(
+            self,
+            _("Debug failed import"),
+            _("Choose the hand-history file to inspect:"),
+            labels,
+            0,
+            False,
+        )
+        if not accepted:
+            return
+        path = self.failed_import_paths[labels.index(label)]
+        if not path.is_file():
+            QMessageBox.warning(self, _("File unavailable"), _("The failed hand-history file can no longer be read."))
+            return
+        from fpdb_3_legacy.parser_debugger_dialog import show_parser_debugger
+
+        dialog = show_parser_debugger(self.config, self.main_window or self)
+        dialog.load_file(path)
+        dialog.run()
+
     @staticmethod
     def _phh_lines(phh) -> str:
         """The PHH part of the completion message: the counts the totals fold together."""
@@ -328,6 +382,7 @@ class GuiBulkImport(QWidget):
         self.main_window = parent
         self.settings = settings
         self.config = config
+        self.failed_import_paths: list[Path] = []
 
         self.importer = Importer.Importer(self, self.settings, config, sql, self)
 
@@ -396,6 +451,11 @@ class GuiBulkImport(QWidget):
         self.load_button.setIcon(QIcon(str(download_icon_path)) if download_icon_path.exists() else QIcon())
         self.load_button.clicked.connect(self.load_clicked)
         self.main_layout.addWidget(self.load_button)
+
+        self.debug_failed_button = QPushButton(_("Debug failed import…"))
+        self.debug_failed_button.setEnabled(False)
+        self.debug_failed_button.clicked.connect(self.debug_failed_import)
+        self.main_layout.addWidget(self.debug_failed_button)
 
         self.progress_bar = QProgressBar()
         self.progress_bar.setTextVisible(False)
@@ -548,6 +608,66 @@ def _compare_regression_sidecars(filename: str, importer, *, quiet: bool) -> int
     return mismatches
 
 
+def _write_regression_sidecars(filename: str, importer, *, overwrite: bool) -> list[Path]:
+    """Write sidecars from the single hand retained by this importer run."""
+    path = Path(filename)
+    hhc = importer.getCachedHHC(str(path)) or importer.getCachedHHC()
+    hands = hhc.getProcessedHands() if hhc is not None else []
+    return write_hand_sidecars(path, hands, overwrite=overwrite)
+
+
+def _validate_cli_args(args, parser) -> int | None:
+    """Validate headless-import options before touching the database."""
+    if not args.xtables:
+        # Interactive GUI mode is launched by fpdb.pyw; there is nothing to do
+        # when this module is run directly without the CLI flag.
+        parser.print_help()
+        return 0
+    if not args.filename:
+        log.error("CLI bulk import (-x) requires -f <file|dir>")
+        return 2
+    if not os.path.exists(args.filename):
+        log.error("Import path does not exist: %s", args.filename)
+        return 2
+    requirements = (
+        (args.overwrite_regression_sidecars and not args.write_regression_sidecars,
+         "--overwrite-regression-sidecars requires --write-regression-sidecars"),
+        (args.write_regression_sidecars and not args.accept_current_output_as_expected,
+         "--write-regression-sidecars requires --accept-current-output-as-expected"),
+        (args.accept_current_output_as_expected and not args.write_regression_sidecars,
+         "--accept-current-output-as-expected requires --write-regression-sidecars"),
+        (args.write_regression_sidecars and not Path(args.filename).is_file(),
+         "--write-regression-sidecars requires one hand-history file, not a directory"),
+    )
+    for invalid, message in requirements:
+        if invalid:
+            log.error(message)
+            return 2
+    return None
+
+
+def _write_sidecars_after_import(args, importer, *, errs: int, partial: int, skipped: int) -> int:
+    """Write reviewed expected values only after a clean import."""
+    if not args.write_regression_sidecars:
+        return 0
+    if errs or partial or skipped:
+        reason = f"import did not complete cleanly (partial={partial}, skipped={skipped}, errors={errs})"
+        log.warning("Regression sidecars %s: %s", args.filename, reason)
+        print(f"Regression sidecars {args.filename}: could not write: {reason}")
+        return 1
+    try:
+        paths = _write_regression_sidecars(
+            args.filename, importer, overwrite=args.overwrite_regression_sidecars
+        )
+    except (OSError, ValueError, AttributeError) as exc:
+        log.warning("Regression sidecars %s: could not write expected values: %s", args.filename, exc)
+        print(f"Regression sidecars {args.filename}: could not write: {exc}")
+        return 1
+    if not args.quiet:
+        print("Regression sidecars written: " + ", ".join(str(path) for path in paths))
+    return 0
+
+
 def main(argv=None) -> int:
     """CLI entry point for headless bulk import.
 
@@ -580,23 +700,29 @@ def main(argv=None) -> int:
         action="store_true",
         help="compare imported hands with adjacent .hands/.hp/.gt THP sidecar files",
     )
+    parser.add_argument(
+        "--write-regression-sidecars",
+        action="store_true",
+        help="write .hands/.hp/.gt from this import's single parsed hand",
+    )
+    parser.add_argument(
+        "--accept-current-output-as-expected",
+        action="store_true",
+        help="confirm that you independently reviewed this parser output before saving it as a baseline",
+    )
+    parser.add_argument(
+        "--overwrite-regression-sidecars",
+        action="store_true",
+        help="allow --write-regression-sidecars to replace existing expected values",
+    )
     args = parser.parse_args(argv)
 
     Configuration.set_logfile("fpdb-log.txt")
     config = Configuration.Config(file=args.config) if args.config else Configuration.Config()
 
-    if not args.xtables:
-        # Interactive GUI mode is launched by fpdb.pyw; there is nothing to do
-        # when this module is run directly without the CLI flag.
-        parser.print_help()
-        return 0
-
-    if not args.filename:
-        log.error("CLI bulk import (-x) requires -f <file|dir>")
-        return 2
-    if not os.path.exists(args.filename):
-        log.error("Import path does not exist: %s", args.filename)
-        return 2
+    validation_error = _validate_cli_args(args, parser)
+    if validation_error is not None:
+        return validation_error
 
     settings = {"os": "windows" if os.name == "nt" else "linuxmac"}
     settings.update(config.get_db_parameters())
@@ -613,7 +739,7 @@ def main(argv=None) -> int:
     importer = Importer.Importer(caller=None, settings=settings, config=config)
     importer.setThreads(-1)
     importer.setCallHud(False)
-    if args.compare_regression:
+    if args.compare_regression or args.write_regression_sidecars:
         # The comparison reads the parsed hands back off the converter, which the
         # importer only keeps when this is on; without it the flag crashed.
         importer.setFakeCacheHHC(True)
@@ -625,6 +751,10 @@ def main(argv=None) -> int:
 
     phh = importer.phh_summary()
     comparison_errors = 0
+    sidecar_write_errors = 0
+    sidecar_write_errors = _write_sidecars_after_import(
+        args, importer, errs=errs, partial=partial, skipped=skipped
+    )
     if args.compare_regression:
         comparison_errors = _compare_regression_sidecars(args.filename, importer, quiet=args.quiet)
 
@@ -639,10 +769,11 @@ def main(argv=None) -> int:
         f"Duplicates: {format_number(dups, 0)}, Partial: {format_number(partial, 0)}, "
         f"Skipped: {format_number(skipped, 0)}, Errors: {format_number(errs, 0)}, "
         f"Regression mismatches: {format_number(comparison_errors, 0)}, "
+        f"Sidecar write errors: {format_number(sidecar_write_errors, 0)}, "
         f"Time: {format_number(elapsed, 3)}s, Stored/second: {format_number(stored / elapsed, 0)}",
     )
     _print_phh_summary(phh, quiet=args.quiet)
-    return 0 if errs == 0 and comparison_errors == 0 else 1
+    return 0 if errs == 0 and comparison_errors == 0 and sidecar_write_errors == 0 else 1
 
 
 def _print_phh_summary(phh, *, quiet: bool) -> None:

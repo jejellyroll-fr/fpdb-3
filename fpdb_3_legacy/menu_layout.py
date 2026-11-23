@@ -224,10 +224,15 @@ def menu_layout() -> tuple[Menu, ...]:
                     tip=N_("Turn on or off the captures that read hands from a poker client itself"),
                 ),
                 MenuItem(
+                    N_("Parser Debugger…"),
+                    "show_parser_debugger",
+                    tip=N_("Everything a converter reads from a hand history, and where it fails"),
+                    separator_before=True,
+                ),
+                MenuItem(
                     N_("Logger Dev Tool"),
                     "show_logger_dev_tool",
                     tip=N_("Advanced logger manager"),
-                    separator_before=True,
                 ),
             ),
         ),

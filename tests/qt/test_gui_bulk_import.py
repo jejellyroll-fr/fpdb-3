@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+from types import SimpleNamespace
 
 import pytest
 from PySide6.QtCore import QPoint, Qt, QTimer
@@ -467,3 +468,24 @@ def test_cannot_list_tells_a_refused_folder_from_an_empty_one(tmp_path, monkeypa
 
     monkeypatch.setattr(GuiBulkImport.os, "listdir", refuse)
     assert GuiBulkImport._cannot_list(str(tmp_path)) is True
+
+
+@pytest.mark.qt
+def test_partial_import_moved_to_imported_directory_remains_debuggable(bulk_import_widget, tmp_path):
+    widget, _lock = bulk_import_widget
+    imported_dir = tmp_path / "imported"
+    imported_dir.mkdir()
+    moved_history = imported_dir / "partial.txt"
+    moved_history.write_text("hand history", encoding="utf-8")
+
+    widget.importer.settings = {
+        "moveimportedfiles": True,
+        "moveImportedFilesDir": str(imported_dir),
+        "movefailedfiles": True,
+        "moveFailedFilesDir": str(tmp_path / "failed"),
+    }
+    widget.importer.file_results = {
+        str(tmp_path / "partial.txt"): SimpleNamespace(errors=0, partial=1, skipped=0, is_summary_file=False),
+    }
+
+    assert widget._failed_import_paths() == [moved_history]
