@@ -32,11 +32,13 @@ from typing import Any
 from PySide6.QtCore import QModelIndex, QPersistentModelIndex, QSize, Qt, QTimer
 from PySide6.QtGui import QColor, QFont, QFontDatabase, QGuiApplication, QPainter, QTextCursor, QTextFormat
 from PySide6.QtWidgets import (
+    QAbstractItemView,
     QApplication,
     QCheckBox,
     QComboBox,
     QDialog,
     QFileDialog,
+    QGridLayout,
     QHBoxLayout,
     QHeaderView,
     QInputDialog,
@@ -198,12 +200,15 @@ def _tree(
     tree.setHeaderLabels(labels)
     header = tree.header()
     header.setStretchLastSection(False)
+    header.setSectionsMovable(True)
     for column, width in enumerate(widths):
         tree.setColumnWidth(column, width)
     for column in stretch_columns:
         header.setSectionResizeMode(column, QHeaderView.ResizeMode.Stretch)
     tree.setAlternatingRowColors(True)
     tree.setUniformRowHeights(True)
+    tree.setHorizontalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
+    tree.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
     tree.setItemDelegate(_StatusColorDelegate(tree))
     return tree
 
@@ -302,14 +307,24 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self._failed_hand_keys: list[str] = []
         self._failed_hands_signature: tuple[tuple[str, int], ...] | None = None
         self.setWindowTitle(_("Parser Debugger"))
-        self.resize(1180, 760)
+        self.resize(1160, 780)
         self.setMinimumSize(900, 620)
-        self.setMaximumSize(1420, 1000)
+        self.setMaximumSize(1320, 1000)
         self.setWindowFlag(Qt.WindowType.WindowMaximizeButtonHint, True)
 
         splitter = QSplitter(Qt.Orientation.Horizontal, self)
-        splitter.addWidget(self._input_panel())
-        splitter.addWidget(self._report_panel())
+        splitter.setHandleWidth(10)
+        splitter.setChildrenCollapsible(False)
+        splitter.setStyleSheet(
+            "QSplitter::handle:horizontal { background: #172b45; }"
+            "QSplitter::handle:horizontal:hover { background: #00c78a; }"
+        )
+        input_panel = self._input_panel()
+        report_panel = self._report_panel()
+        input_panel.setMinimumWidth(340)
+        report_panel.setMinimumWidth(420)
+        splitter.addWidget(input_panel)
+        splitter.addWidget(report_panel)
         splitter.setStretchFactor(0, 2)
         splitter.setStretchFactor(1, 3)
 
@@ -405,9 +420,12 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.failed_hands_table.setWordWrap(False)
         header = self.failed_hands_table.horizontalHeader()
         header.setStretchLastSection(False)
+        header.setSectionsMovable(True)
         for column, width in enumerate((180, 230, 90, 100, 100, 165)):
             self.failed_hands_table.setColumnWidth(column, width)
         header.setSectionResizeMode(6, QHeaderView.ResizeMode.Stretch)
+        self.failed_hands_table.setHorizontalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
+        self.failed_hands_table.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
         self.failed_hands_table.itemDoubleClicked.connect(lambda _item: self.replay_failed_hand())
         layout.addWidget(self.failed_hands_table, 1)
 
@@ -456,6 +474,10 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         layout.addWidget(_status_legend(panel))
 
         self.tabs = QTabWidget(panel)
+        self.tabs.setUsesScrollButtons(True)
+        self.tabs.setElideMode(Qt.TextElideMode.ElideNone)
+        self.tabs.setMovable(True)
+        self.tabs.tabBar().setExpanding(False)
         self.summary = QTextBrowser(panel)
         self.summary.setOpenLinks(False)
         self.summary.anchorClicked.connect(lambda url: self.go_to_line(int(url.toString().removeprefix("line:"))))
@@ -502,12 +524,14 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
             (self.json_view, _("JSON")),
             (self.changes_view, _("Changes")),
         ):
-            self.tabs.addTab(widget, title)
+            tab_index = self.tabs.addTab(widget, title)
+            self.tabs.setTabToolTip(tab_index, title)
         self.failed_hands_panel = self._failed_hands_panel(panel)
-        self.tabs.addTab(self.failed_hands_panel, _("Hands to debug"))
+        failed_hands_index = self.tabs.addTab(self.failed_hands_panel, _("Hands to debug"))
+        self.tabs.setTabToolTip(failed_hands_index, _("Hands to debug"))
         layout.addWidget(self.tabs, 1)
 
-        buttons = QHBoxLayout()
+        buttons = QGridLayout()
         self.copy_button = QPushButton(_("Copy bug report"), panel)
         self.copy_button.setToolTip(_("Markdown for a GitHub issue, player names replaced"))
         self.copy_button.clicked.connect(self.copy_bug_report)
@@ -516,12 +540,18 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         self.compare_button = QPushButton(_("Compare with…"), panel)
         self.compare_button.setToolTip(_("What changed since a report saved earlier on the same text"))
         self.compare_button.clicked.connect(self.compare_report)
-        for button in (self.copy_button, self.save_button, self.compare_button, self._fixture_action(panel)):
+        action_buttons = (self.copy_button, self.save_button, self.compare_button, self._fixture_action(panel))
+        for index, button in enumerate(action_buttons):
             button.setEnabled(False)
-            buttons.addWidget(button)
-        buttons.addStretch(1)
+            button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+            buttons.addWidget(button, index // 2, index % 2)
+        buttons.setColumnStretch(0, 1)
+        buttons.setColumnStretch(1, 1)
         self.status_label = QLabel(panel)
-        buttons.addWidget(self.status_label)
+        self.status_label.setMinimumWidth(0)
+        self.status_label.setMaximumWidth(560)
+        self.status_label.setWordWrap(True)
+        buttons.addWidget(self.status_label, 2, 0, 1, 2)
         layout.addLayout(buttons)
         return panel
 
