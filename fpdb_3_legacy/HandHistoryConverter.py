@@ -26,6 +26,7 @@ import sys
 import time
 import xml.parsers.expat
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from decimal import Decimal
 from pathlib import Path
 
@@ -161,6 +162,7 @@ in_path   (default '-' = sys.stdin)
         self.numErrors = 0
         self.numPartial = 0
         self.parsing_issues: list[str] = []
+        self.failed_hand_callback: Callable[..., None] | None = None
         self.isCarraige = False
         self.autoPop = False
 
@@ -288,11 +290,11 @@ HandHistoryConverter: '{sitename}'
 
     def _capture_failed_hand(self, hand_index: int, hand_text: str, failure_type: str, message: str, error: Exception) -> None:
         """Publish the complete failed hand only when an importer requested capture."""
-        callback = getattr(self, "failed_hand_callback", None)
+        callback = self.failed_hand_callback
         if callback is None:
             return
         shared_header = ""
-        if self.copyGameHeader and getattr(self, "whole_file", ""):
+        if self.copyGameHeader and self.whole_file:
             split_hands_re = getattr(self, "re_split_hands", getattr(self, "re_SplitHands", None))
             if split_hands_re is not None:
                 shared_header = re.split(split_hands_re, self.whole_file, maxsplit=1)[0].strip()
