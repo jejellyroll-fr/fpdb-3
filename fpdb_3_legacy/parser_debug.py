@@ -688,19 +688,33 @@ def _annotate_redundant_pokerstars_payouts(converter: Any, hand: Any, recorder: 
     action_collections = _plain_regex(converter, "re_collect_pot2")
     if summary_collections is None or action_collections is None:
         return
-    summary_values = {
-        (match.group("PNAME"), Decimal(match.group("POT").replace(",", "")))
-        for match in summary_collections.finditer(summary)
-    }
+    summary_values = set()
+    for match in summary_collections.finditer(summary):
+        amount = _decimal_capture(match, "POT")
+        if amount is not None:
+            summary_values.add((match.group("PNAME"), amount))
     for match in action_collections.finditer(pre_summary):
         player = match.group("PNAME")
-        amount = Decimal(match.group("POT").replace(",", ""))
+        amount = _decimal_capture(match, "POT")
+        if amount is None:
+            continue
         if (player, amount) in summary_values and hand.collectees.get(player) == amount:
             recorder.mark_redundant(
                 pre_summary,
                 match,
                 "A matching collection was read from the summary; this earlier payout was skipped to prevent double-counting.",
             )
+
+
+def _decimal_capture(match: Any, group: str) -> Decimal | None:
+    """Parse an optional numeric regex group without letting diagnostics abort parsing."""
+    value = match.group(group)
+    if value is None:
+        return None
+    try:
+        return Decimal(value.replace(",", ""))
+    except (AttributeError, InvalidOperation, TypeError):
+        return None
 
 
 def _annotate_redundant_rake_lines(converter: Any, hand: Any, recorder: Recorder) -> None:
@@ -713,14 +727,9 @@ def _annotate_redundant_rake_lines(converter: Any, hand: Any, recorder: Recorder
     for match in rake_pattern.finditer(hand.handText):
         if match.span() in read_rake_spans:
             continue
-        pot_text = match.group("POT")
-        rake_text = match.group("RAKE")
-        if pot_text is None or rake_text is None:
-            continue
-        try:
-            total_pot = Decimal(pot_text.replace(",", ""))
-            rake = Decimal(rake_text.replace(",", ""))
-        except (AttributeError, InvalidOperation, TypeError):
+        total_pot = _decimal_capture(match, "POT")
+        rake = _decimal_capture(match, "RAKE")
+        if total_pot is None or rake is None:
             # Annotation is diagnostic only. A malformed or optional capture
             # must not turn a successfully parsed hand into a failed report.
             continue

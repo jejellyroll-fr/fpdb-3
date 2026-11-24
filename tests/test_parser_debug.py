@@ -175,6 +175,20 @@ def test_a_payout_that_disagrees_with_the_summary_stays_unread(config) -> None:
     assert payout.status == "unread"
 
 
+def test_a_malformed_payout_does_not_abort_the_debug_report(config) -> None:
+    text = STARS.read_text(encoding="utf-8").replace(
+        "AAALISAAAA collected $39.35 from pot",
+        "AAALISAAAA collected $39..35 from pot",
+        1,
+    )
+
+    [hand] = debug_parse_text(text, config).hands
+
+    payout = next(mark for mark in hand.lines if mark.text == "AAALISAAAA collected $39..35 from pot")
+    assert hand.ok
+    assert payout.status == "unread"
+
+
 def test_duplicate_rake_lines_are_redundant_but_conflicting_values_stay_unread(config) -> None:
     text = STARS.read_text(encoding="utf-8").replace(
         "*** SUMMARY ***",
