@@ -27,7 +27,9 @@ SOKO = ROOT / "regression-test-files" / "unsupported-sites" / "soko"
 SOKO_COMPLETE = SOKO / "soko_2005_001_complete_anonymized.txt"
 SOKO_HEADERLESS = SOKO / "soko_2005_002_header_missing_anonymized.txt"
 STARS = ROOT / "regression-test-files" / "cash" / "Stars" / "Flop" / "NLHE-6max-USD-0.05-0.10-200912.Allin-pre.txt"
-STARS_SITOUT_EVENTS = ROOT / "regression-test-files" / "cash" / "Stars" / "Flop" / "NLHE-FR-USD-0.01-0.02-201004.4betPF.txt"
+STARS_SITOUT_EVENTS = (
+    ROOT / "regression-test-files" / "cash" / "Stars" / "Flop" / "NLHE-FR-USD-0.01-0.02-201004.4betPF.txt"
+)
 BOVADA = ROOT / "tests" / "fixtures" / "hands" / "bovada" / "zone_poker.txt"
 
 
@@ -151,8 +153,48 @@ def test_every_line_says_which_regex_read_it(stars) -> None:
     assert lines["*** HOLE CARDS ***"].status == "marker"
     assert lines["*** SUMMARY ***"].status == "marker"
     assert lines["Board [3d 7h Kh Ts 5c]"].status == "summary"
-    assert lines["AAALISAAAA collected $39.35 from pot"].status == "unread"
-    assert "UnreadLine" in _kinds(stars)
+    payout = lines["AAALISAAAA collected $39.35 from pot"]
+    assert payout.status == "redundant"
+    assert "read from the summary" in payout.reason
+    payout_line = stars.hands[0].start_line + payout.number - 1
+    assert any(item.kind == "RedundantLine" and item.line == payout_line for item in stars.diagnostics)
+
+
+def test_a_payout_that_disagrees_with_the_summary_stays_unread(config) -> None:
+    text = STARS.read_text(encoding="utf-8").replace(
+        "AAALISAAAA collected $39.35 from pot",
+        "AAALISAAAA collected $39.36 from pot",
+        1,
+    )
+
+    [hand] = debug_parse_text(text, config).hands
+
+    payout = next(mark for mark in hand.lines if mark.text == "AAALISAAAA collected $39.36 from pot")
+    assert hand.ok
+    assert payout.status == "unread"
+
+
+def test_duplicate_rake_lines_are_redundant_but_conflicting_values_stay_unread(config) -> None:
+    text = STARS.read_text(encoding="utf-8").replace(
+        "*** SUMMARY ***",
+        "\n".join(
+            (
+                "Total pot $41.40 | Rake $2.05",
+                "Total pot $41.40 | Rake $2.05",
+                "Total pot $41.41 | Rake $2.05",
+                "*** SUMMARY ***",
+            )
+        ),
+        1,
+    )
+
+    [hand] = debug_parse_text(text, config).hands
+
+    rake_lines = [mark for mark in hand.lines if mark.text.startswith("Total pot $")]
+    assert hand.ok
+    assert hand.extracted["pot"]["total"] == "41.40"
+    assert hand.extracted["pot"]["rake"] == "2.05"
+    assert [mark.status for mark in rake_lines] == ["read", "redundant", "unread", "redundant"]
 
 
 def test_the_extracted_hand_is_plain_data(stars) -> None:

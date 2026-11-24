@@ -79,7 +79,7 @@ _STATUS_FOREGROUNDS = {
     "error": QColor("#ff9292"),
 }
 _STATUS_WORDS = {
-    "ok": {"ok", "pass", "passed", "met", "yes", "read", "every value matches"},
+    "ok": {"ok", "pass", "passed", "met", "yes", "read", "redundant", "every value matches"},
     "warning": {"warning", "unread", "not reached", "not called", "missing", "skipped"},
     "error": {"error", "failed", "fail", "raised", "mismatch", "bug"},
 }
@@ -87,6 +87,7 @@ _STATUS_ROLE = Qt.ItemDataRole.UserRole + 1
 # Background of a line in the input, by what the report says of it.
 _LINE_COLOURS = {
     "read": _STATUS_BACKGROUNDS["ok"],
+    "redundant": _STATUS_BACKGROUNDS["ok"],
     "unread": _STATUS_BACKGROUNDS["warning"],
     "not reached": _STATUS_BACKGROUNDS["warning"],
     "error": _STATUS_BACKGROUNDS["error"],
@@ -497,8 +498,8 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
         )
         self.hand_tree = _tree([_("Field"), _("Value")], widths=(180, 300))
         self.lines_tree = _tree(
-            [_("Line"), _("Status"), _("Text"), _("Read by"), _("Regex match spans")],
-            widths=(55, 90, 300, 180, 220),
+            [_("Line"), _("Status"), _("Text"), _("Read by"), _("Regex match spans"), _("Reason")],
+            widths=(55, 90, 300, 180, 220, 260),
         )
         self.lines_tree.itemActivated.connect(self._line_item_activated)
         self.expected_tree = _tree(
@@ -1032,7 +1033,10 @@ class ParserDebuggerDialog(QDialog):  # pylint: disable=too-many-instance-attrib
             spans = "; ".join(
                 f"{span['regex']} [{span['start']}:{span['end']}] {span['text']!r}" for span in mark.spans
             )
-            item = QTreeWidgetItem(self.lines_tree, [str(line), mark.status, mark.text, ", ".join(mark.regexes), spans])
+            item = QTreeWidgetItem(
+                self.lines_tree,
+                [str(line), mark.status, mark.text, ", ".join(mark.regexes), spans, mark.reason],
+            )
             item.setData(0, _LINE_ROLE, line)
             _colour_status_row(item, mark.status)
         for column in range(4):

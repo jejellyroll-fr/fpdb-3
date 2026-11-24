@@ -108,6 +108,7 @@ class LineMark:
     status: str
     regexes: list[str] = field(default_factory=list)
     spans: list[dict[str, Any]] = field(default_factory=list)
+    reason: str = ""
 
 
 @dataclass
@@ -435,9 +436,7 @@ def bug_report(report: ParseDebugReport, hand: int | None = None) -> str:
     if not report.hands and report.source_text:
         names += _history_player_names(report.source_text)
     texts = "\n\n".join(result.text for result in selected) if selected else report.source_text
-    player_names_unavailable = [
-        result.index for result in selected if not result.extracted.get("players")
-    ]
+    player_names_unavailable = [result.index for result in selected if not result.extracted.get("players")]
     unparsed_source = not selected and bool(report.source_text)
     anonymized = bool(names) and not player_names_unavailable
     hand_text = texts
