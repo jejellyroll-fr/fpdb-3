@@ -717,6 +717,23 @@ def _decimal_capture(match: Any, group: str) -> Decimal | None:
         return None
 
 
+def _total_rake_capture(match: Any, pattern: Any) -> Decimal | None:
+    """Return the converter's rake plus any separately captured deductions."""
+    rake = _decimal_capture(match, "RAKE")
+    if rake is None:
+        return None
+    for group in ("JACKPOT", "BINGO", "FORTUNE", "TAX"):
+        if group not in pattern.groupindex:
+            continue
+        if match.group(group) is None:
+            continue
+        amount = _decimal_capture(match, group)
+        if amount is None:
+            return None
+        rake += amount
+    return rake
+
+
 def _annotate_redundant_rake_lines(converter: Any, hand: Any, recorder: Recorder) -> None:
     rake_pattern = _plain_regex(converter, "re_rake")
     if rake_pattern is None or hand.totalpot is None or hand.rake is None:
@@ -728,7 +745,7 @@ def _annotate_redundant_rake_lines(converter: Any, hand: Any, recorder: Recorder
         if match.span() in read_rake_spans:
             continue
         total_pot = _decimal_capture(match, "POT")
-        rake = _decimal_capture(match, "RAKE")
+        rake = _total_rake_capture(match, rake_pattern)
         if total_pot is None or rake is None:
             # Annotation is diagnostic only. A malformed or optional capture
             # must not turn a successfully parsed hand into a failed report.

@@ -32,6 +32,7 @@ STARS_SITOUT_EVENTS = (
 )
 BOVADA = ROOT / "tests" / "fixtures" / "hands" / "bovada" / "zone_poker.txt"
 GGPOKER = ROOT / "tests" / "fixtures" / "hands" / "ggpoker" / "aof_omaha.txt"
+GGPOKER_RAKE = ROOT / "regression-test-files" / "cash" / "GGPoker" / "Flop" / "NL-ShortDeck-5max-USD-0.2-202103.txt"
 
 
 @pytest.fixture(scope="module")
@@ -210,6 +211,23 @@ def test_duplicate_rake_lines_are_redundant_but_conflicting_values_stay_unread(c
     assert hand.extracted["pot"]["total"] == "41.40"
     assert hand.extracted["pot"]["rake"] == "2.05"
     assert [mark.status for mark in rake_lines] == ["read", "redundant", "unread", "redundant"]
+
+
+def test_ggpoker_rake_duplicates_include_extra_deductions(config) -> None:
+    line = "Total pot $0.6 | Rake $0.02 | Jackpot $0.02 | Bingo $0"
+    conflicting = line.replace("Jackpot $0.02", "Jackpot $0.03")
+    text = GGPOKER_RAKE.read_text(encoding="utf-8").replace(
+        "*** SUMMARY ***",
+        "\n".join((line, line, conflicting, "*** SUMMARY ***")),
+        1,
+    )
+
+    [hand, *_] = debug_parse_text(text, config).hands
+
+    rake_lines = [mark for mark in hand.lines if mark.text.startswith("Total pot $0.6")][:3]
+    assert hand.ok
+    assert hand.extracted["pot"]["rake"] == "0.04"
+    assert [mark.status for mark in rake_lines] == ["read", "redundant", "unread"]
 
 
 def test_optional_rake_capture_does_not_abort_the_debug_report(config) -> None:
