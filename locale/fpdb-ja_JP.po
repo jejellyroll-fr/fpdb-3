@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 19:34+0100\n"
+"POT-Creation-Date: 2026-11-24 13:38+0100\n"
 "PO-Revision-Date: 2014-06-15 03:46+0900\n"
 "Last-Translator: TAKAHASHI Kaoru <kaoru@kaisei.org>\n"
 "Language-Team: Fpdb\n"
@@ -1702,7 +1702,7 @@ msgstr "チェック"
 msgid "Choose hands…"
 msgstr "ハンドを選択…"
 
-#: fpdb_3_legacy/GuiHandViewer.py
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Clear"
 msgstr "クリア"
@@ -7257,6 +7257,10 @@ msgid "Clear list"
 msgstr "すべてクリア"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Clear the raw hand and its analysis"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 #| msgid "Close"
 msgid "Closest"
@@ -7493,6 +7497,10 @@ msgstr "準備完了"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
 msgid "Read by the {converter} converter as {site}."
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Reason"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py

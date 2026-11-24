@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 19:34+0100\n"
+"POT-Creation-Date: 2026-11-24 13:38+0100\n"
 "PO-Revision-Date: 2011-06-16 13:21+0000\n"
 "Last-Translator: Lexej <alexej@glyvin.com>\n"
 "Language-Team: Russian (Russia) (http://www.transifex.net/projects/p/fpdb/"
@@ -1728,7 +1728,7 @@ msgstr "Чек"
 msgid "Choose hands…"
 msgstr "Выбрать руки…"
 
-#: fpdb_3_legacy/GuiHandViewer.py
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Clear"
 msgstr "Очистить"
@@ -7294,6 +7294,10 @@ msgid "Clear list"
 msgstr "Очистить всё"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Clear the raw hand and its analysis"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Closest"
 msgstr "Закрыть"
@@ -7526,6 +7530,10 @@ msgstr "Готово"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
 msgid "Read by the {converter} converter as {site}."
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Reason"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py

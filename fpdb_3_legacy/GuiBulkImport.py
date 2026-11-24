@@ -320,6 +320,34 @@ class GuiBulkImport(QWidget):
         """Return the main widget container."""
         return self.main_layout
 
+    def _failed_import_paths(self) -> list[Path]:
+        """Return paths for files with incomplete imports, including relocated files."""
+        paths = []
+        for original, result in getattr(self.importer, "file_results", {}).items():
+            errors = getattr(result, "errors", 0)
+            incomplete = errors or getattr(result, "partial", 0) or getattr(result, "skipped", 0)
+            if not incomplete:
+                continue
+
+            source = Path(original)
+            if source.is_file():
+                paths.append(source)
+                continue
+
+            # Partial/skipped imports are counted as incomplete for debugging,
+            # but the importer relocates them with successful files unless it
+            # recorded an actual error.
+            failed = bool(errors)
+            enabled_key, directory_key = (
+                ("movefailedfiles", "moveFailedFilesDir") if failed else ("moveimportedfiles", "moveImportedFilesDir")
+            )
+            directory = self.importer.settings.get(directory_key)
+            if self.importer.settings.get(enabled_key) and directory:
+                relocated = Path(directory) / source.name
+                if relocated.is_file():
+                    paths.append(relocated)
+        return paths
+
     def __init__(self, settings: Any, config: Any, sql: Any = None, parent: Any = None) -> None:
         """Initialize the bulk import widget."""
         QWidget.__init__(self, parent)

@@ -36,7 +36,7 @@ import time
 import traceback
 from collections.abc import Sequence
 from dataclasses import asdict, dataclass
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any, Final
 
@@ -713,8 +713,17 @@ def _annotate_redundant_rake_lines(converter: Any, hand: Any, recorder: Recorder
     for match in rake_pattern.finditer(hand.handText):
         if match.span() in read_rake_spans:
             continue
-        total_pot = Decimal(match.group("POT").replace(",", ""))
-        rake = Decimal(match.group("RAKE").replace(",", ""))
+        pot_text = match.group("POT")
+        rake_text = match.group("RAKE")
+        if pot_text is None or rake_text is None:
+            continue
+        try:
+            total_pot = Decimal(pot_text.replace(",", ""))
+            rake = Decimal(rake_text.replace(",", ""))
+        except (AttributeError, InvalidOperation, TypeError):
+            # Annotation is diagnostic only. A malformed or optional capture
+            # must not turn a successfully parsed hand into a failed report.
+            continue
         if (total_pot, rake) == (hand.totalpot, hand.rake):
             recorder.mark_redundant(
                 hand.handText,
