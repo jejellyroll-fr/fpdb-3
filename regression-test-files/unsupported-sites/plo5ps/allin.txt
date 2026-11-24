@@ -1,0 +1,33 @@
+PokerStars Hand #262648475894:  5 Card Omaha Pot Limit ($0.25/$0.50 USD) - 2026/11/08 20:06:30 CET [2026/11/08 14:06:30 ET]
+Table 'China VII' 6-max Seat #5 is the button
+Seat 1: Player1 ($84.27 in chips)
+Seat 2: Player2 ($115.99 in chips)
+Seat 5: Hero ($66.65 in chips)
+Player1: posts small blind $0.25
+Player2: posts big blind $0.50
+*** HOLE CARDS ***
+Dealt to Hero [7s As Ad 4h Jc]
+Hero: raises $1.25 to $1.75
+Player1: calls $1.50
+Player2: raises $3.75 to $5.50
+Hero: raises $12.75 to $18.25
+Player1: folds
+Player2: calls $12.75
+*** FLOP *** [4s 5s Tc]
+Player2: checks
+Hero: bets $18.75
+Player2: raises $75 to $93.75
+Hero: calls $29.65 and is all-in
+Uncalled bet ($45.35) returned to Player2
+*** TURN *** [4s 5s Tc] [Qc]
+*** RIVER *** [4s 5s Tc Qc] [8c]
+*** SHOW DOWN ***
+Player2: shows [5h 4d 7h 6c 3h] (a straight, Four to Eight)
+Hero: shows [7s As Ad 4h Jc] (a pair of Aces)
+Player2 collected $134.30 from pot
+*** SUMMARY ***
+Total pot $135.05 | Rake $0.75
+Board [4s 5s Tc Qc 8c]
+Seat 1: Player1 (small blind) folded before Flop
+Seat 2: Player2 (big blind) showed [5h 4d 7h 6c 3h] and won ($134.30) with a straight, Four to Eight
+Seat 5: Hero (button) showed [7s As Ad 4h Jc] and lost with a pair of Aces
