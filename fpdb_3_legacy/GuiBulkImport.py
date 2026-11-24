@@ -32,7 +32,6 @@ from PySide6.QtWidgets import (
     QCheckBox,
     QFileDialog,
     QHBoxLayout,
-    QInputDialog,
     QLabel,
     QLineEdit,
     QMessageBox,
@@ -219,8 +218,6 @@ class GuiBulkImport(QWidget):
         log.info(completion_message)
         # PHH files (#381) say more than the totals: what was unsupported, what malformed.
         phh = self.importer.phh_summary()
-        self.failed_import_paths[:] = self._failed_import_paths()
-        self.debug_failed_button.setEnabled(bool(self.failed_import_paths))
 
         self.importer.clearFileList()
         self.settings["global_lock"].release()
@@ -285,57 +282,6 @@ class GuiBulkImport(QWidget):
         if main_window is not None and hasattr(main_window, "refresh_after_import"):
             main_window.refresh_after_import()
 
-    def _failed_import_paths(self) -> list[Path]:
-        """Keep readable hand-history files that had errors, partials, or skips."""
-        failed: list[Path] = []
-        settings = getattr(self.importer, "settings", {})
-        for raw_path, result in getattr(self.importer, "file_results", {}).items():
-            if getattr(result, "is_summary_file", False) or not (
-                getattr(result, "errors", 0) or getattr(result, "partial", 0) or getattr(result, "skipped", 0)
-            ):
-                continue
-            path = Path(raw_path)
-            if not path.is_file():
-                # Importer relocates files based on parser errors, not on the
-                # presence of partial/skipped hands. Such files still belong
-                # to the imported directory when errors == 0.
-                has_errors = bool(getattr(result, "errors", 0))
-                setting = "movefailedfiles" if has_errors else "moveimportedfiles"
-                directory = "moveFailedFilesDir" if has_errors else "moveImportedFilesDir"
-                target_dir = settings.get(directory)
-                if settings.get(setting) and target_dir:
-                    moved = Path(target_dir) / path.name
-                    if moved.is_file():
-                        path = moved
-            if path.is_file():
-                failed.append(path)
-        return failed
-
-    def debug_failed_import(self) -> None:
-        """Open a file with failed hands directly in the Parser Debugger."""
-        if not self.failed_import_paths:
-            return
-        labels = [str(path) for path in self.failed_import_paths]
-        label, accepted = QInputDialog.getItem(
-            self,
-            _("Debug failed import"),
-            _("Choose the hand-history file to inspect:"),
-            labels,
-            0,
-            False,
-        )
-        if not accepted:
-            return
-        path = self.failed_import_paths[labels.index(label)]
-        if not path.is_file():
-            QMessageBox.warning(self, _("File unavailable"), _("The failed hand-history file can no longer be read."))
-            return
-        from fpdb_3_legacy.parser_debugger_dialog import show_parser_debugger
-
-        dialog = show_parser_debugger(self.config, self.main_window or self)
-        dialog.load_file(path)
-        dialog.run()
-
     @staticmethod
     def _phh_lines(phh) -> str:
         """The PHH part of the completion message: the counts the totals fold together."""
@@ -382,7 +328,6 @@ class GuiBulkImport(QWidget):
         self.main_window = parent
         self.settings = settings
         self.config = config
-        self.failed_import_paths: list[Path] = []
 
         self.importer = Importer.Importer(self, self.settings, config, sql, self)
 
@@ -451,11 +396,6 @@ class GuiBulkImport(QWidget):
         self.load_button.setIcon(QIcon(str(download_icon_path)) if download_icon_path.exists() else QIcon())
         self.load_button.clicked.connect(self.load_clicked)
         self.main_layout.addWidget(self.load_button)
-
-        self.debug_failed_button = QPushButton(_("Debug failed import…"))
-        self.debug_failed_button.setEnabled(False)
-        self.debug_failed_button.clicked.connect(self.debug_failed_import)
-        self.main_layout.addWidget(self.debug_failed_button)
 
         self.progress_bar = QProgressBar()
         self.progress_bar.setTextVisible(False)

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 14:13+0100\n"
+"POT-Creation-Date: 2026-11-23 19:34+0100\n"
 "PO-Revision-Date: 2011-05-13 08:55+0000\n"
 "Last-Translator: jax <jax@netmagnet.ro>\n"
 "Language-Team: Romanian (Romania) (http://www.transifex.net/projects/p/fpdb/"
@@ -1025,28 +1025,8 @@ msgstr "Alegeți un dosar de destinație"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy
-msgid "Choose the hand-history file to inspect:"
-msgstr "Calea către istoricele de mâini"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
 msgid "Configured Import Directories:"
 msgstr "Dosare de import configurate:"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
-#| msgid "eMail Import"
-msgid "Debug failed import"
-msgstr "Importare eMail"
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "Debug failed import…"
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-#, fuzzy
-msgid "File unavailable"
-msgstr "Actualizează previzualizarea"
 
 #: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
 msgid "Folder access needed"
@@ -1132,10 +1112,6 @@ msgstr "Alegeti calea dorita pentru Importarea Automata"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Select at least one configured directory, or choose a folder to import."
-msgstr ""
-
-#: fpdb_3_legacy/GuiBulkImport.py
-msgid "The failed hand-history file can no longer be read."
 msgstr ""
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
@@ -6444,6 +6420,7 @@ msgid "Redo the change just undone (Ctrl+Shift+Z)"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Remove"
 msgstr "Elimină"
@@ -7304,9 +7281,19 @@ msgid "Cannot anonymize fixture"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "Captured from {source} · {site}"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Changes"
 msgstr "hud_main: Joc schimbat."
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Clear list"
+msgstr "Golește tot"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
@@ -7371,6 +7358,10 @@ msgid "Expected"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Failure"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
 msgid "File encoding: {encoding}"
 msgstr ""
@@ -7403,6 +7394,16 @@ msgstr "Mână"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Hand fingerprint"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Hands to debug"
+msgstr "Mâini după"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy, python-brace-format
+msgid "Hands to debug ({count})"
+msgstr "Mâini după"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
@@ -7439,6 +7440,10 @@ msgstr "Jurnalizare Mesaje"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Missing / not reached"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Mode"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
@@ -7484,6 +7489,12 @@ msgstr ""
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Parser Debugger"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+#| msgid "database used"
+msgid "Parser message"
+msgstr "baza de date folosita"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Parser not determined yet"
@@ -7540,6 +7551,11 @@ msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
+msgid "Replay selected hand"
+msgstr "Actualizează selecția"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
 msgid "Report saved"
 msgstr "Raportează o problemă"
 
@@ -7565,6 +7581,17 @@ msgstr "Salvează presetarea"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Sidecar"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+#| msgid "Suited connectors"
+msgid "Site / converter"
+msgstr "Conectori in suita"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Source file"
+msgstr "Mâini sursă"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Status colours"
@@ -7608,6 +7635,12 @@ msgstr ""
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "This file has no regression sidecar (.hands, .hp, .gt)"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+#| msgid "utcTime:"
+msgid "Time"
+msgstr "utcTime:"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Trace lines"
@@ -7687,6 +7720,11 @@ msgstr "Fisierul nu a fost gasit"
 #| msgid "Unknown Site"
 msgid "unknown encoding"
 msgstr "Site Necunoscut"
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+#, python-brace-format
+msgid "{hand} · {attempts} attempts"
+msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
@@ -11115,6 +11153,10 @@ msgstr ""
 #~ msgid "Cell already used"
 #~ msgstr "siguranta e deja detinuta de:"
 
+#, fuzzy
+#~ msgid "Choose the hand-history file to inspect:"
+#~ msgstr "Calea către istoricele de mâini"
+
 #~ msgid "Closed, no graph exported"
 #~ msgstr "Inchis, nici un grafic exportat"
 
@@ -11280,6 +11322,11 @@ msgstr ""
 #, fuzzy
 #~ msgid "Debug Statistics Windows"
 #~ msgstr "Debug StatWindows"
+
+#, fuzzy
+#~| msgid "eMail Import"
+#~ msgid "Debug failed import"
+#~ msgstr "Importare eMail"
 
 #~ msgid "Default encoding set to US-ASCII, defaulting to CP1252 instead."
 #~ msgstr "Codarea implicita pentru US-ASCII a fost schimbata cu CP1252."
@@ -11538,6 +11585,10 @@ msgstr ""
 #~ msgid "File to be split is a PokerStars or Full Tilt Poker archive file"
 #~ msgstr ""
 #~ "Fisierul care trebuie impartit e o arhiva a PokerStars sau Full Tilt Poker"
+
+#, fuzzy
+#~ msgid "File unavailable"
+#~ msgstr "Actualizează previzualizarea"
 
 #, fuzzy
 #~ msgid "Finished downloading emails."
@@ -12714,9 +12765,6 @@ msgstr ""
 #~ msgid "Stud"
 #~ msgstr "Stud"
 
-#~ msgid "Suited connectors"
-#~ msgstr "Conectori in suita"
-
 #, fuzzy
 #~ msgid "Summary file '%s' correctly parsed (took %.3f seconds)"
 #~ msgstr "Fisierul sumar '%s' a fost parcurs cu succes (a durat %.3f secunde)"
@@ -13307,9 +13355,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "using db name = %s"
 #~ msgstr "Folosirea bd numita = %s"
-
-#~ msgid "utcTime:"
-#~ msgstr "utcTime:"
 
 #~ msgid "waiting for writers to finish ..."
 #~ msgstr "se asteapta sa termine scrierile ..."

@@ -26,6 +26,7 @@ import sys
 import time
 import xml.parsers.expat
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from decimal import Decimal
 from pathlib import Path
 
@@ -161,6 +162,7 @@ in_path   (default '-' = sys.stdin)
         self.numErrors = 0
         self.numPartial = 0
         self.parsing_issues: list[str] = []
+        self.failed_hand_callback: Callable[..., None] | None = None
         self.isCarraige = False
         self.autoPop = False
 
@@ -217,9 +219,9 @@ HandHistoryConverter: '{sitename}'
         if not handsList or self.isSummary(handsList[0]) is False:
             self.parsedObjectType = "HH"
             last_error_info = None
-            for handText in handsList:
+            for hand_index, hand_text in enumerate(handsList, start=1):
                 try:
-                    self.processedHands.append(self.processHand(handText))
+                    self.processedHands.append(self.processHand(hand_text))
                     lastParsed = "stored"
                 except FpdbHandPartial as e:
                     self.numPartial += 1
@@ -228,9 +230,10 @@ HandHistoryConverter: '{sitename}'
                         self.in_path,
                         "partial",
                         str(e),
-                        handText,
+                        hand_text,
                     )
-                    self.parsing_issues.append(f"[PARTIAL] Hand starting with '{handText[:30]}...': {e}")
+                    self._capture_failed_hand(hand_index, hand_text, "partial", str(e), e)
+                    self.parsing_issues.append(f"[PARTIAL] Hand starting with '{hand_text[:30]}...': {e}")
                     log.info(f"partial {e}")
                 except FpdbHandSkipped:
                     self.numSkipped += 1
@@ -242,9 +245,10 @@ HandHistoryConverter: '{sitename}'
                         self.in_path,
                         "error",
                         str(e),
-                        handText,
+                        hand_text,
                     )
-                    self.parsing_issues.append(f"[ERROR] Hand starting with '{handText[:30]}...': {e}")
+                    self._capture_failed_hand(hand_index, hand_text, "error", str(e), e)
+                    self.parsing_issues.append(f"[ERROR] Hand starting with '{hand_text[:30]}...': {e}")
                     log.exception(f"FpdbParseError for file '{self.in_path}'")
 
             # Improved error handling - only reset file position when truly necessary
@@ -283,6 +287,29 @@ HandHistoryConverter: '{sitename}'
                 log.warning(
                     f"Error converting summary file '{self.in_path}' (took {endtime - starttime:.3f} seconds)",
                 )
+
+    def _capture_failed_hand(self, hand_index: int, hand_text: str, failure_type: str, message: str, error: Exception) -> None:
+        """Publish the complete failed hand only when an importer requested capture."""
+        callback = self.failed_hand_callback
+        if callback is None:
+            return
+        shared_header = ""
+        if self.copyGameHeader and self.whole_file:
+            split_hands_re = getattr(self, "re_split_hands", getattr(self, "re_SplitHands", None))
+            if split_hands_re is not None:
+                shared_header = re.split(split_hands_re, self.whole_file, maxsplit=1)[0].strip()
+        hand_identifier = getattr(error, "handid", None)
+        try:
+            callback(
+                hand_index=hand_index,
+                failure_type=failure_type,
+                message=message,
+                raw_text=hand_text,
+                shared_header=shared_header,
+                hand_identifier=str(hand_identifier) if hand_identifier else None,
+            )
+        except Exception:  # noqa: BLE001 - debug capture must never interfere with importing
+            log.exception("Could not capture a failed hand for Parser Debugger replay")
 
     def setAutoPop(self, value) -> None:
         self.autoPop = value
