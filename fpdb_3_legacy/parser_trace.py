@@ -126,6 +126,7 @@ class Recorder:  # pylint: disable=too-many-instance-attributes  # the state of 
         self.line_starts: list[int] = [0]
         self.marks: dict[int, set[str]] = {}
         self.spans: list[dict[str, Any]] = []
+        self.redundant_lines: dict[int, str] = {}
         self._located: dict[tuple[str, int], int] = {}
         self._streets: dict[int, tuple[str, int]] = {}
         self.street_starts: dict[str, int] = {}
@@ -138,6 +139,7 @@ class Recorder:  # pylint: disable=too-many-instance-attributes  # the state of 
         self.line_starts = [0] + [index + 1 for index, char in enumerate(text) if char == "\n"]
         self.marks = {}
         self.spans = []
+        self.redundant_lines = {}
         self._located = {}
         self._streets = {}
         self.street_starts = {}
@@ -199,6 +201,18 @@ class Recorder:  # pylint: disable=too-many-instance-attributes  # the state of 
         last = bisect.bisect_right(self.line_starts, end - 1) - 1
         for line in range(first, last + 1):
             self.marks.setdefault(line, set()).add(regex)
+
+    def mark_redundant(self, string: str, match: re.Match[str], reason: str) -> None:
+        """Explain a matched input line that the parser deliberately did not use."""
+        span = self._span_in_hand(string, match)
+        if span is None:
+            return
+        first = bisect.bisect_right(self.line_starts, span[0]) - 1
+        last = bisect.bisect_right(self.line_starts, span[1] - 1) - 1
+        for line in range(first, last + 1):
+            line_end = self.line_starts[line + 1] - 1 if line + 1 < len(self.line_starts) else len(self.hand_text)
+            if self.hand_text[self.line_starts[line] : line_end].strip():
+                self.redundant_lines[line] = reason
 
     def _base_of(self, string: str) -> int:
         """Where ``string`` starts in the hand text, -1 when it is not part of it."""

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 19:34+0100\n"
+"POT-Creation-Date: 2026-11-24 13:38+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -1703,7 +1703,7 @@ msgstr "Passzolt"
 msgid "Choose hands…"
 msgstr "Kezek kiválasztása…"
 
-#: fpdb_3_legacy/GuiHandViewer.py
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Clear"
 msgstr "Törlés"
@@ -7300,6 +7300,10 @@ msgid "Clear list"
 msgstr "Összes törlése"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Clear the raw hand and its analysis"
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
 #, fuzzy
 msgid "Closest"
 msgstr "Bezárás"
@@ -7534,6 +7538,10 @@ msgstr "Kész"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 #, python-brace-format
 msgid "Read by the {converter} converter as {site}."
+msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Reason"
 msgstr ""
 
 #: fpdb_3_legacy/parser_debugger_dialog.py

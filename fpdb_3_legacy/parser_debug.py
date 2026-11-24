@@ -36,6 +36,7 @@ import time
 import traceback
 from collections.abc import Sequence
 from dataclasses import asdict, dataclass
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any, Final
 
@@ -514,7 +515,9 @@ def update_snapshot_manifest(path: str | Path, report: ParseDebugReport) -> tupl
         except ValueError:
             continue
     if key is None:
-        raise ValueError("snapshot input must be under tests/fixtures/hands, regression-test-files/cash, or regression-test-files/tour")
+        raise ValueError(
+            "snapshot input must be under tests/fixtures/hands, regression-test-files/cash, or regression-test-files/tour"
+        )
     parse_errors = [
         diagnostic
         for diagnostic in report.diagnostics
@@ -531,7 +534,12 @@ def update_snapshot_manifest(path: str | Path, report: ParseDebugReport) -> tupl
     text = json.dumps(manifest, indent=2, ensure_ascii=False, sort_keys=True) + "\n"
     _SNAPSHOT_MANIFEST.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(
-        mode="w", encoding="utf-8", newline="", dir=_SNAPSHOT_MANIFEST.parent, prefix=".live_parser_snapshots.", delete=False
+        mode="w",
+        encoding="utf-8",
+        newline="",
+        dir=_SNAPSHOT_MANIFEST.parent,
+        prefix=".live_parser_snapshots.",
+        delete=False,
     ) as staged:
         staged.write(text)
         staged_path = Path(staged.name)
@@ -550,9 +558,12 @@ def _line_marks(recorder: Recorder, text: str, filetype: str) -> tuple[list[Line
     in_summary = False
     for number, line in enumerate(text.split("\n")):
         regexes = sorted(recorder.marks.get(number, ()))
+        reason = recorder.redundant_lines.get(number, "")
         if _SUMMARY_MARKER.match(line):
             in_summary = True
-        if regexes:
+        if reason and not regexes:
+            status = "redundant"
+        elif regexes:
             status = "read"
         elif _NOISE_LINE.match(line):
             status = "blank"
@@ -562,7 +573,16 @@ def _line_marks(recorder: Recorder, text: str, filetype: str) -> tuple[list[Line
             status = "summary"
         else:
             status = "unread"
-        marks.append(LineMark(number + 1, line, status, regexes, spans_by_line.get(number + 1, [])))
+        marks.append(
+            LineMark(
+                number + 1,
+                line,
+                status,
+                regexes,
+                spans_by_line.get(number + 1, []),
+                reason if status == "redundant" else "",
+            )
+        )
     if filetype != "text":
         note = "XML histories are mostly read by an XML parser, not by regexes: unread lines are expected"
     else:
@@ -635,13 +655,107 @@ def _coverage_pass(fobj: FPDBFile, config: Any, texts: Sequence[str]) -> list[Re
         return [None] * len(texts)
     for text in texts:
         with captured_logs():
-            _parse_hand(converter, recorder, text)
+            hand, error, _message = _parse_hand(converter, recorder, text)
+        if error is None and hand is not None:
+            _annotate_redundant_lines(converter, hand, recorder)
         # start_hand() gives the recorder fresh containers for the next hand,
         # so this hand's steps and marks can be kept as they are.
         snapshot = Recorder()
         snapshot.steps, snapshot.marks, snapshot.spans = recorder.steps, recorder.marks, recorder.spans
+        snapshot.redundant_lines = recorder.redundant_lines
         traced.append(snapshot)
     return traced
+
+
+def _plain_regex(converter: Any, name: str) -> Any:
+    pattern = getattr(converter, name, None)
+    return getattr(pattern, "_pattern", pattern)
+
+
+def _annotate_redundant_lines(converter: Any, hand: Any, recorder: Recorder) -> None:
+    """Mark duplicate payout/rake text only when the parsed hand confirms it."""
+    if type(converter).__name__ == "PokerStars":
+        _annotate_redundant_pokerstars_payouts(converter, hand, recorder)
+    _annotate_redundant_rake_lines(converter, hand, recorder)
+
+
+def _annotate_redundant_pokerstars_payouts(converter: Any, hand: Any, recorder: Recorder) -> None:
+    sections = hand.handText.split("*** SUMMARY ***", 1)
+    if len(sections) != 2:
+        return
+    pre_summary, summary = sections
+    summary_collections = _plain_regex(converter, "re_collect_pot")
+    action_collections = _plain_regex(converter, "re_collect_pot2")
+    if summary_collections is None or action_collections is None:
+        return
+    summary_values = set()
+    for match in summary_collections.finditer(summary):
+        amount = _decimal_capture(match, "POT")
+        if amount is not None:
+            summary_values.add((match.group("PNAME"), amount))
+    for match in action_collections.finditer(pre_summary):
+        player = match.group("PNAME")
+        amount = _decimal_capture(match, "POT")
+        if amount is None:
+            continue
+        if (player, amount) in summary_values and hand.collectees.get(player) == amount:
+            recorder.mark_redundant(
+                pre_summary,
+                match,
+                "A matching collection was read from the summary; this earlier payout was skipped to prevent double-counting.",
+            )
+
+
+def _decimal_capture(match: Any, group: str) -> Decimal | None:
+    """Parse an optional numeric regex group without letting diagnostics abort parsing."""
+    value = match.group(group)
+    if value is None:
+        return None
+    try:
+        return Decimal(value.replace(",", ""))
+    except (AttributeError, InvalidOperation, TypeError):
+        return None
+
+
+def _total_rake_capture(match: Any, pattern: Any) -> Decimal | None:
+    """Return the converter's rake plus any separately captured deductions."""
+    rake = _decimal_capture(match, "RAKE")
+    if rake is None:
+        return None
+    for group in ("JACKPOT", "BINGO", "FORTUNE", "TAX"):
+        if group not in pattern.groupindex:
+            continue
+        if match.group(group) is None:
+            continue
+        amount = _decimal_capture(match, group)
+        if amount is None:
+            return None
+        rake += amount
+    return rake
+
+
+def _annotate_redundant_rake_lines(converter: Any, hand: Any, recorder: Recorder) -> None:
+    rake_pattern = _plain_regex(converter, "re_rake")
+    if rake_pattern is None or hand.totalpot is None or hand.rake is None:
+        return
+    if not {"POT", "RAKE"} <= set(rake_pattern.groupindex):
+        return
+    read_rake_spans = {(span["start"], span["end"]) for span in recorder.spans if span["regex"] == "re_rake"}
+    for match in rake_pattern.finditer(hand.handText):
+        if match.span() in read_rake_spans:
+            continue
+        total_pot = _decimal_capture(match, "POT")
+        rake = _total_rake_capture(match, rake_pattern)
+        if total_pot is None or rake is None:
+            # Annotation is diagnostic only. A malformed or optional capture
+            # must not turn a successfully parsed hand into a failed report.
+            continue
+        if (total_pot, rake) == (hand.totalpot, hand.rake):
+            recorder.mark_redundant(
+                hand.handText,
+                match,
+                "The same total pot and rake were already read from another line.",
+            )
 
 
 # ---------------------------------------------------------------------------
@@ -753,6 +867,24 @@ def _unread_line_diagnostics(results: Sequence[HandResult]) -> list[Diagnostic]:
             )
         )
     return diagnostics
+
+
+def _redundant_line_diagnostics(results: Sequence[HandResult]) -> list[Diagnostic]:
+    """Explain lines intentionally skipped because an equivalent value was used."""
+    return [
+        Diagnostic(
+            INFO,
+            "RedundantLine",
+            mark.reason,
+            result.index,
+            result.start_line + mark.number - 1,
+            mark.text.strip(),
+        )
+        for result in results
+        if result.ok and result.coverage.startswith("Lines")
+        for mark in result.lines
+        if mark.status == "redundant" and mark.reason
+    ]
 
 
 # ---------------------------------------------------------------------------
@@ -949,6 +1081,7 @@ def debug_parse_file(
             report.diagnostics += _hand_diagnostics(result)
             report.hands.append(result)
         report.diagnostics += _unread_line_diagnostics(report.hands)
+        report.diagnostics += _redundant_line_diagnostics(report.hands)
 
     key = _snapshot_key(path)
     if key:

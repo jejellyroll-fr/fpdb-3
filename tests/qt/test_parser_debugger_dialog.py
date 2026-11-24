@@ -229,6 +229,20 @@ def test_a_line_of_the_lines_tab_selects_it_in_the_input(dialog) -> None:
     assert dialog.input.textCursor().selectedText() == "Seat 1: Blåveis ($55.10 in chips)"
 
 
+def test_a_redundant_line_shows_why_it_was_skipped(dialog) -> None:
+    dialog.input.setPlainText(STARS.read_text(encoding="utf-8"))
+    dialog.run()
+
+    payout = next(
+        dialog.lines_tree.topLevelItem(row)
+        for row in range(dialog.lines_tree.topLevelItemCount())
+        if dialog.lines_tree.topLevelItem(row).text(2) == "AAALISAAAA collected $39.35 from pot"
+    )
+
+    assert payout.text(1) == "redundant"
+    assert "read from the summary" in payout.text(5)
+
+
 def test_the_input_gutter_shows_line_numbers_and_coverage(dialog) -> None:
     dialog.input.setPlainText(STARS.read_text(encoding="utf-8"))
     dialog.run()
