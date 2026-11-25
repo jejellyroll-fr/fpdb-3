@@ -468,6 +468,7 @@ class DatabaseBulkImportMixin:
                 hdata["finalPot"],
                 hdata.get("bombPot", 0),
                 hdata.get("splashPot", 0),
+                bool(hdata.get("layeredAntes", False)),
             ],
         )
 

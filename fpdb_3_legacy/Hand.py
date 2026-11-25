@@ -275,6 +275,7 @@ class Hand:
         self.rake: Decimal | int | None = None
         self.bombPot = 0  # Bomb pot amount in cents (0 = no bomb pot)
         self.splashPot = 0  # Splash pot amount in cents (0 = no splash pot)
+        self.layeredAntes = False  # True when trimmed antes count as each player's own contribution (#886)
         # Who actually took the splash, in currency units. The total above says
         # what the room put on the table; this says where it went, which is the
         # only half the replayer can attribute to a seat.
@@ -876,6 +877,7 @@ class Hand:
         # created before these columns simply return nothing, keeping the 0 default.
         self.bombPot = hand_info.get("bombpot", 0) or 0
         self.splashPot = hand_info.get("splashpot", 0) or 0
+        self.layeredAntes = bool(hand_info.get("layeredantes", 0))
         for column in STP_COLUMNS_BY_SITE.get(self.sitename, ()):
             cents = getattr(self, column)
             if cents:
@@ -1027,7 +1029,7 @@ class Hand:
                 f"Hand.select():: name: '{name}' street: '{street}' act: '{act}' bet: '{bet}'",
             )
             if act == 1:  # Ante
-                self.addAnte(name, bet)
+                self.addAnte(name, bet, pooled=not self.layeredAntes)
             elif act == 2:  # Small Blind
                 self.addBlind(name, "small blind", bet)
             elif act == 3:  # Second small blind
@@ -1053,7 +1055,15 @@ class Hand:
             elif act == 13:  # Bringin
                 getattr(self, "addBringIn")(name, bet)
             elif act == 14:  # Complete
-                getattr(self, "addComplete")(street, name, bet)
+                raise_to = row.get("raiseto")
+                complete_to = bet
+                if raise_to is not None:
+                    try:
+                        if Decimal(str(raise_to)) > 0:
+                            complete_to = str(raise_to)
+                    except (ArithmeticError, ValueError):
+                        pass
+                getattr(self, "addComplete")(street, name, complete_to)
             elif act == 15:
                 self.addBlind(name, "straddle", bet)
             elif act == 16:
@@ -1063,6 +1073,8 @@ class Hand:
             else:
                 log.warning(f"unknown action: '{act}'")
 
+        if self.layeredAntes:
+            self._apply_layered_ante_uncalled()
         self.totalPot()
         if self.totalpot is None:
             raise FpdbParseError("Pot calculation did not produce a total")
@@ -1514,6 +1526,26 @@ class Hand:
         self.stacks[player] += amount
         self.pot.common[player] -= amount
         self.pot.antes[player] -= amount
+
+    def _apply_layered_ante_uncalled(self) -> None:
+        """Return per-street uncalled surpluses when layered antes sit in committed (#886).
+
+        With layered antes inside ``pot.committed``, ``totalPot()`` cannot tell an
+        unmatched street bet from a folded player's larger ante. Compute each
+        betting street's top-vs-second surplus from ``self.bets`` identically to
+        ``phh_import._Builder._street_surplus`` and apply ``addUncalled``.
+        """
+        for street in self.actionStreets:
+            if street == "BLINDSANTES":
+                continue
+            totals = [(player, sum(amounts, Decimal(0))) for player, amounts in self.bets.get(street, {}).items()]
+            ordered = sorted(totals, key=lambda item: item[1], reverse=True)
+            if not ordered:
+                continue
+            top, top_bet = ordered[0]
+            second_bet = ordered[1][1] if len(ordered) > 1 else Decimal(0)
+            if top_bet > second_bet:
+                self.addUncalled(street, top, str(top_bet - second_bet))
 
     def sittingOut(self) -> None:
         dealtIn = set()

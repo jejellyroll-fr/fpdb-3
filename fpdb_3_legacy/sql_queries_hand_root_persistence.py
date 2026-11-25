@@ -44,11 +44,12 @@ def hand_root_persistence_queries() -> dict[str, str]:
                                         street4Pot,
                                         finalPot,
                                         bombPot,
-                                        splashPot
+                                        splashPot,
+                                        layeredAntes
                                          )
                                          values
                                           (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                                            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                                            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                                           %s, %s, %s, %s, %s)"""
+                                           %s, %s, %s, %s, %s, %s)"""
     return query
