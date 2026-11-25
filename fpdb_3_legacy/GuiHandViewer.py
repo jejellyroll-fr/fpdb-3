@@ -69,6 +69,7 @@ from fpdb_3_legacy.holdem_classes import RANKS, grid_labels
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_currency, format_number, format_utc_datetime
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.work_priority import interactive_work
 
 log = get_logger("gui_hand_viewer")
 
@@ -600,12 +601,12 @@ class GuiHandViewer(QSplitter):
         return card_images
 
     def loadHands(self, checkState) -> None:
-        hand_ids = self.get_hand_ids_from_date_range(
-            self.filters.getDates()[0],
-            self.filters.getDates()[1],
-        )
-        # ! print(hand_ids)
-        self.reload_hands(hand_ids)
+        with interactive_work("hand-viewer-load"):
+            hand_ids = self.get_hand_ids_from_date_range(
+                self.filters.getDates()[0],
+                self.filters.getDates()[1],
+            )
+            self.reload_hands(hand_ids)
 
     def get_hand_ids_from_date_range(self, start, end):
         q = self.db.sql.query["handsInRangeSessionFilter"]
@@ -747,7 +748,8 @@ class GuiHandViewer(QSplitter):
 
         Returns False, leaving the page shown before untouched, when aborted.
         """
-        return self._show_page(self.all_handids, self.page if page is None else page, self.hands)
+        with interactive_work("hand-viewer-page"):
+            return self._show_page(self.all_handids, self.page if page is None else page, self.hands)
 
     def _show_page(self, handids: list[Any], page: int, cache: HandCache) -> bool:
         """Rebuild page ``page`` of ``handids`` into ``cache``, then show it.
@@ -836,20 +838,21 @@ class GuiHandViewer(QSplitter):
         It looks the number up in the database, so pages never shown are
         searched too, and no hand is rebuilt but the page it is on.
         """
-        found = self._lookup_hand(text)
-        if isinstance(found, str):
-            self._set_search_status(found)
-            return False
-        hand_id, page = found
-        if page != self.page and not self.render_page(page):
-            self._set_search_status("")
-            return False
-        selected = self._select_hand_row(hand_id)
-        if selected:
-            self._set_search_status(_("Hand {} on page {}").format(hand_id, page + 1))
-        else:
-            self._set_search_status(_("Hand is on page {} but hidden (no hero or card filter)").format(page + 1))
-        return selected
+        with interactive_work("hand-viewer-search"):
+            found = self._lookup_hand(text)
+            if isinstance(found, str):
+                self._set_search_status(found)
+                return False
+            hand_id, page = found
+            if page != self.page and not self._show_page(self.all_handids, page, self.hands):
+                self._set_search_status("")
+                return False
+            selected = self._select_hand_row(hand_id)
+            if selected:
+                self._set_search_status(_("Hand {} on page {}").format(hand_id, page + 1))
+            else:
+                self._set_search_status(_("Hand is on page {} but hidden (no hero or card filter)").format(page + 1))
+            return selected
 
     def _lookup_hand(self, text: str) -> tuple[Any, int] | str:
         """The loaded hand numbered ``text`` and its page, or what to tell the user."""

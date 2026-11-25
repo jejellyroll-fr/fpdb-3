@@ -44,6 +44,7 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.parser_registry import get_parser_class, get_summary_class
 from fpdb_3_legacy.phh_import import PHH_SITE_NAME, PHHImportResult, is_phh_path, phh_file_name
 from fpdb_3_legacy.phh_import import import_file as import_phh_file
+from fpdb_3_legacy.work_priority import background_checkpoint, background_work
 
 zmq: Any = _zmq
 
@@ -1118,9 +1119,10 @@ class Importer:
                     prefetch.before_import(f)
 
                 try:
-                    (stored, duplicates, partial, skipped, errors, ttime, detected) = self._import_despatch(
-                        self.filelist[f]
-                    )
+                    with background_work("bulk-import-file"):
+                        (stored, duplicates, partial, skipped, errors, ttime, detected) = self._import_despatch(
+                            self.filelist[f]
+                        )
                     # Periodic latency report when FPDB_LATENCY_LOG_INTERVAL is set (#680).
                     latency_profile.maybe_log()
                     # The parser's room when it found one: a PokerTracker-format file is
@@ -1164,11 +1166,15 @@ class Importer:
                     self.file_results[f] = FileImportResult(_site_name(self.filelist[f]), errors=1)
                     toterrors += 1
                     self._relocate_processed_file(f, failed=True)
+                    background_checkpoint("bulk-import-file")
                     continue
 
                 # Optionally archive the file once processed: successful imports go to
                 # the "imported" directory, files that produced errors to the "failed" one.
                 self._relocate_processed_file(f, failed=errors > 0)
+                # Files are the current import transaction boundary. Yield only
+                # after offsets, duplicate handling and the transaction are settled.
+                background_checkpoint("bulk-import-file")
         finally:
             if prefetch is not None:
                 prefetch.close()
@@ -1413,9 +1419,13 @@ class Importer:
                             log.debug(f"os.path.basename: {os.path.basename(f)}")
                             log.debug(f"self.caller: {self.caller}")
 
-                        (stored, duplicates, partial, skipped, errors, ttime, detected_sitename) = (
-                            self._import_despatch(tracked_file)
-                        )
+                        with background_work("auto-import-file"):
+                            (stored, duplicates, partial, skipped, errors, ttime, detected_sitename) = (
+                                self._import_despatch(tracked_file)
+                            )
+                        # Auto-import offsets are updated by the completed file;
+                        # pause here so a user query never waits behind the next file.
+                        background_checkpoint("auto-import-file")
                         self.logImport(
                             "auto",
                             f,

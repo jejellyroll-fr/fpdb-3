@@ -13,6 +13,7 @@ from PySide6.QtWidgets import QMessageBox, QTabWidget
 
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.ring_stats.styles import get_modern_qss
+from fpdb_3_legacy.work_priority import interactive_work
 
 
 class DbWorker(QThread):
@@ -45,7 +46,11 @@ class DbWorker(QThread):
         DbWorker._started.append(self)
         super().start(*args, **kwargs)
 
-    def run(self) -> None:  # noqa: PLR0915
+    def run(self) -> None:
+        with interactive_work(f"database-query:{self.query_name}"):
+            self._run_query()
+
+    def _run_query(self) -> None:  # noqa: PLR0915
         import logging
         import time
         log = logging.getLogger("DbWorker")

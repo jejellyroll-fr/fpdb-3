@@ -52,6 +52,7 @@ from fpdb_3_legacy.research_drilldown import (
 )
 from fpdb_3_legacy.research_worker_db import worker_database
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
+from fpdb_3_legacy.work_priority import interactive_work
 
 log = get_logger("gui_drilldown")
 
@@ -217,6 +218,10 @@ class _SideDrillWorker(QThread):
         return self._serial
 
     def run(self) -> None:
+        with interactive_work("source-hands-page"):
+            self._run_page()
+
+    def _run_page(self) -> None:
         try:
             with worker_database(self._db) as db:
                 page = run_side_drill(
@@ -251,6 +256,10 @@ class _CountsWorker(QThread):
         return self._serial
 
     def run(self) -> None:
+        with interactive_work("source-hands-counts"):
+            self._run_counts()
+
+    def _run_counts(self) -> None:
         try:
             with worker_database(self._db) as db:
                 counts = drill_counts(db, self._context)
