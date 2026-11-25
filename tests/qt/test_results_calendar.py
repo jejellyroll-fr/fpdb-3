@@ -5,6 +5,7 @@ from __future__ import annotations
 import contextlib
 import sqlite3
 from datetime import date, datetime, timedelta
+from decimal import Decimal
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -113,6 +114,24 @@ def test_the_table_lists_the_chosen_periods(viewer) -> None:
     assert viewer.model.rowCount() == 2
     starts = {viewer.model.item(row, 0).data(results_module.PERIOD_ROLE) for row in range(2)}
     assert starts == {(pr.MONTH, date(2026, 10, 1)), (pr.MONTH, date(2026, 11, 1))}
+
+
+def test_the_table_sorts_money_by_its_exact_decimal_value(viewer) -> None:
+    viewer.show_results(
+        pr.build_results(
+            [
+                (1, datetime(2026, 11, 9, 20, 0), Decimal("0.1000000000000001"), None, False, -1, "USD"),
+                (2, datetime(2026, 11, 10, 20, 0), Decimal("0.1000000000000002"), None, False, -1, "USD"),
+            ],
+        ),
+    )
+    viewer.table.sortByColumn(2, Qt.SortOrder.AscendingOrder)
+
+    periods = [
+        viewer.proxy.index(row, 0).data(results_module.PERIOD_ROLE)
+        for row in range(viewer.proxy.rowCount())
+    ]
+    assert periods == [(pr.DAY, date(2026, 11, 9)), (pr.DAY, date(2026, 11, 10))]
 
 
 def test_selecting_a_day_draws_its_curves_and_reviews_its_hands(viewer) -> None:

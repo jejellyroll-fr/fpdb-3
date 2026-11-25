@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import shutil
 from datetime import date, datetime, timedelta
+from decimal import Decimal
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -145,10 +146,31 @@ def test_money_is_kept_per_currency_and_big_blinds_are_summed() -> None:
     assert day.currencies == ["EUR", "USD"]
     assert day.profit_bb == 10 - 2
     assert pr.period_value(day, "USD") == 1.0
-    assert pr.period_value(day, "EUR") == -0.4
+    assert pr.period_value(day, "EUR") == Decimal("-0.4")
     assert pr.period_value(day, "GBP") is None
     assert pr.period_value(day, pr.UNIT_BB) == 8
     assert pr.display_units(list(results.hands)) == [pr.UNIT_BB]
+
+
+@pytest.mark.usefixtures("new_york")
+def test_fractional_minor_units_stay_exact_across_currency_periods_and_bb_rates() -> None:
+    results = pr.build_results(
+        [
+            _row(1, datetime(2026, 11, 9, 20, 0), Decimal("0.1"), ev=Decimal("0.15"), bb=Decimal("0.1")),
+            _row(2, datetime(2026, 11, 10, 20, 0), Decimal("0.2"), ev=None, bb=Decimal("0.2")),
+            _row(3, datetime(2026, 11, 11, 20, 0), Decimal("0.05"), ev=None, bb=Decimal("0.05"), currency="EUR"),
+        ],
+    )
+    overall = pr.total(results.periods[pr.DAY])
+
+    assert all(isinstance(hand.profit_minor, Decimal) for hand in results.hands)
+    assert overall.profit_minor == {"USD": Decimal("0.3"), "EUR": Decimal("0.05")}
+    assert overall.all_in_ev_minor == {"USD": Decimal("0.35"), "EUR": Decimal("0.05")}
+    assert overall.profit_bb == Decimal("3")
+    assert overall.all_in_ev_bb == Decimal("3.5")
+    assert overall.bb_per_100 == Decimal("100")
+    assert overall.ev_bb_per_100 == Decimal("116.6666666666666666666666667")
+    assert pr.period_value(overall, "USD") == Decimal("0.003")
 
 
 @pytest.mark.usefixtures("new_york")
@@ -165,9 +187,9 @@ def test_bb_per_100_uses_the_hands_with_a_blind_for_profit_and_ev() -> None:
     assert day.hands == 3
     assert day.bb_hands == 2
     assert day.profit_bb == 1.0
-    assert day.all_in_ev_bb == 0.0
-    assert day.bb_per_100 == 50.0
-    assert day.ev_bb_per_100 == 0.0
+    assert day.all_in_ev_bb == Decimal(0)
+    assert day.bb_per_100 == Decimal(50)
+    assert day.ev_bb_per_100 == Decimal(0)
     assert day.money("USD") == 600
     assert day.all_in_ev_minor == {"USD": 500}
 
@@ -184,7 +206,7 @@ def test_no_blind_means_no_bb_rate() -> None:
 def test_a_hand_without_an_all_in_ev_counts_its_result() -> None:
     hand = pr.parse_hands([(1, datetime(2026, 11, 9, 20, 0), 75, None, False, 10, "USD")])[0]
 
-    assert hand.all_in_ev_minor == 75
+    assert hand.all_in_ev_minor == Decimal(75)
 
 
 def test_display_units_offer_the_currency_when_there_is_only_one() -> None:
@@ -205,9 +227,9 @@ def test_total_sums_every_period() -> None:
     overall = pr.total(results.periods[pr.DAY])
 
     assert overall.hands == 2
-    assert overall.profit_minor == {"USD": 100, "EUR": -30}
-    assert overall.all_in_ev_minor == {"USD": 60, "EUR": -30}
-    assert overall.profit_bb == 10 - 3
+    assert overall.profit_minor == {"USD": Decimal(100), "EUR": Decimal(-30)}
+    assert overall.all_in_ev_minor == {"USD": Decimal(60), "EUR": Decimal(-30)}
+    assert overall.profit_bb == Decimal(7)
     assert overall.hand_ids == [1, 2]
     assert pr.total([]) is None
 
@@ -227,14 +249,14 @@ def test_the_four_curves_split_showdown_and_follow_the_ev() -> None:
 
     assert curves.hands == 3
     assert curves.hand_ids == (1, 2, 3)
-    assert curves.net == (0.0, 10.0, 8.0, 13.0)
-    assert curves.ev == (0.0, 4.0, 2.0, 7.0)
-    assert curves.showdown == (0.0, 10.0, 10.0, 15.0)
-    assert curves.nonshowdown == (0.0, 0.0, -2.0, -2.0)
+    assert curves.net == tuple(map(Decimal, ("0", "10", "8", "13")))
+    assert curves.ev == tuple(map(Decimal, ("0", "4", "2", "7")))
+    assert curves.showdown == tuple(map(Decimal, ("0", "10", "10", "15")))
+    assert curves.nonshowdown == tuple(map(Decimal, ("0", "0", "-2", "-2")))
     assert curves.final("net") == curves.final("showdown") + curves.final("nonshowdown")
 
     money = pr.build_curves(hands, "USD")
-    assert money.net == (0.0, 1.0, 0.8, 1.3)
+    assert money.net == tuple(map(Decimal, ("0", "1", "0.8", "1.3")))
 
 
 def test_a_curve_skips_hands_it_cannot_show() -> None:
@@ -247,7 +269,7 @@ def test_a_curve_skips_hands_it_cannot_show() -> None:
 
     assert pr.build_curves(hands, "USD").hand_ids == (2,)
     assert pr.build_curves(hands, pr.UNIT_BB).hand_ids == (1,)
-    assert pr.build_curves([], pr.UNIT_BB).net == (0.0,)
+    assert pr.build_curves([], pr.UNIT_BB).net == (Decimal(0),)
 
 
 # -- calendar -------------------------------------------------------------------
@@ -337,13 +359,13 @@ def test_the_query_reads_every_cash_hand_of_the_hero(imported) -> None:
     assert {hand.player_id for hand in results.hands} == {hero}
     overall = pr.total(results.periods[pr.MONTH])
     assert overall.hands == hands
-    assert overall.profit_minor == {"USD": pytest.approx(float(profit))}
-    assert overall.all_in_ev_minor == {"USD": pytest.approx(float(ev))}
+    assert float(overall.profit_minor["USD"]) == pytest.approx(float(profit))
+    assert float(overall.all_in_ev_minor["USD"]) == pytest.approx(float(ev))
     assert sum(day.hands for day in results.periods[pr.DAY]) == hands
     assert overall.bb_hands == hands  # every hand has its 10-cent big blind
-    assert overall.profit_bb == pytest.approx(float(profit) / 10)
+    assert float(overall.profit_bb) == pytest.approx(float(profit) / 10)
     curves = pr.build_curves(results.hands, pr.UNIT_BB)
-    assert curves.final("net") == pytest.approx(overall.profit_bb)
+    assert float(curves.final("net")) == pytest.approx(float(overall.profit_bb))
 
     viewer.filters = _filters(currencies=())
     cursor.execute(viewer.build_query([hero]))

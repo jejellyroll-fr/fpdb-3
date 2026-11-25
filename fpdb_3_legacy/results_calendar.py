@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import contextlib
 from datetime import date
+from decimal import Decimal
 from time import time
 from typing import Any
 
@@ -55,6 +56,21 @@ log = get_logger("results_calendar")
 SORT_ROLE = Qt.ItemDataRole.UserRole + 1
 #: Role holding the period (granularity, start) a calendar cell or table row stands for.
 PERIOD_ROLE = Qt.ItemDataRole.UserRole + 2
+
+
+class _ResultsSortProxyModel(QSortFilterProxyModel):
+    """Sort decimal cells numerically without converting them to floats."""
+
+    def lessThan(self, left, right) -> bool:  # noqa: N802  # Qt virtual method
+        left_value = left.data(self.sortRole())
+        right_value = right.data(self.sortRole())
+        if isinstance(left_value, tuple) and isinstance(right_value, tuple):
+            return left_value < right_value
+        if isinstance(left_value, Decimal) or isinstance(right_value, Decimal):
+            left_decimal = left_value if isinstance(left_value, Decimal) else Decimal(str(left_value))
+            right_decimal = right_value if isinstance(right_value, Decimal) else Decimal(str(right_value))
+            return left_decimal < right_decimal
+        return super().lessThan(left, right)
 
 
 class ResultsLoader(DbWorker):
@@ -108,7 +124,7 @@ def period_label(granularity: str, start: date) -> str:
     return format_date(start)
 
 
-def money_text(amounts: dict[str, float]) -> str:
+def money_text(amounts: dict[str, Decimal]) -> str:
     """Amounts in minor units per currency, one after the other."""
     if not amounts:
         return "—"
@@ -117,7 +133,7 @@ def money_text(amounts: dict[str, float]) -> str:
     )
 
 
-def value_text(value: float | None, unit: str) -> str:
+def value_text(value: Decimal | float | None, unit: str) -> str:
     """A result in big blinds or in a currency, with its unit."""
     if value is None:
         return "—"
@@ -126,7 +142,7 @@ def value_text(value: float | None, unit: str) -> str:
     return format_currency(value, unit, show_plus=True)
 
 
-def optional_number(value: float | None) -> str:
+def optional_number(value: Decimal | float | None) -> str:
     """A signed number, or a dash when there is none (the calendar cells' unit is in the month's title)."""
     return format_number(value, show_plus=True) if value is not None else "—"
 
@@ -147,11 +163,10 @@ def table_cell(text: str, sort_value: Any) -> QStandardItem:
 def period_row(period: pr.PeriodResult) -> list[QStandardItem]:
     """The period table's cells for one day, week or month."""
     with_bb = period.bb_hands > 0
-    # The money columns sort by the money they show, whatever the unit of the
-    # calendar: the BB columns sort by big blinds. Amounts in several currencies
-    # are added as they are, the only order there is without exchange rates.
-    profit_sort = sum(period.profit_minor.values())
-    ev_sort = sum(period.all_in_ev_minor.values())
+    # Money sorts by currency and then its exact amount, since amounts in
+    # different currencies have no common numeric order without exchange rates.
+    profit_sort = tuple(sorted(period.profit_minor.items()))
+    ev_sort = tuple(sorted(period.all_in_ev_minor.items()))
     row = [
         table_cell(period_label(period.granularity, period.start), period.start.toordinal()),
         table_cell(format_number(period.hands, 0), period.hands),
@@ -159,8 +174,8 @@ def period_row(period: pr.PeriodResult) -> list[QStandardItem]:
         table_cell(money_text(period.all_in_ev_minor), ev_sort),
         table_cell(optional_number(period.profit_bb if with_bb else None), period.profit_bb),
         table_cell(optional_number(period.all_in_ev_bb if with_bb else None), period.all_in_ev_bb),
-        table_cell(optional_number(period.bb_per_100), period.bb_per_100 or 0.0),
-        table_cell(optional_number(period.ev_bb_per_100), period.ev_bb_per_100 or 0.0),
+        table_cell(optional_number(period.bb_per_100), period.bb_per_100 or Decimal(0)),
+        table_cell(optional_number(period.ev_bb_per_100), period.ev_bb_per_100 or Decimal(0)),
         table_cell(optional_number(period.showdown_bb if with_bb else None), period.showdown_bb),
         table_cell(optional_number(period.nonshowdown_bb if with_bb else None), period.nonshowdown_bb),
     ]
@@ -297,7 +312,7 @@ class ResultsCalendar(QSplitter):  # pylint: disable=too-many-instance-attribute
         self.month_button = QPushButton()
         self.calendar = make_calendar()
         self.model = QStandardItemModel(0, 10)
-        self.proxy = QSortFilterProxyModel()
+        self.proxy = _ResultsSortProxyModel()
         self.table = make_period_table(self.model, self.proxy)
         self.graph_frame = QFrame()
         self.graph_box = QVBoxLayout(self.graph_frame)
@@ -715,9 +730,9 @@ class ResultsCalendar(QSplitter):  # pylint: disable=too-many-instance-attribute
             if not color.isValid():
                 color = QColor(fallback)
             plot.plot(
-                list(getattr(curves, name)),
+                [float(value) for value in getattr(curves, name)],
                 pen=pg.mkPen(color=color, width=width, style=style),
-                name=f"{label}: {value_text(curves.final(name), unit)}",
+                name=f"{label}: {value_text(float(curves.final(name)), unit)}",
             )
         self.plot_widget = plot
         self.graph_box.addWidget(plot)
