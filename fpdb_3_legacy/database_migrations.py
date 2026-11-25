@@ -743,6 +743,7 @@ class DatabaseMigrationsMixin:
         definitions = {
             "bombPot": "INT DEFAULT 0",
             "splashPot": "INT DEFAULT 0",
+            "layeredAntes": "BOOLEAN DEFAULT FALSE",
         }
         self._ensure_table_columns("Hands", definitions)
 

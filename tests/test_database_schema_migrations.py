@@ -52,6 +52,53 @@ def test_handsplayers_ev_marker_migrates_as_boolean() -> None:
     assert captured["allInEVCalculated"] == "BOOLEAN DEFAULT FALSE"
 
 
+def test_hands_layered_antes_marker_migrates_as_boolean() -> None:
+    db = Database.__new__(Database)
+    captured: dict[str, str] = {}
+
+    def capture_columns(table: str, definitions: dict[str, str]) -> None:
+        if table == "Hands":
+            captured.update(definitions)
+
+    db._ensure_table_columns = capture_columns
+
+    db.ensure_hands_columns()
+
+    assert captured["layeredAntes"] == "BOOLEAN DEFAULT FALSE"
+
+
+def test_existing_hands_table_gains_layered_antes_on_migration(tmp_path) -> None:
+    """A pre-existing Hands table without layeredAntes gains it with a false default (#886)."""
+    from tests.helpers import analytics_golden as golden
+
+    db = Database(golden.build_config(tmp_path))
+    db.recreate_tables()
+    if db.backend == Database.PGSQL:
+        pytest.skip("the sqlite column probe below needs SQLite")
+
+    cursor = db.get_cursor()
+    cursor.execute("ALTER TABLE Hands DROP COLUMN layeredAntes")
+    cursor.execute(
+        "INSERT INTO Hands (id, tableName, siteHandNo, gametypeId, fileId, startTime, importTime, "
+        "seats, heroSeat, maxPosition, playersVpi, playersAtStreet1, playersAtStreet2, "
+        "playersAtStreet3, playersAtStreet4, playersAtShowdown, street0Raises, street1Raises, "
+        "street2Raises, street3Raises, street4Raises) "
+        "VALUES (1, 'Table', 1001, 1, 1, '2026-01-01 00:00:00', '2026-01-01 00:00:00', "
+        "2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)"
+    )
+    db.commit()
+
+    db.ensure_hands_columns()
+    db.ensure_hands_columns()  # Idempotent when run again.
+
+    cursor.execute("PRAGMA table_info(Hands)")
+    columns = [row[1] for row in cursor.fetchall()]
+    assert "layeredAntes" in columns
+    cursor.execute("SELECT layeredAntes FROM Hands WHERE id = 1")
+    assert cursor.fetchone() == (0,)
+    db.disconnect()
+
+
 @pytest.mark.parametrize(
     ("backend", "expected"),
     [

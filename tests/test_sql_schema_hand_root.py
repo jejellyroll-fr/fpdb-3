@@ -21,6 +21,8 @@ def test_hands_ddl_keeps_backend_specific_links_and_pot_types() -> None:
     assert "finalPot   BIGINT" in mysql
     assert "finalPot   BIGINT" in postgresql
     assert "finalPot INT" in sqlite
+    for ddl in (mysql, postgresql, sqlite):
+        assert "layeredAntes BOOLEAN" in ddl
     for ddl in (mysql, postgresql):
         assert "REFERENCES Gametypes(id)" in ddl
         assert "REFERENCES Files(id)" in ddl

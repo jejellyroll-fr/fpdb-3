@@ -135,6 +135,7 @@ def replayer_queries() -> dict[str, str]:
                   ha.actionId,
                   ha.allIn,
                   round(ha.amount / 100.0,2) as bet,
+                  round(ha.raiseTo / 100.0,2) as raiseto,
                   ha.numDiscarded,
                   ha.cardsDiscarded
             FROM

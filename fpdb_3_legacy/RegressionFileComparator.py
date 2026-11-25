@@ -34,6 +34,7 @@ IGNORED_HAND_KEYS = {
     "gametypeId",
     "gsc",
     "id",
+    "layeredAntes",
     "runItTwice",
     "sc",
     "sessionId",

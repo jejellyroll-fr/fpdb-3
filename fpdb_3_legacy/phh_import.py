@@ -1251,6 +1251,7 @@ class _Builder:
             cutoff = sorted(posted)[-2]
             posted = [min(ante, cutoff) for ante in posted]
             self.layered_antes = len(set(posted)) > 1
+            self.hand.layeredAntes = self.layered_antes
         for seat, ante in zip(self.seats, posted, strict=True):
             if ante > 0:
                 self.hand.addAnte(seat.name, str(ante), pooled=not self.layered_antes)

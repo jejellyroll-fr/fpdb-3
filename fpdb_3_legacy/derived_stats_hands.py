@@ -220,6 +220,7 @@ class DerivedStatsHandsMixin(DerivedStatsBase):
 
     def _assembleStreetTotals(self, hand: Any) -> None:
         """Record the pot size entering each street, in cents."""
+        self.hands["layeredAntes"] = bool(getattr(hand, "layeredAntes", False))
         # Calculate street totals
         try:
             totals = hand.getStreetTotals()

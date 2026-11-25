@@ -179,3 +179,213 @@ def test_a_winamax_splash_comes_back_in_the_pot(importer, fresh_db, legacy_confi
     assert rebuilt.totalpot == parsed.totalpot
     assert rebuilt.rake == parsed.rake
     assert "exceeds total pot" not in caplog.text
+
+
+# --------------------------------------------------------------------------
+# PHH trimmed / layered antes (#886)
+# --------------------------------------------------------------------------
+
+_PHH_TRIMMED_SHORT_ANTE = """
+variant = "NT"
+antes = [10, 10, 10]
+blinds_or_straddles = [1, 2, 0]
+min_bet = 2
+starting_stacks = [5, 100, 100]
+ante_trimming_status = true
+actions = [
+  "d dh p1 AsAh",
+  "d dh p2 2c3d",
+  "d dh p3 KsKh",
+  "p3 cbr 6",
+  "p2 f",
+  "d db 7c4d2s",
+  "d db Jh",
+  "d db 9c",
+  "p1 sm AsAh",
+  "p3 sm KsKh",
+]
+"""
+
+_PHH_UNEVEN_TRIMMED_ANTES = _PHH_TRIMMED_SHORT_ANTE.replace("antes = [10, 10, 10]", "antes = [10, 20, 10]")
+
+_PHH_HETEROGENEOUS_FOLDED_ANTE = """
+variant = "NT"
+antes = [10, 10, 0]
+blinds_or_straddles = [1, 2, 0]
+min_bet = 2
+starting_stacks = [12, 100, 100]
+ante_trimming_status = true
+actions = [
+  "d dh p1 AsAh",
+  "d dh p2 2c3d",
+  "d dh p3 KsKh",
+  "p3 cbr 6",
+  "p1 cc",
+  "p2 f",
+  "d db 7c4d2s",
+  "d db Jh",
+  "d db 9c",
+  "p1 sm AsAh",
+  "p3 sm KsKh",
+]
+winnings = [26, 0, 0]
+"""
+
+_PHH_STUD_TRIMMED_COMPLETE = """
+variant = "F7S"
+antes = [10, 10, 10]
+bring_in = 2
+small_bet = 5
+big_bet = 10
+starting_stacks = [5, 100, 100]
+ante_trimming_status = true
+actions = [
+  "d dh p1 AsAhAc",
+  "d dh p2 2c3d4h",
+  "d dh p3 KsKhKd",
+  "p2 pb",
+  "p3 cbr 5",
+  "p2 f",
+  "d dh p1 2d",
+  "d dh p3 7c",
+  "d dh p1 3s",
+  "d dh p3 Jh",
+  "d dh p1 4c",
+  "d dh p3 9c",
+  "d dh p1 5h",
+  "d dh p3 Qc",
+  "p1 sm AsAhAc",
+  "p3 sm KsKhKd",
+]
+winnings = [15, 0, 14]
+"""
+
+
+def _import_phh_and_reload(importer: Any, db: Any, config: Any, tmp_path: Path, text: str) -> tuple[Any, Any]:
+    import tomllib
+
+    from fpdb_3_legacy.phh_import import PHHDocument, build_hand
+
+    hand_path = tmp_path / "layered_ante.phh"
+    hand_path.write_text(text, encoding="utf-8")
+    parsed = build_hand(PHHDocument(str(hand_path), "hand", 1, tomllib.loads(text)))
+    parsed.totalPot()
+
+    assert importer.addImportFile(str(hand_path))
+    stored, duplicates, *_rest = importer.runImport()
+    assert (stored, duplicates) == (1, 0)
+
+    cursor = db.get_cursor()
+    cursor.execute("SELECT id FROM Hands ORDER BY id DESC LIMIT 1")
+    (hand_id,) = cursor.fetchone()
+    rebuilt = hand_factory(hand_id, config, db)
+    assert rebuilt is not None
+    return parsed, rebuilt
+
+
+def test_trimmed_short_ante_keeps_side_pots_and_net_collected_on_reload(
+    importer, fresh_db, legacy_config, tmp_path
+) -> None:
+    parsed, rebuilt = _import_phh_and_reload(
+        importer,
+        fresh_db,
+        legacy_config,
+        tmp_path,
+        _PHH_TRIMMED_SHORT_ANTE + "winnings = [15, 0, 14]\n",
+    )
+
+    assert rebuilt.layeredAntes is True
+    assert sum(rebuilt.pot.common.values()) == 0
+    assert rebuilt.pot.pots == [(Decimal("15"), {"p1", "p2", "p3"}), (Decimal("14"), {"p2", "p3"})]
+    assert rebuilt.pot.returned == {"p3": Decimal("4")}
+    assert rebuilt.totalpot == Decimal("29")
+    assert rebuilt.rake == Decimal("0")
+
+    parsed.calculate_net_collected()
+    rebuilt.calculate_net_collected()
+    expected_net = {"p1": Decimal("10"), "p2": Decimal("-12"), "p3": Decimal("2")}
+    assert parsed.net_collected == expected_net
+    assert rebuilt.net_collected == expected_net
+
+
+def test_uneven_trimmed_antes_match_importer_pots_on_reload(importer, fresh_db, legacy_config, tmp_path) -> None:
+    parsed, rebuilt = _import_phh_and_reload(
+        importer,
+        fresh_db,
+        legacy_config,
+        tmp_path,
+        _PHH_UNEVEN_TRIMMED_ANTES + "winnings = [15, 0, 14]\n",
+    )
+
+    assert rebuilt.layeredAntes is True
+    assert rebuilt.pot.pots == parsed.pot.pots
+    assert rebuilt.pot.antes == parsed.pot.antes
+    assert rebuilt.pot.committed == parsed.pot.committed
+    assert rebuilt.pot.returned == parsed.pot.returned
+    assert rebuilt.totalpot == parsed.totalpot
+    assert rebuilt.rake == parsed.rake == Decimal("0")
+
+
+def test_untrimmed_short_ante_stays_pooled_on_reload(importer, fresh_db, legacy_config, tmp_path) -> None:
+    untrimmed = _PHH_TRIMMED_SHORT_ANTE.replace("ante_trimming_status = true\n", "") + "winnings = [25, 0, 4]\n"
+    parsed, rebuilt = _import_phh_and_reload(importer, fresh_db, legacy_config, tmp_path, untrimmed)
+
+    assert rebuilt.layeredAntes is False
+    assert sum(rebuilt.pot.common.values()) == Decimal("25")
+    assert rebuilt.pot.pots == parsed.pot.pots
+    assert rebuilt.totalpot == parsed.totalpot == Decimal("29")
+    assert rebuilt.rake == Decimal("0")
+
+
+def test_heterogeneous_layered_ante_returns_uncalled_bet_to_bettor_not_folded_ante(
+    importer, fresh_db, legacy_config, tmp_path
+) -> None:
+    parsed, rebuilt = _import_phh_and_reload(
+        importer, fresh_db, legacy_config, tmp_path, _PHH_HETEROGENEOUS_FOLDED_ANTE
+    )
+
+    assert rebuilt.layeredAntes is True
+    assert rebuilt.pot.returned == {"p3": Decimal("4")}
+    assert (
+        rebuilt.pot.committed
+        == parsed.pot.committed
+        == {
+            "p1": Decimal("12"),
+            "p2": Decimal("12"),
+            "p3": Decimal("2"),
+        }
+    )
+    assert rebuilt.pot.pots == parsed.pot.pots == [(Decimal("6"), {"p1", "p2", "p3"}), (Decimal("20"), {"p1", "p2"})]
+    assert rebuilt.totalpot == parsed.totalpot == Decimal("26")
+    assert rebuilt.rake == Decimal("0")
+
+
+def test_stud_trimmed_ante_with_complete_keeps_side_pots_and_uncalled_return_on_reload(
+    importer, fresh_db, legacy_config, tmp_path
+) -> None:
+    parsed, rebuilt = _import_phh_and_reload(importer, fresh_db, legacy_config, tmp_path, _PHH_STUD_TRIMMED_COMPLETE)
+
+    assert rebuilt.layeredAntes is True
+    assert sum(rebuilt.pot.common.values()) == 0
+    assert rebuilt.pot.returned == parsed.pot.returned == {"p3": Decimal("3")}
+    assert rebuilt.pot.pots == parsed.pot.pots == [(Decimal("15"), {"p1", "p2", "p3"}), (Decimal("14"), {"p2", "p3"})]
+    assert rebuilt.totalpot == parsed.totalpot == Decimal("29")
+    assert rebuilt.rake == Decimal("0")
+
+
+def test_apply_layered_ante_uncalled_handles_single_bettor_street() -> None:
+    from fpdb_3_legacy.Hand import HoldemOmahaHand
+
+    hand = HoldemOmahaHand.__new__(HoldemOmahaHand)
+    hand.actionStreets = ["BLINDSANTES", "PREFLOP", "FLOP"]
+    hand.bets = {
+        "BLINDSANTES": {"p1": [Decimal("5")], "p2": [Decimal("10")]},
+        "PREFLOP": {"p1": [], "p2": []},
+        "FLOP": {"p2": [Decimal("6")]},
+    }
+    returned: list[tuple[str, str, str]] = []
+    hand.addUncalled = lambda street, player, amount: returned.append((street, player, amount))
+
+    hand._apply_layered_ante_uncalled()
+
+    assert returned == [("FLOP", "p2", "6")]
