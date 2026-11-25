@@ -25,7 +25,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from math import cos, hypot, pi, sin
 from typing import Any
 
-import defusedxml.minidom
+import defusedxml.ElementTree
 from PySide6.QtCore import QPointF, QRectF, Qt, QTimer
 from PySide6.QtGui import QColor, QFont, QFontMetrics, QImage, QLinearGradient, QPainter, QPen, QPixmap
 from PySide6.QtWidgets import (
@@ -1234,10 +1234,10 @@ class GuiReplayer(QWidget):
             self._hero_site_cache = {}
             path = os.path.join(Configuration.Config().config_path, "HUD_config.xml")
             try:
-                doc = defusedxml.minidom.parse(path)
-                for site_node in doc.getElementsByTagName("site"):
-                    site_name = site_node.getAttribute("site_name")
-                    self._hero_site_cache[site_name] = site_node.getAttribute("screen_name")
+                root = defusedxml.ElementTree.parse(path).getroot()
+                for site_node in root.iter("site"):
+                    site_name = site_node.get("site_name", "")
+                    self._hero_site_cache[site_name] = site_node.get("screen_name", "")
             except Exception as exc:
                 log.warning("Unable to read HUD screen names for replayer: %s", exc)
         return self._hero_site_cache.get(str(sitename), "")

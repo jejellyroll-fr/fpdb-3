@@ -6,10 +6,9 @@ from __future__ import annotations
 Parses HandHistory xml files and returns requested objects.
 """
 
-from xml.dom.minidom import Node
 from xml.parsers.expat import ExpatError
 
-import defusedxml.minidom
+import defusedxml.ElementTree
 
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -36,39 +35,60 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 log = get_logger("hand_history")
 
 
+def _descendants(node, tag: str):
+    if hasattr(node, "getElementsByTagName"):
+        return list(node.getElementsByTagName(tag))
+    return [child for child in node.iter(tag) if child is not node]
+
+
+def _attribute(node, name: str) -> str:
+    if hasattr(node, "getAttribute"):
+        return node.getAttribute(name)
+    return node.get(name, "")
+
+
+def _direct_text(node) -> str:
+    if hasattr(node, "childNodes"):
+        return "".join(child.data for child in node.childNodes if child.nodeType == child.TEXT_NODE)
+    return node.text or ""
+
+
 class HandHistory:
     def __init__(self, xml_string, elements=("ALL")) -> None:
-        doc = defusedxml.minidom.parseString(xml_string)
+        try:
+            root = defusedxml.ElementTree.fromstring(xml_string)
+        except defusedxml.ElementTree.ParseError as exc:
+            raise ExpatError(str(exc)) from exc
         if elements == ("ALL"):
             elements = ("BETTING", "AWARDS", "POSTS", "PLAYERS", "GAME")
 
         if "BETTING" in elements:
-            self.BETTING = Betting(doc.getElementsByTagName("BETTING")[0])
+            self.BETTING = Betting(next(iter(root.iter("BETTING"))))
         if "AWARDS" in elements:
-            self.AWARDS = Awards(doc.getElementsByTagName("AWARDS")[0])
+            self.AWARDS = Awards(next(iter(root.iter("AWARDS"))))
         if "POSTS" in elements:
-            self.POSTS = Posts(doc.getElementsByTagName("POSTS")[0])
+            self.POSTS = Posts(next(iter(root.iter("POSTS"))))
         if "GAME" in elements:
-            self.GAME = Game(doc.getElementsByTagName("GAME")[0])
+            self.GAME = Game(next(iter(root.iter("GAME"))))
         if "PLAYERS" in elements:
             self.PLAYERS = {}
-            p_n = doc.getElementsByTagName("PLAYERS")[0]
-            for p in p_n.getElementsByTagName("PLAYER"):
+            p_n = next(iter(root.iter("PLAYERS")))
+            for p in _descendants(p_n, "PLAYER"):
                 a_player = Player(p)
                 self.PLAYERS[a_player.name] = a_player
 
 
 class Player:
     def __init__(self, node) -> None:
-        self.name = node.getAttribute("NAME")
-        self.seat = node.getAttribute("SEAT")
-        self.stack = node.getAttribute("STACK")
-        self.showed_hand = node.getAttribute("SHOWED_HAND")
-        self.cards = node.getAttribute("CARDS")
-        self.allin = node.getAttribute("ALLIN")
-        self.sitting_out = node.getAttribute("SITTING_OUT")
-        self.hand = node.getAttribute("HAND")
-        self.start_cards = node.getAttribute("START_CARDS")
+        self.name = _attribute(node, "NAME")
+        self.seat = _attribute(node, "SEAT")
+        self.stack = _attribute(node, "STACK")
+        self.showed_hand = _attribute(node, "SHOWED_HAND")
+        self.cards = _attribute(node, "CARDS")
+        self.allin = _attribute(node, "ALLIN")
+        self.sitting_out = _attribute(node, "SITTING_OUT")
+        self.hand = _attribute(node, "HAND")
+        self.start_cards = _attribute(node, "START_CARDS")
 
         if self.allin in ("", "0") or self.allin.upper() == "FALSE":
             self.allin = False
@@ -89,7 +109,7 @@ class Player:
 class Awards:
     def __init__(self, node) -> None:
         self.awards = []  # just an array of award objects
-        for a in node.getElementsByTagName("AWARD"):
+        for a in _descendants(node, "AWARD"):
             self.awards.append(Award(a))
 
     def __str__(self) -> str:
@@ -98,9 +118,9 @@ class Awards:
 
 class Award:
     def __init__(self, node) -> None:
-        self.player = node.getAttribute("PLAYER")
-        self.amount = node.getAttribute("AMOUNT")
-        self.pot = node.getAttribute("POT")
+        self.player = _attribute(node, "PLAYER")
+        self.amount = _attribute(node, "AMOUNT")
+        self.pot = _attribute(node, "POT")
 
     def __str__(self) -> str:
         return self.player + " won " + self.amount + " from " + self.pot
@@ -117,15 +137,13 @@ class Game:
             ("STRUCTURE", "structure"),
             ("MIXED", "mixed"),
         ):
-            L = node.getElementsByTagName(tag[0])
+            L = _descendants(node, tag[0])
             if not L:
                 continue
             # print(L)
             for node2 in L:
                 title = ""
-                for node3 in node2.childNodes:
-                    if node3.nodeType == Node.TEXT_NODE:
-                        title += node3.data
+                title += _direct_text(node2)
                 self.tags[tag[1]] = title
 
     def __str__(self) -> str:
@@ -141,7 +159,7 @@ class Game:
 class Posts:
     def __init__(self, node) -> None:
         self.posts = []  # just an array of post objects
-        for p in node.getElementsByTagName("POST"):
+        for p in _descendants(node, "POST"):
             self.posts.append(Post(p))
 
     def __str__(self) -> str:
@@ -150,10 +168,10 @@ class Posts:
 
 class Post:
     def __init__(self, node) -> None:
-        self.player = node.getAttribute("PLAYER")
-        self.amount = node.getAttribute("AMOUNT")
-        self.posted = node.getAttribute("POSTED")
-        self.live = node.getAttribute("LIVE")
+        self.player = _attribute(node, "PLAYER")
+        self.amount = _attribute(node, "AMOUNT")
+        self.posted = _attribute(node, "POSTED")
+        self.live = _attribute(node, "LIVE")
 
     def __str__(self) -> str:
         return f"{self.player} posted {self.amount} {self.posted} {self.live}"
@@ -162,7 +180,7 @@ class Post:
 class Betting:
     def __init__(self, node) -> None:
         self.rounds = []  # a Betting object is just an array of rounds
-        for r in node.getElementsByTagName("ROUND"):
+        for r in _descendants(node, "ROUND"):
             self.rounds.append(Round(r))
 
     def __str__(self) -> str:
@@ -171,9 +189,9 @@ class Betting:
 
 class Round:
     def __init__(self, node) -> None:
-        self.name = node.getAttribute("ROUND_NAME")
+        self.name = _attribute(node, "ROUND_NAME")
         self.action = []
-        for a in node.getElementsByTagName("ACTION"):
+        for a in _descendants(node, "ACTION"):
             self.action.append(Action(a))
 
     def __str__(self) -> str:
@@ -182,10 +200,10 @@ class Round:
 
 class Action:
     def __init__(self, node) -> None:
-        self.player = node.getAttribute("PLAYER")
-        self.action = node.getAttribute("ACT")
-        self.amount = node.getAttribute("AMOUNT")
-        self.allin = node.getAttribute("ALLIN")
+        self.player = _attribute(node, "PLAYER")
+        self.action = _attribute(node, "ACT")
+        self.amount = _attribute(node, "AMOUNT")
+        self.allin = _attribute(node, "ALLIN")
 
     def __str__(self) -> str:
         return self.player + " " + self.action + " " + self.amount + " " + self.allin

@@ -349,9 +349,6 @@ def ensure_autonotes_node(config):
         return node
 
     root = cx.root(doc)
-    if root is None:
-        # Only an empty minidom document has no root; an ElementTree one always has.
-        root = doc.appendChild(cx.create_element(doc, "FreePokerToolsConfig"))
     return cx.append(doc, root, cx.create_element(doc, "autonotes"))
 
 
