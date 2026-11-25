@@ -1,4 +1,4 @@
-"""Results calendar: cash results per day, week and month (#827).
+"""Results calendar: cash results per day, week, month and year (#827).
 
 A calendar of the month with what each day and week won, the list of days,
 weeks or months of the filtered range, and the four profit curves (net, all-in
@@ -21,7 +21,7 @@ from time import time
 from typing import Any
 
 import pyqtgraph as pg
-from PySide6.QtCore import QSignalBlocker, QSortFilterProxyModel, Qt, Signal
+from PySide6.QtCore import QDate, QSignalBlocker, QSortFilterProxyModel, Qt, Signal
 from PySide6.QtGui import QBrush, QColor, QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -100,11 +100,13 @@ class ResultsLoader(DbWorker):
 
 
 def period_label(granularity: str, start: date) -> str:
-    """How a day, week or month is named on screen."""
+    """How a day, week, month or year is named on screen."""
     if granularity == pr.WEEK:
         return _("Week of {date}").format(date=format_date(start))
     if granularity == pr.MONTH:
         return f"{_locale_copy().standaloneMonthName(start.month)} {start.year}"
+    if granularity == pr.YEAR:
+        return str(start.year)
     return format_date(start)
 
 
@@ -145,7 +147,7 @@ def table_cell(text: str, sort_value: Any) -> QStandardItem:
 
 
 def period_row(period: pr.PeriodResult) -> list[QStandardItem]:
-    """The period table's cells for one day, week or month."""
+    """The period table's cells for one day, week, month or year."""
     with_bb = period.bb_hands > 0
     # The money columns sort by the money they show, whatever the unit of the
     # calendar: the BB columns sort by big blinds. Amounts in several currencies
@@ -161,6 +163,8 @@ def period_row(period: pr.PeriodResult) -> list[QStandardItem]:
         table_cell(optional_number(period.all_in_ev_bb if with_bb else None), period.all_in_ev_bb),
         table_cell(optional_number(period.bb_per_100), period.bb_per_100 or 0.0),
         table_cell(optional_number(period.ev_bb_per_100), period.ev_bb_per_100 or 0.0),
+        table_cell(format_number(period.vpip_percent) if period.vpip_percent is not None else "—", period.vpip_percent or 0.0),
+        table_cell(format_number(period.pfr_percent) if period.pfr_percent is not None else "—", period.pfr_percent or 0.0),
         table_cell(optional_number(period.showdown_bb if with_bb else None), period.showdown_bb),
         table_cell(optional_number(period.nonshowdown_bb if with_bb else None), period.nonshowdown_bb),
     ]
@@ -207,6 +211,8 @@ def make_period_table(model: QStandardItemModel, proxy: QSortFilterProxyModel) -
             _("All-in EV (BB)"),
             _("BB/100"),
             _("EV BB/100"),
+            _("VPIP %"),
+            _("PFR %"),
             _("Showdown (BB)"),
             _("Non-showdown (BB)"),
         ],
@@ -295,8 +301,9 @@ class ResultsCalendar(QSplitter):  # pylint: disable=too-many-instance-attribute
         self.review_button = QPushButton(_("Review hands"))
         self.summary_label = QLabel()
         self.month_button = QPushButton()
+        self.this_year_button = QPushButton(_("This year"))
         self.calendar = make_calendar()
-        self.model = QStandardItemModel(0, 10)
+        self.model = QStandardItemModel(0, 12)
         self.proxy = QSortFilterProxyModel()
         self.table = make_period_table(self.model, self.proxy)
         self.graph_frame = QFrame()
@@ -312,6 +319,7 @@ class ResultsCalendar(QSplitter):  # pylint: disable=too-many-instance-attribute
         self.setStretchFactor(0, 0)
         self.setStretchFactor(1, 1)
         self._connect_signals()
+        self._update_navigation()
         self.db.rollback()
 
     # -- layout ---------------------------------------------------------
@@ -322,9 +330,16 @@ class ResultsCalendar(QSplitter):  # pylint: disable=too-many-instance-attribute
 
         toolbar = QHBoxLayout()
         toolbar.addWidget(QLabel(_("Period:")))
-        for granularity, label in ((pr.DAY, _("Days")), (pr.WEEK, _("Weeks")), (pr.MONTH, _("Months"))):
+        for granularity, label in (
+            (pr.DAY, _("Days")),
+            (pr.WEEK, _("Weeks")),
+            (pr.MONTH, _("Months")),
+            (pr.YEAR, _("Years")),
+        ):
             self.granularity_box.addItem(label, granularity)
         toolbar.addWidget(self.granularity_box)
+        self.this_year_button.clicked.connect(self.select_this_year)
+        toolbar.addWidget(self.this_year_button)
         toolbar.addWidget(QLabel(_("Unit:")))
         toolbar.addWidget(self.unit_box)
         toolbar.addStretch(1)
@@ -362,10 +377,11 @@ class ResultsCalendar(QSplitter):  # pylint: disable=too-many-instance-attribute
         header = QHBoxLayout()
         previous_button = QPushButton("◀")
         previous_button.setToolTip(_("Previous month"))
-        previous_button.clicked.connect(lambda: self.move_month(-1))
+        previous_button.clicked.connect(lambda: self.move_period(-1))
         next_button = QPushButton("▶")
         next_button.setToolTip(_("Next month"))
-        next_button.clicked.connect(lambda: self.move_month(1))
+        next_button.clicked.connect(lambda: self.move_period(1))
+        self._navigation_buttons = (previous_button, next_button)
         self.month_button.setFlat(True)
         self.month_button.setToolTip(_("Click to select the whole month"))
         header.addWidget(previous_button)
@@ -498,7 +514,7 @@ class ResultsCalendar(QSplitter):  # pylint: disable=too-many-instance-attribute
 
     @property
     def granularity(self) -> str:
-        """The periods the table lists: day, week or month."""
+        """The periods the table lists: day, week, month or year."""
         return self.granularity_box.currentData() or pr.DAY
 
     @property
@@ -531,7 +547,21 @@ class ResultsCalendar(QSplitter):  # pylint: disable=too-many-instance-attribute
 
     def _granularity_changed(self, _index: int) -> None:
         # The selection keeps its meaning (a day stays a day); the table lists other periods.
+        self._update_navigation()
         self._fill_table()
+
+    def _update_navigation(self) -> None:
+        is_year = self.granularity == pr.YEAR
+        for button, step in zip(self._navigation_buttons, (-1, 1), strict=True):
+            if is_year:
+                tooltip = _("Previous year") if step < 0 else _("Next year")
+            else:
+                tooltip = _("Previous month") if step < 0 else _("Next month")
+            button.setToolTip(tooltip)
+        self.month_button.setToolTip(
+            _("Click to select this year") if is_year else _("Click to select the whole month"),
+        )
+        self.this_year_button.setVisible(is_year)
 
     def _unit_changed(self, _index: int) -> None:
         self._redraw()
@@ -572,9 +602,15 @@ class ResultsCalendar(QSplitter):  # pylint: disable=too-many-instance-attribute
         days = results.by_start(pr.DAY) if results is not None else {}
         weeks = results.by_start(pr.WEEK) if results is not None else {}
         month_result = results.by_start(pr.MONTH).get(date(year, month, 1)) if results is not None else None
-        title = f"{_locale_copy().standaloneMonthName(month)} {year}"
-        if month_result is not None:
-            title += "  " + value_text(pr.period_value(month_result, self.unit), self.unit)
+        if self.granularity == pr.YEAR:
+            year_result = results.by_start(pr.YEAR).get(date(year, 1, 1)) if results is not None else None
+            title = str(year)
+            if year_result is not None:
+                title += "  " + value_text(pr.period_value(year_result, self.unit), self.unit)
+        else:
+            title = f"{_locale_copy().standaloneMonthName(month)} {year}"
+            if month_result is not None:
+                title += "  " + value_text(pr.period_value(month_result, self.unit), self.unit)
         self.month_button.setText(title)
 
         # Refilling moves no one's selection: the current cell's signals stay quiet meanwhile.
@@ -620,18 +656,38 @@ class ResultsCalendar(QSplitter):  # pylint: disable=too-many-instance-attribute
         self.month = pr.shift_month(*self.month, step)
         self._fill_calendar()
 
+    def move_period(self, step: int) -> None:
+        """Move the calendar one month, or one year in yearly grouping."""
+        if self.granularity == pr.YEAR:
+            self.month = (self.month[0] + step, self.month[1])
+            self._fill_calendar()
+            return
+        self.move_month(step)
+
     def select_period(self, granularity: str, start: date) -> None:
-        """Select a day, week or month: its curves are drawn and its hands can be reviewed."""
+        """Select a day, week, month or year for curves and hand review."""
         self.selected = (granularity, start)
-        if granularity != pr.WEEK and (start.year, start.month) != self.month:
-            self.month = (start.year, start.month)
+        target_month = (start.year, 1) if granularity == pr.YEAR else (start.year, start.month)
+        if granularity != pr.WEEK and target_month != self.month:
+            self.month = target_month
             self._fill_calendar()
         self._selection_changed()
 
     def select_month(self) -> None:
-        """Select the month the calendar shows."""
+        """Select the year in yearly mode, otherwise the shown month."""
         year, month = self.month
-        self.select_period(pr.MONTH, date(year, month, 1))
+        if self.granularity == pr.YEAR:
+            self.select_period(pr.YEAR, date(year, 1, 1))
+        else:
+            self.select_period(pr.MONTH, date(year, month, 1))
+
+    def select_this_year(self) -> None:
+        """Set the date filter to this calendar year and reload the results."""
+        year = date.today().year
+        self.filters.start_date.setDate(QDate(year, 1, 1))
+        self.filters.end_date.setDate(QDate(year, 12, 31))
+        self.month = (year, 1)
+        self.refresh()
 
     def select_cell(self, row: int, column: int) -> None:
         """Select the day or week of a calendar cell."""

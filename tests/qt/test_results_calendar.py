@@ -113,6 +113,9 @@ def test_the_table_lists_the_chosen_periods(viewer) -> None:
     assert viewer.model.rowCount() == 2
     starts = {viewer.model.item(row, 0).data(results_module.PERIOD_ROLE) for row in range(2)}
     assert starts == {(pr.MONTH, date(2026, 10, 1)), (pr.MONTH, date(2026, 11, 1))}
+    viewer.granularity_box.setCurrentIndex(viewer.granularity_box.findData(pr.YEAR))
+    assert viewer.model.rowCount() == 1
+    assert viewer.model.item(0, 0).text() == "2026"
 
 
 def test_selecting_a_day_draws_its_curves_and_reviews_its_hands(viewer) -> None:
@@ -164,6 +167,23 @@ def test_selecting_a_table_row_selects_its_period(viewer) -> None:
     assert viewer.selected == (pr.MONTH, date(2026, 10, 1))
     assert viewer.month == (2026, 10)
     assert [hand.hand_id for hand in viewer.selected_hands()] == [4]
+
+
+def test_selecting_and_navigating_a_year_uses_all_of_its_hands(viewer) -> None:
+    viewer.show_results(pr.build_results(ROWS))
+    viewer.granularity_box.setCurrentIndex(viewer.granularity_box.findData(pr.YEAR))
+    index = viewer.proxy.index(0, 0)
+
+    viewer.select_row(index)
+
+    assert viewer.selected == (pr.YEAR, date(2026, 1, 1))
+    assert viewer.month == (2026, 1)
+    assert [hand.hand_id for hand in viewer.selected_hands()] == [4, 1, 2, 3]
+    viewer.move_period(-1)
+    assert viewer.month == (2025, 1)
+    viewer.month_button.click()
+    assert viewer.selected == (pr.YEAR, date(2025, 1, 1))
+    assert viewer.selected_hands() == []
 
 
 def test_money_curves_follow_the_unit(viewer) -> None:
