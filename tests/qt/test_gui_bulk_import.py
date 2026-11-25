@@ -110,8 +110,9 @@ class RefreshParent(QWidget):
         super().__init__()
         self.refreshed = False
 
-    def refresh_after_import(self):
+    def refresh_after_import(self, *, data_changed=True):
         self.refreshed = True
+        self.data_changed = data_changed
 
 
 @pytest.fixture
@@ -251,6 +252,7 @@ def test_successful_import_refreshes_parent(qtbot, monkeypatch, tmp_path):
     qtbot.waitUntil(lambda: widget.load_button.isEnabled(), timeout=10_000)
 
     assert parent.refreshed is True
+    assert parent.data_changed is True
 
 
 @pytest.mark.qt

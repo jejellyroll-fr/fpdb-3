@@ -61,6 +61,7 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy import SQL, Card, Configuration, Database, Deck, Filters, GuiReplayer, Hand, gui_empty_state
 from fpdb_3_legacy.analytics_query import escape_literal_percent
+from fpdb_3_legacy.config_gui import HAND_VIEWER_PAGE_SIZES
 from fpdb_3_legacy.hand_review_dialog import add_batch_review_action, add_review_action
 from fpdb_3_legacy.hand_share_dialog import add_share_actions
 from fpdb_3_legacy.hand_viewer_filters import build_filter_clauses, required_analytics_subsystems
@@ -248,6 +249,7 @@ class GuiHandViewer(QSplitter):
             "SiteHandNo": 17,
             "Splash": 18,
         }
+        self.column_keys = list(self.colnum)
         self.view = QTableView()
         self.view.setSelectionBehavior(QTableView.SelectRows)
         self.handsVBox.addWidget(self.view)
@@ -258,6 +260,9 @@ class GuiHandViewer(QSplitter):
 
         self.view.setModel(self.filterModel)
         self.view.verticalHeader().hide()
+        header = self.view.horizontalHeader()
+        header.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        header.customContextMenuRequested.connect(self._show_column_menu)
         self.model.setHorizontalHeaderLabels(
             [
                 "Date",
@@ -299,7 +304,9 @@ class GuiHandViewer(QSplitter):
         # which is expensive on large databases such as GGPoker).
         self.all_handids: list[Any] = []
         self.page = 0
-        self.page_size = 100
+        get_preferences = getattr(self.config, "get_hand_viewer_preferences", None)
+        self.page_size, saved_columns = get_preferences() if callable(get_preferences) else (100, None)
+        self.visible_columns = set(self.column_keys) if saved_columns is None else saved_columns.intersection(self.column_keys)
         # The rebuilt hands, bounded to a few pages (see hand_viewer_paging; #857,
         # after thecrawler1's fork, like the hand-number search below).
         self.hands: HandCache = HandCache()
@@ -308,6 +315,7 @@ class GuiHandViewer(QSplitter):
         # True while a page is being rebuilt, so a click on Prev/Next or a
         # search during its processEvents() cannot start another one.
         self._loading = False
+        self._stale = False
         # Won/Net and Flags text colours, read from the theme once per page.
         self._cell_colors: dict[str, QColor] | None = None
 
@@ -315,11 +323,19 @@ class GuiHandViewer(QSplitter):
         self.prevPageButton = QPushButton(_("◀ Prev"))
         self.nextPageButton = QPushButton(_("Next ▶"))
         self.pageLabel = QLabel("")
+        self.pageSizeCombo = QComboBox()
+        for size in HAND_VIEWER_PAGE_SIZES:
+            self.pageSizeCombo.addItem(str(size), size)
+        self.pageSizeCombo.setCurrentIndex(self.pageSizeCombo.findData(self.page_size))
+        self.pageSizeCombo.setToolTip(_("Hands shown per page"))
+        self.pageSizeCombo.currentIndexChanged.connect(self._page_size_changed)
         self.prevPageButton.clicked.connect(self.prev_page)
         self.nextPageButton.clicked.connect(self.next_page)
         self.pagerBox.addWidget(self.prevPageButton)
         self.pagerBox.addWidget(self.nextPageButton)
         self.pagerBox.addWidget(self.pageLabel)
+        self.pagerBox.addWidget(QLabel(_("Per page:")))
+        self.pagerBox.addWidget(self.pageSizeCombo)
         self.hand_search = QLineEdit()
         self.hand_search.setPlaceholderText(_("Find hand #"))
         self.hand_search.setToolTip(
@@ -369,7 +385,105 @@ class GuiHandViewer(QSplitter):
         self._update_pager()
 
         self.view.resizeColumnsToContents()
+        self._apply_visible_columns()
         self.view.setSortingEnabled(True)
+
+    def _apply_visible_columns(self) -> None:
+        for name, index in self.colnum.items():
+            self.view.setColumnHidden(index, name not in self.visible_columns)
+
+    def _save_view_preferences(self) -> None:
+        try:
+            save_preferences = getattr(self.config, "set_hand_viewer_preferences", None)
+            if callable(save_preferences):
+                save_preferences(self.page_size, self.visible_columns)
+        except Exception:  # noqa: BLE001 - unsaved preferences should not break hand review.
+            log.exception("Could not save Hand Viewer preferences")
+
+    def _show_column_menu(self, position) -> None:
+        header = self.view.horizontalHeader()
+        menu = QMenu(self)
+        for name, index in self.colnum.items():
+            action = menu.addAction(self.model.headerData(index, Qt.Orientation.Horizontal))
+            action.setCheckable(True)
+            action.setChecked(name in self.visible_columns)
+            action.toggled.connect(lambda shown, key=name: self._set_column_visible(key, shown))
+        menu.addSeparator()
+        fit = menu.addAction(_("Fit columns to contents"))
+        fit.triggered.connect(self.view.resizeColumnsToContents)
+        menu.exec(header.viewport().mapToGlobal(position))
+
+    def _set_column_visible(self, name: str, visible: bool) -> None:
+        if visible:
+            self.visible_columns.add(name)
+        else:
+            self.visible_columns.discard(name)
+        self._apply_visible_columns()
+        if visible:
+            self.view.resizeColumnToContents(self.colnum[name])
+        self._save_view_preferences()
+
+    def _page_size_changed(self, _index: int) -> None:
+        size = self.pageSizeCombo.currentData()
+        if size is None or size == self.page_size:
+            return
+        old_size, old_page = self.page_size, self.page
+        first_hand = old_page * old_size
+        new_page = first_hand // size
+        self.page_size = size
+        if self.all_handids and not self.render_page(new_page):
+            self.page_size = old_size
+            self.pageSizeCombo.setCurrentIndex(self.pageSizeCombo.findData(old_size))
+            self._update_pager()
+            return
+        self._save_view_preferences()
+
+    def mark_stale(self) -> None:
+        """Mark this result set out of date after stored hands have changed."""
+        if not self.all_handids:
+            return
+        self._stale = True
+        self._set_search_status(_("New hands are available; refresh pending"))
+
+    def refresh_if_stale(self) -> bool:
+        """Refresh an invalidated result set, keeping the displayed page on abort."""
+        if not getattr(self, "_stale", False) or getattr(self, "_loading", False):
+            return False
+        selected_rows = self.view.selectionModel().selectedRows()
+        selected = None
+        if selected_rows:
+            selected = selected_rows[0].siblingAtColumn(self.colnum["HandId"]).data()
+        if getattr(self, "_external_hand_selection", False):
+            # Keep the explicit subset supplied by Results Calendar; its
+            # selection cannot be reconstructed from this tab's own filters.
+            hand_ids = list(self.all_handids)
+        else:
+            try:
+                hand_ids = self.get_hand_ids_from_date_range(
+                    self.filters.getDates()[0],
+                    self.filters.getDates()[1],
+                )
+            except Exception:  # noqa: BLE001 - retain old rows and retry on next activation.
+                log.exception("Hand Viewer refresh failed")
+                self._set_search_status(_("Refresh failed; activate this tab to retry"))
+                return False
+            if not getattr(self, "_last_hand_query_ok", True):
+                self._set_search_status(_("Refresh could not be completed; activate this tab to retry"))
+                return False
+        page = min(self.page, max(0, (len(hand_ids) - 1) // self.page_size))
+        if selected is not None:
+            with contextlib.suppress(ValueError):
+                page = hand_ids.index(selected) // self.page_size
+        self._set_search_status(_("Refreshing hands…"))
+        loaded = self.reload_hands([]) if not hand_ids else self._show_page(hand_ids, page, HandCache())
+        if not loaded:
+            self._set_search_status(_("Refresh cancelled; activate this tab to retry"))
+            return False
+        self._stale = False
+        self._set_search_status("")
+        if selected is not None:
+            self._select_hand_row(selected)
+        return True
 
     def _build_advanced_filters(self) -> QGroupBox:
         group = QGroupBox(_("Advanced review filters"))
@@ -605,9 +719,12 @@ class GuiHandViewer(QSplitter):
             self.filters.getDates()[1],
         )
         # ! print(hand_ids)
-        self.reload_hands(hand_ids)
+        if self.reload_hands(hand_ids):
+            self._stale = False
+            self._set_search_status("")
 
     def get_hand_ids_from_date_range(self, start, end):
+        self._last_hand_query_ok = False
         q = self.db.sql.query["handsInRangeSessionFilter"]
         q = q.replace("<datetest>", "between '" + start + "' and '" + end + "'")
 
@@ -658,6 +775,7 @@ class GuiHandViewer(QSplitter):
         else:
             c.execute(q)
         result = [r[0] for r in c.fetchall()]
+        self._last_hand_query_ok = True
         log.info("Load Hands matched %d hand(s) for dates %s..%s", len(result), start, end)
         return result
 
@@ -704,7 +822,7 @@ class GuiHandViewer(QSplitter):
             return card1 * 14 * 14 + card2 * 14 + suit1
         return 0
 
-    def reload_hands(self, handids, heroes: Mapping[Any, str] | None = None) -> None:
+    def reload_hands(self, handids, heroes: Mapping[Any, str] | None = None) -> bool:
         """Show ``handids``; ``heroes`` names each hand's hero when another tab sends them.
 
         The Results calendar knows whose hands it sends, which this tab's own
@@ -714,11 +832,12 @@ class GuiHandViewer(QSplitter):
         be an opponent's.
         """
         if self._loading:
-            return
+            return False
         self._set_search_status("")
         handids = list(handids)
         if not handids:
             self.sent_heroes = dict(heroes or {})
+            self._external_hand_selection = heroes is not None
             self.hands = HandCache()
             self.all_handids = []
             self._positions = None
@@ -726,16 +845,21 @@ class GuiHandViewer(QSplitter):
             self.model.removeRows(0, self.model.rowCount())
             self._update_pager()
             gui_empty_state.show_no_data(self, context="Hand viewer", db=self.db)
-            return
+            return True
         previous_heroes = self.sent_heroes
+        previous_external_selection = getattr(self, "_external_hand_selection", False)
         # importhand reads it while the new hands are rebuilt.
         self.sent_heroes = dict(heroes or {})
+        self._external_hand_selection = heroes is not None
         # The hero of a cached hand depends on the filters it was loaded with,
         # so the new hands go into a cache of their own. The table on screen
         # keeps its cache, and stays usable, until the new page replaces it;
         # aborting leaves both as they were.
         if not self._show_page(handids, 0, HandCache()):
             self.sent_heroes = previous_heroes
+            self._external_hand_selection = previous_external_selection
+            return False
+        return True
 
     def page_count(self) -> int:
         if not self.all_handids:

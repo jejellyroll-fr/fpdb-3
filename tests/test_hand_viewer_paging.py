@@ -212,6 +212,54 @@ def test_aborting_new_hands_leaves_the_hands_shown_before(monkeypatch) -> None:
     assert 7 not in viewer.hands
 
 
+def test_a_stale_view_refreshes_its_hand_list(monkeypatch) -> None:
+    viewer = _viewer(monkeypatch, [1, 2, 3])
+    viewer.render_page(0)
+    viewer._stale = True
+    viewer.filters = SimpleNamespace(getDates=lambda: ("start", "end"))
+    viewer.get_hand_ids_from_date_range = lambda *_dates: [7, 8, 9]
+
+    assert viewer.refresh_if_stale() is True
+
+    assert viewer.all_handids == [7, 8, 9]
+    assert viewer.model.rows == [7, 8]
+    assert viewer._stale is False
+
+
+def test_cancelling_a_stale_refresh_keeps_the_current_page_and_stale_flag(monkeypatch) -> None:
+    viewer = _viewer(monkeypatch, [1, 2, 3])
+    viewer.render_page(0)
+    viewer._stale = True
+    viewer.filters = SimpleNamespace(getDates=lambda: ("start", "end"))
+    viewer.get_hand_ids_from_date_range = lambda *_dates: [7, 8, 9]
+    _Progress.cancel_at = 1
+
+    assert viewer.refresh_if_stale() is False
+
+    assert viewer.all_handids == [1, 2, 3]
+    assert viewer.model.rows == [1, 2]
+    assert viewer._stale is True
+
+
+def test_a_refused_stale_query_keeps_the_current_page_and_stale_flag(monkeypatch) -> None:
+    viewer = _viewer(monkeypatch, [1, 2, 3])
+    viewer.render_page(0)
+    viewer._stale = True
+    viewer.filters = SimpleNamespace(getDates=lambda: ("start", "end"))
+
+    def refused_query(*_dates):
+        viewer._last_hand_query_ok = False
+        return []
+
+    viewer.get_hand_ids_from_date_range = refused_query
+
+    assert viewer.refresh_if_stale() is False
+
+    assert viewer.all_handids == [1, 2, 3]
+    assert viewer.model.rows == [1, 2]
+    assert viewer._stale is True
+
+
 def test_the_rows_on_screen_stay_usable_while_new_hands_load(monkeypatch) -> None:
     # The table stays clickable during processEvents(): a right-click or a
     # double-click on a row shown before must still find its hand (Codex, #859).
