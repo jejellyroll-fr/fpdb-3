@@ -1576,6 +1576,7 @@ class Importer:
                 )
 
             hhc.failed_hand_callback = capture_failed_hand
+            hhc.cooperative_checkpoint = lambda: background_checkpoint("import-hand")
             hhc.setAutoPop(self.mode == "auto")
             hhc.start()
 
