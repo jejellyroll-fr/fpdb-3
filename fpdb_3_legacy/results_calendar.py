@@ -22,7 +22,7 @@ from time import time
 from typing import Any
 
 import pyqtgraph as pg
-from PySide6.QtCore import QSignalBlocker, QSortFilterProxyModel, Qt, Signal
+from PySide6.QtCore import QModelIndex, QSignalBlocker, QSortFilterProxyModel, Qt, Signal
 from PySide6.QtGui import QBrush, QColor, QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -61,7 +61,7 @@ PERIOD_ROLE = Qt.ItemDataRole.UserRole + 2
 class _ResultsSortProxyModel(QSortFilterProxyModel):
     """Sort decimal cells numerically without converting them to floats."""
 
-    def lessThan(self, left, right) -> bool:  # noqa: N802  # Qt virtual method
+    def lessThan(self, left: QModelIndex, right: QModelIndex) -> bool:  # noqa: N802  # pylint: disable=invalid-name
         left_value = left.data(self.sortRole())
         right_value = right.data(self.sortRole())
         if isinstance(left_value, tuple) and isinstance(right_value, tuple):
@@ -557,7 +557,7 @@ class ResultsCalendar(QSplitter):  # pylint: disable=too-many-instance-attribute
             return
         self.summary_label.setText(summary_text(self.results.periods[pr.DAY], self.unit))
 
-    def _tint(self, value: float | None) -> QBrush | None:
+    def _tint(self, value: Decimal | float | None) -> QBrush | None:
         """A pale green for a win, a pale red for a loss, nothing for zero."""
         if not value:
             return None
