@@ -6,9 +6,9 @@ from __future__ import annotations
 Parses HandHistory xml files and returns requested objects.
 """
 
-from xml.parsers.expat import ExpatError
+import defusedxml.ElementTree  # noqa: I001
 
-import defusedxml.ElementTree  # pylint: disable=wrong-import-order
+from xml.parsers.expat import ExpatError
 
 from fpdb_3_legacy.loggingFpdb import get_logger
 
