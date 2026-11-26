@@ -40,7 +40,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from fpdb_3_legacy import Configuration, dynamic_panels_consent
+from fpdb_3_legacy import Configuration, config_xml, dynamic_panels_consent
 from fpdb_3_legacy.hud_profiles import HudContext, HudProfileResolver, HudProfileRule
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.i18n import translate_hud_category
@@ -2918,10 +2918,7 @@ class ModernHudPreferences(QDialog):
             return
 
         try:
-            import xml.dom.minidom
-
-            impl = xml.dom.minidom.getDOMImplementation()
-            pkg_doc = impl.createDocument(None, "fpdb_hud_package", None)
+            pkg_doc = config_xml.new_document("fpdb_hud_package")
             root = pkg_doc.documentElement
             assert root is not None
             root.setAttribute("version", "1.0")
@@ -2945,7 +2942,7 @@ class ModernHudPreferences(QDialog):
                 )
                 return
 
-            root.appendChild(pkg_doc.importNode(ss_node, True))
+            root.appendChild(config_xml.import_node(pkg_doc, ss_node))
 
             # 2. Gather referenced Popups
             popup_names = set()
@@ -2972,7 +2969,7 @@ class ModernHudPreferences(QDialog):
             if collected_popups:
                 popups_container = pkg_doc.createElement("popup_windows")
                 for p_name, pu_node in sorted(collected_popups.items()):
-                    popups_container.appendChild(pkg_doc.importNode(pu_node, True))
+                    popups_container.appendChild(config_xml.import_node(pkg_doc, pu_node))
                 root.appendChild(popups_container)
 
             # 3. Export selected Layout Sets
@@ -2998,7 +2995,7 @@ class ModernHudPreferences(QDialog):
                 for ls_name in sorted(selected_layouts):
                     ls_node = self.find_layout_set_node(ls_name)
                     if ls_node:
-                        layouts_container.appendChild(pkg_doc.importNode(ls_node, True))
+                        layouts_container.appendChild(config_xml.import_node(pkg_doc, ls_node))
                 root.appendChild(layouts_container)
 
             with open(filename, "w", encoding="utf-8") as f:
@@ -3019,7 +3016,6 @@ class ModernHudPreferences(QDialog):
     def import_profile(self) -> None:
         import os
 
-        import defusedxml.minidom
         from PySide6.QtWidgets import QFileDialog, QInputDialog, QMessageBox
 
         from fpdb_3_legacy.hud_package import (
@@ -3045,7 +3041,7 @@ class ModernHudPreferences(QDialog):
             return
 
         try:
-            import_doc = defusedxml.minidom.parse(filename)
+            import_doc = config_xml.parse_file(filename)
             root = import_doc.documentElement
             assert root is not None
             if root.tagName != "fpdb_hud_package":
@@ -3230,7 +3226,7 @@ class ModernHudPreferences(QDialog):
             # is therefore preserved.
             indent = self.config.doc.createTextNode("\n        ")
             stat_sets_node.appendChild(indent)
-            merged_ss = self.config.doc.importNode(ss_node, True)
+            merged_ss = config_xml.import_node(self.config.doc, ss_node)
             stat_sets_node.appendChild(merged_ss)
             for secondary_ss in ss_nodes[1:]:
                 secondary_name = secondary_ss.getAttribute("name")
@@ -3238,7 +3234,7 @@ class ModernHudPreferences(QDialog):
                     continue
                 indent = self.config.doc.createTextNode("\n        ")
                 stat_sets_node.appendChild(indent)
-                stat_sets_node.appendChild(self.config.doc.importNode(secondary_ss, True))
+                stat_sets_node.appendChild(config_xml.import_node(self.config.doc, secondary_ss))
 
             # B. Apply Popups
             popup_windows_nodes = self.config.doc.getElementsByTagName("popup_windows")
@@ -3257,7 +3253,7 @@ class ModernHudPreferences(QDialog):
 
                     indent = self.config.doc.createTextNode("\n        ")
                     pw_node.appendChild(indent)
-                    merged_pu = self.config.doc.importNode(pu_node, True)
+                    merged_pu = config_xml.import_node(self.config.doc, pu_node)
                     pw_node.appendChild(merged_pu)
 
             # C. Apply Layout Sets
@@ -3277,7 +3273,7 @@ class ModernHudPreferences(QDialog):
 
                     indent = self.config.doc.createTextNode("\n        ")
                     lss_node.appendChild(indent)
-                    merged_ls = self.config.doc.importNode(ls_node, True)
+                    merged_ls = config_xml.import_node(self.config.doc, ls_node)
                     lss_node.appendChild(merged_ls)
 
             # D. Apply game bindings carried by package version 1.1. A stat set
@@ -4804,7 +4800,7 @@ class ModernHudPreferences(QDialog):
                 if popup_windows_nodes:
                     popup_windows_node = popup_windows_nodes[0]
                     # Clear existing popup nodes
-                    while popup_windows_node.firstChild:
+                    while popup_windows_node.firstChild is not None:
                         popup_windows_node.removeChild(popup_windows_node.firstChild)
                 else:
                     # Create popup_windows section

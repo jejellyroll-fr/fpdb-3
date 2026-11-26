@@ -7,9 +7,11 @@ not notice when the parser behind it switches.
 from __future__ import annotations
 
 import re
+from copy import deepcopy
 from pathlib import Path
 
 import defusedxml.ElementTree as SafeET
+import defusedxml.minidom
 import pytest
 from defusedxml import EntitiesForbidden
 
@@ -72,10 +74,18 @@ def test_the_backend_is_the_one_asked_for(doc, backend) -> None:
     assert cx.backend_of(cx.root(doc)) == backend
 
 
-def test_the_default_backend_is_still_minidom() -> None:
-    # The switch of #453 is a change of this value, in a pull request of its own.
-    assert cx.DEFAULT_BACKEND == cx.MINIDOM
-    assert cx.backend_of(cx.parse_string(SAMPLE)) == cx.MINIDOM
+def test_the_default_backend_is_elementtree() -> None:
+    assert cx.DEFAULT_BACKEND == cx.ETREE
+    assert cx.backend_of(cx.parse_string(SAMPLE)) == cx.ETREE
+
+
+def test_the_legacy_package_does_not_import_minidom() -> None:
+    legacy = Path(__file__).resolve().parents[1] / "fpdb_3_legacy"
+    imports_minidom = re.compile(r"^\s*(?:from\s+(?:defusedxml|xml\.dom)\.minidom|import\s+(?:defusedxml|xml\.dom)\.minidom)\b", re.MULTILINE)
+
+    offenders = [path.relative_to(legacy).as_posix() for path in legacy.rglob("*.py") if imports_minidom.search(path.read_text(encoding="utf-8"))]
+
+    assert offenders == []
 
 
 def test_an_unknown_backend_is_refused() -> None:
@@ -152,11 +162,11 @@ def test_the_shipped_template_round_trips(backend) -> None:
     assert COMMENT.findall(text) == COMMENT.findall(source)
 
 
-def test_both_backends_write_the_template_with_the_same_meaning() -> None:
-    written = {name: cx.to_xml(cx.parse_file(EXAMPLE, backend=name)) for name in cx.BACKENDS}
+def test_elementtree_writes_the_template_with_the_same_meaning() -> None:
+    written = cx.to_xml(cx.parse_file(EXAMPLE))
 
-    assert _meaning(written[cx.MINIDOM]) == _meaning(written[cx.ETREE])
-    assert COMMENT.findall(written[cx.MINIDOM]) == COMMENT.findall(written[cx.ETREE])
+    assert _meaning(written) == _meaning(EXAMPLE.read_text(encoding="utf-8"))
+    assert COMMENT.findall(written) == COMMENT.findall(EXAMPLE.read_text(encoding="utf-8"))
 
 
 # --------------------------------------------------------------------------
@@ -305,7 +315,7 @@ def test_an_element_appended_to_an_empty_parent(doc, backend) -> None:
     assert [cx.attr(stat, "cell") for stat in cx.find_all(reread, "stat")] == ["(1,1)"]
 
 
-def test_text_lays_out_a_section_the_same_on_both_backends() -> None:
+def test_text_lays_out_a_section_with_elementtree() -> None:
     written = []
     for which in cx.BACKENDS:
         document = cx.parse_string(SAMPLE, backend=which)
@@ -319,7 +329,6 @@ def test_text_lays_out_a_section_the_same_on_both_backends() -> None:
         cx.append(document, document, cx.create_element(document, "hud_profile_rules"))
         written.append(cx.to_xml(document).replace(" />", "/>"))
 
-    assert written[0] == written[1]
     assert '<stats>\n        <ss name="a"/>\n        <ss name="b"/>\n    </stats>' in written[0]
     assert "\n    <hud_profile_rules/></config>" in written[0]
 
@@ -412,6 +421,53 @@ def test_parent_of(doc) -> None:
 
     assert cx.tag_of(cx.parent_of(doc, site)) == "sites"
     assert cx.parent_of(doc, cx.root(doc)) is None
+
+
+def test_elementtree_elements_keep_the_legacy_dom_behaviour() -> None:
+    element = cx.ConfigElement("site", {"name": "before"})
+
+    assert element
+    assert not element.hasChildNodes()
+    element.attributes.item(0).value = "after"
+    assert element.getAttribute("name") == "after"
+    assert 'name="after"' in element.toxml()
+
+
+def test_deepcopy_preserves_config_element_type_and_parent_links() -> None:
+    doc = cx.parse_string(SAMPLE)
+
+    copied = deepcopy(doc)
+    site = next(node for node in copied.root.iter("site") if node.get("name") == "PokerStars")
+
+    assert isinstance(copied.root, cx.ConfigElement)
+    assert isinstance(site, cx.ConfigElement)
+    assert site.parentNode is copied.root.find("sites")
+
+
+def test_elementtree_element_can_be_imported_into_a_caller_owned_dom() -> None:
+    target = defusedxml.minidom.parseString("<target/>")
+    source = cx.parse_string(SAMPLE)
+    site = cx.find_first(source, "site")
+
+    imported = cx.import_node(target, site)
+    target.documentElement.appendChild(imported)
+
+    assert imported.ownerDocument is target
+    assert imported.getAttribute("name") == "PokerStars"
+    assert imported.firstChild.tagName == "alias"
+    assert cx.parent_of(target, imported) is target.documentElement
+
+
+def test_dom_element_can_be_imported_into_an_elementtree_document() -> None:
+    source = defusedxml.minidom.parseString('<profile><ss name="copied"/></profile>')
+    target = cx.new_document("package")
+
+    imported = target.importNode(source.documentElement, True)
+    target.root.appendChild(imported)
+
+    assert cx.tag_of(imported) == "profile"
+    assert cx.attr(cx.find_first(imported, "ss"), "name") == "copied"
+    assert imported.parentNode is target.root
 
 
 def test_a_cloned_document_is_written_the_same_and_edited_apart(doc, backend) -> None:
@@ -513,7 +569,7 @@ def test_prepend_puts_children_before_the_leading_text() -> None:
         cx.prepend(document, section, [cx.create_element(document, "a"), cx.create_element(document, "b")])
         written.append(cx.to_xml(section).replace(" />", "/>"))
 
-    assert written[0] == written[1] == "<s><a/><b/>\n  <old/>\n</s>"
+    assert written[0] == "<s><a/><b/>\n  <old/>\n</s>"
 
 
 def test_prepend_into_an_empty_element(backend) -> None:

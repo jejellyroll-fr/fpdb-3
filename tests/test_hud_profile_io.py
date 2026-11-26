@@ -5,7 +5,7 @@ from __future__ import annotations
 import defusedxml.minidom
 import pytest
 
-from fpdb_3_legacy import Configuration
+from fpdb_3_legacy import Configuration, config_xml
 from fpdb_3_legacy.modern_hud_preferences import profile_io
 from tests.helpers.hud_editor import stat_set_snapshot
 
@@ -52,6 +52,19 @@ def test_a_profile_written_to_a_new_node_keeps_its_presentation() -> None:
     copy = _write(_profile(RICH))
     expected = stat_set_snapshot(original)
     assert stat_set_snapshot(copy) == expected
+
+
+def test_rewriting_an_elementtree_stat_set_removes_leading_comments() -> None:
+    doc = config_xml.parse_string(
+        '<ss name="saved" rows="1" cols="1"><!--old profile note-->'
+        '<stat _rowcol="(1,1)" _stat_name="old"/></ss>'
+    )
+    node = config_xml.root(doc)
+
+    profile_io.write_profile_items(doc, node, [{"row": 0, "col": 0, "stat": "vpip"}], 1, 1)
+
+    assert [config_xml.tag_of(child) for child in node] == ["stat"]
+    assert config_xml.attr(node[0], "_stat_name") == "vpip"
 
 
 def test_a_multi_block_profile_written_to_a_new_node_is_the_same_set() -> None:

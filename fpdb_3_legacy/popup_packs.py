@@ -210,11 +210,10 @@ class PopupNode:
         own class, so a pack-defined popup is byte-identical in shape to one
         from ``HUD_config.xml``: there is no second popup type to keep in step.
         """
-        from defusedxml.minidom import parseString  # noqa: PLC0415 - keeps pack loading import-light
-
+        from fpdb_3_legacy import config_xml  # noqa: PLC0415 - keeps pack loading import-light
         from fpdb_3_legacy.Configuration import Popup as ConfigPopup  # noqa: PLC0415 - avoids a cycle
 
-        return ConfigPopup(parseString(self.to_xml()).documentElement)
+        return ConfigPopup(config_xml.root(config_xml.parse_string(self.to_xml())))
 
     def as_dict(self) -> dict[str, Any]:
         out: dict[str, Any] = {"name": self.name, "class": self.pu_class}

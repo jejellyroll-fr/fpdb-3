@@ -30,7 +30,7 @@ from collections.abc import Callable
 from decimal import Decimal
 from pathlib import Path
 
-import defusedxml.minidom
+import defusedxml.ElementTree
 import pytz
 from defusedxml.common import DefusedXmlException
 from pytz import timezone
@@ -56,7 +56,7 @@ HHC_SITE_ID_ERRORS = (AttributeError, KeyError, TypeError, ValueError)
 # A hand history is whatever the poker room wrote, so the XML ones are the
 # least trusted input fpdb reads. DefusedXmlException covers the files
 # defusedxml refuses outright; it is a ValueError, not an ExpatError.
-HHC_XML_PARSE_ERRORS = (OSError, TypeError, xml.parsers.expat.ExpatError, DefusedXmlException)
+HHC_XML_PARSE_ERRORS = (OSError, TypeError, xml.parsers.expat.ExpatError, defusedxml.ElementTree.ParseError, DefusedXmlException)
 
 SQLITE_MAGIC = b"SQLite format 3\x00"
 # The Microgaming text export separates its hands with this line, so rebuilding
@@ -857,7 +857,7 @@ or None if we fail to get the info """
         if self.filetype == "xml":
             if hasattr(self, "in_path"):  # Ensure that the file path is available
                 try:
-                    doc = defusedxml.minidom.parse(self.in_path)
+                    doc = defusedxml.ElementTree.parse(self.in_path).getroot()
                     self.doc = doc
                     log.debug("XML file successfully parsed.")
                     return True
