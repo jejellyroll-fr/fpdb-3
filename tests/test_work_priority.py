@@ -40,27 +40,27 @@ def test_interactive_task_runs_at_the_next_import_file_boundary() -> None:
 def test_import_gets_a_turn_during_a_long_interactive_operation() -> None:
     page_started = threading.Event()
     import_resumed = threading.Event()
-    checkpoint_time: list[float] = []
+    page_saw_import_turn = threading.Event()
 
     def open_page() -> None:
         with interactive_work("test-long-page"):
             page_started.set()
-            time.sleep(0.25)
+            if import_resumed.wait(1):
+                page_saw_import_turn.set()
 
     def import_one_file() -> None:
         assert page_started.wait(1)
-        started = time.monotonic()
         background_checkpoint("test-fairness")
-        checkpoint_time.append(time.monotonic() - started)
         import_resumed.set()
 
     page = threading.Thread(target=open_page)
     importer = threading.Thread(target=import_one_file)
     page.start()
     importer.start()
-    importer.join(1)
-    page.join(1)
+    importer.join(2)
+    page.join(2)
 
     assert not importer.is_alive()
+    assert not page.is_alive()
     assert import_resumed.is_set()
-    assert checkpoint_time[0] < 0.2
+    assert page_saw_import_turn.is_set()

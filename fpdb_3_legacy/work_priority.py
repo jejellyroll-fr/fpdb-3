@@ -20,18 +20,18 @@ BACKGROUND_TURN_SECONDS = 0.1
 INTERACTIVE_WAIT_SECONDS = 0.25
 
 _condition = threading.Condition()
-_interactive_waiters = 0
-_interactive_active = 0
-_background_paused = False
-_background_active = 0
+_INTERACTIVE_WAITERS = 0
+_INTERACTIVE_ACTIVE = 0
+_BACKGROUND_PAUSED = False
+_BACKGROUND_ACTIVE = 0
 
 
 @contextlib.contextmanager
 def background_work(name: str) -> Iterator[None]:
     """Mark one indivisible background unit (currently one imported file)."""
-    global _background_active
+    global _BACKGROUND_ACTIVE
     with _condition:
-        _background_active += 1
+        _BACKGROUND_ACTIVE += 1
         _condition.notify_all()
     started = time.monotonic()
     try:
@@ -39,7 +39,7 @@ def background_work(name: str) -> Iterator[None]:
     finally:
         duration_ms = (time.monotonic() - started) * 1000
         with _condition:
-            _background_active -= 1
+            _BACKGROUND_ACTIVE -= 1
             _condition.notify_all()
         if duration_ms >= 1000:
             log.warning("[PERF] background-work name=%s duration=%.0fms", name, duration_ms)
@@ -48,21 +48,21 @@ def background_work(name: str) -> Iterator[None]:
 @contextlib.contextmanager
 def interactive_work(name: str) -> Iterator[None]:
     """Prioritize one user-visible operation at the next import boundary."""
-    global _interactive_active, _interactive_waiters
+    global _INTERACTIVE_ACTIVE, _INTERACTIVE_WAITERS
     queued_at = time.monotonic()
     with _condition:
-        if not _background_active:
-            _interactive_active += 1
+        if not _BACKGROUND_ACTIVE:
+            _INTERACTIVE_ACTIVE += 1
             started = time.monotonic()
             queue_wait_ms = 0.0
         else:
-            _interactive_waiters += 1
+            _INTERACTIVE_WAITERS += 1
             _condition.notify_all()
             deadline = queued_at + INTERACTIVE_WAIT_SECONDS
-            while _background_active and not _background_paused and time.monotonic() < deadline:
+            while _BACKGROUND_ACTIVE and not _BACKGROUND_PAUSED and time.monotonic() < deadline:
                 _condition.wait(max(0, deadline - time.monotonic()))
-            _interactive_waiters -= 1
-            _interactive_active += 1
+            _INTERACTIVE_WAITERS -= 1
+            _INTERACTIVE_ACTIVE += 1
             started = time.monotonic()
             queue_wait_ms = (started - queued_at) * 1000
     try:
@@ -70,7 +70,7 @@ def interactive_work(name: str) -> Iterator[None]:
     finally:
         duration_ms = (time.monotonic() - started) * 1000
         with _condition:
-            _interactive_active -= 1
+            _INTERACTIVE_ACTIVE -= 1
             _condition.notify_all()
         level = logging.WARNING if queue_wait_ms >= 100 or duration_ms >= 1000 else logging.DEBUG
         log.log(
@@ -84,17 +84,17 @@ def interactive_work(name: str) -> Iterator[None]:
 
 def background_checkpoint(name: str) -> None:
     """Yield at a safe boundary, then guarantee a bounded background turn."""
-    global _background_paused
+    global _BACKGROUND_PAUSED
     started = time.monotonic()
     with _condition:
-        if not _interactive_waiters and not _interactive_active:
+        if not _INTERACTIVE_WAITERS and not _INTERACTIVE_ACTIVE:
             return
-        _background_paused = True
+        _BACKGROUND_PAUSED = True
         _condition.notify_all()
         deadline = started + BACKGROUND_TURN_SECONDS
-        while (_interactive_waiters or _interactive_active) and time.monotonic() < deadline:
+        while (_INTERACTIVE_WAITERS or _INTERACTIVE_ACTIVE) and time.monotonic() < deadline:
             _condition.wait(deadline - time.monotonic())
-        _background_paused = False
+        _BACKGROUND_PAUSED = False
         _condition.notify_all()
     waited_ms = (time.monotonic() - started) * 1000
     log.debug("[PERF] background-checkpoint name=%s yielded=%.0fms", name, waited_ms)
