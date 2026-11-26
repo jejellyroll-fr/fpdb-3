@@ -302,6 +302,7 @@ class ResultsCalendar(QSplitter):  # pylint: disable=too-many-instance-attribute
         self.summary_label = QLabel()
         self.month_button = QPushButton()
         self.this_year_button = QPushButton(_("This year"))
+        self._navigation_buttons = (QPushButton("◀"), QPushButton("▶"))
         self.calendar = make_calendar()
         self.model = QStandardItemModel(0, 12)
         self.proxy = QSortFilterProxyModel()
@@ -375,13 +376,9 @@ class ResultsCalendar(QSplitter):  # pylint: disable=too-many-instance-attribute
         layout.setContentsMargins(0, 0, 0, 0)
 
         header = QHBoxLayout()
-        previous_button = QPushButton("◀")
-        previous_button.setToolTip(_("Previous month"))
+        previous_button, next_button = self._navigation_buttons
         previous_button.clicked.connect(lambda: self.move_period(-1))
-        next_button = QPushButton("▶")
-        next_button.setToolTip(_("Next month"))
         next_button.clicked.connect(lambda: self.move_period(1))
-        self._navigation_buttons = (previous_button, next_button)
         self.month_button.setFlat(True)
         self.month_button.setToolTip(_("Click to select the whole month"))
         header.addWidget(previous_button)
@@ -548,6 +545,7 @@ class ResultsCalendar(QSplitter):  # pylint: disable=too-many-instance-attribute
     def _granularity_changed(self, _index: int) -> None:
         # The selection keeps its meaning (a day stays a day); the table lists other periods.
         self._update_navigation()
+        self._fill_calendar()
         self._fill_table()
 
     def _update_navigation(self) -> None:

@@ -116,6 +116,9 @@ def test_the_table_lists_the_chosen_periods(viewer) -> None:
     viewer.granularity_box.setCurrentIndex(viewer.granularity_box.findData(pr.YEAR))
     assert viewer.model.rowCount() == 1
     assert viewer.model.item(0, 0).text() == "2026"
+    assert viewer.month_button.text().startswith("2026")
+    viewer.granularity_box.setCurrentIndex(viewer.granularity_box.findData(pr.MONTH))
+    assert viewer.month_button.text().startswith("November 2026")
 
 
 def test_selecting_a_day_draws_its_curves_and_reviews_its_hands(viewer) -> None:
