@@ -435,7 +435,7 @@ class GuiHandViewer(QSplitter):
         first_hand = old_page * old_size
         new_page = first_hand // size
         self.page_size = size
-        if self.all_handids and not self.render_page(new_page):
+        if self.all_handids and not self._show_page(self.all_handids, new_page, HandCache(self.hands)):
             self.page_size = old_size
             self.page_size_combo.setCurrentIndex(self.page_size_combo.findData(old_size))
             self._update_pager()
@@ -457,37 +457,44 @@ class GuiHandViewer(QSplitter):
         selected = None
         if selected_rows:
             selected = selected_rows[0].siblingAtColumn(self.colnum["HandId"]).data()
-        if getattr(self, "_external_hand_selection", False):
-            # Keep the explicit subset supplied by Results Calendar; its
-            # selection cannot be reconstructed from this tab's own filters.
-            hand_ids = list(self.all_handids)
-        else:
-            try:
-                hand_ids = self.get_hand_ids_from_date_range(
-                    self.filters.getDates()[0],
-                    self.filters.getDates()[1],
-                )
-            except Exception:  # noqa: BLE001 - retain old rows and retry on next activation.
-                log.exception("Hand Viewer refresh failed")
-                self._set_search_status(_("Refresh failed; activate this tab to retry"))
+        uses_own_filters = not getattr(self, "_external_hand_selection", False)
+        try:
+            if uses_own_filters:
+                try:
+                    hand_ids = self.get_hand_ids_from_date_range(
+                        self.filters.getDates()[0],
+                        self.filters.getDates()[1],
+                    )
+                except Exception:  # noqa: BLE001 - retain old rows and retry on next activation.
+                    log.exception("Hand Viewer refresh failed")
+                    self._set_search_status(_("Refresh failed; activate this tab to retry"))
+                    return False
+                if not getattr(self, "_last_hand_query_ok", True):
+                    self._set_search_status(_("Refresh could not be completed; activate this tab to retry"))
+                    return False
+            else:
+                # Keep the explicit subset supplied by Results Calendar; its
+                # selection cannot be reconstructed from this tab's own filters.
+                hand_ids = list(self.all_handids)
+            page = min(self.page, max(0, (len(hand_ids) - 1) // self.page_size))
+            if selected is not None:
+                with contextlib.suppress(ValueError):
+                    page = hand_ids.index(int(selected)) // self.page_size
+            self._set_search_status(_("Refreshing hands…"))
+            loaded = self.reload_hands([]) if not hand_ids else self._show_page(hand_ids, page, HandCache())
+            if not loaded:
+                self._set_search_status(_("Refresh cancelled; activate this tab to retry"))
                 return False
-            if not getattr(self, "_last_hand_query_ok", True):
-                self._set_search_status(_("Refresh could not be completed; activate this tab to retry"))
-                return False
-        page = min(self.page, max(0, (len(hand_ids) - 1) // self.page_size))
-        if selected is not None:
-            with contextlib.suppress(ValueError):
-                page = hand_ids.index(int(selected)) // self.page_size
-        self._set_search_status(_("Refreshing hands…"))
-        loaded = self.reload_hands([]) if not hand_ids else self._show_page(hand_ids, page, HandCache())
-        if not loaded:
-            self._set_search_status(_("Refresh cancelled; activate this tab to retry"))
-            return False
-        self._stale = False
-        self._set_search_status("")
-        if selected is not None:
-            self._select_hand_row(selected)
-        return True
+            self._stale = False
+            self._set_search_status("")
+            if selected is not None:
+                self._select_hand_row(selected)
+            return True
+        finally:
+            filters = getattr(self, "filters", None)
+            end_read_transaction = getattr(filters, "end_read_transaction", None)
+            if callable(end_read_transaction):
+                end_read_transaction()
 
     def _build_advanced_filters(self) -> QGroupBox:
         group = QGroupBox(_("Advanced review filters"))

@@ -1624,10 +1624,8 @@ msgid "Hand {} on page {}"
 msgstr "Main {} en page {}"
 
 #: fpdb_3_legacy/GuiHandViewer.py
-#, fuzzy
-#| msgid "Hand {} on page {}"
 msgid "Hands shown per page"
-msgstr "Main {} en page {}"
+msgstr "Mains affichées par page"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Hold'em starting hand"
@@ -1718,10 +1716,8 @@ msgid "Refresh failed; activate this tab to retry"
 msgstr ""
 
 #: fpdb_3_legacy/GuiHandViewer.py
-#, fuzzy
-#| msgid "Refresh Hands"
 msgid "Refreshing hands…"
-msgstr "Rafraîchir les mains"
+msgstr "Actualisation des mains…"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid ""
