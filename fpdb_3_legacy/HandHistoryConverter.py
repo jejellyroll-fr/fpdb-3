@@ -163,6 +163,7 @@ in_path   (default '-' = sys.stdin)
         self.numPartial = 0
         self.parsing_issues: list[str] = []
         self.failed_hand_callback: Callable[..., None] | None = None
+        self.cooperative_checkpoint: Callable[[], None] | None = None
         self.isCarraige = False
         self.autoPop = False
 
@@ -250,6 +251,13 @@ HandHistoryConverter: '{sitename}'
                     self._capture_failed_hand(hand_index, hand_text, "error", str(e), e)
                     self.parsing_issues.append(f"[ERROR] Hand starting with '{hand_text[:30]}...': {e}")
                     log.exception(f"FpdbParseError for file '{self.in_path}'")
+
+                # Parsing a whole file happens before the importer's database
+                # transaction. Let background importers yield only after a
+                # complete hand has been parsed, keeping hand order and resume
+                # offsets intact while interactive reads get a chance to run.
+                if self.cooperative_checkpoint is not None:
+                    self.cooperative_checkpoint()
 
             # Improved error handling - only reset file position when truly necessary
             if lastParsed in ("partial", "error") and self.autoPop:
