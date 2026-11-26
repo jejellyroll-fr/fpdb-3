@@ -6,10 +6,13 @@ from __future__ import annotations
 Parses HandHistory xml files and returns requested objects.
 """
 
-import defusedxml.ElementTree  # noqa: I001
-
+# Pylint classifies this XML parser import inconsistently with the standard library.
+# pylint: disable=wrong-import-order
 from xml.parsers.expat import ExpatError
 
+import defusedxml.ElementTree
+
+# pylint: enable=wrong-import-order
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 #    Copyright 2008-2011, Ray E. Barker
