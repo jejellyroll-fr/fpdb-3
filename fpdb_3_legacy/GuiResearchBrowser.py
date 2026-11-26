@@ -80,6 +80,7 @@ from fpdb_3_legacy.research_worker_db import WorkerDatabase, worker_database
 from fpdb_3_legacy.responsive_layout import PaneSwitcher, ResponsiveSplitter, wrap_in_scroll
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 from fpdb_3_legacy.table_export import install_table_export
+from fpdb_3_legacy.work_priority import interactive_work
 
 log = get_logger("gui_research_browser")
 
@@ -172,6 +173,10 @@ class _QueryWorker(QThread):
         return self._serial
 
     def run(self) -> None:
+        with interactive_work("research-query"):
+            self._run_query()
+
+    def _run_query(self) -> None:
         try:
             with _worker_database(self._db) as db:
                 result = self._task(db)
@@ -201,6 +206,10 @@ class _DrillWorker(QThread):
         return self._serial
 
     def run(self) -> None:
+        with interactive_work("research-drilldown"):
+            self._run_drilldown()
+
+    def _run_drilldown(self) -> None:
         try:
             with _worker_database(self._db) as db:
                 drill = rb.run_drill_down(db, self._query, group=self._group, numerator_only=self._numerator)
