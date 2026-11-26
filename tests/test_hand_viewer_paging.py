@@ -347,6 +347,25 @@ def test_a_refused_stale_query_keeps_the_current_page_and_stale_flag(monkeypatch
     viewer.filters.end_read_transaction.assert_called_once_with()
 
 
+def test_a_failed_stale_query_ends_its_read_transaction(monkeypatch) -> None:
+    viewer = _viewer(monkeypatch, [1, 2, 3])
+    viewer.render_page(0)
+    viewer._stale = True
+    viewer.filters = SimpleNamespace(getDates=lambda: ("start", "end"), end_read_transaction=MagicMock())
+
+    def failed_query(*_dates):
+        raise RuntimeError("query failed")
+
+    viewer.get_hand_ids_from_date_range = failed_query
+
+    assert viewer.refresh_if_stale() is False
+
+    assert viewer.all_handids == [1, 2, 3]
+    assert viewer.model.rows == [1, 2]
+    assert viewer._stale is True
+    viewer.filters.end_read_transaction.assert_called_once_with()
+
+
 def test_the_rows_on_screen_stay_usable_while_new_hands_load(monkeypatch) -> None:
     # The table stays clickable during processEvents(): a right-click or a
     # double-click on a row shown before must still find its hand (Codex, #859).
