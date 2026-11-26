@@ -319,6 +319,7 @@ class GuiHandViewer(QSplitter):
         self._stale = False
         self._has_loaded_hand_query = False
         self._last_hand_query_ok = True
+        self._external_hand_selection = False
         # Won/Net and Flags text colours, read from the theme once per page.
         self._cell_colors: dict[str, QColor] | None = None
 

@@ -228,7 +228,7 @@ def test_a_stale_view_refreshes_its_hand_list(monkeypatch) -> None:
     assert viewer._stale is False
 
 
-def test_import_invalidates_a_loaded_empty_result_set(monkeypatch) -> None:
+def test_import_invalidates_a_loaded_empty_result_set() -> None:
     viewer = GuiHandViewer.__new__(GuiHandViewer)  # pylint: disable=no-value-for-parameter
     viewer._has_loaded_hand_query = True
     viewer.all_handids = []
