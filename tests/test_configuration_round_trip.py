@@ -537,6 +537,14 @@ def _check_import_filters(config: Config) -> None:
     assert config.imp.importFilters == ["holdem", "razz"]
 
 
+def _set_hand_viewer_preferences(config: Config) -> None:
+    config.set_hand_viewer_preferences(200, {"Date", "HandId", "Net"})
+
+
+def _check_hand_viewer_preferences(config: Config) -> None:
+    assert config.get_hand_viewer_preferences() == (200, {"Date", "HandId", "Net"})
+
+
 THIS_SITE = {"supported_sites": Child("site", "site_name", SITE)}
 THIS_STAT_SET = {"stat_sets": Child("ss", "name", STAT_SET)}
 
@@ -631,6 +639,7 @@ EDITS = (
         _check_import_filters,
         {"import": None},
     ),
+    Edit("set_hand_viewer_preferences", _set_hand_viewer_preferences, _check_hand_viewer_preferences, {"general": None}),
 )
 
 # Public methods named like setters that never write the file: set_timezone and

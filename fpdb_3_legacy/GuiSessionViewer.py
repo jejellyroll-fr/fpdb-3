@@ -623,7 +623,7 @@ class GuiSessionViewer(QSplitter):
             handids = list(self.times[row])
             log.debug(f"handids: {handids}")
 
-            replayer.reload_hands(handids)
+            replayer.reload_hands(handids, external_hand_selection=True)
 
 
 def main(argv=None):

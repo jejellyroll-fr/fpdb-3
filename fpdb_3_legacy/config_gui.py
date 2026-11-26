@@ -32,6 +32,7 @@ log = get_logger("configuration")
 
 # The attributes of a stats-table <col>, in the order of a column's values.
 _COL_ATTRIBUTES = ("col_name", "col_title", "disp_all", "disp_posn", "field_format", "field_type", "xalignment")
+HAND_VIEWER_PAGE_SIZES = (25, 50, 100, 200, 500)
 
 
 class General(dict):
@@ -284,6 +285,35 @@ class GUITourStats(list):
 
 class ConfigGuiMixin(ConfigBase):
     """Read and edit the general settings and the stats-table columns."""
+
+    HAND_VIEWER_PAGE_SIZES = HAND_VIEWER_PAGE_SIZES
+
+    def get_hand_viewer_preferences(self) -> tuple[int, set[str] | None]:
+        """Return the saved Hand Viewer page size and visible column keys.
+
+        An absent or invalid value keeps the defaults used by existing users.
+        """
+        try:
+            page_size = int(self.general.get("hand_viewer_page_size", 100))
+        except (TypeError, ValueError):
+            page_size = 100
+        if page_size not in self.HAND_VIEWER_PAGE_SIZES:
+            page_size = 100
+        columns = self.general.get("hand_viewer_visible_columns")
+        visible = {name for name in str(columns).split(",") if name} if columns is not None else None
+        return page_size, visible
+
+    def set_hand_viewer_preferences(self, page_size: int, visible_columns: set[str]) -> None:
+        """Persist Hand Viewer controls in the user's existing <general> config."""
+        if page_size not in self.HAND_VIEWER_PAGE_SIZES:
+            raise ValueError(f"Unsupported Hand Viewer page size: {page_size}")
+        names = ",".join(sorted(visible_columns))
+        self.general["hand_viewer_page_size"] = str(page_size)
+        self.general["hand_viewer_visible_columns"] = names
+        for general_node in cx.find_all(self.doc, "general"):
+            cx.set_attr(general_node, "hand_viewer_page_size", str(page_size))
+            cx.set_attr(general_node, "hand_viewer_visible_columns", names)
+        self.save()
 
     def set_general(self, lang=None) -> None:
         for general_node in cx.find_all(self.doc, "general"):

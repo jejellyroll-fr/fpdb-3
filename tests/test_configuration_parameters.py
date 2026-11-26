@@ -64,6 +64,24 @@ def test_a_setting_that_was_never_written_falls_back(config) -> None:
     assert hui["seats_cust_nums_high"] == 10
 
 
+def test_hand_viewer_preferences_default_for_existing_configs(config) -> None:
+    assert config.get_hand_viewer_preferences() == (100, None)
+
+
+def test_hand_viewer_preferences_are_saved_and_reloaded(config) -> None:
+    config.set_hand_viewer_preferences(200, {"Date", "HandId", "Net"})
+
+    reloaded = Config(file=config.file)
+
+    assert reloaded.get_hand_viewer_preferences() == (200, {"Date", "HandId", "Net"})
+
+
+def test_invalid_hand_viewer_page_size_uses_default(config) -> None:
+    config.general["hand_viewer_page_size"] = "invalid"
+
+    assert config.get_hand_viewer_preferences() == (100, None)
+
+
 def test_the_hero_settings_have_their_own_fallbacks(config) -> None:
     # The hero is shown a shorter window than everyone else by default.
     config.ui = SimpleNamespace()

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-26 06:10+0100\n"
+"POT-Creation-Date: 2026-11-26 21:42+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1391,6 +1391,14 @@ msgid "◀ Prev"
 msgstr ""
 
 #: fpdb_3_legacy/GuiHandViewer.py
+msgid "Hands shown per page"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Per page:"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
 msgid "Find hand #"
 msgstr ""
 
@@ -1418,6 +1426,30 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Filter: splash pot"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Fit columns to contents"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "New hands are available; refresh pending"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Refresh failed; activate this tab to retry"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Refresh could not be completed; activate this tab to retry"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Refreshing hands…"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Refresh cancelled; activate this tab to retry"
 msgstr ""
 
 #: fpdb_3_legacy/GuiHandViewer.py
@@ -2708,10 +2740,6 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
 msgid "Double-click a row to see its tournaments"
-msgstr ""
-
-#: fpdb_3_legacy/GuiTourneyPlayerStats.py
-msgid "Fit columns to contents"
 msgstr ""
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
@@ -8051,14 +8079,6 @@ msgid "Open the hands of the selected period in the Hand Viewer"
 msgstr ""
 
 #: fpdb_3_legacy/results_calendar.py
-msgid "Previous month"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
-msgid "Next month"
-msgstr ""
-
-#: fpdb_3_legacy/results_calendar.py
 msgid "Click to select the whole month"
 msgstr ""
 
@@ -8072,6 +8092,14 @@ msgstr ""
 
 #: fpdb_3_legacy/results_calendar.py
 msgid "Previous year"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Next month"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Previous month"
 msgstr ""
 
 #: fpdb_3_legacy/results_calendar.py

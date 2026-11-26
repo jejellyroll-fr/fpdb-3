@@ -280,7 +280,7 @@ class GuiBulkImport(QWidget):
 
         main_window = getattr(self, "main_window", None) or self.parent()
         if main_window is not None and hasattr(main_window, "refresh_after_import"):
-            main_window.refresh_after_import()
+            main_window.refresh_after_import(data_changed=stored > 0)
 
     @staticmethod
     def _phh_lines(phh) -> str:

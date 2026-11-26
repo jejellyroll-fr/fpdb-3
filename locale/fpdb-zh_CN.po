@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-26 06:10+0100\n"
+"POT-Creation-Date: 2026-11-26 21:42+0100\n"
 "PO-Revision-Date: 2011-04-07 08:53+0000\n"
 "Last-Translator: steffen123 <steffen@schaumburger.info>\n"
 "Language-Team: Chinese (China) <>\n"
@@ -1816,6 +1816,10 @@ msgstr "最终底池 (BB)"
 msgid "Find hand #"
 msgstr "成牌"
 
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Fit columns to contents"
+msgstr ""
+
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
 msgid "Folded"
@@ -1838,6 +1842,10 @@ msgstr "文件%s无法找到"
 #: fpdb_3_legacy/GuiHandViewer.py
 #, python-brace-format
 msgid "Hand {} on page {}"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Hands shown per page"
 msgstr ""
 
 #: fpdb_3_legacy/GuiHandViewer.py
@@ -1876,6 +1884,10 @@ msgid "Net result (BB)"
 msgstr "净结果 (BB)"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+msgid "New hands are available; refresh pending"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
 msgid ""
 "No hands were queried, to avoid presenting an incomplete result as empty."
@@ -1895,6 +1907,10 @@ msgstr "超过底池的 150%"
 #, fuzzy
 msgid "Pairs"
 msgstr "对子"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Per page:"
+msgstr ""
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
@@ -1921,6 +1937,23 @@ msgstr "RFI"
 #, fuzzy
 msgid "Raised"
 msgstr "加注"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Refresh cancelled; activate this tab to retry"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Refresh could not be completed; activate this tab to retry"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Refresh failed; activate this tab to retry"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Refreshing hands…"
+msgstr "刷新手牌"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid ""
@@ -3047,10 +3080,6 @@ msgstr "筛选"
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
 msgid "Finish"
-msgstr ""
-
-#: fpdb_3_legacy/GuiTourneyPlayerStats.py
-msgid "Fit columns to contents"
 msgstr ""
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py

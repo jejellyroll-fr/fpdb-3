@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-26 06:10+0100\n"
+"POT-Creation-Date: 2026-11-26 21:42+0100\n"
 "PO-Revision-Date: 2011-07-27 15:17+0000\n"
 "Last-Translator: pkpkpkdo <ofelipedbzgt@hotmail.com>\n"
 "Language-Team: Portuguese (Brazilian) (http://www.transifex.net/projects/p/"
@@ -1803,6 +1803,10 @@ msgstr "Pote final (BB)"
 msgid "Find hand #"
 msgstr "Mão feita"
 
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Fit columns to contents"
+msgstr ""
+
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
 msgid "Folded"
@@ -1825,6 +1829,10 @@ msgstr "não encontrado"
 #: fpdb_3_legacy/GuiHandViewer.py
 #, python-brace-format
 msgid "Hand {} on page {}"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Hands shown per page"
 msgstr ""
 
 #: fpdb_3_legacy/GuiHandViewer.py
@@ -1863,6 +1871,10 @@ msgid "Net result (BB)"
 msgstr "Resultado líquido (BB)"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+msgid "New hands are available; refresh pending"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
 msgid ""
 "No hands were queried, to avoid presenting an incomplete result as empty."
@@ -1884,6 +1896,10 @@ msgstr "Mais de 150% do pote"
 #, fuzzy
 msgid "Pairs"
 msgstr "Pares"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Per page:"
+msgstr ""
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
@@ -1910,6 +1926,23 @@ msgstr "RFI"
 #, fuzzy
 msgid "Raised"
 msgstr "Aumentou"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Refresh cancelled; activate this tab to retry"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Refresh could not be completed; activate this tab to retry"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Refresh failed; activate this tab to retry"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Refreshing hands…"
+msgstr "Atualizar mãos"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid ""
@@ -3052,10 +3085,6 @@ msgstr "Filtros"
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
 msgid "Finish"
-msgstr ""
-
-#: fpdb_3_legacy/GuiTourneyPlayerStats.py
-msgid "Fit columns to contents"
 msgstr ""
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py

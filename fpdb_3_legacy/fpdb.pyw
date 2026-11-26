@@ -1970,13 +1970,14 @@ class fpdb(QMainWindow):
         self.lockTakenBy = None
         log.info("Global lock released.")
 
-    def refresh_after_import(self) -> None:
-        """Rebuild the filter panels of open stats tabs after an import.
+    def refresh_after_import(self, *, data_changed: bool = True) -> None:
+        """Rebuild open filters and invalidate Hand Viewer results after an import.
 
         Each stats tab builds its Filters panel once from the database state at
         creation time, so newly imported games/limits/currencies/tournament types
         stay invisible until the tab is reopened. Called by the import widgets
-        when an import finishes.
+        when an import finishes. A visible stale viewer refreshes immediately;
+        a background viewer refreshes the next time its tab is activated.
         """
         for thread in self.threads:
             filters = getattr(thread, "filters", None)
@@ -1988,6 +1989,19 @@ class fpdb(QMainWindow):
                         "Failed to refresh filters for %s",
                         thread.__class__.__name__,
                     )
+            if data_changed and hasattr(thread, "mark_stale"):
+                thread.mark_stale()
+                if self.nb.currentWidget() is thread:
+                    thread.refresh_if_stale()
+
+    def _tab_activated(self, index: int) -> None:
+        """Refresh a Hand Viewer when a stale tab becomes visible."""
+        if index < 0:
+            return
+        tab = self.nb.widget(index)
+        refresh = getattr(tab, "refresh_if_stale", None)
+        if callable(refresh):
+            refresh()
 
     def tab_auto_import(self, widget, data=None) -> None:
         """Opens the auto import tab."""
@@ -2474,6 +2488,7 @@ class fpdb(QMainWindow):
         self.nb: QTabWidget = QTabWidget()
         self.nb.setTabsClosable(True)
         self.nb.tabCloseRequested.connect(self.close_tab)
+        self.nb.currentChanged.connect(self._tab_activated)
         self.central_layout.addWidget(self.nb)
         self.setCentralWidget(self.central_widget)
 
