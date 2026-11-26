@@ -8,7 +8,7 @@ Parses HandHistory xml files and returns requested objects.
 
 from xml.parsers.expat import ExpatError
 
-import defusedxml.ElementTree
+import defusedxml.ElementTree  # pylint: disable=wrong-import-order
 
 from fpdb_3_legacy.loggingFpdb import get_logger
 

@@ -9,9 +9,9 @@ from __future__ import annotations
 import re
 from copy import deepcopy
 from pathlib import Path
-from xml.dom.minidom import Document
 
 import defusedxml.ElementTree as SafeET
+import defusedxml.minidom
 import pytest
 from defusedxml import EntitiesForbidden
 
@@ -445,17 +445,17 @@ def test_deepcopy_preserves_config_element_type_and_parent_links() -> None:
 
 
 def test_elementtree_element_can_be_imported_into_a_caller_owned_dom() -> None:
-    target = Document()
+    target = defusedxml.minidom.parseString("<target/>")
     source = cx.parse_string(SAMPLE)
     site = cx.find_first(source, "site")
 
     imported = cx.import_node(target, site)
-    target.appendChild(imported)
+    target.documentElement.appendChild(imported)
 
     assert imported.ownerDocument is target
     assert imported.getAttribute("name") == "PokerStars"
     assert imported.firstChild.tagName == "alias"
-    assert cx.parent_of(target, imported) is None
+    assert cx.parent_of(target, imported) is target.documentElement
 
 
 def test_a_cloned_document_is_written_the_same_and_edited_apart(doc, backend) -> None:

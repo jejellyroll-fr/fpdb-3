@@ -51,7 +51,7 @@ Node = Any  # a ConfigDocument or an ElementTree element
 
 # These spellings implement the small legacy DOM surface still used by the
 # preferences UI. They deliberately mirror the DOM API and are not app APIs.
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name,attribute-defined-outside-init
 
 
 @dataclass(eq=False)
@@ -118,6 +118,8 @@ class _TextNode:
 
 
 class ConfigElement(ET.Element):
+    # This facade mirrors the wider minidom API while keeping callers on ElementTree.
+    # pylint: disable=too-many-public-methods
     """ElementTree element with the small DOM-shaped surface older callers use."""
 
     ELEMENT_NODE = 1
@@ -191,7 +193,7 @@ class ConfigElement(ET.Element):
         found = [node for node in self.iter(tag) if node is not self and _is_element(node)]
         return cast(list[ConfigElement], found)
 
-    def appendChild(self, node: ET.Element | _TextNode) -> ET.Element | _TextNode:  # pylint: disable=attribute-defined-outside-init
+    def appendChild(self, node: ET.Element | _TextNode) -> ET.Element | _TextNode:
         if isinstance(node, _TextNode):
             if len(self):
                 self[-1].tail = (self[-1].tail or "") + node.data
