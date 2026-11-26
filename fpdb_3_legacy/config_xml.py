@@ -25,7 +25,7 @@ import xml.etree.ElementTree as ET  # noqa: S405  # nosec B405  # nosemgrep
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import defusedxml.ElementTree
 
@@ -47,14 +47,18 @@ ParseError = ET.ParseError
 # declare names the same namespace everywhere they use it.
 _PREFIX_URIS: dict[str, str] = {"xml": "http://www.w3.org/XML/1998/namespace"}
 
-Node = Any  # a ConfigDocument or an ElementTree Element
+Node = Any  # a ConfigDocument or an ElementTree element
+
+# These spellings implement the small legacy DOM surface still used by the
+# preferences UI. They deliberately mirror the DOM API and are not app APIs.
+# pylint: disable=invalid-name
 
 
 @dataclass(eq=False)
 class ConfigDocument:
     """An XML document on ElementTree that keeps its comments and namespace prefixes."""
 
-    root: ET.Element
+    root: ConfigElement
     before_root: list[Any] = field(default_factory=list)
     after_root: list[Any] = field(default_factory=list)
     namespaces: dict[str, str] = field(default_factory=dict)
@@ -65,7 +69,7 @@ class ConfigDocument:
 
     def getElementsByTagName(self, tag: str) -> list[ConfigElement]:
         found = list(self.root.iter(tag))
-        return [node for node in found if _is_element(node)]
+        return cast(list[ConfigElement], [node for node in found if _is_element(node)])
 
     def createElement(self, tag: str) -> ConfigElement:
         return ConfigElement(tag)
@@ -74,9 +78,9 @@ class ConfigDocument:
         return _TextNode(text)
 
     def importNode(self, node: ET.Element, deep: bool = True) -> ConfigElement:
-        return copy.deepcopy(node) if deep else ConfigElement(node.tag, node.attrib)
+        return cast(ConfigElement, copy.deepcopy(node)) if deep else ConfigElement(node.tag, node.attrib)
 
-    def appendChild(self, node: ET.Element) -> ET.Element:
+    def appendChild(self, node: ConfigElement) -> ConfigElement:
         if self.root is None:
             self.root = node
         else:
@@ -90,6 +94,16 @@ class ConfigDocument:
     def toprettyxml(self, indent: str = "  ") -> str:
         ET.indent(self.root, space=indent)
         return to_xml(self)
+
+    def __deepcopy__(self, memo: dict[int, Any]) -> ConfigDocument:
+        copied = ConfigDocument(
+            copy.deepcopy(self.root, memo),
+            copy.deepcopy(self.before_root, memo),
+            copy.deepcopy(self.after_root, memo),
+            copy.deepcopy(self.namespaces, memo),
+        )
+        memo[id(self)] = copied
+        return copied
 
 
 class _TextNode:
@@ -111,9 +125,17 @@ class ConfigElement(ET.Element):
     COMMENT_NODE = 8
     nodeType = 1
 
+    def __init__(self, tag: str, attrib: Mapping[str, str] | None = None, **extra: str) -> None:
+        super().__init__(tag, dict(attrib or {}), **extra)
+        self._parent: ConfigElement | None = None
+
     @property
     def tagName(self) -> str:
         return self.tag if isinstance(self.tag, str) else ""
+
+    @property
+    def localName(self) -> str:
+        return self.tagName.rsplit("}", 1)[-1]
 
     @property
     def nodeName(self) -> str:
@@ -129,11 +151,11 @@ class ConfigElement(ET.Element):
 
     @property
     def parentNode(self) -> ET.Element | None:
-        return _PARENTS.get(id(self))
+        return self._parent
 
     @property
     def attributes(self) -> _Attributes:
-        return _Attributes(self.attrib)
+        return _Attributes(self)
 
     @property
     def firstChild(self) -> ET.Element | None:
@@ -152,6 +174,13 @@ class ConfigElement(ET.Element):
     def hasAttributes(self) -> bool:
         return bool(self.attrib)
 
+    def hasChildNodes(self) -> bool:
+        return bool(self.text) or len(self) > 0
+
+    def __bool__(self) -> bool:
+        # minidom nodes are truthy even when they have no child elements.
+        return True
+
     def setAttribute(self, name: str, value: object) -> None:
         self.set(_etree_name(name), str(value))
 
@@ -159,9 +188,10 @@ class ConfigElement(ET.Element):
         self.attrib.pop(_etree_name(name), None)
 
     def getElementsByTagName(self, tag: str) -> list[ConfigElement]:
-        return [node for node in self.iter(tag) if node is not self and _is_element(node)]
+        found = [node for node in self.iter(tag) if node is not self and _is_element(node)]
+        return cast(list[ConfigElement], found)
 
-    def appendChild(self, node: ET.Element | _TextNode) -> ET.Element | _TextNode:
+    def appendChild(self, node: ET.Element | _TextNode) -> ET.Element | _TextNode:  # pylint: disable=attribute-defined-outside-init
         if isinstance(node, _TextNode):
             if len(self):
                 self[-1].tail = (self[-1].tail or "") + node.data
@@ -169,48 +199,86 @@ class ConfigElement(ET.Element):
                 self.text = (self.text or "") + node.data
             return node
         ET.Element.append(self, node)
-        _PARENTS[id(node)] = self
+        if isinstance(node, ConfigElement):
+            node._parent = self
         return node
 
     def insertBefore(self, node: ET.Element, before: ET.Element | None) -> ET.Element:
-        index = list(self).index(before) if before in self else len(self)
+        index = list(self).index(before) if before is not None and before in self else len(self)
         self.insert(index, node)
-        _PARENTS[id(node)] = self
+        if isinstance(node, ConfigElement):
+            node._parent = self
         return node
 
     def removeChild(self, node: ET.Element) -> ET.Element:
         self.remove(node)
-        _PARENTS.pop(id(node), None)
+        if isinstance(node, ConfigElement):
+            node._parent = None
         return node
 
     def cloneNode(self, deep: bool = True) -> ConfigElement:
         return copy.deepcopy(self) if deep else ConfigElement(self.tag, self.attrib)
+
+    def __deepcopy__(self, memo: dict[int, Any]) -> ConfigElement:
+        existing = memo.get(id(self))
+        if existing is not None:
+            return existing
+        copied = ConfigElement(self.tag, copy.deepcopy(self.attrib, memo))
+        memo[id(self)] = copied
+        copied.text = copy.deepcopy(self.text, memo)
+        copied.tail = copy.deepcopy(self.tail, memo)
+        for child in self:
+            copied_child = copy.deepcopy(child, memo)
+            ET.Element.append(copied, copied_child)
+            if isinstance(copied_child, ConfigElement):
+                copied_child._parent = copied
+        return copied
 
     def toxml(self) -> str:
         return _element_xml(self)
 
 
 class _Attribute:
-    def __init__(self, name: str, value: str) -> None:
-        self.localName = name
-        self.name = name
-        self.value = value
+    def __init__(self, element: ConfigElement, key: str) -> None:
+        self._element = element
+        self._key = key
+
+    @property
+    def localName(self) -> str:
+        return _file_name(self._key)
+
+    @property
+    def name(self) -> str:
+        return _file_name(self._key)
+
+    @property
+    def value(self) -> str:
+        return self._element.attrib[self._key]
+
+    @value.setter
+    def value(self, value: str) -> None:
+        self._element.attrib[self._key] = value
 
 
 class _Attributes:
-    def __init__(self, values: Mapping[str, str]) -> None:
-        self._values = list(values.items())
+    def __init__(self, element: ConfigElement) -> None:
+        self._element = element
 
     @property
     def length(self) -> int:
-        return len(self._values)
+        return len(self._element.attrib)
+
+    def keys(self) -> list[str]:
+        return [_file_name(key) for key in self._element.attrib]
+
+    def items(self) -> list[tuple[str, str]]:
+        return [(_file_name(key), value) for key, value in self._element.attrib.items()]
+
+    def __getitem__(self, name: str) -> str:
+        return self._element.attrib[_etree_name(name)]
 
     def item(self, index: int) -> _Attribute:
-        name, value = self._values[index]
-        return _Attribute(name, value)
-
-
-_PARENTS: dict[int, ET.Element] = {}
+        return _Attribute(self._element, list(self._element.attrib)[index])
 
 
 class _Builder:
@@ -277,11 +345,12 @@ def _parse_etree(data: bytes | str) -> ConfigDocument:
     builder = _Builder()
     parser = defusedxml.ElementTree.XMLParser(target=builder)
     parser.feed(data)
-    root = parser.close()
+    root = cast(ConfigElement, parser.close())
     for parent in root.iter():
         if isinstance(parent, ConfigElement):
             for child in parent:
-                _PARENTS[id(child)] = parent
+                if isinstance(child, ConfigElement):
+                    child._parent = parent
     for prefix, uri in builder.namespaces.items():
         if prefix:
             _PREFIX_URIS.setdefault(prefix, uri)
@@ -562,8 +631,8 @@ def append(doc: Node, parent: Node, child: Node, *, indent: str | None = None) -
         _set_last_whitespace(parent, indent)
         child.tail = closing
     parent.append(child)
-    if isinstance(parent, ConfigElement):
-        _PARENTS[id(child)] = parent
+    if isinstance(parent, ConfigElement) and isinstance(child, ConfigElement):
+        child._parent = parent
     return child
 
 
@@ -584,8 +653,8 @@ def insert_before(doc: Node, parent: Node, child: Node, reference: Node) -> Node
     index = siblings.index(reference)
     child.tail = siblings[index - 1].tail if index else parent.text
     parent.insert(index, child)
-    if isinstance(parent, ConfigElement):
-        _PARENTS[id(child)] = parent
+    if isinstance(parent, ConfigElement) and isinstance(child, ConfigElement):
+        child._parent = parent
     return child
 
 
@@ -607,6 +676,8 @@ def parent_of(doc: Node, node: Node) -> Node | None:
     if _is_dom(node):
         parent = node.parentNode
         return None if parent is None or parent.nodeType == parent.DOCUMENT_NODE else parent
+    if isinstance(node, ConfigElement):
+        return node._parent
     for candidate in root(doc).iter():
         for child in candidate:
             if child is node:
@@ -633,6 +704,8 @@ def remove(doc: Node, node: Node) -> None:
     else:
         parent.text = node.tail
     parent.remove(node)
+    if isinstance(node, ConfigElement):
+        node._parent = None
 
 
 def clear(doc: Node, node: Node) -> None:
@@ -644,6 +717,8 @@ def clear(doc: Node, node: Node) -> None:
         return
     for child in list(node):
         node.remove(child)
+        if isinstance(child, ConfigElement):
+            child._parent = None
     node.text = None
 
 
@@ -668,6 +743,8 @@ def prepend(doc: Node, parent: Node, children: list[Node]) -> None:
             remove(doc, child)
         child.tail = None
         parent.insert(index, child)
+        if isinstance(parent, ConfigElement) and isinstance(child, ConfigElement):
+            child._parent = parent
     if children:
         children[-1].tail = lead
     else:
@@ -685,12 +762,34 @@ def replace_root(doc: Node, new_root: Node) -> None:
 def import_node(doc: Node, node: Node) -> Node:
     """A deep copy of ``node`` (from any document of the same backend) that ``doc`` can hold."""
     if _is_dom(doc):
-        return doc.importNode(node, True)
+        owner_doc = doc if doc.nodeType == doc.DOCUMENT_NODE else doc.ownerDocument
+        if _is_dom(node):
+            return owner_doc.importNode(node, True)
+        return _etree_node_to_dom(owner_doc, node)
     if _is_dom(node):
         return _parse_etree(node.toxml()).root
     copied = copy.deepcopy(node)
     copied.tail = None
     return copied
+
+
+def _etree_node_to_dom(doc: Any, node: ET.Element) -> Any:
+    """Build a minidom node in ``doc`` without importing minidom in this module."""
+    if node.tag is ET.Comment:
+        return doc.createComment(node.text or "")
+    if node.tag is ET.ProcessingInstruction:
+        target, _, data = (node.text or "").partition(" ")
+        return doc.createProcessingInstruction(target, data)
+    element = doc.createElement(_file_name(node.tag))
+    for name, value in node.attrib.items():
+        element.setAttribute(_file_name(name), value)
+    if node.text:
+        element.appendChild(doc.createTextNode(node.text))
+    for child in node:
+        element.appendChild(_etree_node_to_dom(doc, child))
+        if child.tail:
+            element.appendChild(doc.createTextNode(child.tail))
+    return element
 
 
 def preceding_comment(doc: Node, node: Node) -> Node | None:

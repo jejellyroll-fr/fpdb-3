@@ -7,15 +7,12 @@ import urllib2
 
 
 def generate_url_list(week, day, hand):
-    subst = {"week": week, "day": day, "hand": hand}
-    url = "http://thebiggame.pokerstars.net/data/s1/w%(week)s/d%(day)s/d%(week)sh%(hand)s.js" % subst
-    return url
+    return f"http://thebiggame.pokerstars.net/data/s1/w{week}/d{day}/d{week}h{hand}.js"
 
 
 def modify_url_list(urls):
     """Data on website not 100% in corret places"""
     # Week 1, hand 122 is missing from the website.
-    idx = urls.index("http://thebiggame.pokerstars.net/data/s1/w1/d5/d1h122.js")
     urls.remove("http://thebiggame.pokerstars.net/data/s1/w1/d5/d1h122.js")
 
     return urls
@@ -23,7 +20,7 @@ def modify_url_list(urls):
 
 def fetch_url_list(urls):
     for url in urls:
-        print("URL: %s" % url)
+        print(f"URL: {url}")
         data = urllib2.urlopen(url).read()
         print(data)
 
@@ -47,7 +44,7 @@ def get_all_data():
     urllist = []
 
     for i, week in enumerate(season1, start=1):
-        print("Total: %s" % count)
+        print(f"Total: {count}")
         for j, days in enumerate(week, start=1):
             start_hand, end_hand = days
             for k in range(start_hand, end_hand + 1):
@@ -57,7 +54,7 @@ def get_all_data():
     urllist = modify_url_list(urllist)
     fetch_url_list(urllist)
 
-    print("Total: %s" % count)
+    print(f"Total: {count}")
 
 
 def main():

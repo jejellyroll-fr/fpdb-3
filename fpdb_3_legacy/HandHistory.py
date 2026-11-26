@@ -54,6 +54,8 @@ def _direct_text(node) -> str:
 
 
 class HandHistory:
+    # Public attributes retain the uppercase XML section names for legacy callers.
+    # pylint: disable=invalid-name
     def __init__(self, xml_string, elements=("ALL")) -> None:
         try:
             root = defusedxml.ElementTree.fromstring(xml_string)
@@ -85,20 +87,14 @@ class Player:
         self.stack = _attribute(node, "STACK")
         self.showed_hand = _attribute(node, "SHOWED_HAND")
         self.cards = _attribute(node, "CARDS")
-        self.allin = _attribute(node, "ALLIN")
-        self.sitting_out = _attribute(node, "SITTING_OUT")
+        allin = _attribute(node, "ALLIN")
+        sitting_out = _attribute(node, "SITTING_OUT")
         self.hand = _attribute(node, "HAND")
         self.start_cards = _attribute(node, "START_CARDS")
 
-        if self.allin in ("", "0") or self.allin.upper() == "FALSE":
-            self.allin = False
-        else:
-            self.allin = True
+        self.allin: bool = allin not in ("", "0") and allin.upper() != "FALSE"
 
-        if self.sitting_out in ("", "0") or self.sitting_out.upper() == "FALSE":
-            self.sitting_out = False
-        else:
-            self.sitting_out = True
+        self.sitting_out: bool = sitting_out not in ("", "0") and sitting_out.upper() != "FALSE"
 
     def __str__(self) -> str:
         temp = f"{self.name}\n    seat = {self.seat}\n    stack = {self.stack}\n    cards = {self.cards}\n"
@@ -137,11 +133,11 @@ class Game:
             ("STRUCTURE", "structure"),
             ("MIXED", "mixed"),
         ):
-            L = _descendants(node, tag[0])
-            if not L:
+            tag_nodes = _descendants(node, tag[0])
+            if not tag_nodes:
                 continue
-            # print(L)
-            for node2 in L:
+            # print(tag_nodes)
+            for node2 in tag_nodes:
                 title = ""
                 title += _direct_text(node2)
                 self.tags[tag[1]] = title

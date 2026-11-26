@@ -7,7 +7,9 @@ not notice when the parser behind it switches.
 from __future__ import annotations
 
 import re
+from copy import deepcopy
 from pathlib import Path
+from xml.dom.minidom import Document
 
 import defusedxml.ElementTree as SafeET
 import pytest
@@ -419,6 +421,41 @@ def test_parent_of(doc) -> None:
 
     assert cx.tag_of(cx.parent_of(doc, site)) == "sites"
     assert cx.parent_of(doc, cx.root(doc)) is None
+
+
+def test_elementtree_elements_keep_the_legacy_dom_behaviour() -> None:
+    element = cx.ConfigElement("site", {"name": "before"})
+
+    assert element
+    assert not element.hasChildNodes()
+    element.attributes.item(0).value = "after"
+    assert element.getAttribute("name") == "after"
+    assert 'name="after"' in element.toxml()
+
+
+def test_deepcopy_preserves_config_element_type_and_parent_links() -> None:
+    doc = cx.parse_string(SAMPLE)
+
+    copied = deepcopy(doc)
+    site = next(node for node in copied.root.iter("site") if node.get("name") == "PokerStars")
+
+    assert isinstance(copied.root, cx.ConfigElement)
+    assert isinstance(site, cx.ConfigElement)
+    assert site.parentNode is copied.root.find("sites")
+
+
+def test_elementtree_element_can_be_imported_into_a_caller_owned_dom() -> None:
+    target = Document()
+    source = cx.parse_string(SAMPLE)
+    site = cx.find_first(source, "site")
+
+    imported = cx.import_node(target, site)
+    target.appendChild(imported)
+
+    assert imported.ownerDocument is target
+    assert imported.getAttribute("name") == "PokerStars"
+    assert imported.firstChild.tagName == "alias"
+    assert cx.parent_of(target, imported) is None
 
 
 def test_a_cloned_document_is_written_the_same_and_edited_apart(doc, backend) -> None:
