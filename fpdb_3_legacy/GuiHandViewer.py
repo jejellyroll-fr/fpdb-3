@@ -305,7 +305,8 @@ class GuiHandViewer(QSplitter):
         self.all_handids: list[Any] = []
         self.page = 0
         get_preferences = getattr(self.config, "get_hand_viewer_preferences", None)
-        self.page_size, saved_columns = get_preferences() if callable(get_preferences) else (100, None)
+        page_size, saved_columns = get_preferences() if callable(get_preferences) else (100, None)
+        self.page_size: int = page_size
         self.visible_columns = set(self.column_keys) if saved_columns is None else saved_columns.intersection(self.column_keys)
         # The rebuilt hands, bounded to a few pages (see hand_viewer_paging; #857,
         # after thecrawler1's fork, like the hand-number search below).
