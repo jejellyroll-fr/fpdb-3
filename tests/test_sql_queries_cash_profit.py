@@ -43,6 +43,10 @@ def test_period_results_query_reads_cash_hands_with_their_ev_and_blind() -> None
     assert "hp.sawShowdown" in query
     assert "gt.bigBlind" in query
     assert "gt.currency" in query
+    assert "hp.street0VPIChance" in query
+    assert "hp.street0VPI" in query
+    assert "hp.street0AggrChance" in query
+    assert "hp.street0Aggr" in query
     assert "gt.type = 'ring'" in query
     assert "hp.tourneysPlayersId IS NULL" in query
     for placeholder in (

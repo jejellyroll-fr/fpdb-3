@@ -1,4 +1,4 @@
-"""Cash results per day, week and month for the Results calendar (#827).
+"""Cash results per day, week, month and year for the Results calendar (#827).
 
 Days follow HudCache (#600): the hand's own UTC offset, then ``day_start``. The
 zone is pinned to New York with pytz, as in test_hud_day, so these run the same
@@ -81,16 +81,49 @@ def test_a_text_start_time_from_sqlite_is_read() -> None:
     assert hands[0].start_time == datetime(2026, 1, 15, 4, 30)
 
 
-def test_weeks_start_on_monday_and_months_on_the_first() -> None:
+def test_period_boundaries_include_years_and_leap_years() -> None:
     sunday = date(2026, 11, 15)
 
     assert pr.period_start(sunday, pr.WEEK) == date(2026, 11, 9)
     assert pr.period_end(date(2026, 11, 9), pr.WEEK) == sunday
     assert pr.period_start(sunday, pr.MONTH) == date(2026, 11, 1)
     assert pr.period_end(date(2026, 2, 1), pr.MONTH) == date(2026, 2, 28)
+    assert pr.period_start(date(2024, 12, 31), pr.YEAR) == date(2024, 1, 1)
+    assert pr.period_end(date(2024, 1, 1), pr.YEAR) == date(2024, 12, 31)
     assert pr.period_end(sunday, pr.DAY) == sunday
     with pytest.raises(ValueError, match="granularity"):
-        pr.period_start(sunday, "year")
+        pr.period_start(sunday, "decade")
+
+
+@pytest.mark.usefixtures("new_york")
+def test_hands_at_a_local_year_boundary_use_the_local_year() -> None:
+    results = pr.build_results(
+        [
+            _row(1, datetime(2026, 1, 1, 4, 30), 10),  # 23:30 EST on 2025-12-31
+            _row(2, datetime(2026, 1, 1, 5, 30), 20),  # 00:30 EST on 2026-01-01
+        ],
+    )
+
+    assert [(year.start, year.hands) for year in results.periods[pr.YEAR]] == [
+        (date(2025, 1, 1), 1),
+        (date(2026, 1, 1), 1),
+    ]
+
+
+def test_vpip_and_pfr_rates_sum_opportunities_instead_of_averaging_rates() -> None:
+    rows = [
+        (1, datetime(2026, 1, 1), 10, 10, False, 10, "USD", None, 1, 1, 1, 1),
+        (2, datetime(2026, 1, 2), 10, 10, False, 10, "USD", None, 9, 0, 1, 0),
+        (3, datetime(2026, 1, 3), 10, 10, False, 10, "USD", None, 0, 0, 0, 0),
+    ]
+    results = pr.build_results(rows)
+
+    year = results.periods[pr.YEAR][0]
+    assert year.vpip_opportunities == 10
+    assert year.vpip_percent == 10
+    assert year.pfr_opportunities == 2
+    assert year.pfr_percent == 50
+    assert results.periods[pr.DAY][2].vpip_percent is None
 
 
 @pytest.mark.usefixtures("new_york")

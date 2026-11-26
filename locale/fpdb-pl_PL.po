@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-24 13:38+0100\n"
+"POT-Creation-Date: 2026-11-26 06:10+0100\n"
 "PO-Revision-Date: 2011-10-08 08:58+0000\n"
 "Last-Translator: greg20 <greg20@hushmail.com>\n"
 "Language-Team: Polish (Poland) (http://www.transifex.net/projects/p/fpdb/"
@@ -9343,6 +9343,10 @@ msgid "Click to select the whole month"
 msgstr ""
 
 #: fpdb_3_legacy/results_calendar.py
+msgid "Click to select this year"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Days"
 msgstr "%s dni"
@@ -9381,6 +9385,11 @@ msgstr "Następna akcja"
 
 #: fpdb_3_legacy/results_calendar.py
 #, fuzzy
+msgid "Next year"
+msgstr "Dalej"
+
+#: fpdb_3_legacy/results_calendar.py
+#, fuzzy
 #| msgid "Non-showdown"
 msgid "Non-showdown (BB)"
 msgstr "Bez wyłożenia"
@@ -9391,12 +9400,21 @@ msgid "Open the hands of the selected period in the Hand Viewer"
 msgstr "Żaden gracz nie pasuje do wybranej sali i hero."
 
 #: fpdb_3_legacy/results_calendar.py
+msgid "PFR %"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
 msgid "Period:"
 msgstr ""
 
 #: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Previous month"
+msgstr "Poprzednia akcja"
+
+#: fpdb_3_legacy/results_calendar.py
+#, fuzzy
+msgid "Previous year"
 msgstr "Poprzednia akcja"
 
 #: fpdb_3_legacy/results_calendar.py
@@ -9422,8 +9440,17 @@ msgid "Showdown (BB)"
 msgstr "Wyłożenie"
 
 #: fpdb_3_legacy/results_calendar.py
+msgid "This year"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
 msgid "Unit:"
 msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+#, fuzzy
+msgid "VPIP %"
+msgstr "VPIP"
 
 #: fpdb_3_legacy/results_calendar.py
 msgid "Week"
@@ -9436,6 +9463,10 @@ msgstr ""
 
 #: fpdb_3_legacy/results_calendar.py
 msgid "Weeks"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Years"
 msgstr ""
 
 #: fpdb_3_legacy/results_calendar.py

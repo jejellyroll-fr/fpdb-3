@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-24 13:38+0100\n"
+"POT-Creation-Date: 2026-11-26 06:10+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -7992,6 +7992,14 @@ msgid "EV BB/100"
 msgstr ""
 
 #: fpdb_3_legacy/results_calendar.py
+msgid "VPIP %"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "PFR %"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
 msgid "Showdown (BB)"
 msgstr ""
 
@@ -8011,6 +8019,10 @@ msgid "Review hands"
 msgstr ""
 
 #: fpdb_3_legacy/results_calendar.py
+msgid "This year"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
 msgid "Period:"
 msgstr ""
 
@@ -8019,11 +8031,15 @@ msgid "Days"
 msgstr ""
 
 #: fpdb_3_legacy/results_calendar.py
+msgid "Weeks"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
 msgid "Months"
 msgstr ""
 
 #: fpdb_3_legacy/results_calendar.py
-msgid "Weeks"
+msgid "Years"
 msgstr ""
 
 #: fpdb_3_legacy/results_calendar.py
@@ -8048,6 +8064,18 @@ msgstr ""
 
 #: fpdb_3_legacy/results_calendar.py
 msgid "Loading…"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Next year"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Previous year"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Click to select this year"
 msgstr ""
 
 #: fpdb_3_legacy/results_calendar.py
