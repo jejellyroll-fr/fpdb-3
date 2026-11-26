@@ -109,6 +109,7 @@ class RefreshParent(QWidget):
     def __init__(self):
         super().__init__()
         self.refreshed = False
+        self.data_changed = False
 
     def refresh_after_import(self, *, data_changed=True):
         self.refreshed = True

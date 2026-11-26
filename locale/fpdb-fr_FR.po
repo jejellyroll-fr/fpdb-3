@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-24 13:38+0100\n"
+"POT-Creation-Date: 2026-11-26 06:13+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -1597,6 +1597,10 @@ msgstr "Pot final (BB)"
 msgid "Find hand #"
 msgstr "Trouver la main n°"
 
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Fit columns to contents"
+msgstr "Ajuster les colonnes au contenu"
+
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Folded"
 msgstr "Couché"
@@ -1617,6 +1621,12 @@ msgstr "Main introuvable"
 #: fpdb_3_legacy/GuiHandViewer.py
 #, python-brace-format
 msgid "Hand {} on page {}"
+msgstr "Main {} en page {}"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+#| msgid "Hand {} on page {}"
+msgid "Hands shown per page"
 msgstr "Main {} en page {}"
 
 #: fpdb_3_legacy/GuiHandViewer.py
@@ -1648,6 +1658,10 @@ msgid "Net result (BB)"
 msgstr "Résultat net (BB)"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+msgid "New hands are available; refresh pending"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
 msgid ""
 "No hands were queried, to avoid presenting an incomplete result as empty."
 msgstr ""
@@ -1665,6 +1679,10 @@ msgstr "Plus de 150 % du pot"
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Pairs"
 msgstr "Paires"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Per page:"
+msgstr ""
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Players in hand"
@@ -1686,6 +1704,24 @@ msgstr "RFI"
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Raised"
 msgstr "Relancé"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Refresh cancelled; activate this tab to retry"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Refresh could not be completed; activate this tab to retry"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+msgid "Refresh failed; activate this tab to retry"
+msgstr ""
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+#| msgid "Refresh Hands"
+msgid "Refreshing hands…"
+msgstr "Rafraîchir les mains"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid ""
@@ -2701,10 +2737,6 @@ msgstr "Filtrer les lignes…"
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
 msgid "Finish"
 msgstr "Place"
-
-#: fpdb_3_legacy/GuiTourneyPlayerStats.py
-msgid "Fit columns to contents"
-msgstr "Ajuster les colonnes au contenu"
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
 msgid "Graphs need the pyqtgraph package."

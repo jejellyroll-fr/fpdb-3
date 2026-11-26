@@ -316,6 +316,8 @@ class GuiHandViewer(QSplitter):
         # search during its processEvents() cannot start another one.
         self._loading = False
         self._stale = False
+        self._has_loaded_hand_query = False
+        self._last_hand_query_ok = True
         # Won/Net and Flags text colours, read from the theme once per page.
         self._cell_colors: dict[str, QColor] | None = None
 
@@ -323,19 +325,19 @@ class GuiHandViewer(QSplitter):
         self.prevPageButton = QPushButton(_("◀ Prev"))
         self.nextPageButton = QPushButton(_("Next ▶"))
         self.pageLabel = QLabel("")
-        self.pageSizeCombo = QComboBox()
+        self.page_size_combo = QComboBox()
         for size in HAND_VIEWER_PAGE_SIZES:
-            self.pageSizeCombo.addItem(str(size), size)
-        self.pageSizeCombo.setCurrentIndex(self.pageSizeCombo.findData(self.page_size))
-        self.pageSizeCombo.setToolTip(_("Hands shown per page"))
-        self.pageSizeCombo.currentIndexChanged.connect(self._page_size_changed)
+            self.page_size_combo.addItem(str(size), size)
+        self.page_size_combo.setCurrentIndex(self.page_size_combo.findData(self.page_size))
+        self.page_size_combo.setToolTip(_("Hands shown per page"))
+        self.page_size_combo.currentIndexChanged.connect(self._page_size_changed)
         self.prevPageButton.clicked.connect(self.prev_page)
         self.nextPageButton.clicked.connect(self.next_page)
         self.pagerBox.addWidget(self.prevPageButton)
         self.pagerBox.addWidget(self.nextPageButton)
         self.pagerBox.addWidget(self.pageLabel)
         self.pagerBox.addWidget(QLabel(_("Per page:")))
-        self.pagerBox.addWidget(self.pageSizeCombo)
+        self.pagerBox.addWidget(self.page_size_combo)
         self.hand_search = QLineEdit()
         self.hand_search.setPlaceholderText(_("Find hand #"))
         self.hand_search.setToolTip(
@@ -424,7 +426,7 @@ class GuiHandViewer(QSplitter):
         self._save_view_preferences()
 
     def _page_size_changed(self, _index: int) -> None:
-        size = self.pageSizeCombo.currentData()
+        size = self.page_size_combo.currentData()
         if size is None or size == self.page_size:
             return
         old_size, old_page = self.page_size, self.page
@@ -433,14 +435,14 @@ class GuiHandViewer(QSplitter):
         self.page_size = size
         if self.all_handids and not self.render_page(new_page):
             self.page_size = old_size
-            self.pageSizeCombo.setCurrentIndex(self.pageSizeCombo.findData(old_size))
+            self.page_size_combo.setCurrentIndex(self.page_size_combo.findData(old_size))
             self._update_pager()
             return
         self._save_view_preferences()
 
     def mark_stale(self) -> None:
         """Mark this result set out of date after stored hands have changed."""
-        if not self.all_handids:
+        if not self._has_loaded_hand_query:
             return
         self._stale = True
         self._set_search_status(_("New hands are available; refresh pending"))
@@ -473,7 +475,7 @@ class GuiHandViewer(QSplitter):
         page = min(self.page, max(0, (len(hand_ids) - 1) // self.page_size))
         if selected is not None:
             with contextlib.suppress(ValueError):
-                page = hand_ids.index(selected) // self.page_size
+                page = hand_ids.index(int(selected)) // self.page_size
         self._set_search_status(_("Refreshing hands…"))
         loaded = self.reload_hands([]) if not hand_ids else self._show_page(hand_ids, page, HandCache())
         if not loaded:
@@ -719,7 +721,10 @@ class GuiHandViewer(QSplitter):
             self.filters.getDates()[1],
         )
         # ! print(hand_ids)
+        if not getattr(self, "_last_hand_query_ok", True):
+            return
         if self.reload_hands(hand_ids):
+            self._has_loaded_hand_query = True
             self._stale = False
             self._set_search_status("")
 
@@ -845,6 +850,7 @@ class GuiHandViewer(QSplitter):
             self.model.removeRows(0, self.model.rowCount())
             self._update_pager()
             gui_empty_state.show_no_data(self, context="Hand viewer", db=self.db)
+            self._has_loaded_hand_query = True
             return True
         previous_heroes = self.sent_heroes
         previous_external_selection = getattr(self, "_external_hand_selection", False)
@@ -859,6 +865,7 @@ class GuiHandViewer(QSplitter):
             self.sent_heroes = previous_heroes
             self._external_hand_selection = previous_external_selection
             return False
+        self._has_loaded_hand_query = True
         return True
 
     def page_count(self) -> int:

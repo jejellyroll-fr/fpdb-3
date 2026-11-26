@@ -305,8 +305,6 @@ class ConfigGuiMixin(ConfigBase):
 
     def set_hand_viewer_preferences(self, page_size: int, visible_columns: set[str]) -> None:
         """Persist Hand Viewer controls in the user's existing <general> config."""
-        from fpdb_3_legacy import config_xml as cx
-
         if page_size not in self.HAND_VIEWER_PAGE_SIZES:
             raise ValueError(f"Unsupported Hand Viewer page size: {page_size}")
         names = ",".join(sorted(visible_columns))

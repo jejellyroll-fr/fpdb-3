@@ -144,12 +144,14 @@ def _viewer(monkeypatch, hand_ids, page_size=2):
     viewer.all_handids = list(hand_ids)
     viewer.page = 0
     viewer.page_size = page_size
+    viewer.colnum = {"HandId": 0}
     viewer.hands = HandCache()
     viewer._positions = None  # pylint: disable=protected-access
     viewer._loading = False  # pylint: disable=protected-access
     viewer.sent_heroes = {}
     viewer.model = _Model()
     viewer.view = MagicMock()
+    viewer._select_hand_row = lambda _hand_id: True
     viewer.pageLabel = MagicMock()
     viewer.prevPageButton = MagicMock()
     viewer.nextPageButton = MagicMock()
@@ -224,6 +226,59 @@ def test_a_stale_view_refreshes_its_hand_list(monkeypatch) -> None:
     assert viewer.all_handids == [7, 8, 9]
     assert viewer.model.rows == [7, 8]
     assert viewer._stale is False
+
+
+def test_import_invalidates_a_loaded_empty_result_set(monkeypatch) -> None:
+    viewer = GuiHandViewer.__new__(GuiHandViewer)  # pylint: disable=no-value-for-parameter
+    viewer._has_loaded_hand_query = True
+    viewer.all_handids = []
+    viewer.hand_search_status = MagicMock()
+
+    viewer.mark_stale()
+
+    assert viewer._stale is True
+
+
+def test_a_loaded_empty_result_set_refreshes_after_an_import(monkeypatch) -> None:
+    viewer = _viewer(monkeypatch, [])
+    viewer._has_loaded_hand_query = True
+    viewer._stale = True
+    viewer.filters = SimpleNamespace(getDates=lambda: ("start", "end"))
+    viewer.get_hand_ids_from_date_range = lambda *_dates: []
+    viewer.db = None
+    monkeypatch.setattr(viewer_module.gui_empty_state, "show_no_data", lambda *_args, **_kwargs: None)
+
+    assert viewer.refresh_if_stale() is True
+
+    assert viewer.all_handids == []
+    assert viewer._stale is False
+
+
+def test_import_does_not_load_an_untouched_empty_viewer() -> None:
+    viewer = GuiHandViewer.__new__(GuiHandViewer)  # pylint: disable=no-value-for-parameter
+    viewer._has_loaded_hand_query = False
+    viewer.all_handids = []
+    viewer.hand_search_status = MagicMock()
+
+    viewer.mark_stale()
+
+    assert getattr(viewer, "_stale", False) is False
+
+
+def test_stale_refresh_follows_selected_hand_after_its_id_is_returned_as_text(monkeypatch) -> None:
+    viewer = _viewer(monkeypatch, [1, 2, 3, 4])
+    viewer.render_page(0)
+    viewer._stale = True
+    viewer.filters = SimpleNamespace(getDates=lambda: ("start", "end"))
+    viewer.get_hand_ids_from_date_range = lambda *_dates: [7, 8, 9, 10]
+    selected = MagicMock()
+    selected.siblingAtColumn.return_value.data.return_value = "9"
+    viewer.view.selectionModel.return_value.selectedRows.return_value = [selected]
+
+    assert viewer.refresh_if_stale() is True
+
+    assert viewer.page == 1
+    assert viewer.model.rows == [9, 10]
 
 
 def test_cancelling_a_stale_refresh_keeps_the_current_page_and_stale_flag(monkeypatch) -> None:
