@@ -1,6 +1,6 @@
-"""Cash results per day, week and month, Qt free (#827).
+"""Cash results per day, week, month and year, Qt free (#827).
 
-The Results calendar shows what each day, week or month won. This module is
+The Results calendar shows what each day, week, month or year won. This module is
 its reusable core: it takes the hero's cash hands, files each one under the
 period it was played in and sums it there, and draws the four profit curves
 (net, all-in EV, showdown, non-showdown) of any set of hands.
@@ -36,7 +36,8 @@ from fpdb_3_legacy import hud_day
 DAY = "day"
 WEEK = "week"
 MONTH = "month"
-GRANULARITIES = (DAY, WEEK, MONTH)
+YEAR = "year"
+GRANULARITIES = (DAY, WEEK, MONTH, YEAR)
 
 #: Curves drawn by :func:`build_curves`, in drawing order.
 CURVES = ("net", "ev", "showdown", "nonshowdown")
@@ -58,6 +59,10 @@ class HandResult:  # pylint: disable=too-many-instance-attributes  # one field p
     big_blind_minor: Decimal
     currency: str
     player_id: int | None = None  # the hero's player of the hand, on its own site
+    vpip_opportunities: float = 0.0
+    vpip: float = 0.0
+    pfr_opportunities: float = 0.0
+    pfr: float = 0.0
 
     @property
     def has_bb(self) -> bool:
@@ -67,7 +72,7 @@ class HandResult:  # pylint: disable=too-many-instance-attributes  # one field p
 
 @dataclass
 class PeriodResult:  # pylint: disable=too-many-instance-attributes
-    """What one day, week or month won."""
+    """What one day, week, month or year won."""
 
     start: date
     granularity: str
@@ -77,6 +82,10 @@ class PeriodResult:  # pylint: disable=too-many-instance-attributes
     all_in_ev_bb: Decimal = ZERO
     showdown_bb: Decimal = ZERO
     nonshowdown_bb: Decimal = ZERO
+    vpip_opportunities: float = 0.0
+    vpip: float = 0.0
+    pfr_opportunities: float = 0.0
+    pfr: float = 0.0
     profit_minor: dict[str, Decimal] = field(default_factory=dict)
     all_in_ev_minor: dict[str, Decimal] = field(default_factory=dict)
     hand_ids: list[int] = field(default_factory=list)
@@ -96,10 +105,24 @@ class PeriodResult:  # pylint: disable=too-many-instance-attributes
         """All-in EV in big blinds per 100 hands, over the same hands as :attr:`bb_per_100`."""
         return self.all_in_ev_bb / self.bb_hands * HUNDRED if self.bb_hands else None
 
+    @property
+    def vpip_percent(self) -> float | None:
+        """VPIP rate, or None when the period has no VPIP opportunities."""
+        return self.vpip / self.vpip_opportunities * 100 if self.vpip_opportunities else None
+
+    @property
+    def pfr_percent(self) -> float | None:
+        """PFR rate, or None when the period has no PFR opportunities."""
+        return self.pfr / self.pfr_opportunities * 100 if self.pfr_opportunities else None
+
     def add(self, hand: HandResult) -> None:
         """Count ``hand`` in the period."""
         self.hands += 1
         self.hand_ids.append(hand.hand_id)
+        self.vpip_opportunities += hand.vpip_opportunities
+        self.vpip += hand.vpip
+        self.pfr_opportunities += hand.pfr_opportunities
+        self.pfr += hand.pfr
         self.profit_minor[hand.currency] = self.profit_minor.get(hand.currency, ZERO) + hand.profit_minor
         self.all_in_ev_minor[hand.currency] = self.all_in_ev_minor.get(hand.currency, ZERO) + hand.all_in_ev_minor
         if hand.has_bb:
@@ -126,7 +149,8 @@ def parse_hands(rows: Iterable[Sequence[Any]]) -> list[HandResult]:
     """Rows of ``periodResultsHands``, ordered by start time then hand id.
 
     ``(hand id, start time, profit, all-in EV, saw showdown, big blind, currency,
-    player id)``; the start time is a datetime, or text on SQLite. A missing
+    player id, VPIP opportunity, VPIP, PFR opportunity, PFR)``; the start time is
+    a datetime, or text on SQLite. A missing
     all-in EV is the hand's result; the player id may be left out.
     """
     hands = []
@@ -145,6 +169,10 @@ def parse_hands(rows: Iterable[Sequence[Any]]) -> list[HandResult]:
                 big_blind_minor=_number(row[5]),
                 currency=str(row[6] or "UNKNOWN").upper(),
                 player_id=int(row[7]) if len(row) > 7 and row[7] is not None else None,
+                vpip_opportunities=float(row[8]) if len(row) > 8 and row[8] is not None else 0.0,
+                vpip=float(row[9]) if len(row) > 9 and row[9] is not None else 0.0,
+                pfr_opportunities=float(row[10]) if len(row) > 10 and row[10] is not None else 0.0,
+                pfr=float(row[11]) if len(row) > 11 and row[11] is not None else 0.0,
             ),
         )
     hands.sort(key=lambda hand: (hand.start_time, hand.hand_id))
@@ -158,13 +186,15 @@ def local_day(start_time: datetime, day_start: float = 0.0) -> date:
 
 
 def period_start(day: date, granularity: str) -> date:
-    """First day of the day, week (Monday) or month holding ``day``."""
+    """First day of the day, week (Monday), month or year holding ``day``."""
     if granularity == DAY:
         return day
     if granularity == WEEK:
         return day - timedelta(days=day.weekday())
     if granularity == MONTH:
         return day.replace(day=1)
+    if granularity == YEAR:
+        return day.replace(month=1, day=1)
     msg = f"unknown granularity {granularity!r}"
     raise ValueError(msg)
 
@@ -177,6 +207,8 @@ def period_end(start: date, granularity: str) -> date:
         return start + timedelta(days=6)
     if granularity == MONTH:
         return start.replace(day=calendar.monthrange(start.year, start.month)[1])
+    if granularity == YEAR:
+        return date(start.year, 12, 31)
     msg = f"unknown granularity {granularity!r}"
     raise ValueError(msg)
 
@@ -216,6 +248,10 @@ def total(periods: Iterable[PeriodResult], granularity: str = "total") -> Period
         result.all_in_ev_bb += period.all_in_ev_bb
         result.showdown_bb += period.showdown_bb
         result.nonshowdown_bb += period.nonshowdown_bb
+        result.vpip_opportunities += period.vpip_opportunities
+        result.vpip += period.vpip
+        result.pfr_opportunities += period.pfr_opportunities
+        result.pfr += period.pfr
         result.hand_ids.extend(period.hand_ids)
         for currency, amount in period.profit_minor.items():
             result.profit_minor[currency] = result.profit_minor.get(currency, ZERO) + amount
@@ -328,7 +364,7 @@ class Results:
 
 
 def build_results(rows: Iterable[Sequence[Any]], day_start: float = 0.0) -> Results:
-    """Parse ``periodResultsHands`` rows and sum them per day, week and month."""
+    """Parse ``periodResultsHands`` rows and sum them per day, week, month and year."""
     hands = parse_hands(rows)
     days = [local_day(hand.start_time, day_start) for hand in hands]
     periods = {granularity: tuple(aggregate(hands, granularity, days=days)) for granularity in GRANULARITIES}
@@ -340,6 +376,7 @@ __all__ = [
     "DAY",
     "GRANULARITIES",
     "MONTH",
+    "YEAR",
     "UNIT_BB",
     "WEEK",
     "Curves",

@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-24 13:38+0100\n"
+"POT-Creation-Date: 2026-11-26 06:10+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -8481,6 +8481,10 @@ msgid "Click to select the whole month"
 msgstr "Cliquer pour sélectionner tout le mois"
 
 #: fpdb_3_legacy/results_calendar.py
+msgid "Click to select this year"
+msgstr "Cliquer pour sélectionner cette année"
+
+#: fpdb_3_legacy/results_calendar.py
 msgid "Days"
 msgstr "Jours"
 
@@ -8516,6 +8520,10 @@ msgid "Next month"
 msgstr "Mois suivant"
 
 #: fpdb_3_legacy/results_calendar.py
+msgid "Next year"
+msgstr "Année suivante"
+
+#: fpdb_3_legacy/results_calendar.py
 msgid "Non-showdown (BB)"
 msgstr "Sans-showdown (BB)"
 
@@ -8525,12 +8533,20 @@ msgstr ""
 "Ouvrir les mains de la période sélectionnée dans la visionneuse de mains"
 
 #: fpdb_3_legacy/results_calendar.py
+msgid "PFR %"
+msgstr "PFR %"
+
+#: fpdb_3_legacy/results_calendar.py
 msgid "Period:"
 msgstr "Période :"
 
 #: fpdb_3_legacy/results_calendar.py
 msgid "Previous month"
 msgstr "Mois précédent"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Previous year"
+msgstr "Année précédente"
 
 #: fpdb_3_legacy/results_calendar.py
 msgid "Profit (BB)"
@@ -8550,8 +8566,16 @@ msgid "Showdown (BB)"
 msgstr "Showdown (BB)"
 
 #: fpdb_3_legacy/results_calendar.py
+msgid "This year"
+msgstr "Cette année"
+
+#: fpdb_3_legacy/results_calendar.py
 msgid "Unit:"
 msgstr "Unité :"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "VPIP %"
+msgstr "VPIP %"
 
 #: fpdb_3_legacy/results_calendar.py
 msgid "Week"
@@ -8565,6 +8589,10 @@ msgstr "Semaine du {date}"
 #: fpdb_3_legacy/results_calendar.py
 msgid "Weeks"
 msgstr "Semaines"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Years"
+msgstr "Années"
 
 #: fpdb_3_legacy/results_calendar.py
 #, python-brace-format
