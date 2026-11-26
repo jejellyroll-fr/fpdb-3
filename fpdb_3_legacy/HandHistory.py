@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-from __future__ import annotations
-
 """HandHistory.py.
 
 Parses HandHistory xml files and returns requested objects.
 """
+
+from __future__ import annotations
 
 from xml.parsers.expat import ExpatError
 
