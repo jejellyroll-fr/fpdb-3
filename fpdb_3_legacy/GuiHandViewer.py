@@ -70,6 +70,7 @@ from fpdb_3_legacy.holdem_classes import RANKS, grid_labels
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_currency, format_number, format_utc_datetime
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.work_priority import interactive_work
 
 log = get_logger("gui_hand_viewer")
 
@@ -725,17 +726,17 @@ class GuiHandViewer(QSplitter):
         return card_images
 
     def loadHands(self, checkState) -> None:
-        hand_ids = self.get_hand_ids_from_date_range(
-            self.filters.getDates()[0],
-            self.filters.getDates()[1],
-        )
-        # ! print(hand_ids)
-        if not getattr(self, "_last_hand_query_ok", True):
-            return
-        if self.reload_hands(hand_ids):
-            self._has_loaded_hand_query = True
-            self._stale = False
-            self._set_search_status("")
+        with interactive_work("hand-viewer-load"):
+            hand_ids = self.get_hand_ids_from_date_range(
+                self.filters.getDates()[0],
+                self.filters.getDates()[1],
+            )
+            if not getattr(self, "_last_hand_query_ok", True):
+                return
+            if self.reload_hands(hand_ids):
+                self._has_loaded_hand_query = True
+                self._stale = False
+                self._set_search_status("")
 
     def get_hand_ids_from_date_range(self, start, end):
         self._last_hand_query_ok = False
@@ -836,22 +837,31 @@ class GuiHandViewer(QSplitter):
             return card1 * 14 * 14 + card2 * 14 + suit1
         return 0
 
-    def reload_hands(self, handids, heroes: Mapping[Any, str] | None = None) -> bool:
+    def reload_hands(
+        self,
+        handids,
+        heroes: Mapping[Any, str] | None = None,
+        *,
+        external_hand_selection: bool = False,
+    ) -> bool:
         """Show ``handids``; ``heroes`` names each hand's hero when another tab sends them.
 
         The Results calendar knows whose hands it sends, which this tab's own
         filters may not (a hero profile selected there, not here): without it,
-        a hand with no hero by these filters was left out (#827). The hero is
+        a hand with no hero by these filters was left out (#827). ``heroes`` is
         given hand by hand, never as a set of names, which on another site can
-        be an opponent's.
+        be an opponent's. ``external_hand_selection`` marks subsets such as a
+        session opened from the Session Viewer that must survive automatic
+        refreshes independently of hero overrides.
         """
         if self._loading:
             return False
         self._set_search_status("")
         handids = list(handids)
+        external_selection = external_hand_selection or heroes is not None
         if not handids:
             self.sent_heroes = dict(heroes or {})
-            self._external_hand_selection = heroes is not None
+            self._external_hand_selection = external_selection
             self.hands = HandCache()
             self.all_handids = []
             self._positions = None
@@ -860,12 +870,13 @@ class GuiHandViewer(QSplitter):
             self._update_pager()
             gui_empty_state.show_no_data(self, context="Hand viewer", db=self.db)
             self._has_loaded_hand_query = True
+            self._stale = False
             return True
         previous_heroes = self.sent_heroes
         previous_external_selection = getattr(self, "_external_hand_selection", False)
         # importhand reads it while the new hands are rebuilt.
         self.sent_heroes = dict(heroes or {})
-        self._external_hand_selection = heroes is not None
+        self._external_hand_selection = external_selection
         # The hero of a cached hand depends on the filters it was loaded with,
         # so the new hands go into a cache of their own. The table on screen
         # keeps its cache, and stays usable, until the new page replaces it;
@@ -875,6 +886,7 @@ class GuiHandViewer(QSplitter):
             self._external_hand_selection = previous_external_selection
             return False
         self._has_loaded_hand_query = True
+        self._stale = False
         return True
 
     def page_count(self) -> int:
@@ -887,7 +899,8 @@ class GuiHandViewer(QSplitter):
 
         Returns False, leaving the page shown before untouched, when aborted.
         """
-        return self._show_page(self.all_handids, self.page if page is None else page, self.hands)
+        with interactive_work("hand-viewer-page"):
+            return self._show_page(self.all_handids, self.page if page is None else page, self.hands)
 
     def _show_page(self, handids: list[Any], page: int, cache: HandCache) -> bool:
         """Rebuild page ``page`` of ``handids`` into ``cache``, then show it.
@@ -976,20 +989,21 @@ class GuiHandViewer(QSplitter):
         It looks the number up in the database, so pages never shown are
         searched too, and no hand is rebuilt but the page it is on.
         """
-        found = self._lookup_hand(text)
-        if isinstance(found, str):
-            self._set_search_status(found)
-            return False
-        hand_id, page = found
-        if page != self.page and not self.render_page(page):
-            self._set_search_status("")
-            return False
-        selected = self._select_hand_row(hand_id)
-        if selected:
-            self._set_search_status(_("Hand {} on page {}").format(hand_id, page + 1))
-        else:
-            self._set_search_status(_("Hand is on page {} but hidden (no hero or card filter)").format(page + 1))
-        return selected
+        with interactive_work("hand-viewer-search"):
+            found = self._lookup_hand(text)
+            if isinstance(found, str):
+                self._set_search_status(found)
+                return False
+            hand_id, page = found
+            if page != self.page and not self._show_page(self.all_handids, page, self.hands):
+                self._set_search_status("")
+                return False
+            selected = self._select_hand_row(hand_id)
+            if selected:
+                self._set_search_status(_("Hand {} on page {}").format(hand_id, page + 1))
+            else:
+                self._set_search_status(_("Hand is on page {} but hidden (no hero or card filter)").format(page + 1))
+            return selected
 
     def _lookup_hand(self, text: str) -> tuple[Any, int] | str:
         """The loaded hand numbered ``text`` and its page, or what to tell the user."""

@@ -230,6 +230,23 @@ def test_aborting_new_hands_leaves_the_hands_shown_before(monkeypatch) -> None:
     assert 7 not in viewer.hands
 
 
+def test_external_hand_subset_without_heroes_survives_stale_refresh(monkeypatch) -> None:
+    viewer = _viewer(monkeypatch, [1, 2, 3])
+    viewer.filters = SimpleNamespace(end_read_transaction=MagicMock())
+    viewer.get_hand_ids_from_date_range = MagicMock(side_effect=AssertionError("must keep the supplied subset"))
+
+    assert viewer.reload_hands([7, 8, 9], external_hand_selection=True) is True
+    viewer.mark_stale()
+
+    assert viewer._stale is True
+    assert viewer.refresh_if_stale() is True
+
+    assert viewer.all_handids == [7, 8, 9]
+    assert viewer.model.rows == [7, 8]
+    viewer.get_hand_ids_from_date_range.assert_not_called()
+    viewer.filters.end_read_transaction.assert_called_once_with()
+
+
 def test_a_stale_view_refreshes_its_hand_list(monkeypatch) -> None:
     viewer = _viewer(monkeypatch, [1, 2, 3])
     viewer.render_page(0)

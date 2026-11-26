@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-26 06:13+0100\n"
+"POT-Creation-Date: 2026-11-26 21:42+0100\n"
 "PO-Revision-Date: 2011-04-07 08:53+0000\n"
 "Last-Translator: steffen123 <steffen@schaumburger.info>\n"
 "Language-Team: Chinese (China) <>\n"
@@ -9343,6 +9343,10 @@ msgid "Click to select the whole month"
 msgstr ""
 
 #: fpdb_3_legacy/results_calendar.py
+msgid "Click to select this year"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
 msgid "Days"
 msgstr ""
 
@@ -9380,6 +9384,11 @@ msgstr "下一个行动"
 
 #: fpdb_3_legacy/results_calendar.py
 #, fuzzy
+msgid "Next year"
+msgstr "下一个"
+
+#: fpdb_3_legacy/results_calendar.py
+#, fuzzy
 msgid "Non-showdown (BB)"
 msgstr "非摊牌"
 
@@ -9389,12 +9398,21 @@ msgid "Open the hands of the selected period in the Hand Viewer"
 msgstr "没有玩家匹配所选站点和主角。"
 
 #: fpdb_3_legacy/results_calendar.py
+msgid "PFR %"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
 msgid "Period:"
 msgstr ""
 
 #: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Previous month"
+msgstr "上一个行动"
+
+#: fpdb_3_legacy/results_calendar.py
+#, fuzzy
+msgid "Previous year"
 msgstr "上一个行动"
 
 #: fpdb_3_legacy/results_calendar.py
@@ -9418,8 +9436,17 @@ msgid "Showdown (BB)"
 msgstr "摊牌"
 
 #: fpdb_3_legacy/results_calendar.py
+msgid "This year"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
 msgid "Unit:"
 msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+#, fuzzy
+msgid "VPIP %"
+msgstr "VPIP"
 
 #: fpdb_3_legacy/results_calendar.py
 msgid "Week"
@@ -9432,6 +9459,10 @@ msgstr ""
 
 #: fpdb_3_legacy/results_calendar.py
 msgid "Weeks"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Years"
 msgstr ""
 
 #: fpdb_3_legacy/results_calendar.py

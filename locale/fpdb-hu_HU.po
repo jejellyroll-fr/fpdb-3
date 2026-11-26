@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-26 06:13+0100\n"
+"POT-Creation-Date: 2026-11-26 21:42+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -9406,6 +9406,10 @@ msgid "Click to select the whole month"
 msgstr ""
 
 #: fpdb_3_legacy/results_calendar.py
+msgid "Click to select this year"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Days"
 msgstr "Az elmúlt %s nap"
@@ -9444,6 +9448,11 @@ msgstr "Következő lépés"
 
 #: fpdb_3_legacy/results_calendar.py
 #, fuzzy
+msgid "Next year"
+msgstr "Következő"
+
+#: fpdb_3_legacy/results_calendar.py
+#, fuzzy
 #| msgid "Non-showdown"
 msgid "Non-showdown (BB)"
 msgstr "Mutatás nélkül:"
@@ -9454,12 +9463,21 @@ msgid "Open the hands of the selected period in the Hand Viewer"
 msgstr "Egyetlen játékos sem felel meg a kiválasztott teremnek és hősnek."
 
 #: fpdb_3_legacy/results_calendar.py
+msgid "PFR %"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
 msgid "Period:"
 msgstr ""
 
 #: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Previous month"
+msgstr "Előző lépés"
+
+#: fpdb_3_legacy/results_calendar.py
+#, fuzzy
+msgid "Previous year"
 msgstr "Előző lépés"
 
 #: fpdb_3_legacy/results_calendar.py
@@ -9485,8 +9503,17 @@ msgid "Showdown (BB)"
 msgstr "Mutatással:"
 
 #: fpdb_3_legacy/results_calendar.py
+msgid "This year"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
 msgid "Unit:"
 msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+#, fuzzy
+msgid "VPIP %"
+msgstr "VPIP"
 
 #: fpdb_3_legacy/results_calendar.py
 msgid "Week"
@@ -9499,6 +9526,10 @@ msgstr ""
 
 #: fpdb_3_legacy/results_calendar.py
 msgid "Weeks"
+msgstr ""
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Years"
 msgstr ""
 
 #: fpdb_3_legacy/results_calendar.py

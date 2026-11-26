@@ -80,7 +80,9 @@ def period_results_queries() -> dict[str, str]:
     return {
         "periodResultsHands": """
         SELECT h.id, h.startTime, hp.totalProfit, COALESCE(hp.allInEV, hp.totalProfit),
-               hp.sawShowdown, gt.bigBlind, gt.currency, hp.playerId
+               hp.sawShowdown, gt.bigBlind, gt.currency, hp.playerId,
+               hp.street0VPIChance, hp.street0VPI,
+               hp.street0AggrChance, hp.street0Aggr
         FROM HandsPlayers hp
         INNER JOIN Hands h         ON  (h.id  = hp.handId)
         INNER JOIN Gametypes gt    ON  (gt.id = h.gametypeId)
