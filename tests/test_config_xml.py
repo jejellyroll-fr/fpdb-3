@@ -458,6 +458,18 @@ def test_elementtree_element_can_be_imported_into_a_caller_owned_dom() -> None:
     assert cx.parent_of(target, imported) is target.documentElement
 
 
+def test_dom_element_can_be_imported_into_an_elementtree_document() -> None:
+    source = defusedxml.minidom.parseString('<profile><ss name="copied"/></profile>')
+    target = cx.new_document("package")
+
+    imported = target.importNode(source.documentElement, True)
+    target.root.appendChild(imported)
+
+    assert cx.tag_of(imported) == "profile"
+    assert cx.attr(cx.find_first(imported, "ss"), "name") == "copied"
+    assert imported.parentNode is target.root
+
+
 def test_a_cloned_document_is_written_the_same_and_edited_apart(doc, backend) -> None:
     clone = cx.clone_document(doc)
 

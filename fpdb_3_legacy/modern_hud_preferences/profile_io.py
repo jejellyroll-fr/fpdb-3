@@ -318,7 +318,7 @@ def write_profile_items(doc: Any, stat_set_node: Any, profile: Any, rows: int, c
     """Replace the children of ``stat_set_node`` with the profile's items."""
     stat_set_node.setAttribute("rows", str(rows))
     stat_set_node.setAttribute("cols", str(cols))
-    while stat_set_node.firstChild:
+    while stat_set_node.firstChild is not None:
         stat_set_node.removeChild(stat_set_node.firstChild)
 
     blocks = profile.get("blocks") if isinstance(profile, dict) else None

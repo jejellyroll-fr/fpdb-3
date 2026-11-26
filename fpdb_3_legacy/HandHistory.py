@@ -6,13 +6,9 @@ from __future__ import annotations
 Parses HandHistory xml files and returns requested objects.
 """
 
-# Pylint classifies this XML parser import inconsistently with the standard library.
-# pylint: disable=wrong-import-order
 from xml.parsers.expat import ExpatError
 
-import defusedxml.ElementTree
-
-# pylint: enable=wrong-import-order
+from fpdb_3_legacy import config_xml
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 #    Copyright 2008-2011, Ray E. Barker
@@ -51,9 +47,11 @@ def _attribute(node, name: str) -> str:
 
 
 def _direct_text(node) -> str:
+    if hasattr(node, "text"):
+        return node.text or ""
     if hasattr(node, "childNodes"):
         return "".join(child.data for child in node.childNodes if child.nodeType == child.TEXT_NODE)
-    return node.text or ""
+    return ""
 
 
 class HandHistory:
@@ -61,8 +59,8 @@ class HandHistory:
     # pylint: disable=invalid-name
     def __init__(self, xml_string, elements=("ALL")) -> None:
         try:
-            root = defusedxml.ElementTree.fromstring(xml_string)
-        except defusedxml.ElementTree.ParseError as exc:
+            root = config_xml.root(config_xml.parse_string(xml_string))
+        except config_xml.ParseError as exc:
             raise ExpatError(str(exc)) from exc
         if elements == ("ALL"):
             elements = ("BETTING", "AWARDS", "POSTS", "PLAYERS", "GAME")

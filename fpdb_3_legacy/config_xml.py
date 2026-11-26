@@ -77,7 +77,12 @@ class ConfigDocument:
     def createTextNode(self, text: str) -> _TextNode:
         return _TextNode(text)
 
-    def importNode(self, node: ET.Element, deep: bool = True) -> ConfigElement:
+    def importNode(self, node: Any, deep: bool = True) -> ConfigElement:
+        if _is_dom(node):
+            if deep:
+                return _parse_etree(node.toxml()).root
+            attributes = {attribute.name: attribute.value for attribute in node.attributes.values()}
+            return ConfigElement(node.tagName, attributes)
         return cast(ConfigElement, copy.deepcopy(node)) if deep else ConfigElement(node.tag, node.attrib)
 
     def appendChild(self, node: ConfigElement) -> ConfigElement:
