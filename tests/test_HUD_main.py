@@ -2231,6 +2231,15 @@ def test_new_tournament_table_uses_the_previous_table_scope(hud_main) -> None:
     assert hud_main._hud_params_for_new_table("ring", "1160377") == hud_main.hud_params
 
 
+def test_the_database_worker_is_told_the_saved_tournament_scope(hud_main) -> None:
+    hud_main._tournament_hud_params = {"1160377": {"agg_bb_mult": 10000}}
+
+    request = hud_main._build_batch_request(["901"])
+    hud_main._tournament_hud_params["1160377"]["agg_bb_mult"] = 1
+
+    assert request.tournament_hud_params == {"1160377": {"agg_bb_mult": 10000}}
+
+
 def test_another_tournament_is_left_where_it_is(hud_main) -> None:
     hud_main.hud_dict = {"81498 Table 4": _tour_hud("81498 Table 4")}
 
