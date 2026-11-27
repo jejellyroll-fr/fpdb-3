@@ -26,6 +26,10 @@ _BACKGROUND_PAUSED = False
 _BACKGROUND_ACTIVE = 0
 
 
+class BackgroundWorkCancelled(Exception):
+    """A background unit was cancelled at a safe cooperative checkpoint."""
+
+
 @contextlib.contextmanager
 def background_work(name: str) -> Iterator[None]:
     """Mark one indivisible background unit (currently one imported file)."""
@@ -41,8 +45,8 @@ def background_work(name: str) -> Iterator[None]:
         with _condition:
             _BACKGROUND_ACTIVE -= 1
             _condition.notify_all()
-        if duration_ms >= 1000:
-            log.warning("[PERF] background-work name=%s duration=%.0fms", name, duration_ms)
+        level = logging.WARNING if duration_ms >= 1000 else logging.DEBUG
+        log.log(level, "[PERF] background-work name=%s duration=%.0fms", name, duration_ms)
 
 
 @contextlib.contextmanager
@@ -82,9 +86,11 @@ def interactive_work(name: str) -> Iterator[None]:
         )
 
 
-def background_checkpoint(name: str) -> None:
+def background_checkpoint(name: str, cancel_event: threading.Event | None = None) -> None:
     """Yield at a safe boundary, then guarantee a bounded background turn."""
     global _BACKGROUND_PAUSED
+    if cancel_event is not None and cancel_event.is_set():
+        raise BackgroundWorkCancelled(f"Background work cancelled before checkpoint: {name}")
     started = time.monotonic()
     with _condition:
         if not _INTERACTIVE_WAITERS and not _INTERACTIVE_ACTIVE:
@@ -98,10 +104,13 @@ def background_checkpoint(name: str) -> None:
         _condition.notify_all()
     waited_ms = (time.monotonic() - started) * 1000
     log.debug("[PERF] background-checkpoint name=%s yielded=%.0fms", name, waited_ms)
+    if cancel_event is not None and cancel_event.is_set():
+        raise BackgroundWorkCancelled(f"Background work cancelled at checkpoint: {name}")
 
 
 __all__ = [
     "BACKGROUND_TURN_SECONDS",
+    "BackgroundWorkCancelled",
     "INTERACTIVE_WAIT_SECONDS",
     "background_checkpoint",
     "background_work",
