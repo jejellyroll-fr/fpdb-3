@@ -15,7 +15,7 @@ class _Handle:
         self.result = result
         self.calls = 0
 
-    def startSystemMove(self) -> bool:
+    def startSystemMove(self) -> bool:  # pylint: disable=invalid-name
         self.calls += 1
         return self.result
 
@@ -37,10 +37,10 @@ def test_windows_does_not_use_native_move_when_qt_reports_success(monkeypatch) -
         def pos(self) -> QPoint:
             return QPoint(100, 200)
 
-        def windowHandle(self) -> _Handle:
+        def windowHandle(self) -> _Handle:  # pylint: disable=invalid-name
             return handle
 
-        def grabMouse(self) -> None:
+        def grabMouse(self) -> None:  # pylint: disable=invalid-name
             grabbed.append(True)
 
     event = SimpleNamespace(globalPosition=lambda: SimpleNamespace(toPoint=lambda: QPoint(120, 220)))
@@ -67,13 +67,13 @@ def test_windows_manual_drag_release_reaches_layout_callback(monkeypatch) -> Non
         def pos(self) -> QPoint:
             return self._pos
 
-        def windowHandle(self) -> _Handle:
+        def windowHandle(self) -> _Handle:  # pylint: disable=invalid-name
             return handle
 
-        def grabMouse(self) -> None:
+        def grabMouse(self) -> None:  # pylint: disable=invalid-name
             grabbed.append(True)
 
-        def releaseMouse(self) -> None:
+        def releaseMouse(self) -> None:  # pylint: disable=invalid-name
             released.append(True)
 
     seat = FakeSeat()
