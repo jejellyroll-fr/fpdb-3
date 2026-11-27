@@ -3516,6 +3516,22 @@ def test_a_window_taken_over_by_the_next_match_drops_its_hud(hud_main) -> None:
     stale.assert_called_once_with(hud)
 
 
+def test_a_timer_driven_table_switch_preserves_tournament_scope(hud_main) -> None:
+    """The geometry poll saves scope before it removes a stale tournament HUD."""
+    table = _tour_table([1200531183, 1200533055])
+    table.tournament = 1200531182
+    hud = SimpleNamespace(
+        table=table,
+        hud_params={"agg_bb_mult": 10000, "h_agg_bb_mult": 10000, "stat_range": "A"},
+    )
+
+    with patch.object(hud_main, "table_is_stale"):
+        hud_main._handle_tour_table_switch(hud, table)
+        hud_main._handle_tour_table_switch(hud, table)
+
+    assert hud_main._tournament_hud_params["1200531182"] == hud.hud_params
+
+
 def test_a_title_without_a_table_id_never_signals_a_switch(hud_main) -> None:
     """Sites whose title omits the table id must not have their HUD killed."""
     table = _tour_table([False, False])

@@ -142,6 +142,12 @@ class HudMainTablesMixin(HudMainBase):
                 seen,
                 baseline,
             )
+            # The status timer can detect the move before the next imported
+            # hand reaches _handle_tournament_table_changes(). Preserve the
+            # player's selected scope before table_is_stale() removes the HUD.
+            tour_number = getattr(table, "tournament", None)
+            if tour_number is not None:
+                self._remember_tournament_hud_params(str(tour_number), hud)
             self.table_is_stale(hud)
 
     def _topify_mac_windows(self) -> None:
