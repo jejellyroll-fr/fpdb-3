@@ -4136,8 +4136,6 @@ msgid "All time"
 msgstr "Depuis toujours"
 
 #: fpdb_3_legacy/hud_options_panel.py
-#, fuzzy
-#| msgid "All levels"
 msgid "Any blind level"
 msgstr "Tous les niveaux"
 
@@ -4165,7 +4163,7 @@ msgstr "Adversaires"
 msgid ""
 "Period is independent from blind level. All time does not change the "
 "selected blind range."
-msgstr ""
+msgstr "La période est indépendante des blindes. « Depuis toujours » ne modifie pas la plage de blindes sélectionnée."
 
 #: fpdb_3_legacy/hud_options_panel.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -4175,7 +4173,7 @@ msgstr "Sièges"
 #: fpdb_3_legacy/hud_options_panel.py
 msgid ""
 "Select which blind levels are included; Any blind level includes every level."
-msgstr ""
+msgstr "Choisissez les niveaux de blindes à inclure ; « Toutes les blindes » inclut tous les niveaux."
 
 #: fpdb_3_legacy/hud_options_panel.py
 msgid "This level"
