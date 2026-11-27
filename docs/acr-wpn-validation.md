@@ -29,8 +29,8 @@ Send the questions below to ACR/WPN support or the game-integrity team. Keep the
 >    hands in which that same player participated permitted under §4.1.3,
 >    notwithstanding §4.3.0?
 > 2. Does §4.2.11 prohibit a separate HUD window placed over the table area if
-   it does not cover, replace or alter any ACR table graphics, cards, controls
-   or security indicators? Is placement beside the table required?
+>    it does not cover, replace or alter any ACR table graphics, cards, controls
+>    or security indicators? Is placement beside the table required?
 > 3. Would a panel that selects among historical statistics based on the
    current table situation be prohibited even when it reveals no current-hand
    information? fpdb currently disables dynamic and position-bound panels at
