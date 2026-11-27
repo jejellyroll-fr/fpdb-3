@@ -34,9 +34,10 @@ removes power.
 Threading follows the ring-stats pattern: queries run on a worker QThread,
 never on the Qt event loop. Every query carries a serial number; a finished
 query whose serial is no longer current is dropped instead of overwriting a
-newer result -- the stale-result race the issue names. Cancellation bumps
-the serial and clears the wait, which ends the wait promptly without
-touching the worker the engine runs on.
+newer result -- the stale-result race the issue names. Cancellation invalidates
+the serial and requests interruption. Since DB-API calls cannot be interrupted
+safely on every backend, a worker finishes its current call and discards its
+result. Closing a tab waits until every owned worker has finished.
 """
 
 from __future__ import annotations
@@ -181,8 +182,16 @@ class _QueryWorker(QThread):
             with _worker_database(self._db) as db:
                 result = self._task(db)
         except Exception as exc:  # noqa: BLE001 - worker boundary reports errors via signal.
+            if self.isInterruptionRequested():
+                return
             log.exception("Research query failed")
             self.failed.emit(str(exc), self.serial)
+            return
+        # DB-API calls cannot be interrupted safely on every supported backend.
+        # A cancelled task therefore finishes its current call, then drops the
+        # result before it can queue a UI callback.
+        if self.isInterruptionRequested():
+            log.debug("Research query cancelled after worker returned: serial=%d", self.serial)
             return
         self.finished_ok.emit(result, self.serial)
 
@@ -214,8 +223,13 @@ class _DrillWorker(QThread):
             with _worker_database(self._db) as db:
                 drill = rb.run_drill_down(db, self._query, group=self._group, numerator_only=self._numerator)
         except Exception as exc:  # noqa: BLE001
+            if self.isInterruptionRequested():
+                return
             log.exception("Research drill-down failed")
             self.failed.emit(str(exc), self.serial)
+            return
+        if self.isInterruptionRequested():
+            log.debug("Research drill-down cancelled after worker returned: serial=%d", self.serial)
             return
         self.finished_ok.emit(drill, self.serial)
 
@@ -1334,12 +1348,11 @@ texture*. The label already existed; nothing called it. Technical names
         return lambda db: rb.execute_preset(db, {**preset, "group_by": ()})
 
     def _start_task(self, task: Any) -> None:
-        # A finished worker is only retired here, at replacement time: the
-        # signal between its ``run`` end and ``finished_ok`` delivery still
-        # names the live widget, and dropping the reference earlier would
-        # garbage-collect the thread mid-emission and eat the callback.
-        if self._worker is not None and not self._worker.isRunning():
-            self._worker.deleteLater()
+        # Replacing a query invalidates its serial and requests cooperative
+        # cancellation. The worker owns its DB call and may only stop after
+        # that call returns, so keep it alive until then.
+        if self._worker is not None:
+            self._retire_worker(self._worker)
             self._worker = None
         self._query_serial += 1
         # In stacked mode the filters pane is about to stop being useful: make
@@ -1372,14 +1385,21 @@ texture*. The label already existed; nothing called it. Technical names
         return _run
 
     def _cancel_query(self) -> None:
-        """Stop waiting for the running query; its result will be dropped."""
+        """Stop waiting and discard the result after the current DB call."""
         self._query_serial += 1
         self.cancel_button.setVisible(False)
         self.sample_label.setText("")
         self.result_note.setText(_("Query cancelled."))
         if self._worker is not None:
-            self._retired_workers.append(self._worker)
+            self._retire_worker(self._worker)
             self._worker = None
+
+    def _retire_worker(self, worker: QThread) -> None:
+        """Request cancellation while retaining ownership of an in-flight thread."""
+        worker.requestInterruption()
+        self._retired_workers = live_workers(self._retired_workers)
+        if worker not in self._retired_workers:
+            self._retired_workers.append(worker)
 
     def _on_query_done(self, result: Any, serial: int) -> None:
         """A finished query: render it, unless a newer query superseded it.
@@ -1819,6 +1839,9 @@ texture*. The label already existed; nothing called it. Technical names
         self.hands_stack.setCurrentIndex(0)
         numerator = self.drill_mode_combo.currentIndex() == 1
         self._drill_serial += 1
+        if self._drill_worker is not None:
+            self._retire_worker(self._drill_worker)
+            self._drill_worker = None
         self.drill_note.setText(_("Loading hands…"))
         worker = _DrillWorker(self.db, self._current_query, dict(group), numerator, self._drill_serial, self)
         worker.finished_ok.connect(self._on_drill_done)
@@ -2123,15 +2146,19 @@ texture*. The label already existed; nothing called it. Technical names
         ``fpdb.close_tab`` removes a page from the tab widget and calls this
         hook directly; removed child widgets do not receive ``closeEvent``.
         """
+        # Invalidate callbacks before waiting: a completed worker may already
+        # have queued a result for the GUI thread when its tab is closed.
+        self._query_serial += 1
+        self._drill_serial += 1
         workers = live_workers(
             [*self._retired_workers, *([self._worker] if self._worker is not None else []),
              *([self._drill_worker] if self._drill_worker is not None else [])],
         )
         for worker in workers:
-            if (
-                worker.isRunning()
-                and not worker.wait(SourceHandsPane.SHUTDOWN_WAIT_MS)
-            ):
+            if worker.isRunning():
+                worker.requestInterruption()
+        for worker in workers:
+            if worker.isRunning() and not worker.wait(SourceHandsPane.SHUTDOWN_WAIT_MS):
                 worker.wait()
         self._retired_workers.clear()
         self._worker = None

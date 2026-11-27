@@ -10,6 +10,7 @@ stale results dropped, presets applied and saved, and empty states explained.
 
 from __future__ import annotations
 
+import threading
 import time
 from pathlib import Path
 
@@ -358,6 +359,70 @@ def test_cancel_bumps_the_serial_and_clears_the_wait(browser) -> None:
     assert browser._query_serial == 4
     assert not browser.cancel_button.isVisible()
     assert "cancelled" in browser.result_note.text().lower()
+
+
+def test_replacing_a_query_interrupts_and_discards_the_old_result(browser, qtbot, monkeypatch) -> None:
+    """A superseded query finishes its active DB call but cannot update the view."""
+    started = threading.Event()
+    release = threading.Event()
+    rendered: list[object] = []
+    monkeypatch.setattr(browser, "_with_scope", lambda task: task)
+    monkeypatch.setattr(browser, "_render", rendered.append)
+
+    def old_task(_db):
+        started.set()
+        assert release.wait(5)
+        return "stale", None
+
+    browser._start_task(old_task)
+    old_worker = browser._worker
+    assert old_worker is not None
+    assert started.wait(5)
+
+    browser._start_task(lambda _db: ("current", None))
+
+    assert old_worker.isInterruptionRequested()
+    assert old_worker in browser._retired_workers
+    qtbot.waitUntil(lambda: browser._worker is None, timeout=15000)
+    get_qapp().processEvents()
+    assert rendered == ["current"]
+
+    with qtbot.waitSignal(old_worker.finished, timeout=10_000):
+        release.set()
+    qtbot.wait(20)
+    assert rendered == ["current"]
+
+
+def test_shutdown_interrupts_and_owns_a_running_query_until_it_finishes(browser, monkeypatch) -> None:
+    started = threading.Event()
+    release = threading.Event()
+    shutdown_observed = threading.Event()
+    monkeypatch.setattr(browser, "_with_scope", lambda task: task)
+
+    def blocking_task(_db):
+        started.set()
+        assert release.wait(5)
+        return "discarded", None
+
+    browser._start_task(blocking_task)
+    worker = browser._worker
+    assert worker is not None
+    assert started.wait(5)
+
+    def release_worker() -> None:
+        time.sleep(0.05)
+        if worker.isRunning() and worker.isInterruptionRequested():
+            shutdown_observed.set()
+        release.set()
+
+    releaser = threading.Thread(target=release_worker)
+    releaser.start()
+    browser.shutdown_workers()
+    releaser.join(1)
+
+    assert shutdown_observed.is_set()
+    assert browser._worker is None
+    assert browser._retired_workers == []
 
 
 # ---------------------------------------------------------------------------
