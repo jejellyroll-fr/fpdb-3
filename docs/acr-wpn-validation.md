@@ -17,15 +17,17 @@ Send the questions below to ACR/WPN support or the game-integrity team. Keep the
 > Hello,
 >
 > I am checking the third-party software rules for ACR / Winning Poker Network.
-The [Security & Game Integrity Policies](https://www.acrpoker.eu/security/)
-appear to say both that certain third-party tools are prohibited (§4.3.0) and
-that a HUD displaying numeric statistics from hands the player personally
-played is allowed (§4.1.3). Could you clarify how these sections apply together
-to fpdb, an open-source hand-history tracker?
+> The [Security & Game Integrity Policies](https://www.acrpoker.eu/security/)
+> appear to say both that certain third-party tools are prohibited (§4.3.0) and
+> that a HUD displaying numeric statistics from hands the player personally
+> played is allowed (§4.1.3). Could you clarify how these sections apply together
+> to fpdb, an open-source hand-history tracker?
 >
 > In particular:
 >
-> 1. Is a static HUD showing only historical numeric statistics from completed hands in which that same player participated permitted under §4.1.3, notwithstanding §4.3.0?
+> 1. Is a static HUD showing only historical numeric statistics from completed
+>    hands in which that same player participated permitted under §4.1.3,
+>    notwithstanding §4.3.0?
 > 2. Does §4.2.11 prohibit a separate HUD window placed over the table area if
    it does not cover, replace or alter any ACR table graphics, cards, controls
    or security indicators? Is placement beside the table required?
@@ -36,7 +38,9 @@ to fpdb, an open-source hand-history tracker?
 > 4. Are these answers the same for every WPN skin, and are there client
    versions, table formats or other conditions that change them?
 >
-> Please point me to the applicable current policy text and confirm the date or version of your answer. I will treat anything not explicitly confirmed as unresolved.
+> Please point me to the applicable current policy text and confirm the date
+> or version of your answer. I will treat anything not explicitly confirmed as
+> unresolved.
 
 ### Response record
 
