@@ -105,6 +105,12 @@ class AutoImportThread(QThread):
         self.importer = importer
         self.db_write_lock = db_write_lock
 
+    def request_cancel(self) -> None:
+        """Stop at the next parsed-hand or completed-file boundary."""
+        request_cancel = getattr(self.importer, "request_cancel", None)
+        if callable(request_cancel):
+            request_cancel()
+
     def run(self) -> None:
         # Held for the whole cycle: the importer's database is one connection
         # with one set of bulk buffers, and the live SwC hand callback would
@@ -121,6 +127,9 @@ class AutoImportThread(QThread):
                 return
             self.importer.autoSummaryGrab()
             self.importer.runUpdated()
+            self.finished.emit()
+        except Importer.BackgroundWorkCancelled:
+            log.info("Auto-import worker cancelled at a safe boundary.")
             self.finished.emit()
         except Exception as e:  # intentional broad catch: Qt worker thread surfaces any failure via the error signal
             self.error.emit(str(e))
@@ -811,6 +820,9 @@ class GuiAutoImport(QWidget):
             self.progressBar.setVisible(True)
             self.progressBar.setMaximum(0)  # Indeterminate progress
 
+            clear_cancel = getattr(self.importer, "clear_cancel", None)
+            if callable(clear_cancel):
+                clear_cancel()
             self.import_thread = AutoImportThread(self.importer, db_write_lock=self.db_write_lock)
             self.import_thread.finished.connect(self.import_finished)
             self.import_thread.error.connect(self.import_error)
@@ -852,6 +864,7 @@ class GuiAutoImport(QWidget):
         """
         if self.import_thread is None or not self.import_thread.isRunning():
             return True
+        self.import_thread.request_cancel()
         if self.import_thread.wait(STOP_WAIT_MS):
             return True
         log.warning("AutoImport: import worker did not stop in time; leaving it to finish.")

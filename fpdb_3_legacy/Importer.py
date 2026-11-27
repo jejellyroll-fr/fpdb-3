@@ -21,6 +21,7 @@ import os
 import re
 import shutil
 import sys
+import threading
 from collections.abc import Callable
 from dataclasses import dataclass
 from time import process_time, time
@@ -44,7 +45,7 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.parser_registry import get_parser_class, get_summary_class
 from fpdb_3_legacy.phh_import import PHH_SITE_NAME, PHHImportResult, is_phh_path, phh_file_name
 from fpdb_3_legacy.phh_import import import_file as import_phh_file
-from fpdb_3_legacy.work_priority import background_checkpoint, background_work
+from fpdb_3_legacy.work_priority import BackgroundWorkCancelled, background_checkpoint, background_work
 
 zmq: Any = _zmq
 
@@ -404,6 +405,7 @@ class Importer:
         self.faobs = None  # File as one big string
         self.mode = None
         self.pos_in_file: dict[str, int] = {}  # dict to remember how far we have read in the file
+        self._cancel_event = threading.Event()
 
         # Configuration of default parameters
         self.callHud = self.config.get_import_parameters().get("callFpdbHud")
@@ -987,6 +989,7 @@ class Importer:
         Returns:
             tuple: A tuple containing the number of stored, duplicate, partial, skipped, and error hands, and the total import duration in seconds.
         """
+        self._cancel_event.clear()
         if self._local_first_sync is not None:
             self._local_first_sync.start()
 
@@ -1049,6 +1052,25 @@ class Importer:
 
     # end def runImport
 
+    def request_cancel(self) -> None:
+        """Ask the current import to stop at its next safe boundary."""
+        self._cancel_event_for_run().set()
+
+    def clear_cancel(self) -> None:
+        """Prepare an importer for a new run after a previous stop request."""
+        self._cancel_event_for_run().clear()
+
+    def _cancel_event_for_run(self) -> threading.Event:
+        """Return the run's cancellation event, including for legacy test doubles."""
+        event = getattr(self, "_cancel_event", None)
+        if event is None:
+            event = threading.Event()
+            self._cancel_event = event
+        return event
+
+    def _cancel_requested(self) -> bool:
+        return self._cancel_event_for_run().is_set()
+
     def runPostImport(self) -> None:
         """Perform post-import cleanup operations on the database.
 
@@ -1110,6 +1132,8 @@ class Importer:
         hands_in_db = self.database.getHandCount()
         try:
             for f in self.filelist:
+                if self._cancel_requested():
+                    break
                 if not has_callbacks:
                     ProgressDialog.progress_update(f, str(hands_in_db))
                 else:
@@ -1160,6 +1184,10 @@ class Importer:
                         ttime,
                         self.filelist[f].fileId,
                     )
+                except BackgroundWorkCancelled:
+                    self.database.rollback()
+                    log.info("Bulk import cancelled at a safe file boundary.")
+                    break
                 except Exception as e:  # intentional broad catch: file import must isolate per-file failures.
                     self.database.rollback()
                     log.exception(f"A fatal error occurred while processing file: {f}. Error: {e}")
@@ -1387,7 +1415,14 @@ class Importer:
             return
 
         with db_profile.scope("import_cycle"):
-            self._run_updated_cycle()
+            try:
+                self._run_updated_cycle()
+            except BackgroundWorkCancelled:
+                # A cancelled file has not committed. Earlier files may have,
+                # so close any open transaction and reconcile their caches.
+                log.info("Auto-import cycle cancelled at a safe boundary.")
+                self.database.rollback()
+                self.runPostImport()
         _profile_reporter.maybe_log()
 
     def _run_updated_cycle(self) -> None:
@@ -1401,6 +1436,8 @@ class Importer:
             )
 
         for f in list(self.filelist):
+            if self._cancel_requested():
+                break
             tracked_file = self.filelist.get(f)
             if tracked_file is None:
                 continue
@@ -1425,7 +1462,6 @@ class Importer:
                             )
                         # Auto-import offsets are updated by the completed file;
                         # pause here so a user query never waits behind the next file.
-                        background_checkpoint("auto-import-file")
                         self.logImport(
                             "auto",
                             f,
@@ -1489,6 +1525,9 @@ class Importer:
                             log.debug(f"self.caller2: {self.caller}")
                         self.updatedsize[f] = stat_info.st_size
                         self.updatedtime[f] = time()
+                        # A completed file is now fully accounted for; only
+                        # then may cancellation interrupt the next unit.
+                        background_checkpoint("auto-import-file", self._cancel_event_for_run())
                 elif os.path.isdir(f) or (time() - stat_info.st_mtime) < 60:
                     self.updatedsize[f] = 0
                     self.updatedtime[f] = 0
@@ -1576,7 +1615,7 @@ class Importer:
                 )
 
             hhc.failed_hand_callback = capture_failed_hand
-            hhc.cooperative_checkpoint = lambda: background_checkpoint("import-hand")
+            hhc.cooperative_checkpoint = lambda: background_checkpoint("import-hand", self._cancel_event_for_run())
             hhc.setAutoPop(self.mode == "auto")
             hhc.start()
 
