@@ -1,6 +1,6 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR ORGANIZATION
-# 
+#
 # Translators:
 #   <seppone1991@gmail.com>, 2011, 2012.
 # seppone1991 <seppone1991@gmail.com>, 2011.
@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-26 21:42+0100\n"
+"POT-Creation-Date: 2026-11-27 16:26+0100\n"
 "PO-Revision-Date: 2012-02-17 20:03+0000\n"
 "Last-Translator: seppone1991 <seppone1991@gmail.com>\n"
 "Language-Team: Italian (Italy) (http://www.transifex.net/projects/p/fpdb/"
@@ -25,28 +25,6 @@ msgstr ""
 #, python-format
 msgid "%s cannot read all stud/razz hands yet."
 msgstr "%s impossibile leggere tutte le mani di stud/razz"
-
-#: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/EverleafToFpdb.py
-msgid "No bringin found."
-msgstr "Nessun bring-in trovato"
-
-#: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/EverleafToFpdb.py
-msgid "No small blind"
-msgstr "No small blind(piccolo buio)"
-
-#: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/BossToFpdb.py
-#: fpdb_3_legacy/EnetToFpdb.py fpdb_3_legacy/EntractionToFpdb.py
-#: fpdb_3_legacy/EverestToFpdb.py fpdb_3_legacy/EverleafToFpdb.py
-#: fpdb_3_legacy/FulltiltToFpdb.py fpdb_3_legacy/MicrogamingToFpdb.py
-#: fpdb_3_legacy/OnGameToFpdb.py fpdb_3_legacy/PkrToFpdb.py
-#, python-format
-msgid "Unimplemented %s: '%s' '%s'"
-msgstr "Non implementati %s: '%s' '%s'"
-
-#: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/EnetToFpdb.py
-#: fpdb_3_legacy/EverleafToFpdb.py fpdb_3_legacy/OnGameToFpdb.py
-msgid "reading antes"
-msgstr "lettura ante"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py
 #, python-format
@@ -64,16 +42,32 @@ msgstr "PkrToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'"
 msgid "AbsoluteToFpdb.readHandInfo: '%s'"
 msgstr "AbsoluteToFpdb.readHandInfo: '%s'"
 
+#: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/EverleafToFpdb.py
+msgid "No bringin found."
+msgstr "Nessun bring-in trovato"
+
+#: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/EverleafToFpdb.py
+msgid "No small blind"
+msgstr "No small blind(piccolo buio)"
+
 #: fpdb_3_legacy/AbsoluteToFpdb.py
 #, python-format
 msgid "Player bringing in: %s for %s"
 msgstr "Il Bring-in per il giocatore è:%s per %s"
 
-#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/capture/swc_poker_console.py
-#: fpdb_3_legacy/session_guard_dialog.py
-#, fuzzy
-msgid "Stop"
-msgstr "Ferma"
+#: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/BossToFpdb.py
+#: fpdb_3_legacy/EnetToFpdb.py fpdb_3_legacy/EntractionToFpdb.py
+#: fpdb_3_legacy/EverestToFpdb.py fpdb_3_legacy/EverleafToFpdb.py
+#: fpdb_3_legacy/FulltiltToFpdb.py fpdb_3_legacy/MicrogamingToFpdb.py
+#: fpdb_3_legacy/OnGameToFpdb.py fpdb_3_legacy/PkrToFpdb.py
+#, python-format
+msgid "Unimplemented %s: '%s' '%s'"
+msgstr "Non implementati %s: '%s' '%s'"
+
+#: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/EnetToFpdb.py
+#: fpdb_3_legacy/EverleafToFpdb.py fpdb_3_legacy/OnGameToFpdb.py
+msgid "reading antes"
+msgstr "lettura ante"
 
 #: fpdb_3_legacy/Aux_Hud.py
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
@@ -121,6 +115,12 @@ msgstr ""
 msgid "Stat set"
 msgstr "Statistiche"
 
+#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/capture/swc_poker_console.py
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Stop"
+msgstr "Ferma"
+
 #: fpdb_3_legacy/Aux_Hud.py
 #, fuzzy
 msgid "Stop the HUD on this table"
@@ -130,13 +130,6 @@ msgstr "Copia l'intera tabella"
 #, fuzzy, python-brace-format
 msgid "{label} - HUD configuration"
 msgstr "Ricarica configurazione"
-
-#: fpdb_3_legacy/BossToFpdb.py fpdb_3_legacy/EnetToFpdb.py
-#: fpdb_3_legacy/EntractionToFpdb.py fpdb_3_legacy/FulltiltToFpdb.py
-#: fpdb_3_legacy/MicrogamingToFpdb.py fpdb_3_legacy/OnGameToFpdb.py
-#: fpdb_3_legacy/PkrToFpdb.py
-msgid "DEBUG:"
-msgstr "Debug:"
 
 #: fpdb_3_legacy/BossToFpdb.py
 #, fuzzy, python-format
@@ -158,6 +151,13 @@ msgstr "PkrToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'"
 #, python-format
 msgid "BossToFpdb.readHandInfo: '%s'"
 msgstr "BossToFpdb.readHandInfo: '%s'"
+
+#: fpdb_3_legacy/BossToFpdb.py fpdb_3_legacy/EnetToFpdb.py
+#: fpdb_3_legacy/EntractionToFpdb.py fpdb_3_legacy/FulltiltToFpdb.py
+#: fpdb_3_legacy/MicrogamingToFpdb.py fpdb_3_legacy/OnGameToFpdb.py
+#: fpdb_3_legacy/PkrToFpdb.py
+msgid "DEBUG:"
+msgstr "Debug:"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 #, fuzzy
@@ -193,11 +193,6 @@ msgstr "Riavvio necessario"
 msgid "↻"
 msgstr ""
 
-#: fpdb_3_legacy/EnetToFpdb.py fpdb_3_legacy/EntractionToFpdb.py
-#: fpdb_3_legacy/OnGameToFpdb.py
-msgid "not found"
-msgstr "non trovato"
-
 #: fpdb_3_legacy/EnetToFpdb.py
 #, fuzzy, python-format
 msgid "EnetToFpdb.determineGameType: '%s'"
@@ -217,6 +212,11 @@ msgstr "EverestToFpdb.readHandInfo: '%s'"
 #, fuzzy
 msgid "EnetToFpdb.readHandInfo: Failed to detect currency."
 msgstr "BetOnlineToFpdb.readHandInfo: Impossibile individuare la valuta."
+
+#: fpdb_3_legacy/EnetToFpdb.py fpdb_3_legacy/EntractionToFpdb.py
+#: fpdb_3_legacy/OnGameToFpdb.py
+msgid "not found"
+msgstr "non trovato"
 
 #: fpdb_3_legacy/EntractionToFpdb.py
 #, python-format
@@ -268,57 +268,6 @@ msgstr ""
 #, python-format
 msgid "EverleafToFpdb.readHandInfo: '%s'"
 msgstr "EverleafToFpdb.readHandInfo: '%s'"
-
-#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiTourneyPlayerStats.py
-#, fuzzy
-#| msgid "Add Tournament"
-msgid "All tournaments"
-msgstr "Aggiungi Torneo"
-
-#: fpdb_3_legacy/Filters.py fpdb_3_legacy/fpdb.pyw
-#, fuzzy
-msgid "Cal"
-msgstr "Cal"
-
-#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiResearchViews.py
-#, fuzzy
-msgid "Category"
-msgstr "Categoria"
-
-#: fpdb_3_legacy/Filters.py fpdb_3_legacy/fpdb.pyw
-msgid "Done"
-msgstr "Fatto"
-
-#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
-#: fpdb_3_legacy/hand_share_dialog.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Format"
-msgstr "Formato"
-
-#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
-msgid "Games"
-msgstr "Giochi"
-
-#: fpdb_3_legacy/Filters.py fpdb_3_legacy/research_study_explorer.py
-msgid "Hold'em"
-msgstr "Hold'em"
-
-#: fpdb_3_legacy/Filters.py fpdb_3_legacy/research_study_explorer.py
-msgid "Omaha Hi/Lo"
-msgstr "Omaha Hi/Lo"
-
-#: fpdb_3_legacy/Filters.py fpdb_3_legacy/fpdb.pyw
-msgid "Pick a date"
-msgstr "Scegliere una data"
-
-#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Sites"
-msgstr "Siti"
-
-#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiHandViewer.py
-msgid "Suited"
-msgstr "Suited"
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
@@ -374,6 +323,12 @@ msgstr "Tutti"
 msgid "All Players"
 msgstr "Tutti i Giocatori:"
 
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiTourneyPlayerStats.py
+#, fuzzy
+#| msgid "Add Tournament"
+msgid "All tournaments"
+msgstr "Aggiungi Torneo"
+
 #: fpdb_3_legacy/Filters.py
 msgid "And:"
 msgstr "E:"
@@ -411,6 +366,16 @@ msgstr "Tra:"
 msgid "Buyin"
 msgstr "Buy-in"
 
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/fpdb.pyw
+#, fuzzy
+msgid "Cal"
+msgstr "Cal"
+
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
+msgid "Category"
+msgstr "Categoria"
+
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
 msgid "Courchevel"
@@ -429,6 +394,10 @@ msgstr "valute"
 msgid "Date:"
 msgstr "Data:"
 
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/fpdb.pyw
+msgid "Done"
+msgstr "Fatto"
+
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
 msgid "Double hold'em"
@@ -441,6 +410,12 @@ msgstr "EV"
 #: fpdb_3_legacy/Filters.py
 msgid "Euro"
 msgstr "Euro"
+
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
+#: fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Format"
+msgstr "Formato"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Freezeouts only"
@@ -455,6 +430,10 @@ msgstr "Da:"
 msgid "Fusion"
 msgstr "Fusion"
 
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
+msgid "Games"
+msgstr "Giochi"
+
 #: fpdb_3_legacy/Filters.py
 msgid "Grouping:"
 msgstr "Raggruppamenti:"
@@ -462,6 +441,10 @@ msgstr "Raggruppamenti:"
 #: fpdb_3_legacy/Filters.py
 msgid "Hero:"
 msgstr "Hero:"
+
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/research_study_explorer.py
+msgid "Hold'em"
+msgstr "Hold'em"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Hole Cards"
@@ -515,6 +498,14 @@ msgstr "Offsuit"
 msgid "Omaha"
 msgstr "Omaha"
 
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/research_study_explorer.py
+msgid "Omaha Hi/Lo"
+msgstr "Omaha Hi/Lo"
+
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/fpdb.pyw
+msgid "Pick a date"
+msgstr "Scegliere una data"
+
 #: fpdb_3_legacy/Filters.py
 msgid "Play Money"
 msgstr "Play Money"
@@ -564,6 +555,15 @@ msgstr "Vincite allo Showdown:"
 #: fpdb_3_legacy/Filters.py
 msgid "Single Draw 2-7 Lowball"
 msgstr "Single Draw 2-7 Lowball"
+
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
+#: fpdb_3_legacy/ModernSitePreferences.py
+msgid "Sites"
+msgstr "Siti"
+
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiHandViewer.py
+msgid "Suited"
+msgstr "Suited"
 
 #: fpdb_3_legacy/Filters.py
 msgid "To:"
@@ -653,23 +653,6 @@ msgstr "Hand is not cleanly split into pre and post Summary %s."
 #, python-format
 msgid "No players detected in hand %s."
 msgstr "Nessun giocatore rilevato nella mano %s."
-
-#: fpdb_3_legacy/GuiAutoImport.py fpdb_3_legacy/parser_debugger_dialog.py
-#, fuzzy
-msgid "Log"
-msgstr "Registro"
-
-#: fpdb_3_legacy/GuiAutoImport.py fpdb_3_legacy/GuiBulkImport.py
-#: fpdb_3_legacy/ModernSitePreferences.py
-#, python-format
-msgid ""
-"macOS does not let fpdb read this folder:\n"
-"%s\n"
-"\n"
-"Allow the app that launches fpdb (your terminal, or fpdb itself) in System "
-"Settings > Privacy & Security > Full Disk Access, then restart fpdb. Until "
-"then, its hands cannot be imported."
-msgstr ""
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
@@ -793,6 +776,11 @@ msgstr "Il ciclo di importazione sta durando più del solito..."
 msgid "Importing SwC files still works."
 msgstr ""
 
+#: fpdb_3_legacy/GuiAutoImport.py fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Log"
+msgstr "Registro"
+
 #: fpdb_3_legacy/GuiAutoImport.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -831,6 +819,18 @@ msgstr ""
 msgid "Time between imports (seconds):"
 msgstr "Tempo tra le importazioni (secondi):"
 
+#: fpdb_3_legacy/GuiAutoImport.py fpdb_3_legacy/GuiBulkImport.py
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, python-format
+msgid ""
+"macOS does not let fpdb read this folder:\n"
+"%s\n"
+"\n"
+"Allow the app that launches fpdb (your terminal, or fpdb itself) in System "
+"Settings > Privacy & Security > Full Disk Access, then restart fpdb. Until "
+"then, its hands cannot be imported."
+msgstr ""
+
 #: fpdb_3_legacy/GuiAutoNoteRules.py
 #, fuzzy
 msgid "Automatic Notes"
@@ -845,18 +845,6 @@ msgstr "Attiva o disattiva le regole delle note automatiche sui giocatori."
 #, fuzzy
 msgid "Generate automatic notes"
 msgstr "Genera note automatiche"
-
-#: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/menu_layout.py
-#, fuzzy
-msgid "File"
-msgstr "File"
-
-#: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/GuiBulkImport.py
-#: fpdb_3_legacy/GuiTourneyPlayerStats.py fpdb_3_legacy/hand_share_dialog.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#: fpdb_3_legacy/parser_debugger_dialog.py
-msgid "Site"
-msgstr "Sito"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
@@ -877,6 +865,11 @@ msgstr "Prova a vuoto"
 #, fuzzy
 msgid "Dry Run DB"
 msgstr "Prova a vuoto DB"
+
+#: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "File"
+msgstr "File"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
@@ -962,6 +955,13 @@ msgstr "Esegui"
 msgid "Search"
 msgstr "Cerca"
 
+#: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/GuiBulkImport.py
+#: fpdb_3_legacy/GuiTourneyPlayerStats.py fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/parser_debugger_dialog.py
+msgid "Site"
+msgstr "Sito"
+
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
 msgid "To"
@@ -1000,10 +1000,6 @@ msgstr "Sfoglia ..."
 msgid "Bulk Import"
 msgstr "Importazione manuale"
 
-#: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
-msgid "Folder access needed"
-msgstr ""
-
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy
 msgid "Bulk Import Error"
@@ -1018,6 +1014,10 @@ msgstr "Scegli una cartella di destinazione"
 #, fuzzy
 msgid "Configured Import Directories:"
 msgstr "Cartelle di importazione configurate:"
+
+#: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
+msgid "Folder access needed"
+msgstr ""
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy, python-brace-format
@@ -1325,31 +1325,6 @@ msgstr "🧪 Valuta regola"
 msgid "🧪 Test Sandbox"
 msgstr "🧪 Sandbox di prova"
 
-#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiResearchBrowser.py
-#: fpdb_3_legacy/ModernSitePreferences.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Delete"
-msgstr "Elimina"
-
-#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiTourneyPlayerStats.py
-#: fpdb_3_legacy/pack_share_dialog.py
-msgid "Name"
-msgstr "Nome"
-
-#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiResearchBrowser.py
-#: fpdb_3_legacy/ModernSitePreferences.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Name:"
-msgstr "Nome:"
-
-#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiTrackerMigration.py
-#: fpdb_3_legacy/tracker_notes_dialog.py
-#, fuzzy
-msgid "User"
-msgstr "Utente"
-
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
 msgid "A database name is required."
@@ -1406,6 +1381,13 @@ msgstr "Predefinito"
 msgid "Default database changed"
 msgstr "Database predefinito cambiato"
 
+#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiResearchBrowser.py
+#: fpdb_3_legacy/ModernSitePreferences.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Delete"
+msgstr "Elimina"
+
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
 msgid "Delete database"
@@ -1450,6 +1432,18 @@ msgstr "Migra verso..."
 #, fuzzy
 msgid "Migrating database"
 msgstr "Migrazione del database"
+
+#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiTourneyPlayerStats.py
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Name"
+msgstr "Nome"
+
+#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiResearchBrowser.py
+#: fpdb_3_legacy/ModernSitePreferences.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Name:"
+msgstr "Nome:"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
@@ -1499,20 +1493,16 @@ msgstr ""
 "È l'unico database configurato e non può essere eliminato — fpdb ne serve "
 "almeno uno. Aggiungi prima un altro database."
 
+#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiTrackerMigration.py
+#: fpdb_3_legacy/tracker_notes_dialog.py
+#, fuzzy
+msgid "User"
+msgstr "Utente"
+
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
 msgid "User:"
 msgstr "Utente:"
-
-#: fpdb_3_legacy/GuiDrillDown.py fpdb_3_legacy/GuiResearchBrowser.py
-#, fuzzy
-msgid "Loading hands…"
-msgstr "Caricamento delle mani…"
-
-#: fpdb_3_legacy/GuiDrillDown.py fpdb_3_legacy/GuiHandViewer.py
-#, fuzzy
-msgid "Next ▶"
-msgstr "Successivo ▶"
 
 #: fpdb_3_legacy/GuiDrillDown.py
 #, fuzzy
@@ -1523,6 +1513,16 @@ msgstr "Azioni del field"
 #, fuzzy
 msgid "Field population"
 msgstr "Popolazione del field"
+
+#: fpdb_3_legacy/GuiDrillDown.py fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
+msgid "Loading hands…"
+msgstr "Caricamento delle mani…"
+
+#: fpdb_3_legacy/GuiDrillDown.py fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Next ▶"
+msgstr "Successivo ▶"
 
 #: fpdb_3_legacy/GuiDrillDown.py
 #, fuzzy
@@ -1573,6 +1573,11 @@ msgstr "Informazioni su FPDB 3"
 msgid "Hands"
 msgstr "Mani"
 
+#: fpdb_3_legacy/GuiGraphViewer.py
+#, fuzzy
+msgid "Net profit excluding splash"
+msgstr "Profitto netto esclusi gli splash"
+
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/results_calendar.py
 msgid "Non-showdown"
 msgstr "Non-showdown"
@@ -1586,40 +1591,9 @@ msgid "Refresh Graph"
 msgstr "Aggiorna Grafico"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiHandViewer.py
-#: fpdb_3_legacy/capture/swc_poker_console.py
-#: fpdb_3_legacy/results_calendar.py
+#: fpdb_3_legacy/capture/swc_poker_console.py fpdb_3_legacy/results_calendar.py
 msgid "Showdown"
 msgstr "Showdown"
-
-#: fpdb_3_legacy/GuiGraphViewer.py
-#, fuzzy
-msgid "Net profit excluding splash"
-msgstr "Profitto netto esclusi gli splash"
-
-#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiResearchBrowser.py
-#: fpdb_3_legacy/hud_options_panel.py
-#, fuzzy
-msgid "Any"
-msgstr "Qualsiasi"
-
-#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/parser_debugger_dialog.py
-#, fuzzy
-msgid "Clear"
-msgstr "Cancella"
-
-#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiTourHandViewer.py
-#, fuzzy
-msgid "Copy hand history"
-msgstr "Copia storico della mano"
-
-#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/research_labels.py
-#, fuzzy
-msgid "Effective stack (BB)"
-msgstr "Stack effettivo (BB)"
-
-#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiTourneyPlayerStats.py
-msgid "Fit columns to contents"
-msgstr ""
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
@@ -1674,6 +1648,12 @@ msgstr "Tutte le mani iniziali"
 #, fuzzy
 msgid "Analytics data unavailable"
 msgstr "Dati di analisi non disponibili"
+
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiResearchBrowser.py
+#: fpdb_3_legacy/hud_options_panel.py
+#, fuzzy
+msgid "Any"
+msgstr "Qualsiasi"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
@@ -1730,15 +1710,30 @@ msgstr "Check"
 msgid "Choose hands…"
 msgstr "Scegli le mani…"
 
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Clear"
+msgstr "Cancella"
+
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
 msgid "Continuation bet"
 msgstr "Puntata di continuazione"
 
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiTourHandViewer.py
+#, fuzzy
+msgid "Copy hand history"
+msgstr "Copia storico della mano"
+
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
 msgid "Did not VPIP"
 msgstr "Nessun VPIP"
+
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Effective stack (BB)"
+msgstr "Stack effettivo (BB)"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
@@ -1784,6 +1779,10 @@ msgstr "Piatto finale (BB)"
 #, fuzzy
 msgid "Find hand #"
 msgstr "Punto fatto"
+
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiTourneyPlayerStats.py
+msgid "Fit columns to contents"
+msgstr ""
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
@@ -2052,11 +2051,6 @@ msgstr "{} classi selezionate"
 msgid "◀ Prev"
 msgstr "◀ Prec."
 
-#: fpdb_3_legacy/GuiLogView.py fpdb_3_legacy/GuiOpponentsReport.py
-#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/results_calendar.py
-msgid "Refresh"
-msgstr "Aggiorna"
-
 #: fpdb_3_legacy/GuiLogView.py
 #, fuzzy
 msgid "Copy selection to clipboard"
@@ -2070,6 +2064,11 @@ msgstr "Filtra per modulo:"
 #: fpdb_3_legacy/GuiLogView.py
 msgid "Log Viewer"
 msgstr "Log Viewer"
+
+#: fpdb_3_legacy/GuiLogView.py fpdb_3_legacy/GuiOpponentsReport.py
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/results_calendar.py
+msgid "Refresh"
+msgstr "Aggiorna"
 
 #: fpdb_3_legacy/GuiLogView.py
 #, fuzzy
@@ -2091,19 +2090,6 @@ msgstr "Ordina per:"
 msgid "Top N opponents:"
 msgstr "Primi N avversari:"
 
-#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/pack_gallery_dialog.py
-msgid "HUD"
-msgstr "HUD"
-
-#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/menu_layout.py
-#: fpdb_3_legacy/tracker_notes_dialog.py
-msgid "Import"
-msgstr "Importazione"
-
-#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/menu_layout.py
-msgid "Ring Player Stats"
-msgstr "Stats Giocatore Cash-Game "
-
 #: fpdb_3_legacy/GuiPrefs.py
 msgid "Auxiliary Windows"
 msgstr "Auxiliary Windows"
@@ -2124,9 +2110,18 @@ msgstr "Campo del Tipo"
 msgid "General"
 msgstr "Generale"
 
+#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/pack_gallery_dialog.py
+msgid "HUD"
+msgstr "HUD"
+
 #: fpdb_3_legacy/GuiPrefs.py
 msgid "Hand History Converters"
 msgstr "Convertitori Hand History"
+
+#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/menu_layout.py
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Import"
+msgstr "Importazione"
 
 #: fpdb_3_legacy/GuiPrefs.py
 msgid "Left/Right Align"
@@ -2143,6 +2138,10 @@ msgstr "Nome Popup"
 #: fpdb_3_legacy/GuiPrefs.py
 msgid "Popup Windows"
 msgstr "Popup Windows"
+
+#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/menu_layout.py
+msgid "Ring Player Stats"
+msgstr "Stats Giocatore Cash-Game "
 
 #: fpdb_3_legacy/GuiPrefs.py
 msgid "Setting"
@@ -2183,28 +2182,6 @@ msgstr "Valore (doppio-clic per cambiare)"
 msgid "Window"
 msgstr "Finestra"
 
-#: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/hand_share_dialog.py
-#: fpdb_3_legacy/results_calendar.py
-#, fuzzy
-msgid "Big blinds"
-msgstr "Grandi bui"
-
-#: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/GuiTourneyPlayerStats.py
-#, fuzzy
-msgid "End"
-msgstr "Fine"
-
-#: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/hand_share_dialog.py
-#, fuzzy
-msgid "Share..."
-msgstr "Condividi..."
-
-#: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/GuiTourneyPlayerStats.py
-#: fpdb_3_legacy/session_guard_dialog.py
-#, fuzzy
-msgid "Start"
-msgstr "Inizio"
-
 #: fpdb_3_legacy/GuiReplayer.py
 #, python-format
 msgid "%(street)s · action %(step)s/%(total)s"
@@ -2215,6 +2192,12 @@ msgid ""
 "Also show the pot odds ratio, the pot breakdown, MDF and fold equity, and "
 "each figure's assumptions"
 msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/results_calendar.py
+#, fuzzy
+msgid "Big blinds"
+msgstr "Grandi bui"
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
@@ -2241,6 +2224,11 @@ msgstr "Mazzo:"
 #| msgid "Detailed Filters"
 msgid "Detailed analysis"
 msgstr "Filtri dettagliati"
+
+#: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/GuiTourneyPlayerStats.py
+#, fuzzy
+msgid "End"
+msgstr "Fine"
 
 #: fpdb_3_legacy/GuiReplayer.py
 msgid "Enter or apply this tournament's payout structure, for ICM"
@@ -2302,6 +2290,11 @@ msgstr "Azione precedente"
 msgid "Send this hand's preflop decisions to PreflopAdvisor"
 msgstr "Invia le decisioni preflop di questa mano a PreflopAdvisor"
 
+#: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Share..."
+msgstr "Condividi..."
+
 #: fpdb_3_legacy/GuiReplayer.py
 msgid ""
 "Show SPR, bet sizing, pot odds, MDF and fold equity for every player, not "
@@ -2317,6 +2310,12 @@ msgstr ""
 msgid "Solver review..."
 msgstr "Revisione con solver..."
 
+#: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/GuiTourneyPlayerStats.py
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Start"
+msgstr "Inizio"
+
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
 msgid "This hand has no big blind to count amounts in"
@@ -2326,30 +2325,6 @@ msgstr "Questo gioco non ha un grande buio con cui contare."
 #, fuzzy
 msgid "Use the arrows or space to review the decisions"
 msgstr "Tre o più giocatori hanno visto la decisione."
-
-#: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/GuiResearchViews.py
-#, fuzzy
-msgid "Decisions"
-msgstr "Decisioni"
-
-#: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/parser_debugger_dialog.py
-#, fuzzy
-msgid "Field"
-msgstr "Field"
-
-#: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/tourney_payouts_dialog.py
-msgid "Save"
-msgstr "Salva"
-
-#: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/menu_layout.py
-#, fuzzy
-msgid "View"
-msgstr "Visualizza"
-
-#: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/hud_options_panel.py
-#, fuzzy
-msgid "to"
-msgstr "a"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy
@@ -2452,6 +2427,11 @@ msgstr "Confronta con il field"
 msgid "Count"
 msgstr "Conteggio"
 
+#: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
+msgid "Decisions"
+msgstr "Decisioni"
+
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy
 msgid "Double-click a cell to load the hands behind it."
@@ -2493,6 +2473,11 @@ msgstr ""
 #, fuzzy
 msgid "FPDB Replayer"
 msgstr "Riproduttore FPDB"
+
+#: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/parser_debugger_dialog.py
+#, fuzzy
+msgid "Field"
+msgstr "Field"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy
@@ -2603,6 +2588,10 @@ msgstr ""
 msgid "Running…"
 msgstr "In esecuzione…"
 
+#: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Save"
+msgstr "Salva"
+
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy
 msgid "Save preset"
@@ -2693,6 +2682,11 @@ msgstr "Prova una di queste:"
 msgid "Unknown group-by dimension(s): {names}. Known: {known}."
 msgstr "Dimensione/i di raggruppamento sconosciuta/e: {names}. Note: {known}."
 
+#: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "View"
+msgstr "Visualizza"
+
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy
 msgid "Vocabulary"
@@ -2733,6 +2727,11 @@ msgstr "da"
 msgid "or type a value"
 msgstr "o digita un valore"
 
+#: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/hud_options_panel.py
+#, fuzzy
+msgid "to"
+msgstr "a"
+
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy, python-brace-format
 msgid "{hero} decisions of yours, {field} of the field's"
@@ -2757,11 +2756,6 @@ msgstr "▶ Esegui"
 #, fuzzy
 msgid "＋ Add breakdown"
 msgstr "＋ Aggiungi suddivisione"
-
-#: fpdb_3_legacy/GuiResearchViews.py fpdb_3_legacy/pack_share_dialog.py
-#, fuzzy
-msgid "Share"
-msgstr "Quota"
 
 #: fpdb_3_legacy/GuiResearchViews.py
 #, fuzzy
@@ -2790,6 +2784,11 @@ msgstr ""
 "Realizzato {realized} su {hands} mani; corretto per EV {ev} (di cui {luck} "
 "fortuna)."
 
+#: fpdb_3_legacy/GuiResearchViews.py fpdb_3_legacy/pack_share_dialog.py
+#, fuzzy
+msgid "Share"
+msgstr "Quota"
+
 #: fpdb_3_legacy/GuiResearchViews.py
 #, fuzzy, python-brace-format
 msgid ""
@@ -2811,11 +2810,6 @@ msgid "{n} decisions are counted apart: their cards were never known."
 msgstr ""
 "{n} decisioni sono contate a parte: le loro carte non sono mai state note."
 
-#: fpdb_3_legacy/GuiSessionViewer.py fpdb_3_legacy/hud_options_panel.py
-#: fpdb_3_legacy/research_labels.py
-msgid "Session"
-msgstr "Sessione"
-
 #: fpdb_3_legacy/GuiSessionViewer.py
 #, fuzzy
 msgid "Cumulative result (BB)"
@@ -2834,6 +2828,11 @@ msgstr "Totali nella valuta originale omessi (più valute)"
 #, fuzzy, python-brace-format
 msgid "Profit: {profit} · Currency/hour: {hour}"
 msgstr "Profitto: {profit} · Valuta/ora: {hour}"
+
+#: fpdb_3_legacy/GuiSessionViewer.py fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/research_labels.py
+msgid "Session"
+msgstr "Sessione"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
 #, fuzzy, python-brace-format
@@ -3244,38 +3243,6 @@ msgstr "Vinti"
 msgid "← Back"
 msgstr ""
 
-#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/GuiVersionInfo.py
-#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/tracker_notes_dialog.py
-msgid "Database"
-msgstr "Database"
-
-#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/research_labels.py
-#, fuzzy
-msgid "Hero"
-msgstr "Hero"
-
-#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/tracker_notes_dialog.py
-#, fuzzy
-msgid "Password"
-msgstr "Password:"
-
-#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/tracker_notes_dialog.py
-#, fuzzy
-msgid "Port"
-msgstr "Porta:"
-
-#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/tracker_notes_dialog.py
-#, python-format
-msgid ""
-"The import stopped on an error:\n"
-"%s"
-msgstr ""
-
-#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/pt4hud_dialogs.py
-#, python-format
-msgid "… and %d more"
-msgstr ""
-
 #: fpdb_3_legacy/GuiTrackerMigration.py
 #, python-format
 msgid "%(files)d files from %(rooms)d rooms will be imported."
@@ -3327,6 +3294,11 @@ msgstr ""
 msgid "Connecting to the PokerTracker 4 database…"
 msgstr ""
 
+#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/GuiVersionInfo.py
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Database"
+msgstr "Database"
+
 #: fpdb_3_legacy/GuiTrackerMigration.py
 #, fuzzy
 msgid "Duplicates"
@@ -3360,6 +3332,11 @@ msgstr ""
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "From the PokerTracker 4 database"
 msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hero"
+msgstr "Hero"
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Hero in fpdb"
@@ -3413,6 +3390,16 @@ msgstr ""
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Partial"
 msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/tracker_notes_dialog.py
+#, fuzzy
+msgid "Password"
+msgstr "Password:"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/tracker_notes_dialog.py
+#, fuzzy
+msgid "Port"
+msgstr "Porta:"
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
 #, python-format
@@ -3471,6 +3458,13 @@ msgstr ""
 "Impossibile visualizzare questa mano:\n"
 "%s"
 
+#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/tracker_notes_dialog.py
+#, python-format
+msgid ""
+"The import stopped on an error:\n"
+"%s"
+msgstr ""
+
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "What came over"
 msgstr ""
@@ -3505,6 +3499,11 @@ msgstr ""
 #, fuzzy
 msgid "not set"
 msgstr "Impossibile esportare"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid "… and %d more"
+msgstr ""
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 #, fuzzy
@@ -4107,30 +4106,6 @@ msgid ""
 "yet. Until then, the panels can be set up and previewed in Preferences."
 msgstr ""
 
-#: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/live_capture_dialog.py
-#, fuzzy
-msgid "Live capture"
-msgstr "Cattura dal vivo CoinPoker"
-
-#: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/menu_layout.py
-#, fuzzy
-msgid "Manage HUD Sites"
-msgstr "Gestisci i siti dell'HUD"
-
-#: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
-msgid "Select All"
-msgstr "Seleziona tutto"
-
-#: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Unsaved Changes"
-msgstr "Modifiche non salvate"
-
-#: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/menu_layout.py
-msgid "What fpdb does while you play"
-msgstr ""
-
 #: fpdb_3_legacy/fpdb.pyw
 #, fuzzy
 msgid "Back up and upgrade"
@@ -4174,6 +4149,16 @@ msgstr "Attiva o disattiva i siti per la visualizzazione dell'HUD"
 msgid "Free Poker DB 3"
 msgstr "Free Poker DB 3"
 
+#: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/live_capture_dialog.py
+#, fuzzy
+msgid "Live capture"
+msgstr "Cattura dal vivo CoinPoker"
+
+#: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Manage HUD Sites"
+msgstr "Gestisci i siti dell'HUD"
+
 #: fpdb_3_legacy/fpdb.pyw
 #, fuzzy
 msgid "PT4 stats import"
@@ -4188,6 +4173,11 @@ msgstr "Confermare se si desidera ri-costruire la cache dell'HUD"
 msgid "Search:"
 msgstr "Cerca:"
 
+#: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Select All"
+msgstr "Seleziona tutto"
+
 #: fpdb_3_legacy/fpdb.pyw
 #, fuzzy
 msgid "Skip these games when importing"
@@ -4201,6 +4191,15 @@ msgstr ""
 #: fpdb_3_legacy/fpdb.pyw
 msgid "Unknown Site"
 msgstr "Sito conosciuto"
+
+#: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Unsaved Changes"
+msgstr "Modifiche non salvate"
+
+#: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/menu_layout.py
+msgid "What fpdb does while you play"
+msgstr ""
 
 #: fpdb_3_legacy/fpdb.pyw
 #, fuzzy
@@ -4427,15 +4426,15 @@ msgstr "Questa decisione"
 msgid "This hand cannot be sent to PreflopAdvisor."
 msgstr "Questa mano non può essere inviata a PreflopAdvisor."
 
-#: fpdb_3_legacy/hand_share_dialog.py fpdb_3_legacy/table_export.py
-#, fuzzy
-msgid "Copy"
-msgstr "Copia"
-
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
 msgid "Amounts"
 msgstr "Importi"
+
+#: fpdb_3_legacy/hand_share_dialog.py fpdb_3_legacy/table_export.py
+#, fuzzy
+msgid "Copy"
+msgstr "Copia"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
@@ -4570,14 +4569,6 @@ msgstr ""
 "Impossibile visualizzare questa mano:\n"
 "%s"
 
-#: fpdb_3_legacy/hud_options_panel.py fpdb_3_legacy/menu_layout.py
-msgid "HUD Options"
-msgstr ""
-
-#: fpdb_3_legacy/hud_options_panel.py fpdb_3_legacy/results_calendar.py
-msgid "Period"
-msgstr ""
-
 #: fpdb_3_legacy/hud_options_panel.py
 msgid "0.1x to 10x"
 msgstr ""
@@ -4615,6 +4606,10 @@ msgstr "Regole personalizzate"
 msgid "Exact"
 msgstr "Exact"
 
+#: fpdb_3_legacy/hud_options_panel.py fpdb_3_legacy/menu_layout.py
+msgid "HUD Options"
+msgstr ""
+
 #: fpdb_3_legacy/hud_options_panel.py
 msgid "Last n days"
 msgstr ""
@@ -4623,6 +4618,10 @@ msgstr ""
 #, fuzzy
 msgid "Opponents"
 msgstr "Rapporto sugli avversari"
+
+#: fpdb_3_legacy/hud_options_panel.py fpdb_3_legacy/results_calendar.py
+msgid "Period"
+msgstr ""
 
 #: fpdb_3_legacy/hud_options_panel.py
 msgid ""
@@ -4732,41 +4731,6 @@ msgid ""
 "until you turn it on."
 msgstr ""
 
-#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/update_notice.py
-msgid "Check for updates"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_gallery_dialog.py
-#, fuzzy
-msgid "Get packs"
-msgstr "Pacchetti di statistiche"
-
-#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/session_guard_dialog.py
-#, fuzzy
-msgid "Session Guard"
-msgstr "Session Guard"
-
-#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_share_dialog.py
-msgid "Share a HUD or pack"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "Statistics"
-msgstr "Statistiche"
-
-#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/research_labels.py
-#: fpdb_3_legacy/tourney_payouts_dialog.py
-#, fuzzy
-msgid "Tournament"
-msgstr "Tornei"
-
-#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_gallery_dialog.py
-#: fpdb_3_legacy/pack_share_dialog.py fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
-msgid "Version"
-msgstr "Versione"
-
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
 msgid "About"
@@ -4829,6 +4793,10 @@ msgstr "Cash"
 msgid "Cash results per day, week and month, with their profit curves"
 msgstr ""
 
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/update_notice.py
+msgid "Check for updates"
+msgstr ""
+
 #: fpdb_3_legacy/menu_layout.py
 msgid "Choose the blinds, seats and period that new HUD tables start with"
 msgstr ""
@@ -4879,6 +4847,11 @@ msgstr "Esporta l'intero database in un file di testo (lento)"
 #: fpdb_3_legacy/menu_layout.py
 msgid "From Another Tracker…"
 msgstr ""
+
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_gallery_dialog.py
+#, fuzzy
+msgid "Get packs"
+msgstr "Pacchetti di statistiche"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Graphs"
@@ -5050,9 +5023,18 @@ msgstr ""
 msgid "Seat Settings"
 msgstr "Impostazioni"
 
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Session Guard"
+msgstr "Session Guard"
+
 #: fpdb_3_legacy/menu_layout.py
 msgid "Session Stats"
 msgstr "Stats Sessione"
+
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_share_dialog.py
+msgid "Share a HUD or pack"
+msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -5063,6 +5045,10 @@ msgstr "Impostazioni"
 #, fuzzy
 msgid "Stat Packs"
 msgstr "Pacchetti di statistiche"
+
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid "Statistics"
+msgstr "Statistiche"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -5084,6 +5070,12 @@ msgstr "Temi"
 msgid "Tools"
 msgstr "Strumenti"
 
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/research_labels.py
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, fuzzy
+msgid "Tournament"
+msgstr "Tornei"
+
 #: fpdb_3_legacy/menu_layout.py
 msgid "Tourney Graphs"
 msgstr "Grafici Torneo"
@@ -5100,6 +5092,12 @@ msgstr "Stats Torneo"
 #: fpdb_3_legacy/menu_layout.py
 msgid "Turn on or off the captures that read hands from a poker client itself"
 msgstr ""
+
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_gallery_dialog.py
+#: fpdb_3_legacy/pack_share_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Version"
+msgstr "Versione"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -5727,8 +5725,8 @@ msgstr "Statistiche basate sull'analisi"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid ""
-"Append the profile emoji (e.g. 🐟, 🐌, 🎯) and color the player's name in the "
-"HUD."
+"Append the profile emoji (e.g. 🐟, 🐌, 🎯) and color the player's name in "
+"the HUD."
 msgstr ""
 "Aggiunge l'emoji del profilo (es. 🐟, 🐌, 🎯) e colora il nome del giocatore "
 "nell'HUD."
@@ -6329,8 +6327,8 @@ msgstr "Conferma sovrascrittura"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
-"PT4 HUD Layouts (*.pt4hud);;XML Files (*.xml);;FPDB HUD Files (*.fpdbhud);;"
-"All Files (*)"
+"PT4 HUD Layouts (*.pt4hud);;XML Files (*.xml);;FPDB HUD Files "
+"(*.fpdbhud);;All Files (*)"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -7090,57 +7088,6 @@ msgstr ""
 msgid "{popup} (missing)"
 msgstr ""
 
-#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy, python-format
-msgid "Installed %s."
-msgstr "%s installato."
-
-#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
-msgid "Pack"
-msgstr "Pacchetto"
-
-#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
-msgid "Restart fpdb and the HUD to use the change everywhere."
-msgstr "Riavvia fpdb e l'HUD per usare la modifica ovunque."
-
-#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/pack_share_dialog.py
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
-msgid "Stat pack"
-msgstr "Pacchetto di statistiche"
-
-#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
-msgid "Stats:"
-msgstr "Statistiche:"
-
-#: fpdb_3_legacy/pack_gallery_dialog.py
-#: fpdb_3_legacy/parser_debugger_dialog.py fpdb_3_legacy/stat_packs_dialog.py
-msgid "Status"
-msgstr "Status"
-
-#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
-msgid "This pack cannot be installed:"
-msgstr "Questo pacchetto non può essere installato:"
-
-#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
-msgid "Uninstall"
-msgstr "Disinstalla"
-
-#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy, python-format
-msgid "Uninstall %s?"
-msgstr "Disinstallare %s?"
-
-#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy, python-format
-msgid "Uninstalled %s."
-msgstr "%s disinstallato."
-
 #: fpdb_3_legacy/pack_gallery_dialog.py
 #, python-format
 msgid "%d listed pack(s) are not shown because their entry is invalid."
@@ -7166,6 +7113,11 @@ msgstr "Disinstalla"
 msgid "Installed"
 msgstr "%s installato."
 
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy, python-format
+msgid "Installed %s."
+msgstr "%s installato."
+
 #: fpdb_3_legacy/pack_gallery_dialog.py
 msgid "Kind"
 msgstr ""
@@ -7179,9 +7131,35 @@ msgstr ""
 msgid "Not installed"
 msgstr "Installato dall'utente"
 
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Pack"
+msgstr "Pacchetto"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Restart fpdb and the HUD to use the change everywhere."
+msgstr "Riavvia fpdb e l'HUD per usare la modifica ovunque."
+
 #: fpdb_3_legacy/pack_gallery_dialog.py
 msgid "Share yours…"
 msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/pack_share_dialog.py
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Stat pack"
+msgstr "Pacchetto di statistiche"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Stats:"
+msgstr "Statistiche:"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/parser_debugger_dialog.py
+#: fpdb_3_legacy/stat_packs_dialog.py
+msgid "Status"
+msgstr "Status"
 
 #: fpdb_3_legacy/pack_gallery_dialog.py
 msgid "The gallery could not be reached; showing the copy from the last visit."
@@ -7194,15 +7172,35 @@ msgstr ""
 "Impossibile visualizzare questa mano:\n"
 "%s"
 
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "This pack cannot be installed:"
+msgstr "Questo pacchetto non può essere installato:"
+
 #: fpdb_3_legacy/pack_gallery_dialog.py
 #, fuzzy
 msgid "This pack cannot be uninstalled:"
 msgstr "Questo pacchetto non può essere installato:"
 
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Uninstall"
+msgstr "Disinstalla"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy, python-format
+msgid "Uninstall %s?"
+msgstr "Disinstallare %s?"
+
 #: fpdb_3_legacy/pack_gallery_dialog.py
 #, fuzzy
 msgid "Uninstall pack"
 msgstr "Disinstalla pacchetto di statistiche"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy, python-format
+msgid "Uninstalled %s."
+msgstr "%s disinstallato."
 
 #: fpdb_3_legacy/pack_gallery_dialog.py
 #, fuzzy
@@ -7234,14 +7232,14 @@ msgstr ""
 msgid "Write a HUD profile or a stat pack ready to submit to the gallery"
 msgstr ""
 
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "An SPDX licence identifier; the gallery requires one."
+msgstr ""
+
 #: fpdb_3_legacy/pack_share_dialog.py fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
 msgid "Author"
 msgstr "Autore"
-
-#: fpdb_3_legacy/pack_share_dialog.py
-msgid "An SPDX licence identifier; the gallery requires one."
-msgstr ""
 
 #: fpdb_3_legacy/pack_share_dialog.py
 msgid "For example CC-BY-4.0 or AGPL-3.0-or-later"
@@ -7282,11 +7280,6 @@ msgid ""
 "repository (%(repository)s), add the entry in %(entry)s to index.json, and "
 "open a pull request."
 msgstr ""
-
-#: fpdb_3_legacy/parser_debugger_dialog.py fpdb_3_legacy/research_labels.py
-#, fuzzy
-msgid "Hand"
-msgstr "Mano"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "(empty)"
@@ -7445,6 +7438,11 @@ msgstr "Famiglia di situazioni"
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Found"
 msgstr ""
+
+#: fpdb_3_legacy/parser_debugger_dialog.py fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hand"
+msgstr "Mano"
 
 #: fpdb_3_legacy/parser_debugger_dialog.py
 msgid "Hand fingerprint"
@@ -7916,26 +7914,6 @@ msgstr ""
 msgid "Show the advanced calculations"
 msgstr "quante azioni"
 
-#: fpdb_3_legacy/replayer_panel.py fpdb_3_legacy/results_calendar.py
-#, fuzzy
-msgid "All-in EV"
-msgstr "All-in"
-
-#: fpdb_3_legacy/replayer_panel.py fpdb_3_legacy/research_labels.py
-#, fuzzy
-msgid "Bet size"
-msgstr "Dimensione della puntata"
-
-#: fpdb_3_legacy/replayer_panel.py fpdb_3_legacy/research_labels.py
-#, fuzzy
-msgid "Pot odds"
-msgstr "Pot odds"
-
-#: fpdb_3_legacy/replayer_panel.py fpdb_3_legacy/research_labels.py
-#, fuzzy
-msgid "SPR"
-msgstr "SPR"
-
 #: fpdb_3_legacy/replayer_panel.py
 #, python-format
 msgid "%(chips)s chips"
@@ -7991,11 +7969,21 @@ msgstr ""
 msgid "Against the shown hands only; not an action recommendation."
 msgstr ""
 
+#: fpdb_3_legacy/replayer_panel.py fpdb_3_legacy/results_calendar.py
+#, fuzzy
+msgid "All-in EV"
+msgstr "All-in"
+
 #: fpdb_3_legacy/replayer_panel.py
 #, fuzzy
 #| msgid "Ring Player Stats"
 msgid "Available"
 msgstr "Stats Giocatore Cash-Game "
+
+#: fpdb_3_legacy/replayer_panel.py fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Bet size"
+msgstr "Dimensione della puntata"
 
 #: fpdb_3_legacy/replayer_panel.py
 msgid "Bounty EV"
@@ -8181,6 +8169,11 @@ msgstr ""
 msgid "Payouts needed"
 msgstr ""
 
+#: fpdb_3_legacy/replayer_panel.py fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Pot odds"
+msgstr "Pot odds"
+
 #: fpdb_3_legacy/replayer_panel.py
 msgid ""
 "Pot odds in chips: the share of the final pot the call costs. In a "
@@ -8225,6 +8218,11 @@ msgstr ""
 #: fpdb_3_legacy/replayer_panel.py
 msgid "Required equity"
 msgstr ""
+
+#: fpdb_3_legacy/replayer_panel.py fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "SPR"
+msgstr "SPR"
 
 #: fpdb_3_legacy/replayer_panel.py
 msgid "Simplified model: one opponent, a bluff that never wins when called."
@@ -11543,18 +11541,18 @@ msgstr ""
 #~ "in touch by emailing steffen@schaumburger.info\n"
 #~ "\n"
 #~ "Welcome to Fpdb!\n"
-#~ "To be notified of new snapshots and releases go to https://lists."
-#~ "sourceforge.net/lists/listinfo/fpdb-announce and subscribe.\n"
-#~ "If you want to follow development more closely go to https://lists."
-#~ "sourceforge.net/lists/listinfo/fpdb-main and subscribe.\n"
+#~ "To be notified of new snapshots and releases go to https://"
+#~ "lists.sourceforge.net/lists/listinfo/fpdb-announce and subscribe.\n"
+#~ "If you want to follow development more closely go to https://"
+#~ "lists.sourceforge.net/lists/listinfo/fpdb-main and subscribe.\n"
 #~ "\n"
 #~ "This program is currently in an alpha-state, so our database format is "
 #~ "still sometimes changed.\n"
 #~ "You should therefore always keep your hand history files so that you can "
 #~ "re-import after an update, if necessary.\n"
 #~ "\n"
-#~ "For documentation please visit our website/wiki at http://fpdb."
-#~ "sourceforge.net/.\n"
+#~ "For documentation please visit our website/wiki at http://"
+#~ "fpdb.sourceforge.net/.\n"
 #~ "If you need help click on Contact - Get Help on our website.\n"
 #~ "Please note that default.conf is no longer needed nor used, all "
 #~ "configuration now happens in HUD_config.xml.\n"
@@ -11563,18 +11561,18 @@ msgstr ""
 #~ "the AGPL3, and partially under GPL2 or later.\n"
 #~ "The Windows installer package includes code licensed under the MIT "
 #~ "license.\n"
-#~ "You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, gpl-3.0."
-#~ "txt and mit.txt in the fpdb installation directory."
+#~ "You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, "
+#~ "gpl-3.0.txt and mit.txt in the fpdb installation directory."
 #~ msgstr ""
 #~ "Fpdb ha bisogno di traduttori!\n"
 #~ "Se parli un altra lingua e hai pochi minuti o piu da spendere invia una "
 #~ "mail a steffen@schaumburger.info\n"
 #~ "\n"
 #~ "Benvenuto in Fpdb!\n"
-#~ "Per essere avvisato delle nuove release del programma vai a https://lists."
-#~ "sourceforge.net/lists/listinfo/fpdb-announce e registrati.\n"
-#~ "Se desideri partecipare allo sviluppo del programma vai a https://lists."
-#~ "sourceforge.net/lists/listinfo/fpdb-main e registrati.\n"
+#~ "Per essere avvisato delle nuove release del programma vai a https://"
+#~ "lists.sourceforge.net/lists/listinfo/fpdb-announce e registrati.\n"
+#~ "Se desideri partecipare allo sviluppo del programma vai a https://"
+#~ "lists.sourceforge.net/lists/listinfo/fpdb-main e registrati.\n"
 #~ "\n"
 #~ "Il programma al momento è alla versione alpha ,e il formato del nostro "
 #~ "databse è cambiato piu di una volta.\n"
@@ -11591,9 +11589,9 @@ msgstr ""
 #~ "AGPL3 e parzialmente sotto licenza GPL2 o suuccesiva.\n"
 #~ "Il pacchetto di installazione di Windows contiene codice soto licenza "
 #~ "MIT.\n"
-#~ "Potete trovare la licenza completa in formato tetsuale nei file agpl-3.0."
-#~ "txt,gpl-2.0.txt,gpl-3.0.txt e mit.txt nella cartella di installazione di "
-#~ "fpdb."
+#~ "Potete trovare la licenza completa in formato tetsuale nei file "
+#~ "agpl-3.0.txt,gpl-2.0.txt,gpl-3.0.txt e mit.txt nella cartella di "
+#~ "installazione di fpdb."
 
 #~ msgid "FpdbParseError for file '%s'"
 #~ msgstr "FpdbParseError per il file '%s'"
@@ -11847,8 +11845,8 @@ msgstr ""
 #~ msgid ""
 #~ "Login to mailserver failed: please check mailserver, username and password"
 #~ msgstr ""
-#~ "Login a mailserver fallito:Si prega di controllare il mailserver,"
-#~ "l'username e la password"
+#~ "Login a mailserver fallito:Si prega di controllare il "
+#~ "mailserver,l'username e la password"
 
 #~ msgid "MATRIX"
 #~ msgstr "MATRIX"
@@ -12686,11 +12684,11 @@ msgstr ""
 #~ msgstr "Impossibile prendere un ID di torneo valido:File rifiutato"
 
 #~ msgid ""
-#~ "Unable to import PYTZ library. Please install PYTZ from http://pypi."
-#~ "python.org/pypi/pytz/"
+#~ "Unable to import PYTZ library. Please install PYTZ from http://"
+#~ "pypi.python.org/pypi/pytz/"
 #~ msgstr ""
-#~ "Impossibile importare libreria PYTZ. Installa PYTZ da http://pypi.python."
-#~ "org/pypi/pytz/"
+#~ "Impossibile importare libreria PYTZ. Installa PYTZ da http://"
+#~ "pypi.python.org/pypi/pytz/"
 
 #~ msgid ""
 #~ "Unable to load PyGTK modules required for GUI. Please install PyCairo, "
@@ -12753,8 +12751,8 @@ msgstr ""
 
 #~ msgid ""
 #~ "We appear to be running in Windows, but the Windows Python Extensions are "
-#~ "not loading. Please install the PYWIN32 package from http://sourceforge."
-#~ "net/projects/pywin32/"
+#~ "not loading. Please install the PYWIN32 package from http://"
+#~ "sourceforge.net/projects/pywin32/"
 #~ msgstr ""
 #~ "Ci sembra essere in esecuzione in Windows, ma le estensioni Python di "
 #~ "Windows non vengono caricate. Si prega di installare il pacchetto PYWIN32 "
