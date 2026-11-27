@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import contextlib
 import math
+import sys
 import time
 from typing import TYPE_CHECKING, Any
 
@@ -103,6 +104,22 @@ def set_drag_active(active: bool) -> None:
     global _drag_active, _drag_started_at
     _drag_active = active
     _drag_started_at = time.monotonic() if active else 0.0
+
+
+def _try_start_native_move(window: Any) -> bool:
+    """Start a compositor-managed drag when its release can be observed.
+
+    Qt's Windows implementation can successfully return ``True`` from
+    ``QWindow.startSystemMove()`` while routing the rest of the drag through
+    the native message loop.  In that mode ``SeatWindow`` does not receive the
+    button release, so the final position never reaches ``configure_event_cb``
+    and the next HUD refresh restores the old layout.  The manual path uses a
+    Qt mouse grab and therefore receives the release reliably.
+    """
+    if sys.platform == "win32":
+        return False
+    handle = window.windowHandle()
+    return handle is not None and bool(handle.startSystemMove())
 
 
 def _nearest_screen(app: Any, x: int, y: int) -> Any:
@@ -405,8 +422,7 @@ class SeatWindow(QWidget):
         # Prefer the native window move (smooth on macOS). Fall back to a manual
         # grabMouse drag only where the platform can't start a system move.
         self._system_move_active = False
-        handle = self.windowHandle()
-        if handle is not None and handle.startSystemMove():
+        if _try_start_native_move(self):
             self._system_move_active = True
         else:
             self.grabMouse()
