@@ -111,7 +111,7 @@ pointer, not advice: follow the link and read the current version.
 ### ACR / WPN in detail
 
 From ACR Poker's [Security & Game Integrity Policies](https://www.acrpoker.eu/security/),
-read 6 November 2026 (#719). This is how fpdb reads them, **not an approval by
+read 27 November 2026 (#719). This is how fpdb reads them, **not an approval by
 ACR**: their rules prevail and may change.
 
 | Rule | What it says | What fpdb does | Status |
@@ -128,4 +128,6 @@ ACR**: their rules prevail and may change.
 
 Manual check for a new table layout: open a cash and a tournament table at the
 client's default size and resized, and make sure no HUD block or popup covers
-the action buttons, the cards, the pot or the client's own indicators.
+the action buttons, the cards, the pot or the client's own indicators. Record
+results per skin and layout using the
+[ACR / WPN validation record](acr-wpn-validation.md).
