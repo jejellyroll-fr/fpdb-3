@@ -229,6 +229,7 @@ class HudMainBase:
     _shutdown_started: bool
     _table_reads: dict[str, TableReadState]
     _table_stat_set_overrides: dict[str, tuple[str, str, str]]
+    _tournament_hud_params: dict[str, dict[str, Any]]
     _tables_attached: set[str]
     _tables_not_found: set[str]
     _unpaired_pools: set[str]
@@ -277,6 +278,7 @@ class HudMainBase:
         _get_table_info: Callable[..., tuple | None]
         _get_temp_key: Callable[..., str]
         _handle_tournament_table_changes: Callable[..., bool]
+        _hud_params_for_new_table: Callable[..., dict[str, Any]]
         _seat_players: Callable[..., dict]
         _refresh_other_huds: Callable[..., None]
         _create_new_hud: Callable[..., None]

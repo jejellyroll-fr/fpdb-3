@@ -263,7 +263,7 @@ class HudMainHudsMixin(HudMainBase):
         Separate from ``create_HUD`` only so that the claim can be undone as a
         whole when any part of the build fails.
         """
-        hud_kwargs = {"context": args.context}
+        hud_kwargs: dict[str, Any] = {"context": args.context}
         if args.hud_params is not None:
             hud_kwargs["hud_params"] = args.hud_params
         self.hud_dict[args.temp_key] = Hud.Hud(
