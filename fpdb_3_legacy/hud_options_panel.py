@@ -47,10 +47,12 @@ _BLINDS = (
     (N_("0.5x to 2x"), 2),
     (N_("0.33x to 3x"), 3),
     (N_("0.1x to 10x"), 10),
-    (N_("All levels"), 10000),
+    (N_("Any blind level"), 10000),
 )
 _SEATS = ((N_("Any"), "A"), (N_("Custom"), "C"), (N_("Exact"), "E"))
 _PERIOD = ((N_("All time"), "A"), (N_("Session"), "S"), (N_("Last n days"), "T"))
+_BLINDS_TOOLTIP = N_("Select which blind levels are included; Any blind level includes every level.")
+_PERIOD_TOOLTIP = N_("Period is independent from blind level. All time does not change the selected blind range.")
 
 _SEATS_CUSTOM = "C"
 _PERIOD_DAYS = "T"
@@ -143,6 +145,7 @@ class HudOptionsPanel(QWidget):
     def _add_column(self, grid: QGridLayout, column: int, prefix: str) -> None:
         blinds = bound_combo(self._params, f"{prefix}agg_bb_mult", self._translated(_BLINDS))
         blinds.setObjectName(f"{prefix}agg_bb_mult")
+        blinds.setToolTip(_(_BLINDS_TOOLTIP))
         grid.addWidget(blinds, 1, column)
 
         seats = bound_combo(self._params, f"{prefix}seats_style", self._translated(_SEATS), self._on_choice)
@@ -159,6 +162,7 @@ class HudOptionsPanel(QWidget):
 
         period = bound_combo(self._params, f"{prefix}stat_range", self._translated(_PERIOD), self._on_choice)
         period.setObjectName(f"{prefix}stat_range")
+        period.setToolTip(_(_PERIOD_TOOLTIP))
         days = self._spinner(f"{prefix}hud_days", 1, 9999)
         self._days[prefix] = days
         grid.addLayout(self._row(period, days), 3, column)

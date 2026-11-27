@@ -15,7 +15,7 @@ from PySide6.QtWidgets import QWidget
 
 from fpdb_3_legacy import Aux_Base, Hud, latency_profile
 from fpdb_3_legacy.hud_diagnostics import session_id
-from fpdb_3_legacy.hud_main_base import HudMainBase, log
+from fpdb_3_legacy.hud_main_base import HudMainBase, copy_hud_scope_params, log
 from fpdb_3_legacy.SmartHudManager import RestartReason
 
 
@@ -258,6 +258,7 @@ class HudMainTablesMixin(HudMainBase):
         if temp_key in self.hud_dict:
             if self.hud_dict[temp_key].table.has_table_title_changed(self.hud_dict[temp_key]):
                 log.debug("table has been renamed")
+                self._remember_tournament_hud_params(tour_number, self.hud_dict[temp_key])
                 self.table_is_stale(self.hud_dict[temp_key])
                 return True
         else:
@@ -267,9 +268,23 @@ class HudMainTablesMixin(HudMainBase):
                 # tournament 116 the same as 1160391.
                 if k.split(" Table ", 1)[0] == tour_number:
                     log.debug("check if the tournament number is in the hud_dict under a different table")
+                    self._remember_tournament_hud_params(tour_number, self.hud_dict[k])
                     self.table_is_stale(self.hud_dict[k])
                     # continue checking other tables
         return False
+
+    def _remember_tournament_hud_params(self, tour_number: str, hud: Hud.Hud) -> None:
+        """Keep the selected HUD scope when an MTT table is replaced."""
+        params = copy_hud_scope_params(getattr(hud, "hud_params", {}))
+        if params:
+            self._tournament_hud_params[str(tour_number)] = params
+
+    def _hud_params_for_new_table(self, game_type: str, tour_number: str) -> dict[str, Any]:
+        """Return defaults plus the active tournament's selected scope."""
+        params = dict(self.hud_params)
+        if game_type == "tour":
+            params.update(self._tournament_hud_params.get(str(tour_number), {}))
+        return params
 
     def idle_move(self, hud: Hud.Hud) -> None:
         """Handle the idle move event."""

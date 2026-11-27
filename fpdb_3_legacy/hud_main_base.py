@@ -32,6 +32,31 @@ log = get_logger("hud_main")
 FAST_FOLD_POOL_PREFIX = "gf."
 """What the Winamax log calls a Fast-Fold pool, covering Escape and HOLD-UP."""
 
+# Scope values are kept separate from layout/rendering values so a tournament
+# table replacement can carry the player's selected statistics filters over to
+# the new HUD object.
+HUD_SCOPE_PARAM_KEYS = (
+    "agg_bb_mult",
+    "seats_style",
+    "seats_cust_nums_low",
+    "seats_cust_nums_high",
+    "stat_range",
+    "hud_days",
+    "h_agg_bb_mult",
+    "h_seats_style",
+    "h_seats_cust_nums_low",
+    "h_seats_cust_nums_high",
+    "h_stat_range",
+    "h_hud_days",
+)
+
+
+def copy_hud_scope_params(params: Any) -> dict[str, Any]:
+    """Copy only HUD filters that should survive a table replacement."""
+    if not isinstance(params, dict):
+        return {}
+    return {key: params[key] for key in HUD_SCOPE_PARAM_KEYS if key in params}
+
 
 @dataclass
 class HUDCreationArgs:
@@ -48,6 +73,7 @@ class HUDCreationArgs:
     context: HudContext | None = None
     hand_instance: Any = None
     loading: bool = False
+    hud_params: dict[str, Any] | None = None
 
 
 @dataclass
