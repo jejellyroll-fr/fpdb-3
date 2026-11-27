@@ -13,10 +13,12 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 """Base classes for auxiliary HUD elements like Mucked cards."""
+
 from __future__ import annotations
 
 import contextlib
 import math
+import sys
 import time
 from typing import TYPE_CHECKING, Any
 
@@ -103,6 +105,22 @@ def set_drag_active(active: bool) -> None:
     global _drag_active, _drag_started_at
     _drag_active = active
     _drag_started_at = time.monotonic() if active else 0.0
+
+
+def _try_start_native_move(window: Any) -> bool:
+    """Start a compositor-managed drag when its release can be observed.
+
+    Qt's Windows implementation can successfully return ``True`` from
+    ``QWindow.startSystemMove()`` while routing the rest of the drag through
+    the native message loop.  In that mode ``SeatWindow`` does not receive the
+    button release, so the final position never reaches ``configure_event_cb``
+    and the next HUD refresh restores the old layout.  The manual path uses a
+    Qt mouse grab and therefore receives the release reliably.
+    """
+    if sys.platform == "win32":
+        return False
+    handle = window.windowHandle()
+    return handle is not None and bool(handle.startSystemMove())
 
 
 def _nearest_screen(app: Any, x: int, y: int) -> Any:
@@ -405,13 +423,16 @@ class SeatWindow(QWidget):
         # Prefer the native window move (smooth on macOS). Fall back to a manual
         # grabMouse drag only where the platform can't start a system move.
         self._system_move_active = False
-        handle = self.windowHandle()
-        if handle is not None and handle.startSystemMove():
+        if _try_start_native_move(self):
             self._system_move_active = True
         else:
             self.grabMouse()
-        _drag_trace("drag-start seat=%s native=%s pos=%s", getattr(self, "seat", "?"),
-                    self._system_move_active, (self.lastPos.x(), self.lastPos.y()))
+        _drag_trace(
+            "drag-start seat=%s native=%s pos=%s",
+            getattr(self, "seat", "?"),
+            self._system_move_active,
+            (self.lastPos.x(), self.lastPos.y()),
+        )
 
     def button_press_middle(self, event: QMouseEvent) -> None:
         """Handle middle mouse button press.
@@ -469,8 +490,14 @@ class SeatWindow(QWidget):
         # what used to fill the position store with stale offsets.
         moved = self.pos() != getattr(self, "_press_origin", self.pos())
         final = (self.pos().x(), self.pos().y())
-        _drag_trace("drag-end seat=%s block=%s native=%s moved=%s final=%s", getattr(self, "seat", "?"),
-                    getattr(self, "block_key", None), was_native, moved, final)
+        _drag_trace(
+            "drag-end seat=%s block=%s native=%s moved=%s final=%s",
+            getattr(self, "seat", "?"),
+            getattr(self, "block_key", None),
+            was_native,
+            moved,
+            final,
+        )
         if moved and self.aw is not None and self.seat is not None:
             self.aw.configure_event_cb(self, self.seat)
 
@@ -940,7 +967,11 @@ class AuxSeats(AuxWindow):
             return
         try:
             save_layout()
-            log.info("HUD layout auto-saved after drag (%s-max, site=%s)", getattr(hud, "max", "?"), getattr(hud, "site", "?"))
+            log.info(
+                "HUD layout auto-saved after drag (%s-max, site=%s)",
+                getattr(hud, "max", "?"),
+                getattr(hud, "site", "?"),
+            )
         except Exception:
             log.exception("Auto-save of HUD layout after drag failed; use the Save HUD Layout menu")
 

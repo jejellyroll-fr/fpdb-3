@@ -58,9 +58,30 @@ tables until Unibet confirms what fpdb may do there
 | Auto Import on macOS, several tables, restarts | verified live |
 | HUD on macOS: cash, spins, several tables | verified live |
 | File truncation / rotation | covered by a test (`tests/test_unibet_export_rotation.py`) |
-| **Windows** HUD window detection | window-title matching is tested; **not yet validated with a real Windows client** |
+| **Windows** HUD window detection | Win32 enumeration and regex matching are covered by portable tests; **not yet validated with a real Windows client** |
 | **Regular MTTs** | window title assumed to carry the tournament id as spins do; only spins tested live |
-| HUD latency and CPU with many tables | **not measured** |
+| HUD latency and CPU with many tables | local HUD read-path smoke measured below; **not yet measured with a live client** |
+
+### Local HUD read-path smoke
+
+The repository benchmark can exercise the same database/Python refresh path with
+the anonymised Unibet corpus. On 27 November 2026, four fixture files (19 hands,
+five tables) were replayed against a fresh local SQLite database for three rounds
+at one and two simulated tables:
+
+| Simulated tables | p50 | p95 | max |
+| ---: | ---: | ---: | ---: |
+| 1 | 4.0 ms | 31.9 ms | 35.0 ms |
+| 2 | 6.4 ms | 8.2 ms | 8.4 ms |
+
+Reproduce it with:
+
+```text
+uv run --no-sync python tools/benchmark_hud_live.py --corpus "tests/fixtures/hands/unibet/*.txt" --corpus-limit 4 --tables 1,2 --stat-range A --repeats 3
+```
+
+This is a repeatable read-path smoke test, not evidence of live-client CPU,
+window-detection, or multi-table responsiveness on Windows or macOS.
 
 ## Room rules
 

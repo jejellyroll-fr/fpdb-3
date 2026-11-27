@@ -22,6 +22,9 @@ TABLE_TITLE = "Omaha - PL5 (99465067)"
 # carries (99007080), and the export file is named "H... T99007080 ...").
 TOUR_TITLE = "0,25€ Power Spin Flash - 10/20  - Prize pool 5€ (99007080)"
 OTHER_TOUR_TITLE = "0,25€ Power Spin Flash - 15/30  - Prize pool 0,50€ (99006969)"
+# Regular MTTs use the same trailing numeric identifier as Spins.  The exact
+# marketing text is deliberately not part of the matcher contract.
+REGULAR_MTT_TITLE = "SPRINT KO - 10/20 - Tournament 99042656 (99042656)"
 LOBBY_TITLE = "Unibet Poker v3.58.0"
 OTHER_TABLE_TITLE = "Omaha - PL5 (99433705)"
 
@@ -44,6 +47,15 @@ def test_tournament_search_uses_the_tournament_id() -> None:
     assert not re.search(pattern, OTHER_TOUR_TITLE)
     assert not re.search(pattern, "0,25€ Power Spin Flash (99503253)")
     assert not re.search(pattern, LOBBY_TITLE)
+
+
+def test_regular_mtt_search_uses_the_tournament_id() -> None:
+    pattern = Unibet.getTableTitleRe("tour", tournament=99042656, table_number=99042657)
+
+    assert re.search(pattern, REGULAR_MTT_TITLE)
+    assert not re.search(pattern, REGULAR_MTT_TITLE.replace("99042656", "99042655"))
+    # The hand's table id must not accidentally attach the HUD to another MTT.
+    assert not re.search(pattern, "SPRINT KO - 10/20 - Table 99042657")
 
 
 def _group1(pattern: str, title: str) -> str:
