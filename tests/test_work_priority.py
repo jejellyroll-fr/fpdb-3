@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import logging
 import threading
 import time
 
+from fpdb_3_legacy import work_priority
 from fpdb_3_legacy.work_priority import background_checkpoint, background_work, interactive_work
 
 
@@ -37,7 +39,8 @@ def test_interactive_task_runs_at_the_next_import_file_boundary() -> None:
     assert import_resumed.is_set()
 
 
-def test_import_gets_a_turn_during_a_long_interactive_operation() -> None:
+def test_import_gets_a_bounded_turn_during_a_long_interactive_operation(caplog) -> None:
+    caplog.set_level(logging.DEBUG, logger="work_priority")
     page_started = threading.Event()
     import_resumed = threading.Event()
     page_saw_import_turn = threading.Event()
@@ -64,3 +67,28 @@ def test_import_gets_a_turn_during_a_long_interactive_operation() -> None:
     assert not page.is_alive()
     assert import_resumed.is_set()
     assert page_saw_import_turn.is_set()
+    assert any("background-checkpoint name=test-fairness yielded=" in record.getMessage() for record in caplog.records)
+    assert any("interactive-work name=test-long-page queue_wait=" in record.getMessage() for record in caplog.records)
+
+
+def test_interactive_metrics_separate_queue_wait_from_work_duration(caplog) -> None:
+    caplog.set_level(logging.DEBUG, logger="work_priority")
+    operation_started = threading.Event()
+
+    def open_page() -> None:
+        with interactive_work("queued-page"):
+            operation_started.set()
+            time.sleep(0.01)
+
+    with background_work("blocking-import-file"):
+        page = threading.Thread(target=open_page)
+        page.start()
+        with work_priority._condition:
+            assert work_priority._condition.wait_for(lambda: work_priority._INTERACTIVE_WAITERS > 0, timeout=1)
+
+    page.join(1)
+    assert not page.is_alive()
+    assert operation_started.is_set()
+    record = next(record for record in caplog.records if "interactive-work name=queued-page" in record.getMessage())
+    assert "queue_wait=" in record.getMessage()
+    assert "duration=" in record.getMessage()
