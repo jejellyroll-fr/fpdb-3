@@ -263,6 +263,9 @@ class HudMainHudsMixin(HudMainBase):
         Separate from ``create_HUD`` only so that the claim can be undone as a
         whole when any part of the build fails.
         """
+        hud_kwargs: dict[str, Any] = {"context": args.context}
+        if args.hud_params is not None:
+            hud_kwargs["hud_params"] = args.hud_params
         self.hud_dict[args.temp_key] = Hud.Hud(
             self,
             args.table,
@@ -270,7 +273,7 @@ class HudMainHudsMixin(HudMainBase):
             args.poker_game,
             args.game_type,
             self.config,
-            args.context,
+            **hud_kwargs,
         )
         self.hud_dict[args.temp_key].table_name = args.temp_key
         self.hud_dict[args.temp_key].stat_dict = args.stat_dict
@@ -690,6 +693,7 @@ class HudMainHudsMixin(HudMainBase):
             return
 
         log.debug("create new hud for hand %s", new_hand_id)
+        hud_params = self._hud_params_for_new_table(game_type, tour_number)
         # Everything below that reads the database is skipped both for the
         # placeholder and when the caller brought its own statistics.
         from_database = stats is None and not loading
@@ -698,11 +702,11 @@ class HudMainHudsMixin(HudMainBase):
         elif loading:
             stat_dict = {}
         else:
-            self.db_connection.init_hud_stat_vars(self.hud_params["hud_days"], self.hud_params["h_hud_days"])
+            self.db_connection.init_hud_stat_vars(hud_params["hud_days"], hud_params["h_hud_days"])
             stat_dict = self.db_connection.get_stats_from_hand(
                 new_hand_id,
                 game_type,
-                self.hud_params,
+                hud_params,
                 self.hero_ids[site_id],
                 num_seats,
                 poker_game=hud_poker_game,
@@ -811,6 +815,7 @@ class HudMainHudsMixin(HudMainBase):
                 ),
                 hand_instance=prepared.hand_instance if prepared is not None else None,
                 loading=loading,
+                hud_params=hud_params,
             )
             self.create_HUD(args)
             if args.temp_key in self.hud_dict:

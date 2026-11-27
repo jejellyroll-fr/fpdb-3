@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-26 21:42+0100\n"
+"POT-Creation-Date: 2026-11-27 16:26+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -4123,12 +4123,12 @@ msgid "0.5x to 2x"
 msgstr "0,5x à 2x"
 
 #: fpdb_3_legacy/hud_options_panel.py
-msgid "All levels"
-msgstr "Tous les niveaux"
-
-#: fpdb_3_legacy/hud_options_panel.py
 msgid "All time"
 msgstr "Depuis toujours"
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "Any blind level"
+msgstr "Tous les niveaux"
 
 #: fpdb_3_legacy/hud_options_panel.py
 msgid "Blinds"
@@ -4159,9 +4159,24 @@ msgid "Period"
 msgstr "Période"
 
 #: fpdb_3_legacy/hud_options_panel.py
+msgid ""
+"Period is independent from blind level. All time does not change the "
+"selected blind range."
+msgstr ""
+"La période est indépendante des blindes. « Depuis toujours » ne modifie pas "
+"la plage de blindes sélectionnée."
+
+#: fpdb_3_legacy/hud_options_panel.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Seats"
 msgstr "Sièges"
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid ""
+"Select which blind levels are included; Any blind level includes every level."
+msgstr ""
+"Choisissez les niveaux de blindes à inclure ; « Toutes les blindes » inclut "
+"tous les niveaux."
 
 #: fpdb_3_legacy/hud_options_panel.py
 msgid "This level"

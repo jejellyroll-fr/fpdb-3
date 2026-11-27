@@ -78,7 +78,17 @@ def importName(module_name: str, name: str) -> Any:
 class Hud:
     """A class to manage the HUD overlays."""
 
-    def __init__(self, parent: Any, table: Any, max_players: int, poker_game: str, game_type: str, config: Any, context: HudContext | None = None) -> None:  # noqa: PLR0913, PLR0915
+    def __init__(  # noqa: PLR0913, PLR0915
+        self,
+        parent: Any,
+        table: Any,
+        max_players: int,
+        poker_game: str,
+        game_type: str,
+        config: Any,
+        context: HudContext | None = None,
+        hud_params: dict[str, Any] | None = None,
+    ) -> None:  # noqa: PLR0913, PLR0915
         """Initialize the HUD.
 
         This method is intended to be called from the stdin thread,
@@ -110,7 +120,7 @@ class Hud:
             max_seats=max_players,
         )
         self.hud_params = dict.copy(
-            parent.hud_params,
+            hud_params if hud_params is not None else parent.hud_params,
         )  # we must dict.copy a fresh hud_params dict
         # because each aux hud can control local hud param
         # settings.  Simply assigning the dictionary does not

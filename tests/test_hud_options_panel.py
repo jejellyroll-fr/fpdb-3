@@ -146,6 +146,15 @@ def test_the_combos_open_on_the_current_values(params) -> None:
     menu.close()
 
 
+def test_scope_tooltips_explain_that_period_and_blinds_are_independent(params) -> None:
+    menu = _menu(params)
+
+    assert "blind" in _combo(menu, "h_agg_bb_mult").toolTip().lower()
+    assert "independent" in _combo(menu, "h_stat_range").toolTip().lower()
+    assert _combo(menu, "h_agg_bb_mult").itemText(4) == "Any blind level"
+    menu.close()
+
+
 @pytest.mark.parametrize(
     ("combo", "index", "spinners"),
     [

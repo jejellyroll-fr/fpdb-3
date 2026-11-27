@@ -2208,12 +2208,36 @@ def _tour_hud(table_key: str) -> MagicMock:
 
 
 def test_the_window_of_the_table_left_behind_is_taken_down(hud_main) -> None:
-    hud_main.hud_dict = {"1160377 Table 4": _tour_hud("1160377 Table 4")}
+    hud = _tour_hud("1160377 Table 4")
+    hud.hud_params = {"agg_bb_mult": 1, "h_agg_bb_mult": 10000, "stat_range": "A"}
+    hud_main.hud_dict = {"1160377 Table 4": hud}
 
     with patch.object(hud_main, "table_is_stale") as stale:
         hud_main._handle_tournament_table_changes("tour", "1160377 Table 9", "1160377")
 
     stale.assert_called_once_with(hud_main.hud_dict["1160377 Table 4"])
+    assert hud_main._tournament_hud_params["1160377"] == hud.hud_params
+
+
+def test_new_tournament_table_uses_the_previous_table_scope(hud_main) -> None:
+    hud_main.hud_params = {"agg_bb_mult": 3, "h_agg_bb_mult": 1, "stat_range": "A"}
+    hud_main._tournament_hud_params = {"1160377": {"agg_bb_mult": 10000, "h_agg_bb_mult": 10000}}
+
+    assert hud_main._hud_params_for_new_table("tour", "1160377") == {
+        "agg_bb_mult": 10000,
+        "h_agg_bb_mult": 10000,
+        "stat_range": "A",
+    }
+    assert hud_main._hud_params_for_new_table("ring", "1160377") == hud_main.hud_params
+
+
+def test_the_database_worker_is_told_the_saved_tournament_scope(hud_main) -> None:
+    hud_main._tournament_hud_params = {"1160377": {"agg_bb_mult": 10000}}
+
+    request = hud_main._build_batch_request(["901"])
+    hud_main._tournament_hud_params["1160377"]["agg_bb_mult"] = 1
+
+    assert request.tournament_hud_params == {"1160377": {"agg_bb_mult": 10000}}
 
 
 def test_another_tournament_is_left_where_it_is(hud_main) -> None:
@@ -3499,6 +3523,22 @@ def test_a_window_taken_over_by_the_next_match_drops_its_hud(hud_main) -> None:
         hud_main._handle_tour_table_switch(hud, table)
 
     stale.assert_called_once_with(hud)
+
+
+def test_a_timer_driven_table_switch_preserves_tournament_scope(hud_main) -> None:
+    """The geometry poll saves scope before it removes a stale tournament HUD."""
+    table = _tour_table([1200531183, 1200533055])
+    table.tournament = 1200531182
+    hud = SimpleNamespace(
+        table=table,
+        hud_params={"agg_bb_mult": 10000, "h_agg_bb_mult": 10000, "stat_range": "A"},
+    )
+
+    with patch.object(hud_main, "table_is_stale"):
+        hud_main._handle_tour_table_switch(hud, table)
+        hud_main._handle_tour_table_switch(hud, table)
+
+    assert hud_main._tournament_hud_params["1200531182"] == hud.hud_params
 
 
 def test_a_title_without_a_table_id_never_signals_a_switch(hud_main) -> None:

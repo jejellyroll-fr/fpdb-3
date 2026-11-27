@@ -185,6 +185,9 @@ class HudMainDbMixin(HudMainBase):
             hand_ids=tuple(hand_ids),
             hud_params=dict(self.hud_params),
             tables=self._table_read_contexts(),
+            tournament_hud_params={
+                tour: dict(params) for tour, params in getattr(self, "_tournament_hud_params", {}).items()
+            },
         )
 
     def _on_db_snapshot(self, snapshot: HudBatchSnapshot) -> None:

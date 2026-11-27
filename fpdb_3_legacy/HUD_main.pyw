@@ -362,6 +362,9 @@ class HudMain(
             # Values include game identity so a recycled table key cannot leak a
             # Hold'em/PLO choice into another game.
             self._table_stat_set_overrides: dict[str, tuple[str, str, str]] = {}
+            # Scope filters selected on a tournament HUD follow the player to
+            # the next table. They are intentionally session-only.
+            self._tournament_hud_params: dict[str, dict[str, Any]] = {}
             # Fingerprint of HUD_config.xml as last read. Preferences run in the
             # fpdb process, not this one, so a saved profile rule reaches the
             # open tables by way of the file rather than a call.

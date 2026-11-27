@@ -56,6 +56,50 @@ def test_read_batch_keeps_only_latest_primary_hand_and_finishes_transaction() ->
     database.connection.rollback.assert_called_once()
 
 
+def _tour_table_info(tour_number: int, table: str) -> tuple:
+    return ("tour-table", 9, "holdem", "tour", False, 1, "site", 9, tour_number, f"Table {table}", None)
+
+
+def _stats_params(database: MagicMock) -> dict:
+    return database.get_stats_from_hand.call_args.args[2]
+
+
+def test_a_new_mtt_table_reads_with_the_scope_of_the_table_it_replaces() -> None:
+    database = _database()
+    database.get_table_info.side_effect = lambda hand_id: _tour_table_info(1160377, "9")
+    service = HudReadService(_config(), database, hand_factory=lambda *_args: None)
+    defaults = {"hud_days": 30, "h_hud_days": 90, "agg_bb_mult": 3, "h_agg_bb_mult": 3, "stat_range": "S"}
+
+    service.read_batch(
+        HudBatchReadRequest(
+            1,
+            ("901",),
+            defaults,
+            tournament_hud_params={"1160377": {"agg_bb_mult": 10000, "h_agg_bb_mult": 10000, "h_stat_range": "A"}},
+        ),
+    )
+
+    assert _stats_params(database) == {**defaults, "agg_bb_mult": 10000, "h_agg_bb_mult": 10000, "h_stat_range": "A"}
+
+
+@pytest.mark.parametrize(
+    "table_info",
+    [_tour_table_info(81498, "9"), _table_info("ring-table")],
+    ids=["another-tournament", "cash-game"],
+)
+def test_a_saved_mtt_scope_stays_with_its_own_tournament(table_info) -> None:
+    database = _database()
+    database.get_table_info.side_effect = lambda hand_id: table_info
+    service = HudReadService(_config(), database, hand_factory=lambda *_args: None)
+    defaults = {"hud_days": 30, "h_hud_days": 90, "agg_bb_mult": 3}
+
+    service.read_batch(
+        HudBatchReadRequest(1, ("901",), defaults, tournament_hud_params={"1160377": {"agg_bb_mult": 10000}}),
+    )
+
+    assert _stats_params(database) == defaults
+
+
 def test_secondary_huds_share_one_batched_stats_query_and_normalize_ids() -> None:
     database = _database()
     database.get_table_info.side_effect = lambda hand_id: _table_info(f"table-{hand_id}")

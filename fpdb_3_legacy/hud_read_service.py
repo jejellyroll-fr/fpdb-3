@@ -64,6 +64,16 @@ def hud_temp_key(table_info: tuple) -> str:
     return f"{tour_number} Table {suffix}"
 
 
+def _new_table_params(request: HudBatchReadRequest, info: TableInfo) -> dict[str, Any]:
+    """Defaults, plus the scope a replaced table of the same MTT was using."""
+    if info.game_type != "tour":
+        return request.hud_params
+    scope = request.tournament_hud_params.get(str(info.tour_number))
+    if not scope:
+        return request.hud_params
+    return {**request.hud_params, **scope}
+
+
 def hud_poker_game(poker_game: str) -> str:
     """Map imported game names to HUD layout names."""
     return {"fusion": "holdem"}.get(poker_game, poker_game)
@@ -91,6 +101,10 @@ class HudBatchReadRequest:
     hand_ids: tuple[str, ...]
     hud_params: dict[str, Any]
     tables: tuple[HudTableReadContext, ...] = ()
+    # Scope filters a tournament HUD carried before its table was replaced,
+    # keyed by tournament number. A new MTT table has no visible HUD yet, so
+    # without these its first statistics would use the global defaults (#924).
+    tournament_hud_params: dict[str, dict[str, Any]] = field(default_factory=dict)
     # When the Qt thread queued this request, so the worker can report how long
     # it waited behind earlier work (#680).
     submitted_at: float = field(default_factory=time.monotonic)
@@ -653,7 +667,7 @@ class HudReadService:
             temp_key = hud_temp_key(info)
             context = contexts.get(temp_key)
             poker_game = context.poker_game if context else hud_poker_game(info.poker_game)
-            params = context.hud_params if context else request.hud_params
+            params = context.hud_params if context else _new_table_params(request, info)
             needs_mucked = context.needs_mucked_data if context else self._needs_mucked_data(poker_game, info.game_type)
             try:
                 hands[_hand_key(hand_id)] = self._read_hand(

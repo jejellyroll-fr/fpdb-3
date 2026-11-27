@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-26 21:42+0100\n"
+"POT-Creation-Date: 2026-11-27 16:26+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3886,7 +3886,7 @@ msgid "0.1x to 10x"
 msgstr ""
 
 #: fpdb_3_legacy/hud_options_panel.py
-msgid "All levels"
+msgid "Any blind level"
 msgstr ""
 
 #: fpdb_3_legacy/hud_options_panel.py
@@ -3903,6 +3903,17 @@ msgstr ""
 
 #: fpdb_3_legacy/hud_options_panel.py
 msgid "Last n days"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid ""
+"Select which blind levels are included; Any blind level includes every level."
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid ""
+"Period is independent from blind level. All time does not change the "
+"selected blind range."
 msgstr ""
 
 #: fpdb_3_legacy/hud_options_panel.py

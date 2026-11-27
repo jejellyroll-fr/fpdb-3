@@ -32,6 +32,31 @@ log = get_logger("hud_main")
 FAST_FOLD_POOL_PREFIX = "gf."
 """What the Winamax log calls a Fast-Fold pool, covering Escape and HOLD-UP."""
 
+# Scope values are kept separate from layout/rendering values so a tournament
+# table replacement can carry the player's selected statistics filters over to
+# the new HUD object.
+HUD_SCOPE_PARAM_KEYS = (
+    "agg_bb_mult",
+    "seats_style",
+    "seats_cust_nums_low",
+    "seats_cust_nums_high",
+    "stat_range",
+    "hud_days",
+    "h_agg_bb_mult",
+    "h_seats_style",
+    "h_seats_cust_nums_low",
+    "h_seats_cust_nums_high",
+    "h_stat_range",
+    "h_hud_days",
+)
+
+
+def copy_hud_scope_params(params: Any) -> dict[str, Any]:
+    """Copy only HUD filters that should survive a table replacement."""
+    if not isinstance(params, dict):
+        return {}
+    return {key: params[key] for key in HUD_SCOPE_PARAM_KEYS if key in params}
+
 
 @dataclass
 class HUDCreationArgs:
@@ -48,6 +73,7 @@ class HUDCreationArgs:
     context: HudContext | None = None
     hand_instance: Any = None
     loading: bool = False
+    hud_params: dict[str, Any] | None = None
 
 
 @dataclass
@@ -203,6 +229,7 @@ class HudMainBase:
     _shutdown_started: bool
     _table_reads: dict[str, TableReadState]
     _table_stat_set_overrides: dict[str, tuple[str, str, str]]
+    _tournament_hud_params: dict[str, dict[str, Any]]
     _tables_attached: set[str]
     _tables_not_found: set[str]
     _unpaired_pools: set[str]
@@ -251,6 +278,7 @@ class HudMainBase:
         _get_table_info: Callable[..., tuple | None]
         _get_temp_key: Callable[..., str]
         _handle_tournament_table_changes: Callable[..., bool]
+        _hud_params_for_new_table: Callable[..., dict[str, Any]]
         _seat_players: Callable[..., dict]
         _refresh_other_huds: Callable[..., None]
         _create_new_hud: Callable[..., None]
