@@ -32,9 +32,9 @@ Send the questions below to ACR/WPN support or the game-integrity team. Keep the
 >    it does not cover, replace or alter any ACR table graphics, cards, controls
 >    or security indicators? Is placement beside the table required?
 > 3. Would a panel that selects among historical statistics based on the
-   current table situation be prohibited even when it reveals no current-hand
-   information? fpdb currently disables dynamic and position-bound panels at
-   WPN tables.
+>    current table situation be prohibited even when it reveals no current-hand
+>    information? fpdb currently disables dynamic and position-bound panels at
+>    WPN tables.
 > 4. Are these answers the same for every WPN skin, and are there client
    versions, table formats or other conditions that change them?
 >
