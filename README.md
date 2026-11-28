@@ -16,9 +16,9 @@ replayer, tournament ICM and study tools afterwards. No account, no upload, no t
 **Version 3.11.0 — released 28 November 2026.** Download it from the
 [3.11.0 release](https://github.com/jejellyroll-fr/fpdb-3/releases/tag/v3.11.0), and see the
 [release notes](docs/RELEASE_NOTES_3.11.0.md) for the new rooms (PokerStars skins, bet365.fr,
-win2day, ChampionPoker, Betclic's and Unibet's new clients, BetRivers), the redesigned HUD editor,
-the replayer's inspector and decision panel, the PokerTracker 4 database import and the new
-Results Calendar and Tourney Stats.
+win2day, ChampionPoker, Betclic's new client, Unibet.fr's 2026 client, BetRivers), the redesigned
+HUD editor, the replayer's inspector and decision panel, the PokerTracker 4 database import and
+the new Results Calendar and Tourney Stats.
 
 The original FPDB-3 Python application: hand-history parsers, PySide6 GUI, statistics engine, and the HUD overlay. This repository hosts the standalone, self-contained legacy Python stack. It has been separated from the `fpdb-new` monorepo by removing all Rust and modern FastAPI components to keep it lightweight, fast, and easy to run.
 
