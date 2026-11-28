@@ -4660,9 +4660,8 @@
             <fav max="10" fav_seat="0"/>
         </site>
         <!-- ChampionPoker (#926): a crypto-oriented room on the iPoker network.
-             No default folder is set: the folders hold the account name. Use
-             Detect in the Sites settings (macOS: the Championpoker Poker container;
-             Windows: the client's data folder), or set the HH and TS paths by hand. -->
+             No default folder is set: the client's directory names are not
+             confirmed yet. Set the HH and TS paths to the folders the client saves to. -->
         <site site_name="ChampionPoker" network="iPoker" enabled="False" HH_path="" TS_path="" screen_name="" site_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
