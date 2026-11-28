@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="utf-8"?>
+<session sessioncode="8757181114">
+ <general>
+  <client_version>26.7.1.32</client_version>
+  <mode>real</mode>
+  <gametype>Omaha PL €0.02/€0.04</gametype>
+  <tablename>Altendorf, 817033427</tablename>
+  <tablecurrency>EUR</tablecurrency>
+  <smallblind>€0.02</smallblind>
+  <bigblind>€0.04</bigblind>
+  <duration>00:09:56</duration>
+  <gamecount>8</gamecount>
+  <startdate>2026-11-28 16:34:40</startdate>
+  <currency>EUR</currency>
+  <nickname>Hero</nickname>
+  <bets>€2.12</bets>
+  <wins>€0</wins>
+  <chipsin>€3.96</chipsin>
+  <chipsout>€3.88</chipsout>
+  <statuspoints>0.05</statuspoints>
+  <awardpoints>0.16</awardpoints>
+  <ipoints>0.05</ipoints>
+  <tablesize>6</tablesize>
+ </general>
+ <game gamecode="12674395923">
+  <general>
+   <startdate>2026-11-28 16:34:40</startdate>
+   <players>
+    <player bet="€0" chips="€4.65" dealer="0" name="Player 1" seat="1" win="€0"/>
+    <player bet="€0" chips="€3.88" dealer="1" name="Player 3" seat="3" win="€0"/>
+    <player bet="€0.04" chips="€0.24" dealer="0" name="Player 5" seat="5" win="€0"/>
+    <player bet="€0.67" chips="€4" dealer="0" name="Player 8" rakeamount="€0.04" seat="8" win="€0.62"/>
+    <player bet="€0.31" chips="€6.15" dealer="0" name="Player 10" seat="10" win="€0"/>
+   </players>
+  </general>
+  <round no="0">
+   <action no="1" player="Player 5" sum="€0.02" type="1"/>
+   <action no="2" player="Player 8" sum="€0.04" type="2"/>
+  </round>
+  <round no="1">
+   <cards player="Player 1" type="Pocket">X X X X</cards>
+   <cards player="Player 3" type="Pocket">X X X X</cards>
+   <cards player="Player 5" type="Pocket">X X X X</cards>
+   <cards player="Player 8" type="Pocket">X X X X</cards>
+   <cards player="Player 10" type="Pocket">X X X X</cards>
+   <action no="3" player="Player 10" sum="€0.04" type="3"/>
+   <action no="4" player="Player 1" sum="€0" type="0"/>
+   <action no="5" player="Player 3" sum="€0" type="0"/>
+   <action no="6" player="Player 5" sum="€0.02" type="3"/>
+   <action no="7" player="Player 8" sum="€0" type="4"/>
+  </round>
+  <round no="2">
+   <action no="8" player="Player 5" sum="€0" type="4"/>
+   <action no="9" player="Player 8" sum="€0.08" type="5"/>
+   <action no="10" player="Player 10" sum="€0.08" type="3"/>
+   <action no="11" player="Player 5" sum="€0" type="0"/>
+   <cards type="Flop">H3 H9 CQ</cards>
+  </round>
+  <round no="3">
+   <action no="12" player="Player 8" sum="€0.19" type="5"/>
+   <action no="13" player="Player 10" sum="€0.19" type="3"/>
+   <cards type="Turn">S9</cards>
+  </round>
+  <round no="4">
+   <action no="14" player="Player 8" sum="€0.36" type="5"/>
+   <action no="15" player="Player 10" sum="€0" type="0"/>
+   <cards type="River">C3</cards>
+  </round>
+ </game>
+ <game gamecode="12674399584">
+  <general>
+   <startdate>2026-11-28 16:36:29</startdate>
+   <players>
+    <player bet="€0.04" chips="€4.65" dealer="0" name="Player 1" seat="1" win="€0"/>
+    <player bet="€0" chips="€3.88" dealer="0" name="Player 3" seat="3" win="€0"/>
+    <player bet="€0" chips="€0.20" dealer="1" name="Player 5" seat="5" win="€0"/>
+    <player bet="€0.40" chips="€4.31" dealer="0" name="Player 8" rakeamount="€0.02" seat="8" win="€0.34"/>
+    <player bet="€0.16" chips="€5.84" dealer="0" name="Player 10" seat="10" win="€0"/>
+   </players>
+  </general>
+  <round no="0">
+   <action no="1" player="Player 8" sum="€0.02" type="1"/>
+   <action no="2" player="Player 10" sum="€0.04" type="2"/>
+  </round>
+  <round no="1">
+   <cards player="Player 1" type="Pocket">X X X X</cards>
+   <cards player="Player 3" type="Pocket">X X X X</cards>
+   <cards player="Player 5" type="Pocket">X X X X</cards>
+   <cards player="Player 8" type="Pocket">X X X X</cards>
+   <cards player="Player 10" type="Pocket">X X X X</cards>
+   <action no="3" player="Player 1" sum="€0.04" type="3"/>
+   <action no="4" player="Player 3" sum="€0" type="0"/>
+   <action no="5" player="Player 5" sum="€0" type="0"/>
+   <action no="6" player="Player 8" sum="€0.16" type="23"/>
+   <action no="7" player="Player 10" sum="€0.12" type="3"/>
+   <action no="8" player="Player 1" sum="€0" type="0"/>
+  </round>
+  <round no="2">
+   <action no="9" player="Player 8" sum="€0" type="4"/>
+   <action no="10" player="Player 10" sum="€0" type="4"/>
+   <cards type="Flop">CJ C9 SJ</cards>
+  </round>
+  <round no="3">
+   <action no="11" player="Player 8" sum="€0.24" type="5"/>
+   <action no="12" player="Player 10" sum="€0" type="0"/>
+   <cards type="Turn">DK</cards>
+  </round>
+ </game>
+ <game gamecode="12674400252">
+  <general>
+   <startdate>2026-11-28 16:37:41</startdate>
+   <players>
+    <player bet="€0.44" chips="€4.61" dealer="0" name="Player 1" rakeamount="€0.02" seat="1" win="€0.28"/>
+    <player bet="€0" chips="€3.88" dealer="0" name="Player 3" seat="3" win="€0"/>
+    <player bet="€0" chips="€0.20" dealer="0" name="Player 5" seat="5" win="€0"/>
+    <player bet="€0.14" chips="€4.49" dealer="1" name="Player 8" seat="8" win="€0"/>
+    <player bet="€0.02" chips="€5.68" dealer="0" name="Player 10" seat="10" win="€0"/>
+   </players>
+  </general>
+  <round no="0">
+   <action no="1" player="Player 10" sum="€0.02" type="1"/>
+   <action no="2" player="Player 1" sum="€0.04" type="2"/>
+  </round>
+  <round no="1">
+   <cards player="Player 1" type="Pocket">X X X X</cards>
+   <cards player="Player 3" type="Pocket">X X X X</cards>
+   <cards player="Player 5" type="Pocket">X X X X</cards>
+   <cards player="Player 8" type="Pocket">X X X X</cards>
+   <cards player="Player 10" type="Pocket">X X X X</cards>
+   <action no="3" player="Player 3" sum="€0" type="0"/>
+   <action no="4" player="Player 5" sum="€0" type="0"/>
+   <action no="5" player="Player 8" sum="€0.14" type="23"/>
+   <action no="6" player="Player 10" sum="€0" type="0"/>
+   <action no="7" player="Player 1" sum="€0.10" type="3"/>
+  </round>
+  <round no="2">
+   <action no="8" player="Player 1" sum="€0.30" type="5"/>
+   <action no="9" player="Player 8" sum="€0" type="0"/>
+   <cards type="Flop">S5 H8 C5</cards>
+  </round>
+ </game>
+ <game gamecode="12674402405">
+  <general>
+   <startdate>2026-11-28 16:38:45</startdate>
+   <players>
+    <player bet="€0.04" chips="€4.75" dealer="0" name="Player 1" seat="1" win="€0"/>
+    <player bet="€0.20" chips="€3.88" dealer="0" name="Player 3" rakeamount="€0.01" seat="3" win="€0.15"/>
+    <player bet="€0.04" chips="€0.20" dealer="0" name="Player 5" seat="5" win="€0"/>
+    <player bet="€0" chips="€4.35" dealer="0" name="Player 8" seat="8" win="€0"/>
+    <player bet="€0.04" chips="€5.66" dealer="1" name="Player 10" seat="10" win="€0"/>
+   </players>
+  </general>
+  <round no="0">
+   <action no="1" player="Player 1" sum="€0.02" type="1"/>
+   <action no="2" player="Player 3" sum="€0.04" type="2"/>
+  </round>
+  <round no="1">
+   <cards player="Player 1" type="Pocket">X X X X</cards>
+   <cards player="Player 3" type="Pocket">X X X X</cards>
+   <cards player="Player 5" type="Pocket">X X X X</cards>
+   <cards player="Player 8" type="Pocket">X X X X</cards>
+   <cards player="Player 10" type="Pocket">X X X X</cards>
+   <action no="3" player="Player 5" sum="€0.04" type="3"/>
+   <action no="4" player="Player 8" sum="€0" type="0"/>
+   <action no="5" player="Player 10" sum="€0.04" type="3"/>
+   <action no="6" player="Player 1" sum="€0.02" type="3"/>
+   <action no="7" player="Player 3" sum="€0" type="4"/>
+  </round>
+  <round no="2">
+   <action no="8" player="Player 1" sum="€0" type="4"/>
+   <action no="9" player="Player 3" sum="€0.16" type="5"/>
+   <action no="10" player="Player 5" sum="€0" type="0"/>
+   <action no="11" player="Player 10" sum="€0" type="0"/>
+   <action no="12" player="Player 1" sum="€0" type="0"/>
+   <cards type="Flop">C7 CA D3</cards>
+  </round>
+ </game>
+ <game gamecode="12674402891">
+  <general>
+   <startdate>2026-11-28 16:39:31</startdate>
+   <players>
+    <player bet="€0" chips="€4.71" dealer="1" name="Player 1" seat="1" win="€0"/>
+    <player bet="€0.04" chips="€3.99" dealer="0" name="Player 3" seat="3" win="€0.08"/>
+    <player bet="€0.04" chips="€4" dealer="0" name="Player 5" seat="5" win="€0"/>
+    <player bet="€0" chips="€4.35" dealer="0" name="Player 8" seat="8" win="€0"/>
+    <player bet="€0" chips="€5.62" dealer="0" name="Player 10" seat="10" win="€0"/>
+   </players>
+  </general>
+  <round no="0">
+   <action no="1" player="Player 3" sum="€0.02" type="1"/>
+   <action no="2" player="Player 5" sum="€0.04" type="2"/>
+  </round>
+  <round no="1">
+   <cards player="Player 1" type="Pocket">X X X X</cards>
+   <cards player="Player 3" type="Pocket">HJ H7 H8 H10</cards>
+   <cards player="Player 5" type="Pocket">HQ H9 S5 DA</cards>
+   <cards player="Player 8" type="Pocket">X X X X</cards>
+   <cards player="Player 10" type="Pocket">X X X X</cards>
+   <action no="3" player="Player 8" sum="€0" type="0"/>
+   <action no="4" player="Player 10" sum="€0" type="0"/>
+   <action no="5" player="Player 1" sum="€0" type="0"/>
+   <action no="6" player="Player 3" sum="€0.02" type="3"/>
+   <action no="7" player="Player 5" sum="€0" type="4"/>
+  </round>
+  <round no="2">
+   <action no="8" player="Player 3" sum="€0" type="4"/>
+   <action no="9" player="Player 5" sum="€0" type="4"/>
+   <cards type="Flop">CK HK D3</cards>
+  </round>
+  <round no="3">
+   <action no="10" player="Player 3" sum="€0" type="4"/>
+   <action no="11" player="Player 5" sum="€0" type="4"/>
+   <cards type="Turn">D8</cards>
+  </round>
+  <round no="4">
+   <action no="12" player="Player 3" sum="€0" type="4"/>
+   <action no="13" player="Player 5" sum="€0" type="4"/>
+   <cards type="River">S3</cards>
+  </round>
+ </game>
+ <game gamecode="12674404222">
+  <general>
+   <startdate>2026-11-28 16:40:23</startdate>
+   <players>
+    <player bet="€0" chips="€4.71" dealer="0" name="alice" seat="1" win="€0"/>
+    <player bet="€0.14" chips="€4.03" dealer="1" name="bob" seat="3" win="€0"/>
+    <player bet="€0.14" chips="€3.96" dealer="0" name="carol" seat="5" win="€0"/>
+    <player bet="€2" chips="€2" dealer="0" name="Hero" seat="6" win="€0"/>
+    <player bet="€2.38" chips="€4.35" dealer="0" name="dave" rakeamount="€0.28" seat="8" win="€4"/>
+    <player bet="€0" chips="€5.62" dealer="0" name="erin" seat="10" win="€0"/>
+   </players>
+  </general>
+  <round no="0">
+   <action no="1" player="carol" sum="€0.02" type="1"/>
+   <action no="2" player="Hero" sum="€0.04" type="2"/>
+  </round>
+  <round no="1">
+   <cards player="alice" type="Pocket">X X X X</cards>
+   <cards player="bob" type="Pocket">X X X X</cards>
+   <cards player="carol" type="Pocket">X X X X</cards>
+   <cards player="Hero" type="Pocket">CQ DA C7 H10</cards>
+   <cards player="dave" type="Pocket">HK SJ SA C5</cards>
+   <cards player="erin" type="Pocket">X X X X</cards>
+   <action no="3" player="dave" sum="€0.14" type="23"/>
+   <action no="4" player="erin" sum="€0" type="0"/>
+   <action no="5" player="alice" sum="€0" type="0"/>
+   <action no="6" player="bob" sum="€0.14" type="3"/>
+   <action no="7" player="carol" sum="€0.12" type="3"/>
+   <action no="8" player="Hero" sum="€0.10" type="3"/>
+  </round>
+  <round no="2">
+   <action no="9" player="carol" sum="€0" type="4"/>
+   <action no="10" player="Hero" sum="€0.56" type="5"/>
+   <action no="11" player="dave" sum="€2.24" type="23"/>
+   <action no="12" player="bob" sum="€0" type="0"/>
+   <action no="13" player="carol" sum="€0" type="0"/>
+   <action no="14" player="Hero" sum="€1.30" type="7"/>
+   <cards type="Flop">C10 S3 DQ</cards>
+  </round>
+  <round no="3">
+   <cards type="Turn">CA</cards>
+  </round>
+  <round no="4">
+   <cards type="River">D9</cards>
+  </round>
+ </game>
+ <game gamecode="12674405733">
+  <general>
+   <startdate>2026-11-28 16:41:41</startdate>
+   <players>
+    <player bet="€0.48" chips="€4.71" dealer="0" name="alice" rakeamount="€0.06" seat="1" win="€0.98"/>
+    <player bet="€0.04" chips="€3.89" dealer="0" name="bob" seat="3" win="€0"/>
+    <player bet="€0" chips="€3.82" dealer="1" name="carol" seat="5" win="€0"/>
+    <player bet="€0.04" chips="€4" dealer="0" name="Hero" seat="6" win="€0"/>
+    <player bet="€0.48" chips="€5.62" dealer="0" name="erin" seat="10" win="€0"/>
+   </players>
+  </general>
+  <round no="0">
+   <action no="1" player="Hero" sum="€0.02" type="1"/>
+   <action no="2" player="erin" sum="€0.04" type="2"/>
+  </round>
+  <round no="1">
+   <cards player="alice" type="Pocket">SJ HA C7 D8</cards>
+   <cards player="bob" type="Pocket">X X X X</cards>
+   <cards player="carol" type="Pocket">X X X X</cards>
+   <cards player="Hero" type="Pocket">D6 C6 S4 S9</cards>
+   <cards player="erin" type="Pocket">HK D3 SQ C4</cards>
+   <action no="3" player="alice" sum="€0.04" type="3"/>
+   <action no="4" player="bob" sum="€0.04" type="3"/>
+   <action no="5" player="carol" sum="€0" type="0"/>
+   <action no="6" player="Hero" sum="€0.02" type="3"/>
+   <action no="7" player="erin" sum="€0" type="4"/>
+  </round>
+  <round no="2">
+   <action no="8" player="Hero" sum="€0" type="4"/>
+   <action no="9" player="erin" sum="€0" type="4"/>
+   <action no="10" player="alice" sum="€0.04" type="5"/>
+   <action no="11" player="bob" sum="€0" type="0"/>
+   <action no="12" player="Hero" sum="€0" type="0"/>
+   <action no="13" player="erin" sum="€0.04" type="3"/>
+   <cards type="Flop">DJ SK H5</cards>
+  </round>
+  <round no="3">
+   <action no="14" player="erin" sum="€0" type="4"/>
+   <action no="15" player="alice" sum="€0.20" type="5"/>
+   <action no="16" player="erin" sum="€0.20" type="3"/>
+   <cards type="Turn">HQ</cards>
+  </round>
+  <round no="4">
+   <action no="17" player="erin" sum="€0" type="4"/>
+   <action no="18" player="alice" sum="€0.20" type="5"/>
+   <action no="19" player="erin" sum="€0.20" type="3"/>
+   <cards type="River">D10</cards>
+  </round>
+ </game>
+ <game gamecode="12674410073">
+  <general>
+   <startdate>2026-11-28 16:43:28</startdate>
+   <players>
+    <player bet="€0.48" chips="€5.21" dealer="0" name="alice" seat="1" win="€0"/>
+    <player bet="€1.68" chips="€3.85" dealer="0" name="bob" rakeamount="€0.08" seat="3" win="€1.12"/>
+    <player bet="€0.08" chips="€3.82" dealer="0" name="carol" seat="5" win="€0"/>
+    <player bet="€0.08" chips="€3.96" dealer="1" name="Hero" seat="6" win="€0"/>
+    <player bet="€0.08" chips="€5.14" dealer="0" name="erin" seat="10" win="€0"/>
+   </players>
+  </general>
+  <round no="0">
+   <action no="1" player="erin" sum="€0.02" type="1"/>
+   <action no="2" player="alice" sum="€0.04" type="2"/>
+  </round>
+  <round no="1">
+   <cards player="alice" type="Pocket">X X X X</cards>
+   <cards player="bob" type="Pocket">X X X X</cards>
+   <cards player="carol" type="Pocket">X X X X</cards>
+   <cards player="Hero" type="Pocket">D10 D7 H7 H8</cards>
+   <cards player="erin" type="Pocket">X X X X</cards>
+   <action no="3" player="bob" sum="€0.04" type="3"/>
+   <action no="4" player="carol" sum="€0.08" type="23"/>
+   <action no="5" player="Hero" sum="€0.08" type="3"/>
+   <action no="6" player="erin" sum="€0.06" type="3"/>
+   <action no="7" player="alice" sum="€0.04" type="3"/>
+   <action no="8" player="bob" sum="€0.04" type="3"/>
+  </round>
+  <round no="2">
+   <action no="9" player="erin" sum="€0" type="4"/>
+   <action no="10" player="alice" sum="€0" type="4"/>
+   <action no="11" player="bob" sum="€0.40" type="5"/>
+   <action no="12" player="carol" sum="€0" type="0"/>
+   <action no="13" player="Hero" sum="€0" type="0"/>
+   <action no="14" player="erin" sum="€0" type="0"/>
+   <action no="15" player="alice" sum="€0.40" type="3"/>
+   <cards type="Flop">S5 CQ D9</cards>
+  </round>
+  <round no="3">
+   <action no="16" player="alice" sum="€0" type="4"/>
+   <action no="17" player="bob" sum="€1.20" type="5"/>
+   <action no="18" player="alice" sum="€0" type="0"/>
+   <cards type="Turn">D2</cards>
+  </round>
+ </game>
+</session>

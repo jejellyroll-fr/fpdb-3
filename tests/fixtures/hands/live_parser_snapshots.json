@@ -2591,6 +2591,10 @@
     "hand_count": 1,
     "sha256": "f3fc454eb38abc00f5857963be48df69217108c381166ae2968733588248291b"
   },
+  "regression/iPoker/Flop/PLO-EUR-0.02-0.04-202611.ChampionPoker.anonymous.seats.xml": {
+    "hand_count": 8,
+    "sha256": "a40d49484d75e4aef976081bea48c436f78d7cec8aafce853cf2e0e8f045e891"
+  },
   "regression/iPoker/Flop/PLO-EUR-0.10-0.20-201207.CNY.currency.txt": {
     "hand_count": 1,
     "sha256": "ab70605a3388a715299f9852be1fe01e2eeb46fab2154318091266d03e796f6c"

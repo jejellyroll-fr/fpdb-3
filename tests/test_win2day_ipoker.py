@@ -216,7 +216,7 @@ def test_v103_adds_the_room() -> None:
     updated = upgrade_document(old, template, CONFIG_VERSION)
 
     sites = {node.getAttribute("site_name"): node for node in updated.getElementsByTagName("site")}
-    assert set(sites) == {"Boss", SITE}
+    assert set(sites) == {"Boss", SITE, "ChampionPoker"}  # v104 (#926)
     new = sites[SITE]
     assert new.getAttribute("enabled") == "False"
     assert new.getAttribute("network") == "iPoker"
@@ -224,7 +224,7 @@ def test_v103_adds_the_room() -> None:
     assert {n.getAttribute("ls") for n in new.getElementsByTagName("layout_set")} == {"ipoker_default"}
     assert sites["Boss"].getAttribute("HH_path") == "/old/win2day"
     hhcs = {n.getAttribute("site"): n.getAttribute("converter") for n in updated.getElementsByTagName("hhc")}
-    assert hhcs == {"Boss": "BossToFpdb", SITE: "iPokerToFpdb"}
+    assert hhcs == {"Boss": "BossToFpdb", SITE: "iPokerToFpdb", "ChampionPoker": "iPokerToFpdb"}
     assert "ipoker_default" in {node.getAttribute("name") for node in updated.getElementsByTagName("ls")}
     assert not reference_errors(updated)
     assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()

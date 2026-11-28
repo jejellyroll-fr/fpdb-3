@@ -201,6 +201,7 @@ IPOKER_SKINS: Final = frozenset(
         "Mr Green Poker",
         "Redbet Poker",
         "Win2day Poker",
+        "ChampionPoker",
     )
 )
 

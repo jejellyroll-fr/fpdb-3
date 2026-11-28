@@ -14,6 +14,7 @@ SKY = "PokerStars on Sky"
 SISAL = "PokerStars on Sisal"
 SNAI = "PokerStars on SNAI"
 WIN2DAY = "Win2day Poker"  # v103 (#891): every upgrade gains it
+CHAMPION = "ChampionPoker"  # v104 (#926): every upgrade gains it
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -265,6 +266,7 @@ def test_v89_gives_unibet_its_summary_importer():
         # v99 adds the PokerStars on Betfair skin (#733).
         "PokerStars on Betfair": "PokerStarsSummary",
         WIN2DAY: "iPokerSummary",
+        CHAMPION: "iPokerSummary",
     }
     assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()
 
@@ -282,6 +284,7 @@ def test_v89_leaves_a_room_on_another_converter_alone():
         "BetRivers": "",
         "PokerStars on Betfair": "PokerStarsSummary",
         WIN2DAY: "iPokerSummary",
+        CHAMPION: "iPokerSummary",
     }
 
 
@@ -313,6 +316,7 @@ def test_v90_adds_the_current_unibet_room():
         SISAL,
         SNAI,
         WIN2DAY,
+        CHAMPION,
     }
     assert sites["Unibet"].getAttribute("network") == "Unibet"
     assert sites["Unibet"].getAttribute("enabled") == "False"
@@ -350,6 +354,7 @@ def test_v91_adds_the_betclic_2025_room():
         SISAL,
         SNAI,
         WIN2DAY,
+        CHAMPION,
     }
     assert sites["Betclic"].getAttribute("network") == "Betclic"
     assert sites["Betclic"].getAttribute("enabled") == "False"
@@ -361,6 +366,7 @@ def test_v91_adds_the_betclic_2025_room():
         "BetRivers": "BetRiversToFpdb",
         "PokerStars on Betfair": "PokerStarsToFpdb",
         WIN2DAY: "iPokerToFpdb",
+        CHAMPION: "iPokerToFpdb",
     }
     assert not reference_errors(updated)
     assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()
@@ -392,6 +398,7 @@ def test_v94_adds_coinpoker_back_as_an_import_only_room():
         SISAL,
         SNAI,
         WIN2DAY,
+        CHAMPION,
     }
     assert sites["CoinPoker"].getAttribute("enabled") == "False"
     assert sites["CoinPoker"].getAttribute("aux_enabled") == "False"
@@ -402,6 +409,7 @@ def test_v94_adds_coinpoker_back_as_an_import_only_room():
         "BetRivers": "BetRiversToFpdb",
         "PokerStars on Betfair": "PokerStarsToFpdb",
         WIN2DAY: "iPokerToFpdb",
+        CHAMPION: "iPokerToFpdb",
     }
     assert "default" in {node.getAttribute("name") for node in updated.getElementsByTagName("ls")}
     assert not reference_errors(updated)
@@ -426,6 +434,7 @@ def test_v94_keeps_a_coinpoker_entry_the_configuration_still_has():
         "BetRivers",
         "PokerStars on Betfair",
         WIN2DAY,
+        CHAMPION,
     ]
 
 
@@ -453,6 +462,7 @@ def test_v95_adds_betrivers_as_an_import_only_room():
         SISAL,
         SNAI,
         WIN2DAY,
+        CHAMPION,
     }
     assert sites["BetRivers"].getAttribute("enabled") == "False"
     assert sites["BetRivers"].getAttribute("aux_enabled") == "False"
@@ -462,6 +472,7 @@ def test_v95_adds_betrivers_as_an_import_only_room():
         "BetRivers": "BetRiversToFpdb",
         "PokerStars on Betfair": "PokerStarsToFpdb",
         WIN2DAY: "iPokerToFpdb",
+        CHAMPION: "iPokerToFpdb",
     }
     assert not reference_errors(updated)
     assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()
@@ -489,6 +500,7 @@ def test_v99_adds_the_pokerstars_on_betfair_skin():
         SISAL,
         SNAI,
         WIN2DAY,
+        CHAMPION,
     }
     betfair = sites["PokerStars on Betfair"]
     assert betfair.getAttribute("enabled") == "False"
@@ -500,6 +512,7 @@ def test_v99_adds_the_pokerstars_on_betfair_skin():
         "PokerStars": "PokerStarsSummary",
         "PokerStars on Betfair": "PokerStarsSummary",
         WIN2DAY: "iPokerSummary",
+        CHAMPION: "iPokerSummary",
     }
     # Before PokerStars' own: IdentifySite keeps the last entry of a converter,
     # and an Excel summary is filed under it as it is.
@@ -507,6 +520,7 @@ def test_v99_adds_the_pokerstars_on_betfair_skin():
         "PokerStars on Betfair",
         "PokerStars",
         WIN2DAY,
+        CHAMPION,
     ]
     assert not reference_errors(updated)
     assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()
@@ -529,6 +543,7 @@ def test_v96_gives_ggpoker_its_summary_importer():
         # v99 adds the PokerStars on Betfair skin (#733).
         "PokerStars on Betfair": "PokerStarsSummary",
         WIN2DAY: "iPokerSummary",
+        CHAMPION: "iPokerSummary",
     }
     assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()
 
@@ -561,11 +576,13 @@ def test_v97_leaves_a_configuration_as_it_was():
         SISAL,
         SNAI,
         WIN2DAY,
+        CHAMPION,
     ]
     assert [n.getAttribute("site") for n in updated.getElementsByTagName("hhc")] == [
         "PokerStars on Betfair",
         "PokerStars",
         WIN2DAY,
+        CHAMPION,
     ]
     assert not reference_errors(updated)
 
@@ -585,7 +602,15 @@ def test_v100_adds_the_legacy_pokerstars_uk_room():
     updated = upgrade_document(old, template, CONFIG_VERSION)
 
     sites = {node.getAttribute("site_name"): node for node in updated.getElementsByTagName("site")}
-    assert set(sites) == {"PokerStars", "PokerStars.UK", "PokerStars on Sky", SISAL, SNAI, WIN2DAY}  # v101-v103
+    assert set(sites) == {
+        "PokerStars",
+        "PokerStars.UK",
+        "PokerStars on Sky",
+        SISAL,
+        SNAI,
+        WIN2DAY,
+        CHAMPION,
+    }  # v101-v104
     uk = sites["PokerStars.UK"]
     assert uk.getAttribute("enabled") == "False"
     assert uk.getAttribute("network") == "PokerStars"
@@ -594,7 +619,7 @@ def test_v100_adds_the_legacy_pokerstars_uk_room():
     assert PureWindowsPath(uk.getAttribute("TS_path")).parts[-2:] == ("PokerStars.UK", "TournSummary")
     assert {n.getAttribute("ls") for n in uk.getElementsByTagName("layout_set")} == {"ps_default"}
     assert "ps_default" in {node.getAttribute("name") for node in updated.getElementsByTagName("ls")}
-    assert [n.getAttribute("site") for n in updated.getElementsByTagName("hhc")] == ["PokerStars", WIN2DAY]
+    assert [n.getAttribute("site") for n in updated.getElementsByTagName("hhc")] == ["PokerStars", WIN2DAY, CHAMPION]
     assert not reference_errors(updated)
     assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()
 
@@ -644,6 +669,7 @@ def test_v98_adds_paddy_power_on_pokerstars_as_a_room_of_its_own():
         SISAL,
         SNAI,
         WIN2DAY,
+        CHAMPION,
     }
     new = sites["PokerStars on Paddy Power"]
     assert new.getAttribute("enabled") == "False"
@@ -657,6 +683,7 @@ def test_v98_adds_paddy_power_on_pokerstars_as_a_room_of_its_own():
         "Paddy Power Poker": "iPokerToFpdb",
         "PokerStars on Betfair": "PokerStarsToFpdb",
         WIN2DAY: "iPokerToFpdb",
+        CHAMPION: "iPokerToFpdb",
     }
     assert "ps_default" in {node.getAttribute("name") for node in updated.getElementsByTagName("ls")}
     assert not reference_errors(updated)
@@ -698,7 +725,7 @@ def test_v101_adds_sky_on_pokerstars_as_a_room_of_its_own():
     updated = upgrade_document(old, template, CONFIG_VERSION)
 
     sites = {node.getAttribute("site_name"): node for node in updated.getElementsByTagName("site")}
-    assert set(sites) == {"Sky Poker", SKY, SISAL, SNAI, WIN2DAY}  # v102 (#893), v103 (#891)
+    assert set(sites) == {"Sky Poker", SKY, SISAL, SNAI, WIN2DAY, CHAMPION}  # v102 (#893), v103 (#891), v104 (#926)
     new = sites[SKY]
     assert new.getAttribute("enabled") == "False"
     assert new.getAttribute("network") == "PokerStars"
@@ -707,7 +734,12 @@ def test_v101_adds_sky_on_pokerstars_as_a_room_of_its_own():
     assert sites["Sky Poker"].getAttribute("network") == "iPoker"
     assert sites["Sky Poker"].getAttribute("HH_path") == "/old/ipoker"
     hhcs = {n.getAttribute("site"): n.getAttribute("converter") for n in updated.getElementsByTagName("hhc")}
-    assert hhcs == {"PokerStars.COM": "PokerStarsToFpdb", "Sky Poker": "iPokerToFpdb", WIN2DAY: "iPokerToFpdb"}
+    assert hhcs == {
+        "PokerStars.COM": "PokerStarsToFpdb",
+        "Sky Poker": "iPokerToFpdb",
+        WIN2DAY: "iPokerToFpdb",
+        CHAMPION: "iPokerToFpdb",
+    }
     assert "ps_default" in {node.getAttribute("name") for node in updated.getElementsByTagName("ls")}
     assert not reference_errors(updated)
     assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()
@@ -750,7 +782,7 @@ def test_v102_adds_sisal_and_snai_on_pokerstars_as_rooms_of_their_own():
     updated = upgrade_document(old, template, CONFIG_VERSION)
 
     sites = {node.getAttribute("site_name"): node for node in updated.getElementsByTagName("site")}
-    assert set(sites) == {"Sisal Poker", "Snai Poker", "PokerStars", SISAL, SNAI, WIN2DAY}
+    assert set(sites) == {"Sisal Poker", "Snai Poker", "PokerStars", SISAL, SNAI, WIN2DAY, CHAMPION}
     for name in (SISAL, SNAI):
         new = sites[name]
         assert new.getAttribute("enabled") == "False"
@@ -762,7 +794,12 @@ def test_v102_adds_sisal_and_snai_on_pokerstars_as_rooms_of_their_own():
         assert sites[name].getAttribute("HH_path") == path
     assert sites["PokerStars"].getAttribute("HH_path") == "/my/stars"
     hhcs = {n.getAttribute("site"): n.getAttribute("converter") for n in updated.getElementsByTagName("hhc")}
-    assert hhcs == {"PokerStars": "PokerStarsToFpdb", "Sisal Poker": "iPokerToFpdb", WIN2DAY: "iPokerToFpdb"}
+    assert hhcs == {
+        "PokerStars": "PokerStarsToFpdb",
+        "Sisal Poker": "iPokerToFpdb",
+        WIN2DAY: "iPokerToFpdb",
+        CHAMPION: "iPokerToFpdb",
+    }
     assert "ps_default" in {node.getAttribute("name") for node in updated.getElementsByTagName("ls")}
     assert not reference_errors(updated)
     assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()

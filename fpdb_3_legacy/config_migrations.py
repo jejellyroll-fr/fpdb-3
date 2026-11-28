@@ -122,6 +122,7 @@ SITES_ADDED_IN_100 = ("PokerStars.UK",)  # #889: the retired UK client, for its 
 SITES_ADDED_IN_101 = ("PokerStars on Sky",)  # #887: Sky Poker on PokerStars software
 SITES_ADDED_IN_102 = ("PokerStars on Sisal", "PokerStars on SNAI")  # #893: the Italian skins
 SITES_ADDED_IN_103 = ("Win2day Poker",)  # #891: win2day on iPoker
+SITES_ADDED_IN_104 = ("ChampionPoker",)  # #926: ChampionPoker on iPoker
 
 
 def _child_section(doc, section: str):
@@ -382,6 +383,16 @@ def _add_sites_102_to_103(doc, template) -> None:
     _add_sites(doc, template, SITES_ADDED_IN_103)
 
 
+def _add_sites_103_to_104(doc, template) -> None:
+    """Advance to v104, adding ChampionPoker, on the iPoker network (#926).
+
+    Its <site> (off, iPoker's network and layouts, no folder, since the
+    client's directory names are not confirmed) and its <hhc> come from the
+    template. A configuration that already declares the room keeps it.
+    """
+    _add_sites(doc, template, SITES_ADDED_IN_104)
+
+
 def _repair_renamed_references(doc) -> None:
     aux_names = {cx.attr(n, "name") for n in cx.find_all(doc, "aw")}
     if "Classic_HUD" not in aux_names and "ClassicHud" in aux_names:
@@ -417,6 +428,7 @@ MIGRATIONS = (
     (100, 101, _add_sites_100_to_101),
     (101, 102, _add_sites_101_to_102),
     (102, 103, _add_sites_102_to_103),
+    (103, 104, _add_sites_103_to_104),
 )
 
 
