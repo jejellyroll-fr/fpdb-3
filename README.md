@@ -9,20 +9,22 @@
 [![Downloads](https://img.shields.io/github/downloads/jejellyroll-fr/fpdb-3/total)](https://github.com/jejellyroll-fr/fpdb-3/releases)
 [![Discord](https://img.shields.io/badge/chat-Discord-5865F2?logo=discord&logoColor=white)](https://discord.gg/mQJwt4NpUz)
 
-A free, open-source poker tracker and HUD. fpdb imports your hand histories from 26 rooms into a
+A free, open-source poker tracker and HUD. fpdb imports your hand histories from 28 rooms into a
 database you own, shows a real-time HUD over your tables, and gives you reports, graphs, a hand
 replayer, tournament ICM and study tools afterwards. No account, no upload, no telemetry.
 
-**Version 3.10.0 — released 6 November 2026.** Download it from the
-[3.10.0 release](https://github.com/jejellyroll-fr/fpdb-3/releases/tag/v3.10.0), and see the
-[release notes](docs/RELEASE_NOTES_3.10.0.md) for tournament ICM, the PokerTracker 4 and Holdem
-Manager 3 import, the research and study tools, pack sharing and the HUD reliability work.
+**Version 3.11.0 — released 28 November 2026.** Download it from the
+[3.11.0 release](https://github.com/jejellyroll-fr/fpdb-3/releases/tag/v3.11.0), and see the
+[release notes](docs/RELEASE_NOTES_3.11.0.md) for the new rooms (PokerStars skins, bet365.fr,
+win2day, ChampionPoker, Betclic's and Unibet's new clients, BetRivers), the redesigned HUD editor,
+the replayer's inspector and decision panel, the PokerTracker 4 database import and the new
+Results Calendar and Tourney Stats.
 
 The original FPDB-3 Python application: hand-history parsers, PySide6 GUI, statistics engine, and the HUD overlay. This repository hosts the standalone, self-contained legacy Python stack. It has been separated from the `fpdb-new` monorepo by removing all Rust and modern FastAPI components to keep it lightweight, fast, and easy to run.
 
 ## ✨ Highlights
 
-- **Hand-History Import & Analysis** from 26 poker rooms. See [PARSER_SUPPORT.md](PARSER_SUPPORT.md) for which converters are covered by golden snapshots and which are kept only for historical archives.
+- **Hand-History Import & Analysis** from 28 poker rooms. See [PARSER_SUPPORT.md](PARSER_SUPPORT.md) for which converters are covered by golden snapshots and which are kept only for historical archives.
 - **Live capture** for rooms that write no hand-history files: SwC Poker (HTTP and native desktop), iPoker. The captures that reach into a client are off until you turn them on ([docs/live-capture.md](docs/live-capture.md)).
 - **Real-Time HUD** overlay with draggable multiblock stats, positional panels, and a per-profile hero toggle. It shows players' history, never a recommended action, and never acts in the client: see [what fpdb does while you play](docs/fair-play.md) and check your room's rules first.
 - **FastHUD for fast-fold tables** with deterministic seat rotation, single-renderer ownership,
