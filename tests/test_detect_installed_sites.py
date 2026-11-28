@@ -496,6 +496,132 @@ def test_a_listable_bwin_container_still_finds_any_player(config, tmp_path) -> N
 
 
 # --------------------------------------------------------------------------
+# ChampionPoker (#926)
+# --------------------------------------------------------------------------
+
+
+def championpoker_container(root: Path) -> Path:
+    """The macOS data folder, as a real install lays it out."""
+    return tree(
+        root,
+        "Library",
+        "Containers",
+        "com.championpoker.poker",
+        "Data",
+        "Library",
+        "Application Support",
+        "Championpoker Poker",
+    )
+
+
+def test_a_protected_championpoker_container_is_found_by_the_screen_name(config, tmp_path) -> None:
+    hero = championpoker_container(tmp_path) / "alice"
+    tree(hero, "History", "Data", "Tables")
+    tree(hero, "History", "Data", "Tournaments")
+    detector = iPokerDetector(config, hero_names=["alice"])
+    detector.platform = "Darwin"
+
+    with on_platform("Darwin", tmp_path), patch.object(Path, "home", return_value=tmp_path), unlistable():
+        result = detector._detect_skin("ChampionPoker")
+
+    assert result["detected"] is True
+    assert result["skin"] == "ChampionPoker"
+    assert result["heroname"] == "alice"
+    assert path_ends_with(result["hhpath"], "Championpoker Poker/alice/History/Data/Tables")
+    assert path_ends_with(result["tspath"], "Championpoker Poker/alice/History/Data/Tournaments")
+    assert result["listing_denied"] is True
+    # The importer files what it reads there under the same room.
+    assert detect_module.ipoker_skin_of(result["hhpath"]) == "ChampionPoker"
+
+
+def test_a_protected_championpoker_container_without_a_screen_name_asks_for_access(config, tmp_path) -> None:
+    container = championpoker_container(tmp_path)
+    tree(container, "alice", "History", "Data")
+    detector = iPokerDetector(config)
+    detector.platform = "Darwin"
+
+    with on_platform("Darwin", tmp_path), patch.object(Path, "home", return_value=tmp_path), unlistable():
+        assert detector._detect_skin("ChampionPoker") == NOT_DETECTED
+
+    assert detector.protected_skins == {"ChampionPoker": str(container)}
+
+
+def test_a_listable_championpoker_container_finds_any_player(config, tmp_path) -> None:
+    tables = tree(championpoker_container(tmp_path), "alice", "History", "Data", "Tables")
+    (tables / "8757181114.xml").write_text("<session/>")
+    detector = iPokerDetector(config)
+    detector.platform = "Darwin"
+
+    with on_platform("Darwin", tmp_path), patch.object(Path, "home", return_value=tmp_path):
+        result = detector._detect_skin("ChampionPoker")
+
+    assert result["heroname"] == "alice"
+    assert result["has_hands"] is True
+    assert detector.protected_skins == {}
+
+
+@pytest.mark.parametrize(
+    ("root", "folder"),
+    [
+        ("local_appdata", "Championpoker Poker"),
+        ("local_appdata", "ChampionPoker"),
+        ("appdata", "Championpoker"),
+        # Any other spelling of the client's folder, by name pattern.
+        ("local_appdata", "Champion Poker"),
+        ("appdata", "ChampionPoker Online Poker"),
+    ],
+)
+def test_championpoker_is_found_on_windows(config, tmp_path, root, folder) -> None:
+    paths = windows_paths(tmp_path)
+    tree(Path(paths[root]), folder, "data", "Hero", "History", "Data", "Tables")
+    detector = iPokerDetector(config)
+    detector.platform = "Windows"
+
+    with on_platform("Windows", tmp_path):
+        result = detector._detect_skin("ChampionPoker")
+
+    assert result["detected"] is True
+    assert result["skin"] == "ChampionPoker"
+    assert result["heroname"] == "Hero"
+    assert detect_module.ipoker_skin_of(result["hhpath"]) == "ChampionPoker"
+
+
+def test_a_championpoker_install_is_among_the_detected_skins(config, tmp_path) -> None:
+    paths = windows_paths(tmp_path)
+    tree(Path(paths["local_appdata"]), "Championpoker Poker", "data", "Hero", "History", "Data", "Tables")
+    detector = iPokerDetector(config)
+    detector.platform = "Windows"
+
+    with (
+        on_platform("Windows", tmp_path),
+        patch.object(detect_module, "windows_registry_install_dirs", return_value=[]),
+    ):
+        detector.detect()
+
+    assert [skin["skin"] for skin in detector.get_all_detected_skins()] == ["ChampionPoker"]
+
+
+def test_a_championpoker_uninstall_entry_points_at_its_data_folder(config, tmp_path) -> None:
+    install = tree(tmp_path, "Games", "Championpoker Poker")
+    tree(install, "data", "Hero", "History", "Data", "Tables")
+    detector = iPokerDetector(config)
+    detector.platform = "Windows"
+
+    with (
+        on_platform("Windows", tmp_path),
+        patch.object(detect_module, "windows_registry_install_dirs", return_value=[str(install)]) as registry,
+    ):
+        result = detector._detect_skin("ChampionPoker")
+
+    assert result["heroname"] == "Hero"
+    assert path_ends_with(result["hhpath"], "Championpoker Poker/data/Hero/History/Data/Tables")
+    # The registry is searched with the room's own name patterns.
+    patterns = registry.call_args.args[0]
+    assert detect_module.matches_any("Championpoker Poker", patterns)
+    assert detect_module.matches_any("Champion Poker", patterns)
+
+
+# --------------------------------------------------------------------------
 # The shared PokerClient folder, where several iPoker skins install together
 # --------------------------------------------------------------------------
 

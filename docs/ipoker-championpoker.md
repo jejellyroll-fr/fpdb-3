@@ -26,9 +26,20 @@ room of their own:
   hands, as on every iPoker skin.
 - **No tournament export yet**: tournaments and their summaries are expected to
   follow the iPoker format but are not checked.
-- **The client's folders are not confirmed.** fpdb ships the room off, with no
-  folder, and its installed-sites detection does not look for it. Set the
-  `ChampionPoker` hand-history and tournament-summary paths in *Sites* to the
-  folders the client saves to.
+- **Folder detection** (*Sites* > ChampionPoker > Detect):
+  - **macOS** (confirmed on a real install): the client is the sandboxed
+    *Championpoker Poker* app. Its hands are in
+    `~/Library/Containers/com.championpoker.poker/Data/Library/Application Support/Championpoker Poker/<account>/History/Data/Tables`,
+    its tournament summaries in `.../History/Data/Tournaments`. macOS lets
+    fpdb check that folder but not list it: type your screen name in the card
+    before clicking Detect, and give the app that runs fpdb *Full Disk Access*
+    (System Settings > Privacy & Security), or nothing can be imported.
+  - **Windows**: the classic iPoker layout,
+    `%LOCALAPPDATA%\Championpoker Poker\data\<account>\History\Data\Tables`
+    (also `ChampionPoker`, `Championpoker` and any folder of `%LOCALAPPDATA%`
+    or `%APPDATA%` naming the brand, and the install folder its uninstall
+    entry records). Not yet confirmed on a real Windows install.
+  - The room still ships off with no folder, since the folders hold the
+    account name.
 - **HUD**: the iPoker network's policy applies, static HUD only. ChampionPoker's
   own rules on third-party HUDs have not been reviewed.

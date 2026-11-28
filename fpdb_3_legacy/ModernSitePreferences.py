@@ -294,6 +294,7 @@ class ModernSiteCard(QFrame):
             "Bwin.fr Poker",
             "PartyPoker.fr",
             "Bet365.fr Poker",
+            "ChampionPoker",
         ]:
             return "iPoker"
         if site_name in ["Americas Cardroom", "ACR Poker", "WinningPoker"]:
