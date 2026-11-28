@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-__version__ = "3.10.0"
+__version__ = "3.11.0"
 
 
 def _is_directory(entry: object, directory: str) -> bool:
