@@ -25,7 +25,7 @@ them, are in [what fpdb does while you play](fair-play.md#rooms).
 | --- | --- | --- | --- | --- | --- |
 | PokerStars, every regional site (.FR, .ES, .COM, .DE…; the retired .UK client is [historical imports only](pokerstars-uk-legacy.md)) and skins ([PokerStars on Paddy Power](pokerstars-paddy-power.md), [PokerStars on Sky](pokerstars-sky.md), [PokerStars on Sisal and on SNAI](pokerstars-italy-skins.md)) | ✔ | — | — | — | Forbids in-game statistics that change automatically with the game state |
 | Winamax | ✔ | — | — | — | Prohibits dynamic range software and certain dynamic HUD features; off until its integrity team approves fpdb's |
-| iPoker network, under every skin's own name (Betclic Poker, PMU Poker, FDJ Poker, Bet365.fr Poker, Barrière Poker, Unibet Poker, Win2day Poker…) | ✔ | — | — | — | Positional and dynamic HUDs documented as not allowed on the network |
+| iPoker network, under every skin's own name (Betclic Poker, PMU Poker, FDJ Poker, Bet365.fr Poker, Barrière Poker, Unibet Poker, Win2day Poker, ChampionPoker…) | ✔ | — | — | — | Positional and dynamic HUDs documented as not allowed on the network |
 | Unibet (the 2026 Relax Gaming client, Unibet.fr) | ✔ | — | — | — | Not reviewed: its rules do not mention HUDs, see below |
 | ACR / WPN (Americas Cardroom, BlackChipPoker, TruePoker, Ya Poker, WinningPoker) | ✔ | — | — | — | Statistics only from your own completed hands (ACR policy §4.1.3): a hand none of your configured WPN screen names played feeds no HUD statistic. See [fair-play.md](fair-play.md#acr--wpn-in-detail) |
 | Any other room (GGPoker…) | ✔ | — | — | — | Not reviewed: the conservative default |

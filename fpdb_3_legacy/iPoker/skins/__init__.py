@@ -12,6 +12,7 @@ from fpdb_3_legacy.iPoker.skins.betfred import BetfredIPoker
 from fpdb_3_legacy.iPoker.skins.betsafe import BetsafeIPoker
 from fpdb_3_legacy.iPoker.skins.betsson import BetssonIPoker
 from fpdb_3_legacy.iPoker.skins.casino_barcelona import CasinoBarcelonaIPoker
+from fpdb_3_legacy.iPoker.skins.champion_poker import ChampionPokerIPoker
 from fpdb_3_legacy.iPoker.skins.chilipoker import ChilipokerIPoker
 from fpdb_3_legacy.iPoker.skins.coolbet import CoolbetIPoker
 from fpdb_3_legacy.iPoker.skins.coral import CoralIPoker
@@ -62,6 +63,7 @@ __all__ = [
     "BetsafeIPoker",
     "BetssonIPoker",
     "CasinoBarcelonaIPoker",
+    "ChampionPokerIPoker",
     "ChilipokerIPoker",
     "CoolbetIPoker",
     "CoralIPoker",

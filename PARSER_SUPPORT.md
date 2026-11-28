@@ -21,7 +21,9 @@ These converters have file-by-file semantic snapshots in
 - iPoker (every skin under its own room; win2day's iPoker client is filed
   under `Win2day Poker` while its Boss Media era files stay with Boss, and
   Sökö sessions are refused, see [docs/ipoker-win2day.md](docs/ipoker-win2day.md);
-  no real win2day export is in the corpus yet)
+  no real win2day export is in the corpus yet; ChampionPoker is filed under
+  `ChampionPoker` and a real cash session of it is in the corpus, see
+  [docs/ipoker-championpoker.md](docs/ipoker-championpoker.md))
 - KingsClub
 - PacificPoker/888
 - PartyPoker

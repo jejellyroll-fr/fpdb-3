@@ -76,7 +76,13 @@ IPOKER_SKINS: tuple[IPokerSkin, ...] = (
         # "bet365 Poker France", "fr.bet365", "bet365-FR"...
         ("*bet365*fr*", "*fr*bet365*"),
     ),
-    IPokerSkin(("partypokerfr", "partypoker.fr", "partypoker.fr online poker"), "PartyPoker.fr", "partypoker_fr", 44, "PartyPokerFrIPoker"),
+    IPokerSkin(
+        ("partypokerfr", "partypoker.fr", "partypoker.fr online poker"),
+        "PartyPoker.fr",
+        "partypoker_fr",
+        44,
+        "PartyPokerFrIPoker",
+    ),
     IPokerSkin(("netbet",), "NetBet Poker", "netbet", 59),
     IPokerSkin(("poker770",), "Poker770", "poker770", 58),
     IPokerSkin(("barriere",), "Barrière Poker", "barriere", 60),
@@ -113,6 +119,15 @@ IPOKER_SKINS: tuple[IPokerSkin, ...] = (
     # every one known for the brand contains "win2day". Its Boss Media era files
     # are another format, imported by the Boss converter, never by this parser.
     IPokerSkin(("win2day",), "Win2day Poker", "win2day", 151, "Win2dayIPoker"),
+    # ChampionPoker on iPoker (#926). The client's folder names are not
+    # confirmed yet; the brand writes itself in one word or two.
+    IPokerSkin(
+        ("championpoker", "champion poker", "champion_poker", "champion-poker"),
+        "ChampionPoker",
+        "champion_poker",
+        152,
+        "ChampionPokerIPoker",
+    ),
     IPokerSkin(("expekt",), "Expekt Poker", "expekt"),
     IPokerSkin(("coolbet",), "Coolbet Poker", "coolbet"),
     IPokerSkin(("chilipoker",), "Chilipoker", "chilipoker"),
