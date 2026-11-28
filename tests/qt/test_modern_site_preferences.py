@@ -194,6 +194,47 @@ def test_a_protected_bwin_fr_folder_does_not_take_another_skins_paths(qtbot, mon
     assert BWIN_FR in warning
 
 
+CHAMPION = "/Containers/com.championpoker.poker/Data/Library/Application Support/Championpoker Poker"
+
+
+@pytest.mark.qt
+def test_the_championpoker_card_detects_through_the_ipoker_detector(qtbot, monkeypatch) -> None:
+    from fpdb_3_legacy import DetectInstalledSites
+    from fpdb_3_legacy.ModernSitePreferences import ModernSiteCard
+
+    asked: list[str] = []
+    found = {
+        "detected": True,
+        "skin": "ChampionPoker",
+        "heroname": "alice",
+        "hhpath": f"{CHAMPION}/alice/History/Data/Tables",
+        "tspath": f"{CHAMPION}/alice/History/Data/Tournaments",
+    }
+    pmu = {"detected": True, "skin": "PMU Poker", "heroname": "bob", "hhpath": "/pmu/bob", "tspath": ""}
+
+    class FakeDetector:
+        def __init__(self, sitename, hero_names=()):
+            asked.append(sitename)
+
+        def get_all_ipoker_skins(self):
+            return [pmu, found]
+
+        def get_protected_ipoker_skins(self):
+            return {}
+
+    monkeypatch.setattr(DetectInstalledSites, "DetectInstalledSites", FakeDetector)
+    site_config = types.SimpleNamespace(enabled=True, screen_name="", hero_aliases=[], HH_path="", TS_path="")
+    card = ModernSiteCard("ChampionPoker", site_config)
+    qtbot.addWidget(card)
+
+    assert card.is_site_detectable()
+    card.detect_clicked()
+
+    assert asked == ["iPoker"]
+    assert card.hh_path_input.text() == found["hhpath"]
+    assert card.get_values()["screen_name"] == "alice"
+
+
 # --------------------------------------------------------------------------- #
 # Hero Profiles tab                                                            #
 # --------------------------------------------------------------------------- #

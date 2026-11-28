@@ -440,6 +440,9 @@ WINDOWS_IPOKER_DATA_DIR_ALIASES: dict[str, tuple[str, ...]] = {
     # bet365.fr: the exact directory name is still to be confirmed on a real
     # install; IPOKER_CLIENT_NAME_PATTERNS below catches the other spellings.
     "Bet365.fr Poker": ("bet365 Poker France", "bet365.fr Poker", "bet365.fr", "bet365fr"),
+    # ChampionPoker (#926): the client is named "Championpoker Poker", as its
+    # macOS data folder is; IPOKER_CLIENT_NAME_PATTERNS catches other spellings.
+    "ChampionPoker": ("Championpoker Poker", "Championpoker"),
 }
 
 # Skins whose client folder, uninstall entry or macOS container name is not
@@ -462,6 +465,9 @@ IPOKER_CLIENT_NAME_PATTERNS: dict[str, tuple[str, ...]] = {
 # folder matching the patterns is taken when the container can be listed.
 MAC_IPOKER_SUPPORT_DIRS: dict[str, tuple[str, ...]] = {
     "Bet365.fr Poker": ("bet365.fr Online Poker", "bet365.fr PLAY", "bet365.fr Poker", "bet365 Poker France"),
+    # Confirmed on a real install (#926): container com.championpoker.poker,
+    # hands in "Championpoker Poker/<account>/History/Data/Tables".
+    "ChampionPoker": ("Championpoker Poker",),
 }
 
 # Containers that may belong to a skin even though their name lacks the
@@ -702,6 +708,7 @@ class iPokerDetector(SiteDetector):  # noqa: N801
             "Redbet Poker",
             "Expekt Poker",
             "Coolbet Poker",
+            "ChampionPoker",
             # Network/Generic
             "iPoker",
             "Playtech Poker",
@@ -1101,6 +1108,7 @@ class iPokerDetector(SiteDetector):  # noqa: N801
                 "netbet": "NetBet Poker",
                 "netbetpoker": "NetBet Poker",
                 "poker770": "Poker770",
+                "championpoker": "ChampionPoker",
             }
 
             # Check each skin folder

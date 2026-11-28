@@ -119,14 +119,18 @@ IPOKER_SKINS: tuple[IPokerSkin, ...] = (
     # every one known for the brand contains "win2day". Its Boss Media era files
     # are another format, imported by the Boss converter, never by this parser.
     IPokerSkin(("win2day",), "Win2day Poker", "win2day", 151, "Win2dayIPoker"),
-    # ChampionPoker on iPoker (#926). The client's folder names are not
-    # confirmed yet; the brand writes itself in one word or two.
+    # ChampionPoker on iPoker (#926). The macOS client is the sandboxed
+    # "Championpoker Poker" app (container com.championpoker.poker, data folder
+    # "Championpoker Poker"); the brand also writes itself in two words.
     IPokerSkin(
         ("championpoker", "champion poker", "champion_poker", "champion-poker"),
         "ChampionPoker",
         "champion_poker",
         152,
         "ChampionPokerIPoker",
+        # For installed-sites detection: the Windows data or install folder, its
+        # uninstall entry and the macOS container, whatever their exact spelling.
+        ("*championpoker*", "*champion poker*"),
     ),
     IPokerSkin(("expekt",), "Expekt Poker", "expekt"),
     IPokerSkin(("coolbet",), "Coolbet Poker", "coolbet"),
