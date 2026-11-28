@@ -15,7 +15,7 @@ rather than a patch.
   on macOS and Windows.
 - **Betclic's 2025+ client**: its native `*** HEADER ***` hand histories, cash
   games, Spin & Rush lotteries and progressive knockout tournaments.
-- **Unibet's 2026 client**: its exports are found, Power Spins filed as
+- **Unibet.fr's 2026 client** (Relax Gaming): its exports are found, Power Spins filed as
   lotteries, Banzai as shallow, truncated exports re-read from the start, and
   the Windows HUD window detection no longer crashes.
 - **BetRivers** and **CoinPoker** (2026 text histories): import only, nothing
